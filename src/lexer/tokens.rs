@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub enum Token {
     Id,
 
@@ -78,9 +79,9 @@ pub enum Token {
     IntegerLiteral,
     FloatingPointLiteral,
     BooleanLiteral,
-    CharLiteral,
-    StringLiteral,
-    TextBlock,
+    CharLiteral(char),
+    StringLiteral(String),
+    TextBlock(String),
 
     // Separators
     LeftParen,

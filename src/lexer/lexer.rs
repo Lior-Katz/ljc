@@ -93,6 +93,30 @@ impl Tokens {
             return Ok(Some(t));
         }
 
+        if c == '\'' {
+            // FIXME: need to only look until end of line
+            return match self.eat_until("'", EatMode::NoEnds) {
+                Ok(s) if s.len() == 0 => {
+                    invalid_sequence(self.line, self.column, "Empty char literal")
+                }
+                // 2 characters is the char itself and the closing quote
+                Ok(s) if s.len() > 1 => invalid_sequence(
+                    self.line,
+                    self.column,
+                    "Too many characters in character literal",
+                ),
+                Ok(s) => Ok(Some(Token::CharLiteral(s.chars().next().unwrap()))),
+                Err(()) => invalid_sequence(self.line, self.column, "Unclosed character literal"),
+            };
+        }
+        if c == '"' {
+            // FIXME: need to only look until end of line
+            return match self.eat_until("\"", EatMode::NoEnds) {
+                Ok(s) => Ok(Some(Token::StringLiteral(String::from(s)))),
+                Err(()) => invalid_sequence(self.line, self.column, "Unclosed string literal"),
+            };
+        }
+
         Ok(None)
     }
 
