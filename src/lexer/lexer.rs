@@ -71,6 +71,28 @@ impl Tokens {
             }
         }
 
+        // separators
+        if let Some(t) = match c {
+            '(' => Some(Token::LeftParen),
+            ')' => Some(Token::RightParen),
+            '{' => Some(Token::LeftBrace),
+            '}' => Some(Token::RightBrace),
+            '[' => Some(Token::LeftBracket),
+            ']' => Some(Token::RightBracket),
+            ';' => Some(Token::Semicolon),
+            ',' => Some(Token::Comma),
+            '.' => Some(Token::Dot), // TODO: handle ellipsis
+            '@' => Some(Token::At),
+            ':' if self.next_is(':') => {
+                self.eat(); // need to dispose of two characters
+                Some(Token::DoubleColon)
+            }
+            _ => None,
+        } {
+            self.eat();
+            return Ok(Some(t));
+        }
+
         Ok(None)
     }
 
