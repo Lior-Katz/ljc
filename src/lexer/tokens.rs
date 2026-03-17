@@ -1,8 +1,4 @@
 pub enum Token {
-    UnicodeEscape,
-    LineTerm,
-    Whitespace,
-    Comment,
     Id,
 
     // keywords

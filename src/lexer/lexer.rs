@@ -1,0 +1,209 @@
+use std::cmp::max;
+use crate::lexer::error::{invalid_sequence, LexError};
+use crate::lexer::tokens::Token;
+use crate::lexer::util::is_whitespace;
+use std::fs::File;
+use std::io;
+use std::io::Read;
+
+macro_rules! get {
+    ( $x:expr ) => {
+        match $x.peek() {
+            Some(c) => c,
+            None => return Ok(None),
+        }
+    };
+}
+
+pub fn lex_single_file(file_path: &str) -> Result<Tokens, io::Error> {
+    let mut input = String::new();
+    let mut file = File::open(file_path)?;
+    File::read_to_string(&mut file, &mut input)?;
+    Ok(Tokens::new(input))
+}
+
+pub struct Tokens {
+    input: String,
+    pos: usize,
+    line: usize,
+    column: usize,
+}
+
+impl Tokens {
+    pub fn new(input: String) -> Self {
+        Self {
+            input,
+            pos: 0,
+            line: 1,
+            column: 1,
+        }
+    }
+
+    pub fn next(&mut self) -> Result<Option<Token>, LexError> {
+        let mut c = get!(self);
+        loop {
+            if is_whitespace(&c) {
+                self.skip_whitespace();
+                c = get!(self);
+            }
+            else if c == '/'
+                && let Some(next) = self.peek_next()
+            {
+                if next == '/' {
+                    self.eat_to_line_end();
+                    c = get!(self);
+                }
+                else if next == '*' {
+                    match self.eat_until("*/", EatMode::NoEnds) {
+                        Err(_) => {
+                            return invalid_sequence(self.line, self.column, "end of comment not found");
+                        }
+                        _ => {}
+                    };
+                    c = get!(self);
+                }
+                else {
+                    break;
+                }
+            }
+            else {
+                break;
+            }
+        }
+
+        Ok(None)
+    }
+
+    fn skip_whitespace(&mut self) {
+        self.eat_while(|tokens| {
+            if let Some(c) = tokens.peek() {
+                match c {
+                    '\r' if tokens.next_is('\n') => {} // will be handled in next step by below line
+                    '\n' | '\r' => {
+                        // singular CR not followed by LF (above guard) counts as a line terminator
+                        tokens.next_line();
+                    }
+                    _ => {}
+                }
+                return is_whitespace(&c);
+            }
+            false
+        }, EatMode::NoEnds);
+    }
+
+    fn eat_to_line_end(&mut self) {
+        self.eat_while(|tokens| {
+            if let Some(c) = tokens.peek() {
+                return match c {
+                    '\r' if tokens.next_is('\n') => true,
+                    '\n' | '\r' => {
+                        tokens.next_line();
+                        tokens.eat();
+                        false
+                    }
+                    _ => true,
+                };
+            }
+            false
+        }, EatMode::NoEnds);
+    }
+
+    fn next_line(&mut self) {
+        self.line += 1;
+        self.column = 1;
+    }
+
+    fn next_is(&mut self, c: char) -> bool {
+        self.peek_next() == Some(c)
+    }
+
+    fn peek(&self) -> Option<char> {
+        self.peek_n(0)
+    }
+
+    fn peek_next(&self) -> Option<char> {
+        self.peek_n(1)
+    }
+
+    fn peek_n(&self, mut n: usize) -> Option<char> {
+        let mut chars = self.input[self.pos..].chars();
+        while n > 0 {
+            chars.next()?;
+            n -= 1;
+        }
+        chars.next()
+    }
+
+    fn eat(&mut self) -> Option<char> {
+        let c = self.peek()?;
+        if c == '\n' {
+            self.line += 1;
+        }
+        self.pos += c.len_utf8();
+        Some(c)
+    }
+
+    fn eat_until(&mut self, sequence: &str, eat_mode: EatMode) -> Result<&str, ()> {
+        if !eat_mode.include_current() {
+            self.eat();
+        }
+        if let Some(i) = self.input[self.pos..].find(sequence) {
+            let slice_len = i
+                + (if eat_mode.include_end() {
+                    sequence.len()
+                } else {
+                    0
+                });
+            let advance_len = i + sequence.len();
+            let s = &self.input[self.pos..self.pos + slice_len];
+            self.pos += advance_len;
+            Ok(s)
+        } else {
+            Err(())
+        }
+    }
+
+    fn eat_while<F>(&mut self, predicate: F, eat_mode: EatMode) -> Option<&str>
+    where
+        F: Fn(&mut Self) -> bool
+    {
+        let mut last_char = match self.peek() {
+            Some(c) => c,
+            None => return None
+        };
+        let start =  if eat_mode.include_current() {self.pos} else {self.pos + last_char.len_utf8()};
+        while let Some(c) = self.peek() {
+            last_char = c;
+            if !predicate(self) {
+                break;
+            }
+            self.eat();
+        }
+        let end = if eat_mode.include_end() {self.pos} else {self.pos - last_char.len_utf8()};
+        Some(&self.input[start..max(start, end)])
+    }
+}
+
+#[allow(dead_code)]
+enum EatMode {
+    StartOnly,
+    NoEnds,
+    BothEnds,
+    EndOnly,
+}
+
+impl EatMode {
+    pub fn include_current(&self) -> bool {
+        match self {
+            EatMode::StartOnly | EatMode::BothEnds => true,
+            _ => false,
+        }
+    }
+
+    pub fn include_end(&self) -> bool {
+        match self {
+            EatMode::EndOnly | EatMode::BothEnds => true,
+            _ => false,
+        }
+    }
+}
