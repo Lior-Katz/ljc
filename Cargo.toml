@@ -6,4 +6,11 @@ edition = "2024"
 [lints.rust]
 warnings = "deny"
 
-[dependencies]
+[[test]]
+name = "snapshot"
+path = "tests/snapshot/snapshot_test.rs"
+harness = false
+
+[dev-dependencies]
+datatest-stable = "0.3.3"
+insta = "1.46.3"

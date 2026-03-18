@@ -1,0 +1,6 @@
+behavior:
+  update: "unseen"
+
+test:
+  runner: "nextest"
+  auto_review: true
