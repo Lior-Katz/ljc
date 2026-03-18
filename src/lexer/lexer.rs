@@ -117,6 +117,71 @@ impl Tokens {
             };
         }
 
+        if c.is_alphabetic() {
+            let identifier_or_kw = self.eat_while(|tokens| {
+                match  tokens.peek() {
+                    None => false,
+                    Some(c) => c.is_alphanumeric() || c == '_'
+                }
+            }, EatMode::BothEnds).unwrap();
+            let token = match identifier_or_kw {
+                "abstract" => Token::Abstract,
+                "assert" => Token::Assert,
+                "boolean" => Token::Boolean,
+                "break" => Token::Break,
+                "byte" => Token::Byte,
+                "case" => Token::Case,
+                "catch" => Token::Catch,
+                "char" => Token::Char,
+                "class" => Token::Class,
+                "const" => Token::Const,
+                "continue" => Token::Continue,
+                "default" => Token::Default,
+                "do" => Token::Do,
+                "double" => Token::Double,
+                "else" => Token::Else,
+                "enum" => Token::Enum,
+                "extends" => Token::Extends,
+                "final" => Token::Final,
+                "finally" => Token::Finally,
+                "float" => Token::Float,
+                "for" => Token::For,
+                "if" => Token::If,
+                "goto" => Token::Goto,
+                "implements" => Token::Implements,
+                "import" => Token::Import,
+                "instanceof" => Token::Instanceof,
+                "int" => Token::Int,
+                "interface" => Token::Interface,
+                "long" => Token::Long,
+                "native" => Token::Native,
+                "new" => Token::New,
+                "package" => Token::Package,
+                "private" => Token::Private,
+                "protected" => Token::Protected,
+                "public" => Token::Public,
+                "return" => Token::Return,
+                "short" => Token::Short,
+                "static" => Token::Static,
+                "strictfp" => Token::Strictfp,
+                "super" => Token::Super,
+                "switch" => Token::Switch,
+                "synchronized" => Token::Synchronized,
+                "this" => Token::This,
+                "throw" => Token::Throw,
+                "throws" => Token::Throws,
+                "transient" => Token::Transient,
+                "try" => Token::Try,
+                "void" => Token::Void,
+                "volatile" => Token::Volatile,
+                "while" => Token::While,
+                "underscore" => Token::Underscore,
+                // TODO: add contextual keywords
+                name => Token::Id(String::from(name))
+            };
+            return Ok(Some(token));
+        }
+
         Ok(None)
     }
 

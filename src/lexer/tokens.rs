@@ -1,6 +1,6 @@
 #[derive(Debug)]
 pub enum Token {
-    Id,
+    Id(String),
 
     // keywords
     Abstract,
