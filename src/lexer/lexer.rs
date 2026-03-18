@@ -2,9 +2,8 @@ use std::cmp::max;
 use crate::lexer::error::{invalid_sequence, LexError};
 use crate::lexer::tokens::Token;
 use crate::lexer::util::is_whitespace;
-use std::fs::File;
-use std::io;
-use std::io::Read;
+use std::{fs, io};
+use std::path::Path;
 
 macro_rules! get {
     ( $x:expr ) => {
@@ -15,10 +14,8 @@ macro_rules! get {
     };
 }
 
-pub fn lex_single_file(file_path: &str) -> Result<Tokens, io::Error> {
-    let mut input = String::new();
-    let mut file = File::open(file_path)?;
-    File::read_to_string(&mut file, &mut input)?;
+pub fn lex_single_file(file_path: &Path) -> Result<Tokens, io::Error> {
+    let input = fs::read_to_string(file_path)?;
     Ok(Tokens::new(input))
 }
 
