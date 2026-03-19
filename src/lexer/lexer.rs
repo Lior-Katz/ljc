@@ -172,7 +172,7 @@ impl Tokens {
                 "void" => Token::Void,
                 "volatile" => Token::Volatile,
                 "while" => Token::While,
-                "underscore" => Token::Underscore,
+                "_" => Token::Underscore,
                 // TODO: add contextual keywords
                 name => Token::Id(String::from(name))
             };
