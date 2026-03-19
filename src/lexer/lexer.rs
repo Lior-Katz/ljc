@@ -324,7 +324,7 @@ impl Tokens {
         self.peek_n(1)
     }
 
-    fn peek_n(&self, mut n: usize) -> Option<char> {
+    fn peek_n(&self, mut n: i32) -> Option<char> {
         let mut chars = self.input[self.pos..].chars();
         while n > 0 {
             chars.next()?;
