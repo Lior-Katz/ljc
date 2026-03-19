@@ -122,6 +122,7 @@ impl Tokens {
                 }
             }, EatMode::BothEnds).unwrap();
             let token = match identifier_or_kw {
+                // keywords
                 "abstract" => Token::Abstract,
                 "assert" => Token::Assert,
                 "boolean" => Token::Boolean,
@@ -172,6 +173,26 @@ impl Tokens {
                 "void" => Token::Void,
                 "volatile" => Token::Volatile,
                 "while" => Token::While,
+
+                // contextual keywords
+                "exports" => Token::Exports,
+                "module" => Token::Module,
+                "nonSealed" => Token::NonSealed,
+                "open" => Token::Open,
+                "opens" => Token::Opens,
+                "permits" => Token::Permits,
+                "provides" => Token::Provides,
+                "record" => Token::Record,
+                "requires" => Token::Requires,
+                "sealed" => Token::Sealed,
+                "to" => Token::To,
+                "transitive" => Token::Transitive,
+                "uses" => Token::Uses,
+                "var" => Token::Var,
+                "when" => Token::When,
+                "with" => Token::With,
+                "yield" => Token::Yield,
+
                 "_" => Token::Underscore,
                 // TODO: add contextual keywords
                 name => Token::Id(String::from(name))
