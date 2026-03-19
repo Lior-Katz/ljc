@@ -114,6 +114,10 @@ impl Tokens {
             };
         }
 
+        if Self::is_operator_char(&mut c) {
+            return Ok(Some(self.scan_operator().unwrap()));
+        }
+
         if c.is_alphabetic() {
             let identifier_or_kw = self.eat_while(|tokens| {
                 match  tokens.peek() {
@@ -201,6 +205,67 @@ impl Tokens {
         }
 
         Ok(None)
+    }
+
+    fn is_operator_char(c: &mut char) -> bool {
+        matches!(c,
+        '=' | '>' | '<' | '!' | '~' | '?' | ':' | '&' | '|' | '+' | '-' | '*' | '/' | '^' | '%')
+    }
+
+    fn scan_operator(&mut self) -> Option<Token> {
+        let walk = Walk::new(&mut self.input[self.pos..]);
+
+        let (token, len) = walk.into_iter()
+            .map(|s| Self::take_operator(s))
+            .take_while(|t| t.is_some())
+            .last()
+            .flatten()?;
+        self.pos += len;
+        Some(token)
+    }
+
+    fn take_operator(s: &str) -> Option<(Token, usize)> {
+        match s {
+            "=" => Some((Token::Assign, 1)),
+            ">" => Some((Token::GreaterThan, 1)),
+            "<" => Some((Token::LessThan, 1)),
+            "!" => Some((Token::ExclamationMark, 1)),
+            "~" => Some((Token::Tilde, 1)),
+            "?" => Some((Token::QuestionMark, 1)),
+            ":" => Some((Token::Colon, 1)),
+            "->" => Some((Token::Arrow, 2)),
+            "==" => Some((Token::Equals, 2)),
+            ">=" => Some((Token::GreaterThanOrEquals, 2)),
+            "<=" => Some((Token::LessThanOrEquals, 2)),
+            "!=" => Some((Token::NotEquals, 2)),
+            "&&" => Some((Token::LogicalAnd, 2)),
+            "||" => Some((Token::LogicalOr, 2)),
+            "++" => Some((Token::Increment, 2)),
+            "--" => Some((Token::Decrement, 2)),
+            "+" => Some((Token::Plus, 1)),
+            "-" => Some((Token::Minus, 1)),
+            "*" => Some((Token::Multiply, 1)),
+            "/" => Some((Token::Divide, 1)),
+            "&" => Some((Token::BitwiseAnd, 1)),
+            "|" => Some((Token::BitwiseOr, 1)),
+            "^" => Some((Token::BitwiseXor, 1)),
+            "%" => Some((Token::Modulo, 1)),
+            "<<" => Some((Token::LeftShift, 2)),
+            ">>" => Some((Token::SignedRightShift, 2)),
+            ">>>" => Some((Token::UnsignedRightShift, 3)),
+            "+=" => Some((Token::AddAssign, 2)),
+            "-=" => Some((Token::SubAssign, 2)),
+            "*=" => Some((Token::MulAssign, 2)),
+            "/=" => Some((Token::DivAssign, 2)),
+            "&=" => Some((Token::AndAssign, 2)),
+            "|=" => Some((Token::OrAssign, 2)),
+            "^=" => Some((Token::XorAssign, 2)),
+            "%=" => Some((Token::ModAssign, 2)),
+            "<<=" => Some((Token::LeftShiftAssign, 3)),
+            ">>=" => Some((Token::SignedRightShiftAssign, 3)),
+            ">>>=" => Some((Token::UnsignedRightShiftAssign, 4)),
+            _ => None,
+        }
     }
 
     fn skip_whitespace(&mut self) {
@@ -334,5 +399,25 @@ impl EatMode {
             EatMode::EndOnly | EatMode::BothEnds => true,
             _ => false,
         }
+    }
+}
+
+struct Walk<'a> {
+    s: &'a str,
+    pos: usize,
+}
+
+impl<'a> Walk<'a> {
+    pub fn new(tokens: &'a mut str) -> Self {
+        Self { s: tokens, pos: 0 }
+    }
+}
+
+impl<'a> Iterator for Walk<'a> {
+    type Item = &'a str;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.pos += &self.s[self.pos..].chars().next()?.len_utf8();
+        Some(&self.s[..self.pos])
     }
 }
