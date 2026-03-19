@@ -197,6 +197,11 @@ impl Tokens {
                 "with" => Token::With,
                 "yield" => Token::Yield,
 
+                // literals
+                "null" => Token::NullLiteral,
+                "true" => Token::BooleanLiteral(true),
+                "false" => Token::BooleanLiteral(false),
+
                 "_" => Token::Underscore,
                 // TODO: add contextual keywords
                 name => Token::Id(String::from(name))

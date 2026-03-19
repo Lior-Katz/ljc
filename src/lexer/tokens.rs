@@ -78,7 +78,7 @@ pub enum Token {
     NullLiteral,
     IntegerLiteral,
     FloatingPointLiteral,
-    BooleanLiteral,
+    BooleanLiteral(bool),
     CharLiteral(char),
     StringLiteral(String),
     TextBlock(String),
