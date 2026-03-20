@@ -1,9 +1,8 @@
-use std::cmp::max;
-use crate::lexer::error::{invalid_sequence, numeric_literal_error, LexError};
+use crate::lexer::error::{LexError, invalid_sequence, numeric_literal_error};
 use crate::lexer::tokens::Token;
-use crate::lexer::util::{convert_to_int, is_whitespace, Radix};
-use std::{fs, io};
+use crate::lexer::util::{Radix, convert_to_int, is_whitespace};
 use std::path::Path;
+use std::{fs, io};
 
 macro_rules! get {
     ( $x:expr ) => {
@@ -37,38 +36,29 @@ impl Tokens {
     }
 
     pub fn next(&mut self) -> Result<Option<Token>, LexError> {
-        let mut c = get!(self);
         loop {
-            if is_whitespace(&c) {
+            if is_whitespace(&get!(self)) {
                 self.skip_whitespace();
-                c = get!(self);
-            }
-            else if c == '/'
-                && let Some(next) = self.peek_next()
-            {
-                if next == '/' {
-                    self.eat_to_line_end();
-                    c = get!(self);
-                }
-                else if next == '*' {
-                    match self.eat_until("*/", EatMode::NoEnds) {
-                        Err(_) => {
-                            return invalid_sequence(self.line, self.column, "end of comment not found");
-                        }
-                        _ => {}
-                    };
-                    c = get!(self);
-                }
-                else {
-                    break;
-                }
-            }
-            else {
+            } else if self.accept_sequence("//") {
+                self.eat_to_line_end();
+            } else if self.accept_sequence("/*") {
+                match self.eat_until("*/", EatMode::IncludeEnd) {
+                    Err(_) => return invalid_sequence(self.line, self.column, "end of comment not found"),
+                    _ => {},
+                };
+            } else {
                 break;
             }
         }
 
         // separators
+        if self.accept_sequence("...") {
+            return Ok(Some(Token::Ellipsis));
+        }
+        if self.accept_sequence("::") {
+            return Ok(Some(Token::DoubleColon));
+        }
+        let c = get!(self);
         if let Some(t) = match c {
             '(' => Some(Token::LeftParen),
             ')' => Some(Token::RightParen),
@@ -78,21 +68,17 @@ impl Tokens {
             ']' => Some(Token::RightBracket),
             ';' => Some(Token::Semicolon),
             ',' => Some(Token::Comma),
-            '.' => Some(Token::Dot), // TODO: handle ellipsis
+            '.' => Some(Token::Dot),
             '@' => Some(Token::At),
-            ':' if self.next_is(':') => {
-                self.eat(); // need to dispose of two characters
-                Some(Token::DoubleColon)
-            }
             _ => None,
         } {
             self.eat();
             return Ok(Some(t));
         }
 
-        if c == '\'' {
+        if self.accept('\'') {
             // FIXME: need to only look until end of line
-            return match self.eat_until("'", EatMode::NoEnds) {
+            return match self.eat_until("'", EatMode::NoEnd) {
                 Ok(s) if s.len() == 0 => {
                     invalid_sequence(self.line, self.column, "Empty char literal")
                 }
@@ -106,15 +92,15 @@ impl Tokens {
                 Err(()) => invalid_sequence(self.line, self.column, "Unclosed character literal"),
             };
         }
-        if c == '"' {
+        if self.accept('"') {
             // FIXME: need to only look until end of line
-            return match self.eat_until("\"", EatMode::NoEnds) {
+            return match self.eat_until("\"", EatMode::NoEnd) {
                 Ok(s) => Ok(Some(Token::StringLiteral(String::from(s)))),
                 Err(()) => invalid_sequence(self.line, self.column, "Unclosed string literal"),
             };
         }
 
-        if Self::is_operator_char(&mut c) {
+        if Self::is_operator_char(&c) {
             return Ok(Some(self.scan_operator().unwrap()));
         }
 
@@ -123,27 +109,27 @@ impl Tokens {
                 Some('x') | Some('X') => {
                     self.eat_n(2);
                     self.scan_number(Radix::Hexadecimal)
-                },
+                }
                 Some('b') | Some('B') => {
                     self.eat_n(2);
                     self.scan_number(Radix::Binary)
-                },
+                }
                 _ => self.scan_number(Radix::Octal),
             }?;
             return Ok(Some(numerical_token));
         }
-        if matches!(c, '1' | '2' |'3' | '4' | '5' | '6' | '7' | '8' | '9') {
+        if matches!(c, '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9') {
             let numerical_token = self.scan_number(Radix::Decimal)?;
             return Ok(Some(numerical_token));
         }
 
         if c.is_alphabetic() {
             let identifier_or_kw = self.eat_while(|tokens| {
-                match  tokens.peek() {
+                match tokens.peek() {
                     None => false,
-                    Some(c) => c.is_alphanumeric() || c == '_'
+                    Some(c) => c.is_alphanumeric() || c == '_',
                 }
-            }, EatMode::BothEnds).unwrap();
+            }, EatMode::IncludeEnd,).unwrap();
             let token = match identifier_or_kw {
                 // keywords
                 "abstract" => Token::Abstract,
@@ -223,7 +209,7 @@ impl Tokens {
 
                 "_" => Token::Underscore,
                 // TODO: add contextual keywords
-                name => Token::Id(String::from(name))
+                name => Token::Id(String::from(name)),
             };
             return Ok(Some(token));
         }
@@ -242,29 +228,31 @@ impl Tokens {
             match tokens.peek() {
                 Some(c) if c.is_digit(radix) => true,
                 Some('_') => true,
-                _ => false
+                _ => false,
             }
-        }, EatMode::BothEnds).unwrap();
+        }, EatMode::IncludeEnd).unwrap();
         let value = convert_to_int(whole, radix).unwrap();
         if matches!(self.peek(), Some('_')) {
-            return numeric_literal_error(self.line, self.column, "Illegal underscore")
+            return numeric_literal_error(self.line, self.column, "Illegal underscore");
         }
         match self.peek() {
             Some('l') | Some('L') => {
                 self.eat();
                 Ok(Token::LongLiteral(value))
-            },
+            }
             _ => Ok(Token::IntegerLiteral(value)),
         }
     }
 
-    fn is_operator_char(c: &mut char) -> bool {
-        matches!(c,
-        '=' | '>' | '<' | '!' | '~' | '?' | ':' | '&' | '|' | '+' | '-' | '*' | '/' | '^' | '%')
+    fn is_operator_char(c: &char) -> bool {
+        matches!(
+            c,
+            '=' | '>' | '<' | '!' | '~' | '?' | ':' | '&' | '|' | '+' | '-' | '*' | '/' | '^' | '%'
+        )
     }
 
     fn scan_operator(&mut self) -> Option<Token> {
-        let walk = Walk::new(&mut self.input[self.pos..]);
+        let walk = Walk::new(&self.input[self.pos..]);
 
         let (token, len) = walk.into_iter()
             .map(|s| Self::take_operator(s))
@@ -333,7 +321,7 @@ impl Tokens {
                 return is_whitespace(&c);
             }
             false
-        }, EatMode::NoEnds);
+        }, EatMode::IncludeEnd);
     }
 
     fn eat_to_line_end(&mut self) {
@@ -350,7 +338,7 @@ impl Tokens {
                 };
             }
             false
-        }, EatMode::NoEnds);
+        }, EatMode::IncludeEnd);
     }
 
     fn next_line(&mut self) {
@@ -370,13 +358,38 @@ impl Tokens {
         self.peek_n(1)
     }
 
-    fn peek_n(&self, mut n: i32) -> Option<char> {
+    fn peek_n(&self, mut n: usize) -> Option<char> {
         let mut chars = self.input[self.pos..].chars();
         while n > 0 {
             chars.next()?;
             n -= 1;
         }
         chars.next()
+    }
+
+    fn accept(&mut self, desired: char) -> bool {
+        match self.peek() {
+            Some(s) if s == desired => {
+                self.eat();
+                true
+            }
+            _ => false,
+        }
+    }
+
+    fn accept_sequence(&mut self, sequence: &str) -> bool {
+        if sequence.is_empty() {
+            return true;
+        }
+        let sequence_len = sequence.chars().count();
+        let mut walk = Walk::new(&self.input[self.pos..]).skip(sequence_len - 1);
+        match walk.next() {
+            Some(s) if s == sequence => {
+                self.eat_n(sequence_len);
+                true
+            }
+            _ => false,
+        }
     }
 
     fn eat(&mut self) -> Option<char> {
@@ -389,7 +402,7 @@ impl Tokens {
         Some(c)
     }
 
-    fn eat_n(&mut self, mut n: i32) -> Option<&str> {
+    fn eat_n(&mut self, mut n: usize) -> Option<&str> {
         let mut len = 0;
         while n > 0 {
             len += self.eat()?.len_utf8();
@@ -398,11 +411,21 @@ impl Tokens {
         Some(&self.input[self.pos - len..self.pos])
     }
 
+    /// Eat input characters until given sequence is encountered.
+    ///
+    /// # Arguments
+    ///
+    /// * `sequence`: the sequence to look for
+    /// * `eat_mode`: controls the string returned.</br>
+    ///               - `IncludeEnd`: the returned string includes the terminating sequence</br>
+    ///               - `NoEnd`: the returned string does not include the terminating sequence</br>
+    ///               In any case, the terminating sequence is eaten as well.
+    ///
     fn eat_until(&mut self, sequence: &str, eat_mode: EatMode) -> Result<&str, ()> {
-        if !eat_mode.include_current() {
-            self.eat();
+        if sequence.is_empty() {
+            return Ok(&self.input[self.pos..self.pos]);
         }
-        if let Some(i) = self.input[self.pos..].find(sequence) {
+        if let Some(i) = self.input[self.pos..].find(&sequence[0..]) {
             let slice_len = i
                 + (if eat_mode.include_end() {
                     sequence.len()
@@ -420,13 +443,13 @@ impl Tokens {
 
     fn eat_while<F>(&mut self, predicate: F, eat_mode: EatMode) -> Option<&str>
     where
-        F: Fn(&mut Self) -> bool
+        F: Fn(&mut Self) -> bool,
     {
         let mut last_char = match self.peek() {
             Some(c) => c,
-            None => return None
+            None => return None,
         };
-        let start =  if eat_mode.include_current() {self.pos} else {self.pos + last_char.len_utf8()};
+        let start = self.pos;
         while let Some(c) = self.peek() {
             last_char = c;
             if !predicate(self) {
@@ -434,31 +457,22 @@ impl Tokens {
             }
             self.eat();
         }
-        let end = if eat_mode.include_end() {self.pos} else {self.pos - last_char.len_utf8()};
-        Some(&self.input[start..max(start, end)])
+        let end = if eat_mode.include_end() { self.pos } else { self.pos - last_char.len_utf8() };
+        Some(&self.input[start..end])
     }
 }
 
 #[allow(dead_code)]
 enum EatMode {
-    StartOnly,
-    NoEnds,
-    BothEnds,
-    EndOnly,
+    IncludeEnd,
+    NoEnd,
 }
 
 impl EatMode {
-    pub fn include_current(&self) -> bool {
-        match self {
-            EatMode::StartOnly | EatMode::BothEnds => true,
-            _ => false,
-        }
-    }
-
     pub fn include_end(&self) -> bool {
         match self {
-            EatMode::EndOnly | EatMode::BothEnds => true,
-            _ => false,
+            EatMode::IncludeEnd => true,
+            EatMode::NoEnd => false,
         }
     }
 }
@@ -469,7 +483,7 @@ struct Walk<'a> {
 }
 
 impl<'a> Walk<'a> {
-    pub fn new(tokens: &'a mut str) -> Self {
+    pub fn new(tokens: &'a str) -> Self {
         Self { s: tokens, pos: 0 }
     }
 }
