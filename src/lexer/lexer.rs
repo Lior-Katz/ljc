@@ -1,7 +1,7 @@
 use std::cmp::max;
-use crate::lexer::error::{invalid_sequence, LexError};
+use crate::lexer::error::{invalid_sequence, numeric_literal_error, LexError};
 use crate::lexer::tokens::Token;
-use crate::lexer::util::is_whitespace;
+use crate::lexer::util::{convert_to_int, is_whitespace, Radix};
 use std::{fs, io};
 use std::path::Path;
 
@@ -118,6 +118,25 @@ impl Tokens {
             return Ok(Some(self.scan_operator().unwrap()));
         }
 
+        if c == '0' {
+            let numerical_token = match self.peek_next() {
+                Some('x') | Some('X') => {
+                    self.eat_n(2);
+                    self.scan_number(Radix::Hexadecimal)
+                },
+                Some('b') | Some('B') => {
+                    self.eat_n(2);
+                    self.scan_number(Radix::Binary)
+                },
+                _ => self.scan_number(Radix::Octal),
+            }?;
+            return Ok(Some(numerical_token));
+        }
+        if matches!(c, '1' | '2' |'3' | '4' | '5' | '6' | '7' | '8' | '9') {
+            let numerical_token = self.scan_number(Radix::Decimal)?;
+            return Ok(Some(numerical_token));
+        }
+
         if c.is_alphabetic() {
             let identifier_or_kw = self.eat_while(|tokens| {
                 match  tokens.peek() {
@@ -210,6 +229,33 @@ impl Tokens {
         }
 
         Ok(None)
+    }
+
+    fn scan_number(&mut self, radix: Radix) -> Result<Token, LexError> {
+        let radix: u32 = radix.into();
+        match self.peek() {
+            Some('_') => return numeric_literal_error(self.line, self.column, "Illegal underscore"),
+            None => return numeric_literal_error(self.line, self.column, "Numbers must contain at least one digit"),
+            _ => {}
+        }
+        let whole = self.eat_while(|tokens| {
+            match tokens.peek() {
+                Some(c) if c.is_digit(radix) => true,
+                Some('_') => true,
+                _ => false
+            }
+        }, EatMode::BothEnds).unwrap();
+        let value = convert_to_int(whole, radix).unwrap();
+        if matches!(self.peek(), Some('_')) {
+            return numeric_literal_error(self.line, self.column, "Illegal underscore")
+        }
+        match self.peek() {
+            Some('l') | Some('L') => {
+                self.eat();
+                Ok(Token::LongLiteral(value))
+            },
+            _ => Ok(Token::IntegerLiteral(value)),
+        }
     }
 
     fn is_operator_char(c: &mut char) -> bool {
@@ -341,6 +387,15 @@ impl Tokens {
         }
         self.pos += c.len_utf8();
         Some(c)
+    }
+
+    fn eat_n(&mut self, mut n: i32) -> Option<&str> {
+        let mut len = 0;
+        while n > 0 {
+            len += self.eat()?.len_utf8();
+            n -= 1;
+        }
+        Some(&self.input[self.pos - len..self.pos])
     }
 
     fn eat_until(&mut self, sequence: &str, eat_mode: EatMode) -> Result<&str, ()> {

@@ -76,7 +76,8 @@ pub enum Token {
 
     // Literals
     NullLiteral,
-    IntegerLiteral,
+    IntegerLiteral(u64),
+    LongLiteral(u64),
     FloatingPointLiteral,
     BooleanLiteral(bool),
     CharLiteral(char),

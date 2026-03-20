@@ -5,6 +5,7 @@ use std::fmt::{Display, Formatter};
 pub enum LexError {
     IoError(String),
     InvalidSequence(ErrorDescription),
+    NumericLiteralError(ErrorDescription),
 }
 
 impl Display for LexError {
@@ -45,6 +46,10 @@ pub fn invalid_sequence<_T>(line: usize, column: usize, cause: &str) -> Result<_
     )))
 }
 
-pub fn invalid_sequence(line: usize, column: usize, cause: &str) -> Result<Option<Token>, LexError> {
-    Err(LexError::InvalidSequence(ErrorDescription::new(line, column, String::from(cause))))
+pub fn numeric_literal_error<_T>(line: usize, column: usize, cause: &str) -> Result<_T, LexError> {
+    Err(LexError::NumericLiteralError(ErrorDescription::new(
+        line,
+        column,
+        String::from(cause),
+    )))
 }
