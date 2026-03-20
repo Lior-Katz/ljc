@@ -335,8 +335,9 @@ impl Tokens {
 
     fn eat(&mut self) -> Option<char> {
         let c = self.peek()?;
+        self.column += 1;
         if c == '\n' {
-            self.line += 1;
+            self.next_line()
         }
         self.pos += c.len_utf8();
         Some(c)
