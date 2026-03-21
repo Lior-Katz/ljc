@@ -8,7 +8,7 @@ macro_rules! get {
     ( $x:expr ) => {
         match $x.peek() {
             Some(c) => c,
-            None => return Ok(None),
+            None => return Ok(Token::EOF),
         }
     };
 }
@@ -35,7 +35,7 @@ impl Tokens {
         }
     }
 
-    pub fn next(&mut self) -> Result<Option<Token>, LexError> {
+    pub fn next(&mut self) -> Result<Token, LexError> {
         loop {
             if is_whitespace(&get!(self)) {
                 self.skip_whitespace();
@@ -53,10 +53,10 @@ impl Tokens {
 
         // separators
         if self.accept_sequence("...") {
-            return Ok(Some(Token::Ellipsis));
+            return Ok(Token::Ellipsis);
         }
         if self.accept_sequence("::") {
-            return Ok(Some(Token::DoubleColon));
+            return Ok(Token::DoubleColon);
         }
         let c = get!(self);
         if let Some(t) = match c {
@@ -73,7 +73,7 @@ impl Tokens {
             _ => None,
         } {
             self.eat();
-            return Ok(Some(t));
+            return Ok(t);
         }
 
         if self.accept('\'') {
@@ -88,20 +88,20 @@ impl Tokens {
                     self.column,
                     "Too many characters in character literal",
                 ),
-                Ok(s) => Ok(Some(Token::CharLiteral(s.chars().next().unwrap()))),
+                Ok(s) => Ok(Token::CharLiteral(s.chars().next().unwrap())),
                 Err(()) => invalid_sequence(self.line, self.column, "Unclosed character literal"),
             };
         }
         if self.accept('"') {
             // FIXME: need to only look until end of line
             return match self.eat_until("\"", EatMode::NoEnd) {
-                Ok(s) => Ok(Some(Token::StringLiteral(String::from(s)))),
+                Ok(s) => Ok(Token::StringLiteral(String::from(s))),
                 Err(()) => invalid_sequence(self.line, self.column, "Unclosed string literal"),
             };
         }
 
         if Self::is_operator_char(&c) {
-            return Ok(Some(self.scan_operator().unwrap()));
+            return Ok(self.scan_operator().unwrap());
         }
 
         if c == '0' {
@@ -116,11 +116,11 @@ impl Tokens {
                 }
                 _ => self.scan_number(Radix::Octal),
             }?;
-            return Ok(Some(numerical_token));
+            return Ok(numerical_token);
         }
         if matches!(c, '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9') {
             let numerical_token = self.scan_number(Radix::Decimal)?;
-            return Ok(Some(numerical_token));
+            return Ok(numerical_token);
         }
 
         if c.is_alphabetic() {
@@ -211,10 +211,10 @@ impl Tokens {
                 // TODO: add contextual keywords
                 name => Token::Id(String::from(name)),
             };
-            return Ok(Some(token));
+            return Ok(token);
         }
 
-        Ok(None)
+        Ok(Token::EOF)
     }
 
     fn scan_number(&mut self, radix: Radix) -> Result<Token, LexError> {

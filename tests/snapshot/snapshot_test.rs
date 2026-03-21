@@ -1,4 +1,5 @@
-use ljc::lexer::lexer::lex_single_file;
+use ljc::lexer::Token;
+use ljc::lexer::lex_single_file;
 use std::path::Path;
 
 fn lex_to_string(path: &Path) -> Result<String, String> {
@@ -8,8 +9,8 @@ fn lex_to_string(path: &Path) -> Result<String, String> {
 
     loop {
         match tokens.next() {
-            Ok(Some(tok)) => out.push(format!("{:?}", tok)),
-            Ok(None) => break,
+            Ok(Token::EOF) => break,
+            Ok(token) => out.push(format!("{:?}", token)),
             Err(e) => return Err(format!("{:?}", e)),
         }
     }

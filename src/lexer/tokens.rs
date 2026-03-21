@@ -137,4 +137,6 @@ pub enum Token {
     LeftShiftAssign,
     SignedRightShiftAssign,
     UnsignedRightShiftAssign,
+
+    EOF,
 }
