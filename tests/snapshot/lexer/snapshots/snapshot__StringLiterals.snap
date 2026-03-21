@@ -1,0 +1,33 @@
+---
+source: tests/snapshot/snapshot_test.rs
+---
+Class
+Id("StringLiterals")
+LeftBrace
+Void
+Id("test")
+LeftParen
+RightParen
+LeftBrace
+Id("String")
+Id("s1")
+Assign
+StringLiteral("abc")
+Semicolon
+Id("String")
+Id("s2")
+Assign
+StringLiteral("")
+Semicolon
+Id("String")
+Id("s3")
+Assign
+StringLiteral("with spaces")
+Semicolon
+Id("String")
+Id("s4")
+Assign
+StringLiteral("123")
+Semicolon
+RightBrace
+RightBrace
