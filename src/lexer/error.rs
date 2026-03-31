@@ -3,7 +3,6 @@ use std::fmt::{Display, Formatter};
 
 #[derive(Debug)]
 pub enum LexError {
-    UnexpectedError(ErrorDescription),
     IoError(String),
     InvalidSequence(ErrorDescription),
     NumericLiteralError(ErrorDescription),
@@ -14,7 +13,6 @@ impl Display for LexError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             LexError::IoError(e) => write!(f, "IO error: {}", e),
-            LexError::UnexpectedError(desc)
             | LexError::InvalidSequence(desc)
             | LexError::NumericLiteralError(desc)
             | LexError::InvalidEscape(desc) => {
@@ -41,14 +39,6 @@ impl ErrorDescription {
             cause,
         }
     }
-}
-
-pub fn unexpected_error<_T, E: Display>(line: usize, column: usize, cause: E) -> Result<_T, LexError> {
-    Err(LexError::UnexpectedError(ErrorDescription::new(
-        line,
-        column,
-        format!("Unexpected error: {}", cause),
-    )))
 }
 
 pub fn invalid_sequence<_T>(line: usize, column: usize, cause: &str) -> Result<_T, LexError> {
