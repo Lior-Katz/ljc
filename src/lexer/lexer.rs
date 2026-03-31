@@ -1,4 +1,4 @@
-use crate::lexer::error::{LexError, invalid_sequence, numeric_literal_error, unexpected_error, invalid_escape};
+use crate::lexer::error::{LexError, invalid_sequence, numeric_literal_error, invalid_escape};
 use crate::lexer::tokens::Token;
 use crate::lexer::util::{Radix, convert_to_int, is_whitespace};
 use std::path::Path;
@@ -233,12 +233,9 @@ impl Tokens {
                 .take(3)
                 .zip(1..)
                 .last() {
-                let r = match u8::from_str_radix(n, 8) {
-                    Ok(n) => Ok(n as char),
-                    Err(e) => unexpected_error(self.line, self.pos, e)
-                };
+                let r = u8::from_str_radix(n, 8).unwrap() as char;
                 self.eat_n(len);
-                return r;
+                return Ok(r);
             }
             return invalid_escape(self.line, self.column);
         }
