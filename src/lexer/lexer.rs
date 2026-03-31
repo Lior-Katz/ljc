@@ -354,14 +354,6 @@ impl Tokens {
     fn skip_whitespace(&mut self) {
         self.eat_while(|tokens| {
             if let Some(c) = tokens.peek() {
-                match c {
-                    '\r' if tokens.next_is('\n') => {} // will be handled in next step by below line
-                    '\n' | '\r' => {
-                        // singular CR not followed by LF (above guard) counts as a line terminator
-                        tokens.next_line();
-                    }
-                    _ => {}
-                }
                 return is_whitespace(&c);
             }
             false
@@ -374,8 +366,6 @@ impl Tokens {
                 return match c {
                     '\r' if tokens.next_is('\n') => true,
                     '\n' | '\r' => {
-                        tokens.next_line();
-                        tokens.eat();
                         false
                     }
                     _ => true,
@@ -437,13 +427,14 @@ impl Tokens {
     }
 
     fn eat(&mut self) -> Option<char> {
-        let c = self.peek()?;
+        let current = self.peek()?;
         self.column += 1;
-        if c == '\n' {
+        let next_is_lf = self.next_is('\n');
+        if current == '\n' || (current == '\r' && !next_is_lf) {
             self.next_line()
         }
-        self.pos += c.len_utf8();
-        Some(c)
+        self.pos += current.len_utf8();
+        Some(current)
     }
 
     fn eat_n(&mut self, mut n: usize) -> Option<&str> {
