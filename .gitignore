@@ -15,3 +15,6 @@ target
 
 # RustRover
 .idea/
+
+# pending snapshots produced by insta
+tests/snapshot/*/snapshots/*.snap.new
