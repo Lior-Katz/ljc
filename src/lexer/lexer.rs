@@ -1,4 +1,4 @@
-use crate::lexer::error::{LexError, invalid_sequence, numeric_literal_error};
+use crate::lexer::error::{LexError, invalid_sequence, numeric_literal_error, unexpected_error, invalid_escape};
 use crate::lexer::tokens::Token;
 use crate::lexer::util::{Radix, convert_to_int, is_whitespace};
 use std::path::Path;
@@ -77,27 +77,28 @@ impl Tokens {
         }
 
         if self.accept('\'') {
-            // FIXME: need to only look until end of line
-            return match self.eat_until("'", EatMode::NoEnd) {
-                Ok(s) if s.len() == 0 => {
-                    invalid_sequence(self.line, self.column, "Empty char literal")
-                }
-                // 2 characters is the char itself and the closing quote
-                Ok(s) if s.len() > 1 => invalid_sequence(
-                    self.line,
-                    self.column,
-                    "Too many characters in character literal",
-                ),
-                Ok(s) => Ok(Token::CharLiteral(s.chars().next().unwrap())),
-                Err(()) => invalid_sequence(self.line, self.column, "Unclosed character literal"),
-            };
+            if self.accept('\'') {
+                return invalid_sequence(self.line, self.column, "Empty char literal");
+            }
+            let c = self.scan_char_literal()?;
+            if self.accept('\'') {
+                return Ok(Token::CharLiteral(c));
+            }
+            let column = self.column;
+            self.eat_while(|tokens| {
+                !matches!(tokens.peek(), Some('\r') | Some('\n') | Some('\''))
+            }, EatMode::IncludeEnd);
+            if self.accept('\'') {
+                return invalid_sequence(self.line, column, "Too many characters in character literal");
+            }
+            return invalid_sequence(self.line, column, "Unclosed character literal");
         }
         if self.accept('"') {
-            // FIXME: need to only look until end of line
-            return match self.eat_until("\"", EatMode::NoEnd) {
-                Ok(s) => Ok(Token::StringLiteral(String::from(s))),
-                Err(()) => invalid_sequence(self.line, self.column, "Unclosed string literal"),
-            };
+            let s = self.scan_string_literal()?;
+            if !self.accept('"') {
+                return invalid_sequence(self.line, self.column, "Unterminated string literal");
+            }
+            return Ok(Token::StringLiteral(s));
         }
 
         if Self::is_operator_char(&c) {
@@ -215,6 +216,49 @@ impl Tokens {
         }
 
         Ok(Token::EOF)
+    }
+
+    fn scan_char_literal(&mut self) -> Result<char, LexError> {
+        if self.accept('\\') {
+            if self.accept('b') { return Ok('\u{0008}') }
+            if self.accept('s') { return Ok(' ') }
+            if self.accept('t') { return Ok('\t') }
+            if self.accept('n') { return Ok('\n') }
+            if self.accept('f') { return Ok('\u{000C}') }
+            if self.accept('r') { return Ok('\r') }
+            if self.accept('"') { return Ok('"') }
+            if self.accept('\'') { return Ok('\'') }
+            if self.accept('\\') { return Ok('\\') }
+            if let Some((n, len)) = Walk::while_holds(&self.input[self.pos..], |c| c.is_digit(8))
+                .take(3)
+                .zip(1..)
+                .last() {
+                let r = match u8::from_str_radix(n, 8) {
+                    Ok(n) => Ok(n as char),
+                    Err(e) => unexpected_error(self.line, self.pos, e)
+                };
+                self.eat_n(len);
+                return r;
+            }
+            return invalid_escape(self.line, self.column);
+        }
+        match self.eat() {
+            Some(c) => Ok(c),
+            None => invalid_sequence(self.line, self.column, "Unclosed character literal")
+        }
+    }
+
+    fn scan_string_literal(&mut self) -> Result<String, LexError> {
+        let mut s = String::new();
+        // let start = self.pos;
+        loop {
+            if self.peek() == Some('"'){
+                break;
+            }
+            s.push(self.scan_char_literal()?);
+        }
+
+        Ok(s)
     }
 
     fn scan_number(&mut self, radix: Radix) -> Result<Token, LexError> {
@@ -480,11 +524,16 @@ impl EatMode {
 struct Walk<'a> {
     s: &'a str,
     pos: usize,
+    predicate: fn(&char) -> bool,
 }
 
 impl<'a> Walk<'a> {
     pub fn new(tokens: &'a str) -> Self {
-        Self { s: tokens, pos: 0 }
+        Self { s: tokens, pos: 0, predicate: |_c| true }
+    }
+
+    pub fn while_holds(tokens: &'a str, predicate: fn(&char) -> bool) -> Self{
+        Self {s: tokens, pos: 0, predicate }
     }
 }
 
@@ -492,7 +541,11 @@ impl<'a> Iterator for Walk<'a> {
     type Item = &'a str;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.pos += &self.s[self.pos..].chars().next()?.len_utf8();
+        let c = &self.s[self.pos..].chars().next()?;
+        if !(self.predicate)(&c) {
+            return None
+        }
+        self.pos += c.len_utf8();
         Some(&self.s[..self.pos])
     }
 }

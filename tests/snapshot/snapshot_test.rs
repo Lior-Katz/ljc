@@ -11,7 +11,7 @@ fn lex_to_string(path: &Path) -> Result<String, String> {
         match tokens.next() {
             Ok(Token::EOF) => break,
             Ok(token) => out.push(format!("{:?}", token)),
-            Err(e) => return Err(format!("{:?}", e)),
+            Err(e) => return Err(format!("{e}")),
         }
     }
 
