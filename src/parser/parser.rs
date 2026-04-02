@@ -2,8 +2,9 @@ use crate::lexer::{LexError, Token};
 use crate::lexer::{Tokens, lex_single_file};
 use crate::parser::ast::{
     ClassBody, ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration, ClassModifier,
-    CompilationUnit, Identifier, MethodBody, MethodDeclaration, MethodModifiers, MethodResult,
-    NormalClassDeclaration, Program, Statement, TopLevelClassOrInterfaceDeclaration,
+    CompilationUnit, FormalParameter, Identifier, MethodBody, MethodDeclaration, MethodModifiers,
+    MethodResult, NormalClassDeclaration, Program, Statement, TopLevelClassOrInterfaceDeclaration,
+    Type, VariableDeclaratorId,
 };
 use crate::parser::error::ParseError;
 use std::path::Path;
@@ -158,12 +159,14 @@ impl Parser {
         let result = self.result()?;
         let identifier = self.identifier()?;
         self.assert(Token::LeftParen)?;
+        let parameters = self.formal_parameters();
         self.assert(Token::RightParen)?;
         let body = self.method_body()?;
         Ok(MethodDeclaration {
             modifiers,
             result,
             identifier,
+            parameters,
             body,
         })
     }
@@ -185,6 +188,70 @@ impl Parser {
             return Ok(MethodResult::Void);
         }
         Err(ParseError::NoProduction)
+    }
+
+    fn formal_parameters(&mut self) -> Vec<FormalParameter> {
+        let mut v = Vec::new();
+        if let Ok(formal_parameter) = self.formal_parameter() {
+            v.push(formal_parameter);
+        } else {
+            return v;
+        }
+        loop {
+            if !self.accept(Token::Comma) {
+                break;
+            }
+            if let Ok(fp) = self.formal_parameter() {
+                v.push(fp);
+            } else {
+                // TODO: if not a format parameter, should get "identifier or type expected" error
+                break;
+            }
+        }
+        v
+    }
+
+    fn formal_parameter(&mut self) -> Result<FormalParameter, ParseError> {
+        let param_type = self.unannotated_type()?;
+        if self.accept(Token::Ellipsis) {
+            // variable arity
+            let identifier = self.identifier()?;
+            Ok(FormalParameter::VariableArityParameter(
+                param_type, identifier,
+            ))
+        } else {
+            let identifier = self.identifier()?;
+            Ok(FormalParameter::NormalFormalParameter(
+                param_type,
+                VariableDeclaratorId { identifier },
+            ))
+        }
+    }
+
+    fn unannotated_type(&mut self) -> Result<Type, ParseError> {
+        self.unannotated_primitive_type()
+    }
+
+    fn unannotated_primitive_type(&mut self) -> Result<Type, ParseError> {
+        if self.accept(Token::Byte) {
+            Ok(Type::Byte)
+        } else if self.accept(Token::Short) {
+            Ok(Type::Short)
+        } else if self.accept(Token::Int) {
+            Ok(Type::Int)
+        } else if self.accept(Token::Long) {
+            Ok(Type::Long)
+        } else if self.accept(Token::Char) {
+            Ok(Type::Char)
+        } else if self.accept(Token::Float) {
+            Ok(Type::Float)
+        } else if self.accept(Token::Double) {
+            Ok(Type::Double)
+        } else if self.accept(Token::Boolean) {
+            Ok(Type::Boolean)
+        } else {
+            Err(ParseError::NoProduction)
+        }
     }
 
     fn method_body(&mut self) -> Result<MethodBody, ParseError> {

@@ -51,6 +51,7 @@ pub struct MethodDeclaration {
     pub modifiers: Vec<MethodModifiers>,
     pub result: MethodResult,
     pub identifier: Identifier,
+    pub parameters: Vec<FormalParameter>,
     pub body: MethodBody,
 }
 
@@ -67,6 +68,12 @@ pub enum MethodResult {
 }
 
 #[derive(Debug)]
+pub enum FormalParameter {
+    NormalFormalParameter(Type, VariableDeclaratorId),
+    VariableArityParameter(Type, Identifier),
+}
+
+#[derive(Debug)]
 pub enum MethodBody {
     Semicolon,
     Block(BlockStatements),
@@ -75,4 +82,22 @@ pub enum MethodBody {
 #[derive(Debug)]
 pub enum Statement {
     EmptyStatement,
+}
+
+#[derive(Debug)]
+pub struct VariableDeclaratorId {
+    pub identifier: Identifier,
+}
+
+#[derive(Debug)]
+pub enum Type {
+    // primitive types
+    Byte,
+    Short,
+    Int,
+    Long,
+    Char,
+    Float,
+    Double,
+    Boolean,
 }
