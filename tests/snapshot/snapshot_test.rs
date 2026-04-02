@@ -1,5 +1,6 @@
 use ljc::lexer::Token;
 use ljc::lexer::lex_single_file;
+use ljc::parser::parse_single_file;
 use std::path::Path;
 
 fn lex_to_string(path: &Path) -> Result<String, String> {
@@ -33,6 +34,20 @@ fn lexer_snapshot_test(path: &Path) -> datatest_stable::Result<()> {
     Ok(()) // to satisfy return type check. insta fails when the output doesn't match
 }
 
+fn parser_snapshot_test(path: &Path) -> datatest_stable::Result<()> {
+    if let Ok(program) = parse_single_file(path) {
+        let name = path.file_stem().unwrap().to_str().unwrap();
+        insta::with_settings!({
+            snapshot_path => "parser/snapshots",
+            omit_expression => true,
+        }, {
+            insta::assert_snapshot!(name, program.to_string());
+        });
+    };
+    Ok(()) // to satisfy return type check. insta fails when the output doesn't match
+}
+
 datatest_stable::harness! {
     { test = lexer_snapshot_test, root = "tests/snapshot/lexer", pattern = r"java" },
+    { test = parser_snapshot_test, root = "tests/snapshot/parser", pattern = r"java" },
 }
