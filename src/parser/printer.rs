@@ -167,6 +167,7 @@ impl Display for MethodResult {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
             MethodResult::Void => write!(f, "void"),
+            MethodResult::Type(t) => write!(f, "{}", t),
         }
     }
 }

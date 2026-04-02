@@ -185,9 +185,10 @@ impl Parser {
 
     fn result(&mut self) -> Result<MethodResult, ParseError> {
         if self.accept(Token::Void) {
-            return Ok(MethodResult::Void);
+            Ok(MethodResult::Void)
+        } else {
+            Ok(MethodResult::Type(self.unannotated_type()?))
         }
-        Err(ParseError::NoProduction)
     }
 
     fn formal_parameters(&mut self) -> Vec<FormalParameter> {

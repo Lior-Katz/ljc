@@ -65,6 +65,7 @@ pub enum MethodModifiers {
 #[derive(Debug)]
 pub enum MethodResult {
     Void,
+    Type(Type),
 }
 
 #[derive(Debug)]
