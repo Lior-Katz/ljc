@@ -119,7 +119,7 @@ impl AstNode for NormalClassDeclaration {
     ) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(&prefix, is_last);
 
-        writeln!(f, "{line_prefix}Class {}", self.identifier)?;
+        writeln!(f, "{line_prefix}Class {} {:?}", self.identifier, self.modifiers)?;
         let total = self.body.class_body_declarations.len();
 
         for (i, decl) in self.body.class_body_declarations.iter().enumerate() {

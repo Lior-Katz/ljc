@@ -1,9 +1,9 @@
 use crate::lexer::{LexError, Token};
 use crate::lexer::{Tokens, lex_single_file};
 use crate::parser::ast::{
-    ClassBody, ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration, CompilationUnit,
-    Identifier, MethodBody, MethodDeclaration, MethodResult, NormalClassDeclaration, Program,
-    Statement, TopLevelClassOrInterfaceDeclaration,
+    ClassBody, ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration, ClassModifier,
+    CompilationUnit, Identifier, MethodBody, MethodDeclaration, MethodResult,
+    NormalClassDeclaration, Program, Statement, TopLevelClassOrInterfaceDeclaration,
 };
 use crate::parser::error::ParseError;
 use std::path::Path;
@@ -101,13 +101,30 @@ impl Parser {
     }
 
     fn normal_class_declaration(&mut self) -> Result<NormalClassDeclaration, ParseError> {
+        let modifiers = self.zero_or_more(Self::class_modifier);
         self.assert(Token::Class)?;
         let identifier = self.identifier()?;
         self.assert(Token::LeftBrace)?;
         let body = self.class_body()?;
         self.assert(Token::RightBrace)?;
-        let class_decl = NormalClassDeclaration { identifier, body };
+        let class_decl = NormalClassDeclaration {
+            modifiers,
+            identifier,
+            body,
+        };
         Ok(class_decl)
+    }
+
+    fn class_modifier(&mut self) -> Result<ClassModifier, ParseError> {
+        self.accept(Token::Public)
+            .then_some(ClassModifier::Public)
+            .or(self
+                .accept(Token::Private)
+                .then_some(ClassModifier::Private))
+            .or(self
+                .accept(Token::Protected)
+                .then_some(ClassModifier::Protected))
+            .ok_or(ParseError::NoProduction)
     }
 
     fn identifier(&mut self) -> Result<Identifier, ParseError> {
