@@ -155,7 +155,7 @@ impl AstNode for ClassMemberDeclaration {
 
         match self {
             ClassMemberDeclaration::MethodDeclaration(m) => {
-                writeln!(f, "{line_prefix}Method {}->{}", m.identifier, m.result)?;
+                writeln!(f, "{line_prefix}Method {}->{} {:?}", m.identifier, m.result, m.modifiers)?;
                 m.fmt_tree(f, &new_prefix, true)
             }
         }

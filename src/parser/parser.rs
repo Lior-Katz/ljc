@@ -2,7 +2,7 @@ use crate::lexer::{LexError, Token};
 use crate::lexer::{Tokens, lex_single_file};
 use crate::parser::ast::{
     ClassBody, ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration, ClassModifier,
-    CompilationUnit, Identifier, MethodBody, MethodDeclaration, MethodResult,
+    CompilationUnit, Identifier, MethodBody, MethodDeclaration, MethodModifiers, MethodResult,
     NormalClassDeclaration, Program, Statement, TopLevelClassOrInterfaceDeclaration,
 };
 use crate::parser::error::ParseError;
@@ -154,16 +154,30 @@ impl Parser {
     }
 
     fn method_declaration(&mut self) -> Result<MethodDeclaration, ParseError> {
+        let modifiers = self.zero_or_more(Self::method_modifier);
         let result = self.result()?;
         let identifier = self.identifier()?;
         self.assert(Token::LeftParen)?;
         self.assert(Token::RightParen)?;
         let body = self.method_body()?;
         Ok(MethodDeclaration {
+            modifiers,
             result,
             identifier,
             body,
         })
+    }
+
+    fn method_modifier(&mut self) -> Result<MethodModifiers, ParseError> {
+        self.accept(Token::Public)
+            .then_some(MethodModifiers::Public)
+            .or(self
+                .accept(Token::Private)
+                .then_some(MethodModifiers::Private))
+            .or(self
+                .accept(Token::Protected)
+                .then_some(MethodModifiers::Protected))
+            .ok_or(ParseError::NoProduction)
     }
 
     fn result(&mut self) -> Result<MethodResult, ParseError> {

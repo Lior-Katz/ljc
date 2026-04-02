@@ -48,9 +48,17 @@ pub enum ClassMemberDeclaration {
 
 #[derive(Debug)]
 pub struct MethodDeclaration {
+    pub modifiers: Vec<MethodModifiers>,
     pub result: MethodResult,
     pub identifier: Identifier,
     pub body: MethodBody,
+}
+
+#[derive(Debug)]
+pub enum MethodModifiers {
+    Public,
+    Protected,
+    Private,
 }
 
 #[derive(Debug)]
