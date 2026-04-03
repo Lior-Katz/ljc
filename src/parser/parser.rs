@@ -405,7 +405,24 @@ impl Parser {
     }
 
     fn postfix_expression(&mut self) -> Result<Expression, ParseError> {
-        self.primary()
+        let mut expression = self
+            .primary().or_else(|_| self
+            .expression_name().map(|name| Expression::Name(name)))?;
+
+        // the semantic structure doesn't actually allow multiple consecutive postfix operators
+        // but the grammar is defined in a way that does.
+        // the openJDK parser also allows multiple, maybe it helps in error diagnostics
+        // maybe we can get away without this loop.
+        loop {
+            if self.accept(Token::Increment) {
+                expression = Expression::PostIncrement(Box::new(expression));
+            } else if self.accept(Token::Decrement) {
+                expression = Expression::PostDecrement(Box::new(expression));
+            } else {
+                break;
+            }
+        }
+        Ok(expression)
     }
 
     fn primary(&mut self) -> Result<Expression, ParseError> {

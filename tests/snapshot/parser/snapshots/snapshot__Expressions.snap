@@ -3,26 +3,36 @@ source: tests/snapshot/snapshot_test.rs
 ---
 └──Compilation Unit
     └──Class Expressions [Public]
-        └──Method literal_expressions->void []
+        ├──Method literal_expressions->void []
+        │   └──Block
+        │       ├──Assignment
+        │       │   ├──x
+        │       │   └──int 5
+        │       ├──Assignment
+        │       │   ├──x
+        │       │   └──long 10
+        │       ├──Assignment
+        │       │   ├──x
+        │       │   └──boolean true
+        │       ├──Assignment
+        │       │   ├──x
+        │       │   └──boolean false
+        │       ├──Assignment
+        │       │   ├──x
+        │       │   └──char 'A'
+        │       ├──Assignment
+        │       │   ├──x
+        │       │   └──String "abc"
+        │       └──Assignment
+        │           ├──x
+        │           └──null
+        └──Method unary_operators->void []
             └──Block
                 ├──Assignment
                 │   ├──x
-                │   └──int 5
-                ├──Assignment
-                │   ├──x
-                │   └──long 10
-                ├──Assignment
-                │   ├──x
-                │   └──boolean true
-                ├──Assignment
-                │   ├──x
-                │   └──boolean false
-                ├──Assignment
-                │   ├──x
-                │   └──char 'A'
-                ├──Assignment
-                │   ├──x
-                │   └──String "abc"
+                │   └──PostIncrement
+                │       └──x
                 └──Assignment
                     ├──x
-                    └──null
+                    └──PostDecrement
+                        └──x

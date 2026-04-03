@@ -99,6 +99,8 @@ pub enum Expression {
         lhs: LeftHandSide,
         rhs: Box<Expression>,
     },
+    PostIncrement(Box<Expression>),
+    PostDecrement(Box<Expression>),
 }
 
 #[derive(Debug, Clone)]

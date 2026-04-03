@@ -8,4 +8,9 @@ public class Expressions {
         x = "abc";
         x = null;
     }
+
+    void unary_operators() {
+        x = x++;
+        x = x--;
+    }
 }

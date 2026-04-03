@@ -277,6 +277,14 @@ impl AstNode for Expression {
                 <LeftHandSide as Into<Expression>>::into(lhs.clone()).fmt_tree(f, &new_prefix, false)?;
                 rhs.fmt_tree(f, &new_prefix, true)
             }
+            Expression::PostIncrement(e) => {
+                writeln!(f, "{line_prefix}PostIncrement")?;
+                e.fmt_tree(f, &new_prefix, true)
+            }
+            Expression::PostDecrement(e) => {
+                writeln!(f, "{line_prefix}PostDecrement")?;
+                e.fmt_tree(f, &new_prefix, true)
+            }
         }
     }
 }
