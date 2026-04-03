@@ -36,7 +36,12 @@ source: tests/snapshot/snapshot_test.rs
                 │   ├──x
                 │   └──PostDecrement
                 │       └──x
+                ├──Assignment
+                │   ├──x
+                │   └──BitwiseComplement
+                │       └──int 100
                 └──Assignment
                     ├──x
-                    └──BitwiseComplement
-                        └──int 100
+                    └──LogicalNot
+                        └──LogicalNot
+                            └──boolean false

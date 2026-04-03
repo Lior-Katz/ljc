@@ -13,5 +13,6 @@ public class Expressions {
         x = x++;
         x = x--;
         x = ~100;
+        x = !!false;
     }
 }

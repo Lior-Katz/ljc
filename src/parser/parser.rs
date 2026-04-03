@@ -403,6 +403,8 @@ impl Parser {
     fn unary_not_plus_minus_expression(&mut self) -> Result<Expression, ParseError> {
         if self.accept(Token::Tilde) {
             Ok(Expression::BitwiseComplement(Box::new(self.unary_expression()?)))
+        } else if self.accept(Token::ExclamationMark) {
+            Ok(Expression::LogicalNot(Box::new(self.unary_expression()?)))
         } else {
             self.postfix_expression()
         }

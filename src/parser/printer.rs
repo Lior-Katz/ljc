@@ -289,6 +289,10 @@ impl AstNode for Expression {
                 writeln!(f, "{line_prefix}BitwiseComplement")?;
                 e.fmt_tree(f, &new_prefix, true)
             }
+            Expression::LogicalNot(e) => {
+                writeln!(f, "{line_prefix}LogicalNot")?;
+                e.fmt_tree(f, &new_prefix, true)
+            }
         }
     }
 }
