@@ -101,6 +101,8 @@ pub enum Expression {
     },
     PostIncrement(Box<Expression>),
     PostDecrement(Box<Expression>),
+    PreIncrement(Box<Expression>),
+    PreDecrement(Box<Expression>),
     BitwiseComplement(Box<Expression>),
     LogicalNot(Box<Expression>),
     UnaryPlus(Box<Expression>),

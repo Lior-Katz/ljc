@@ -38,6 +38,14 @@ source: tests/snapshot/snapshot_test.rs
                 │       └──x
                 ├──Assignment
                 │   ├──x
+                │   └──PreIncrement
+                │       └──x
+                ├──Assignment
+                │   ├──x
+                │   └──PreDecrement
+                │       └──x
+                ├──Assignment
+                │   ├──x
                 │   └──BitwiseComplement
                 │       └──int 100
                 ├──Assignment

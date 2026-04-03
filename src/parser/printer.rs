@@ -285,6 +285,14 @@ impl AstNode for Expression {
                 writeln!(f, "{line_prefix}PostDecrement")?;
                 e.fmt_tree(f, &new_prefix, true)
             }
+            Expression::PreIncrement(e) => {
+                writeln!(f, "{line_prefix}PreIncrement")?;
+                e.fmt_tree(f, &new_prefix, true)
+            }
+            Expression::PreDecrement(e) => {
+                writeln!(f, "{line_prefix}PreDecrement")?;
+                e.fmt_tree(f, &new_prefix, true)
+            }
             Expression::BitwiseComplement(e) => {
                 writeln!(f, "{line_prefix}BitwiseComplement")?;
                 e.fmt_tree(f, &new_prefix, true)

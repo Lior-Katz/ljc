@@ -405,6 +405,10 @@ impl Parser {
             Ok(Expression::UnaryPlus(Box::new(self.unary_expression()?)))
         } else if self.accept(Token::Minus) {
             Ok(Expression::UnaryMinus(Box::new(self.unary_expression()?)))
+        } else if self.accept(Token::Increment) {
+            Ok(Expression::PreIncrement(Box::new(self.unary_expression()?)))
+        } else if self.accept(Token::Decrement) {
+            Ok(Expression::PreDecrement(Box::new(self.unary_expression()?)))
         } else {
             self.postfix_expression()
         }
