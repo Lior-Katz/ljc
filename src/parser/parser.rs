@@ -2,12 +2,26 @@ use crate::lexer::{LexError, Token};
 use crate::lexer::{Tokens, lex_single_file};
 use crate::parser::ast::{
     ClassBody, ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration, ClassModifier,
-    CompilationUnit, FormalParameter, Identifier, MethodBody, MethodDeclaration, MethodModifiers,
-    MethodResult, NormalClassDeclaration, Program, Statement, TopLevelClassOrInterfaceDeclaration,
-    Type, VariableDeclaratorId,
+    CompilationUnit, Expression, FormalParameter, Identifier, LeftHandSide, MethodBody,
+    MethodDeclaration, MethodModifiers, MethodResult, NormalClassDeclaration, Program, Statement,
+    TopLevelClassOrInterfaceDeclaration, Type, VariableDeclaratorId,
 };
 use crate::parser::error::ParseError;
 use std::path::Path;
+
+macro_rules! accept_with_value {
+    ($self:expr, $variant:path) => {{
+        if let Ok($variant(_)) = $self.peek() {
+            if let $variant(v) = $self.next()? {
+                Ok(v)
+            } else {
+                unreachable!()
+            }
+        } else {
+            Err(ParseError::NoProduction)
+        }
+    }};
+}
 
 pub fn parse_single_file(path: &Path) -> Result<Program, ParseError> {
     let mut parser = Parser::new(path).unwrap();
@@ -54,6 +68,26 @@ impl Parser {
             }
             _ => false,
         }
+    }
+
+    fn integer_literal(&mut self) -> Result<u64, ParseError> {
+        accept_with_value!(self, Token::IntegerLiteral)
+    }
+
+    fn long_literal(&mut self) -> Result<u64, ParseError> {
+        accept_with_value!(self, Token::LongLiteral)
+    }
+
+    fn boolean_literal(&mut self) -> Result<bool, ParseError> {
+        accept_with_value!(self, Token::BooleanLiteral)
+    }
+
+    fn char_literal(&mut self) -> Result<char, ParseError> {
+        accept_with_value!(self, Token::CharLiteral)
+    }
+
+    fn string_literal(&mut self) -> Result<String, ParseError> {
+        accept_with_value!(self, Token::StringLiteral)
     }
 
     fn assert(&mut self, desired: Token) -> Result<(), ParseError> {
@@ -129,13 +163,7 @@ impl Parser {
     }
 
     fn identifier(&mut self) -> Result<Identifier, ParseError> {
-        // FIXME: should clean this up
-        if let Ok(Token::Id(_)) = self.peek() {
-            if let Token::Id(id) = self.next()? {
-                return Ok(id);
-            }
-        }
-        Err(ParseError::NoProduction)
+        accept_with_value!(self, Token::Id)
     }
 
     fn class_body(&mut self) -> Result<ClassBody, ParseError> {
@@ -275,16 +303,152 @@ impl Parser {
 
     fn statement_without_trailing_substatement(&mut self) -> Result<Statement, ParseError> {
         self.empty_statement()
+            .or_else(|_| self.expression_statement())
     }
 
     fn empty_statement(&mut self) -> Result<Statement, ParseError> {
         self.assert(Token::Semicolon)?;
         Ok(Statement::EmptyStatement)
     }
+
+    fn expression_statement(&mut self) -> Result<Statement, ParseError> {
+        let expression = self.statement_expression()?;
+        self.assert(Token::Semicolon)?;
+        Ok(Statement::ExpressionStatement(expression))
+    }
+
+    fn statement_expression(&mut self) -> Result<Expression, ParseError> {
+        self.assignment()
+    }
+
+    fn assignment(&mut self) -> Result<Expression, ParseError> {
+        let lhs = self.left_hand_side()?;
+        let op = self.assignment_operator()?;
+        let rhs = self.expression()?;
+        let expression = op.to_expr(lhs.clone(), rhs);
+        Ok(Expression::Assignment {
+            lhs,
+            rhs: Box::new(expression),
+        })
+    }
+
+    fn left_hand_side(&mut self) -> Result<LeftHandSide, ParseError> {
+        Ok(LeftHandSide::ExpressionName(self.expression_name()?))
+    }
+
+    fn assignment_operator(&mut self) -> Result<AssignmentOperator, ParseError> {
+        if self.accept(Token::Assign) {
+            Ok(AssignmentOperator::Identity)
+        } else {
+            Err(ParseError::NoProduction)
+        }
+    }
+
+    fn expression(&mut self) -> Result<Expression, ParseError> {
+        self.assignment_expression()
+    }
+
+    fn assignment_expression(&mut self) -> Result<Expression, ParseError> {
+        self.conditional_expression()
+    }
+
+    fn conditional_expression(&mut self) -> Result<Expression, ParseError> {
+        self.conditional_or_expression()
+    }
+
+    fn conditional_or_expression(&mut self) -> Result<Expression, ParseError> {
+        self.conditional_and_expression()
+    }
+
+    fn conditional_and_expression(&mut self) -> Result<Expression, ParseError> {
+        self.inclusive_or_expression()
+    }
+
+    fn inclusive_or_expression(&mut self) -> Result<Expression, ParseError> {
+        self.exclusive_or_expression()
+    }
+
+    fn exclusive_or_expression(&mut self) -> Result<Expression, ParseError> {
+        self.and_expression()
+    }
+
+    fn and_expression(&mut self) -> Result<Expression, ParseError> {
+        self.equality_expression()
+    }
+
+    fn equality_expression(&mut self) -> Result<Expression, ParseError> {
+        self.relational_expression()
+    }
+
+    fn relational_expression(&mut self) -> Result<Expression, ParseError> {
+        self.shift_expression()
+    }
+
+    fn shift_expression(&mut self) -> Result<Expression, ParseError> {
+        self.additive_expression()
+    }
+
+    fn additive_expression(&mut self) -> Result<Expression, ParseError> {
+        self.multiplicative_expression()
+    }
+
+    fn multiplicative_expression(&mut self) -> Result<Expression, ParseError> {
+        self.unary_expression()
+    }
+
+    fn unary_expression(&mut self) -> Result<Expression, ParseError> {
+        self.unary_not_plus_minus_expression()
+    }
+
+    fn unary_not_plus_minus_expression(&mut self) -> Result<Expression, ParseError> {
+        self.postfix_expression()
+    }
+
+    fn postfix_expression(&mut self) -> Result<Expression, ParseError> {
+        self.primary()
+    }
+
+    fn primary(&mut self) -> Result<Expression, ParseError> {
+        self.primary_no_new_array()
+    }
+
+    fn primary_no_new_array(&mut self) -> Result<Expression, ParseError> {
+        self
+            .integer_literal().map(|v| Expression::IntegerLiteral(v)).or_else(|_| self
+            .long_literal().map(|v| Expression::LongLiteral(v))).or_else(|_| self
+            .boolean_literal().map(|v| Expression::BooleanLiteral(v))).or_else(|_| self
+            .char_literal().map(|v| Expression::CharLiteral(v))).or_else(|_| self
+            .string_literal().map(|v| Expression::StringLiteral(v))).or_else(|_| self
+            .accept(Token::NullLiteral).then_some(Expression::NullLiteral).ok_or(ParseError::NoProduction))
+    }
+
+    fn expression_name(&mut self) -> Result<Identifier, ParseError> {
+        self.identifier()
+    }
 }
 
 impl From<LexError> for ParseError {
     fn from(_e: LexError) -> Self {
         ParseError::NoProduction
+    }
+}
+
+enum AssignmentOperator {
+    Identity,
+}
+
+impl Into<Expression> for LeftHandSide {
+    fn into(self) -> Expression {
+        match self {
+            LeftHandSide::ExpressionName(id) => Expression::Name(id),
+        }
+    }
+}
+
+impl AssignmentOperator {
+    fn to_expr(&self, _lhs: LeftHandSide, rhs: Expression) -> Expression {
+        match self {
+            AssignmentOperator::Identity => rhs,
+        }
     }
 }

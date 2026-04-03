@@ -83,6 +83,27 @@ pub enum MethodBody {
 #[derive(Debug)]
 pub enum Statement {
     EmptyStatement,
+    ExpressionStatement(Expression),
+}
+
+#[derive(Debug)]
+pub enum Expression {
+    IntegerLiteral(u64),
+    LongLiteral(u64),
+    BooleanLiteral(bool),
+    CharLiteral(char),
+    StringLiteral(String),
+    NullLiteral,
+    Name(Identifier),
+    Assignment {
+        lhs: LeftHandSide,
+        rhs: Box<Expression>,
+    },
+}
+
+#[derive(Debug, Clone)]
+pub enum LeftHandSide {
+    ExpressionName(Identifier),
 }
 
 #[derive(Debug)]

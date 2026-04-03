@@ -1,6 +1,6 @@
 use std::fmt;
 use std::fmt::{Display, Formatter};
-use crate::parser::ast::{ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration, CompilationUnit, FormalParameter, MethodBody, MethodDeclaration, MethodResult, NormalClassDeclaration, Statement, TopLevelClassOrInterfaceDeclaration, Type};
+use crate::parser::ast::{ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration, CompilationUnit, Expression, FormalParameter, LeftHandSide, MethodBody, MethodDeclaration, MethodResult, NormalClassDeclaration, Statement, TopLevelClassOrInterfaceDeclaration, Type};
 
 pub trait AstNode{
     // fn to_string(&self, prefix: String, is_last: bool) -> String;
@@ -252,6 +252,30 @@ impl AstNode for Statement {
         match self {
             Statement::EmptyStatement => {
                 writeln!(f, "{line_prefix}EmptyStatement")
+            },
+            Statement::ExpressionStatement(e) => {
+                e.fmt_tree(f, &prefix, is_last)
+            }
+        }
+    }
+}
+
+impl AstNode for Expression {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        let (line_prefix, new_prefix) = branch(&prefix, is_last);
+
+        match self {
+            Expression::IntegerLiteral(v) => writeln!(f, "{line_prefix}int {}", v),
+            Expression::LongLiteral(v) => writeln!(f, "{line_prefix}long {}", v),
+            Expression::BooleanLiteral(v) => writeln!(f, "{line_prefix}boolean {}", v),
+            Expression::CharLiteral(v) => writeln!(f, "{line_prefix}char '{}'", v),
+            Expression::StringLiteral(v) => writeln!(f, "{line_prefix}String \"{}\"", v),
+            Expression::NullLiteral => writeln!(f, "{line_prefix}null"),
+            Expression::Name(v) => writeln!(f, "{line_prefix}{}", v),
+            Expression::Assignment { lhs, rhs } => {
+                writeln!(f, "{line_prefix}Assignment")?;
+                <LeftHandSide as Into<Expression>>::into(lhs.clone()).fmt_tree(f, &new_prefix, false)?;
+                rhs.fmt_tree(f, &new_prefix, true)
             }
         }
     }
