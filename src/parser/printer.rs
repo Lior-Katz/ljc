@@ -293,6 +293,14 @@ impl AstNode for Expression {
                 writeln!(f, "{line_prefix}LogicalNot")?;
                 e.fmt_tree(f, &new_prefix, true)
             }
+            Expression::UnaryPlus(e) => {
+                writeln!(f, "{line_prefix}UnaryPlus")?;
+                e.fmt_tree(f, &new_prefix, true)
+            }
+            Expression::UnaryMinus(e) => {
+                writeln!(f, "{line_prefix}UnaryMinus")?;
+                e.fmt_tree(f, &new_prefix, true)
+            }
         }
     }
 }

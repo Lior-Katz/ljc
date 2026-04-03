@@ -14,5 +14,7 @@ public class Expressions {
         x = x--;
         x = ~100;
         x = !!false;
+        x = +3;
+        x = -3;
     }
 }

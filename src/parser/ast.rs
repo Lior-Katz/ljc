@@ -103,6 +103,8 @@ pub enum Expression {
     PostDecrement(Box<Expression>),
     BitwiseComplement(Box<Expression>),
     LogicalNot(Box<Expression>),
+    UnaryPlus(Box<Expression>),
+    UnaryMinus(Box<Expression>),
 }
 
 #[derive(Debug, Clone)]

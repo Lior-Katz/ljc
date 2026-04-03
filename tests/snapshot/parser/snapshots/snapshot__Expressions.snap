@@ -40,8 +40,16 @@ source: tests/snapshot/snapshot_test.rs
                 │   ├──x
                 │   └──BitwiseComplement
                 │       └──int 100
+                ├──Assignment
+                │   ├──x
+                │   └──LogicalNot
+                │       └──LogicalNot
+                │           └──boolean false
+                ├──Assignment
+                │   ├──x
+                │   └──UnaryPlus
+                │       └──int 3
                 └──Assignment
                     ├──x
-                    └──LogicalNot
-                        └──LogicalNot
-                            └──boolean false
+                    └──UnaryMinus
+                        └──int 3
