@@ -401,7 +401,11 @@ impl Parser {
     }
 
     fn unary_not_plus_minus_expression(&mut self) -> Result<Expression, ParseError> {
-        self.postfix_expression()
+        if self.accept(Token::Tilde) {
+            Ok(Expression::BitwiseComplement(Box::new(self.unary_expression()?)))
+        } else {
+            self.postfix_expression()
+        }
     }
 
     fn postfix_expression(&mut self) -> Result<Expression, ParseError> {

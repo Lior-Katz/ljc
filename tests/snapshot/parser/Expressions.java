@@ -12,5 +12,6 @@ public class Expressions {
     void unary_operators() {
         x = x++;
         x = x--;
+        x = ~100;
     }
 }

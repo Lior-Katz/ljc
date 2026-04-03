@@ -32,7 +32,11 @@ source: tests/snapshot/snapshot_test.rs
                 │   ├──x
                 │   └──PostIncrement
                 │       └──x
+                ├──Assignment
+                │   ├──x
+                │   └──PostDecrement
+                │       └──x
                 └──Assignment
                     ├──x
-                    └──PostDecrement
-                        └──x
+                    └──BitwiseComplement
+                        └──int 100
