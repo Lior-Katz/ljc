@@ -112,6 +112,8 @@ pub enum Expression {
 
 #[derive(Debug)]
 pub enum BinOp {
+    Add,
+    Subtract,
     Multiply,
     Divide,
     Modulo,

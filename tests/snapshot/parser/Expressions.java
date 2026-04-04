@@ -31,11 +31,28 @@ public class Expressions {
         x = 8 % 4 % 2;
         x = 8 * 4 / 2 % 3;
 
+        // Additive
+        x = 5 - 3 - 1;
+        x = 5 + 3 + 1;
+        x = 5 + 3 - 1;
+
+
+        // =======================
+        // Adjacent precedence
+        // =======================
+
+        // Multiplicative vs Additive
+        x = 2 + 3 * 4;
+        x = 2 * 3 + 4;
+
+
         // =======================
         // Unary interaction
         // =======================
 
         x = -5 * 3;
         x = 5 * -3;
+        x = -5 + -3;
+        x = 5 + -3 * 2;
     }
 }

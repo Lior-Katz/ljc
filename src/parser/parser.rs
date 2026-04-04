@@ -420,7 +420,15 @@ impl Parser {
     }
 
     fn additive_expression(&mut self) -> Result<Expression, ParseError> {
-        self.multiplicative_expression()
+        self.left_associative_binary_operation(
+            |this| this.multiplicative_expression(),
+            |this| {
+                accept_with_value!(this,
+                    Token::Plus => BinOp::Add,
+                    Token::Minus => BinOp::Subtract,
+                )
+            },
+        )
     }
 
     fn multiplicative_expression(&mut self) -> Result<Expression, ParseError> {

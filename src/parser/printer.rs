@@ -321,9 +321,11 @@ impl AstNode for Expression {
 impl AstNode for BinOp {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, _is_last: bool) -> fmt::Result {
         match self {
-            BinOp::Multiply => writeln!(f, "{prefix}*"),
-            BinOp::Divide => writeln!(f, "{prefix}/"),
-            BinOp::Modulo => writeln!(f, "{prefix}%"),
+            BinOp::Add => writeln!(f, "{prefix} +"),
+            BinOp::Subtract => writeln!(f, "{prefix} -"),
+            BinOp::Multiply => writeln!(f, "{prefix} *"),
+            BinOp::Divide => writeln!(f, "{prefix} /"),
+            BinOp::Modulo => writeln!(f, "{prefix} %"),
         }
     }
 }
