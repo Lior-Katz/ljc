@@ -120,6 +120,10 @@ pub enum BinOp {
     LeftShift,
     SignedRightShift,
     UnsignedRightShift,
+    Less,
+    Greater,
+    LessEqual,
+    GreaterEqual,
 }
 
 #[derive(Debug, Clone)]

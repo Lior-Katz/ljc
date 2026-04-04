@@ -412,7 +412,28 @@ impl Parser {
     }
 
     fn relational_expression(&mut self) -> Result<Expression, ParseError> {
-        self.shift_expression()
+        let mut expr = self.shift_expression()?;
+
+        // not using generic left_associative_binary_operation here
+        // because in this case there is another case - the instanceof operator
+        // which does not take symmetric operands.
+        loop {
+            if let Ok(op) = accept_with_value!(self,
+                Token::LessThan => BinOp::Less,
+                Token::GreaterThan => BinOp::Greater,
+                Token::LessThanOrEquals => BinOp::LessEqual,
+                Token::GreaterThanOrEquals => BinOp::GreaterEqual,
+            ) {
+                expr = Expression::BinaryOp {
+                    left: Box::new(expr),
+                    right: Box::new(self.shift_expression()?),
+                    op,
+                }
+            } else {
+                break;
+            }
+        }
+        Ok(expr)
     }
 
     fn shift_expression(&mut self) -> Result<Expression, ParseError> {

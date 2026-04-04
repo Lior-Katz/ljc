@@ -144,6 +144,26 @@ source: tests/snapshot/snapshot_test.rs
                 │       └──int 1
                 ├──Assignment
                 │   ├──x
+                │   └── <
+                │       ├──int 5
+                │       └──int 10
+                ├──Assignment
+                │   ├──x
+                │   └── >
+                │       ├──int 5
+                │       └──int 10
+                ├──Assignment
+                │   ├──x
+                │   └── <=
+                │       ├──int 5
+                │       └──int 10
+                ├──Assignment
+                │   ├──x
+                │   └── >=
+                │       ├──int 5
+                │       └──int 10
+                ├──Assignment
+                │   ├──x
                 │   └── +
                 │       ├──int 2
                 │       └── *
@@ -170,6 +190,20 @@ source: tests/snapshot/snapshot_test.rs
                 │       └── +
                 │           ├──int 3
                 │           └──int 1
+                ├──Assignment
+                │   ├──x
+                │   └── <
+                │       ├── <<
+                │       │   ├──int 8
+                │       │   └──int 1
+                │       └──int 20
+                ├──Assignment
+                │   ├──x
+                │   └── <
+                │       ├──int 8
+                │       └── <<
+                │           ├──int 1
+                │           └──int 4
                 ├──Assignment
                 │   ├──x
                 │   └── <<

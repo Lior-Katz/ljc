@@ -329,6 +329,10 @@ impl AstNode for BinOp {
             BinOp::LeftShift => writeln!(f, "{prefix} <<"),
             BinOp::SignedRightShift => writeln!(f, "{prefix} >>"),
             BinOp::UnsignedRightShift => writeln!(f, "{prefix} >>>"),
+            BinOp::Less => writeln!(f, "{prefix} <"),
+            BinOp::Greater => writeln!(f, "{prefix} >"),
+            BinOp::LessEqual => writeln!(f, "{prefix} <="),
+            BinOp::GreaterEqual => writeln!(f, "{prefix} >="),
         }
     }
 }

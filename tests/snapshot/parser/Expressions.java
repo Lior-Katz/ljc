@@ -42,6 +42,12 @@ public class Expressions {
         x = 16 >>> 2 >>> 1;
         x = 16 << 2 >> 1;
 
+        // Relational
+        x = 5 < 10;
+        x = 5 > 10;
+        x = 5 <= 10;
+        x = 5 >= 10;
+
 
         // =======================
         // Adjacent precedence
@@ -55,6 +61,9 @@ public class Expressions {
         x = 2 + 3 << 1;
         x = 2 << 3 + 1;
 
+        // Shift vs Relational
+        x = 8 << 1 < 20;
+        x = 8 < 1 << 4;
 
         // =======================
         // Multi-level chains
