@@ -388,11 +388,25 @@ impl Parser {
     }
 
     fn conditional_or_expression(&mut self) -> Result<Expression, ParseError> {
-        self.conditional_and_expression()
+        self.left_associative_binary_operation(
+            |this| this.conditional_and_expression(),
+            |this| {
+                accept_with_value!(this,
+                    Token::LogicalOr => BinOp::LogicalOr
+                )
+            },
+        )
     }
 
     fn conditional_and_expression(&mut self) -> Result<Expression, ParseError> {
-        self.inclusive_or_expression()
+        self.left_associative_binary_operation(
+            |this| this.inclusive_or_expression(),
+            |this| {
+                accept_with_value!(this,
+                    Token::LogicalAnd => BinOp::LogicalAnd
+                )
+            },
+        )
     }
 
     fn inclusive_or_expression(&mut self) -> Result<Expression, ParseError> {

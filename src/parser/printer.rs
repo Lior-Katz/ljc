@@ -338,6 +338,8 @@ impl AstNode for BinOp {
             BinOp::BitwiseAnd => writeln!(f, "{prefix} &"),
             BinOp::BitwiseXor => writeln!(f, "{prefix} ^"),
             BinOp::BitwiseOr => writeln!(f, "{prefix} |"),
+            BinOp::LogicalAnd => writeln!(f, "{prefix} &&"),
+            BinOp::LogicalOr => writeln!(f, "{prefix} ||"),
         }
     }
 }

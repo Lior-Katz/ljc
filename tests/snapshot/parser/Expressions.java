@@ -57,6 +57,10 @@ public class Expressions {
         x = 5 ^ 3 ^ 1;
         x = 5 | 3 | 1;
 
+        // Logical
+        x = true && false && true;
+        x = true || false || true;
+
 
         // =======================
         // Adjacent precedence
@@ -89,6 +93,13 @@ public class Expressions {
         x = 5 ^ 3 | 1;
         x = 5 | 3 ^ 1;
 
+        // Bitwise OR vs Logical AND
+        x = 1 | 0 && 0;
+
+        // Logical AND vs OR
+        x = true && false || true;
+        x = true || false && true;
+
 
         // =======================
         // Multi-level chains
@@ -96,6 +107,8 @@ public class Expressions {
 
         x = 2 + 3 * 4 << 1;
         x = 8 << 2 + 1 * 3;
+        x = 5 < 10 && 3 + 4 > 6;
+        x = 5 == 5 || 3 * 2 < 4;
 
 
         // =======================

@@ -195,6 +195,20 @@ source: tests/snapshot/snapshot_test.rs
                 │       └──int 1
                 ├──Assignment
                 │   ├──x
+                │   └── &&
+                │       ├── &&
+                │       │   ├──boolean true
+                │       │   └──boolean false
+                │       └──boolean true
+                ├──Assignment
+                │   ├──x
+                │   └── ||
+                │       ├── ||
+                │       │   ├──boolean true
+                │       │   └──boolean false
+                │       └──boolean true
+                ├──Assignment
+                │   ├──x
                 │   └── +
                 │       ├──int 2
                 │       └── *
@@ -286,6 +300,27 @@ source: tests/snapshot/snapshot_test.rs
                 │           └──int 1
                 ├──Assignment
                 │   ├──x
+                │   └── &&
+                │       ├── |
+                │       │   ├──int 1
+                │       │   └──int 0
+                │       └──int 0
+                ├──Assignment
+                │   ├──x
+                │   └── ||
+                │       ├── &&
+                │       │   ├──boolean true
+                │       │   └──boolean false
+                │       └──boolean true
+                ├──Assignment
+                │   ├──x
+                │   └── ||
+                │       ├──boolean true
+                │       └── &&
+                │           ├──boolean false
+                │           └──boolean true
+                ├──Assignment
+                │   ├──x
                 │   └── <<
                 │       ├── +
                 │       │   ├──int 2
@@ -302,6 +337,28 @@ source: tests/snapshot/snapshot_test.rs
                 │           └── *
                 │               ├──int 1
                 │               └──int 3
+                ├──Assignment
+                │   ├──x
+                │   └── &&
+                │       ├── <
+                │       │   ├──int 5
+                │       │   └──int 10
+                │       └── >
+                │           ├── +
+                │           │   ├──int 3
+                │           │   └──int 4
+                │           └──int 6
+                ├──Assignment
+                │   ├──x
+                │   └── ||
+                │       ├── ==
+                │       │   ├──int 5
+                │       │   └──int 5
+                │       └── <
+                │           ├── *
+                │           │   ├──int 3
+                │           │   └──int 2
+                │           └──int 4
                 ├──Assignment
                 │   ├──x
                 │   └── *

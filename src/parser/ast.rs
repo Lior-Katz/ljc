@@ -129,6 +129,8 @@ pub enum BinOp {
     BitwiseAnd,
     BitwiseXor,
     BitwiseOr,
+    LogicalAnd,
+    LogicalOr,
 }
 
 #[derive(Debug, Clone)]
