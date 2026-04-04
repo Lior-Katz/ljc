@@ -15,6 +15,7 @@ class Statements {
 
         // RHS precedence
         a = b + c * d;
+        a = (b + c) * d;
 
 
         // =======================
@@ -41,6 +42,7 @@ class Statements {
         // =======================
 
         a += b + c * d;
+        a *= (b + c);
         a <<= b + 1;
 
 

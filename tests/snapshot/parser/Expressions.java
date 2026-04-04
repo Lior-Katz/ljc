@@ -119,6 +119,16 @@ public class Expressions {
         x = 5 * -3;
         x = -5 + -3;
         x = 5 + -3 * 2;
+
+
+        // =======================
+        // Parentheses override
+        // =======================
+
+        x = (2 + 3) * 4;
+        x = 2 + (3 * 4);
+        x = (2 << 3) + 1;
+        x = 2 << (3 + 1);
     }
 
     void conditional_expressions() {

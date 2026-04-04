@@ -596,6 +596,12 @@ impl Parser {
             .char_literal().map(|v| Expression::CharLiteral(v))).or_else(|_| self
             .string_literal().map(|v| Expression::StringLiteral(v))).or_else(|_| self
             .accept(Token::NullLiteral).then_some(Expression::NullLiteral).ok_or(ParseError::NoProduction))
+            .or_else(|_| {
+                self.assert(Token::LeftParen)?;
+                let expr = self.expression()?;
+                self.assert(Token::RightParen)?;
+                Ok(expr)
+            })
     }
 
     fn expression_name(&mut self) -> Result<Identifier, ParseError> {

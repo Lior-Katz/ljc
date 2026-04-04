@@ -378,14 +378,42 @@ source: tests/snapshot/snapshot_test.rs
         │       │       │   └──int 5
         │       │       └──UnaryMinus
         │       │           └──int 3
+        │       ├──Assignment =
+        │       │   ├──x
+        │       │   └── +
+        │       │       ├──int 5
+        │       │       └── *
+        │       │           ├──UnaryMinus
+        │       │           │   └──int 3
+        │       │           └──int 2
+        │       ├──Assignment =
+        │       │   ├──x
+        │       │   └── *
+        │       │       ├── +
+        │       │       │   ├──int 2
+        │       │       │   └──int 3
+        │       │       └──int 4
+        │       ├──Assignment =
+        │       │   ├──x
+        │       │   └── +
+        │       │       ├──int 2
+        │       │       └── *
+        │       │           ├──int 3
+        │       │           └──int 4
+        │       ├──Assignment =
+        │       │   ├──x
+        │       │   └── +
+        │       │       ├── <<
+        │       │       │   ├──int 2
+        │       │       │   └──int 3
+        │       │       └──int 1
         │       └──Assignment =
         │           ├──x
-        │           └── +
-        │               ├──int 5
-        │               └── *
-        │                   ├──UnaryMinus
-        │                   │   └──int 3
-        │                   └──int 2
+        │           └── <<
+        │               ├──int 2
+        │               └── +
+        │                   ├──int 3
+        │                   └──int 1
         └──Method conditional_expressions->void []
             └──Block
                 ├──Assignment =

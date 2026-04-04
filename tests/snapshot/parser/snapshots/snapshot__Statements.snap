@@ -23,6 +23,13 @@ source: tests/snapshot/snapshot_test.rs
                 │       └── *
                 │           ├──c
                 │           └──d
+                ├──Assignment =
+                │   ├──a
+                │   └── *
+                │       ├── +
+                │       │   ├──b
+                │       │   └──c
+                │       └──d
                 ├──Assignment +=
                 │   ├──a
                 │   └──b
@@ -63,6 +70,11 @@ source: tests/snapshot/snapshot_test.rs
                 │       └── *
                 │           ├──c
                 │           └──d
+                ├──Assignment *=
+                │   ├──a
+                │   └── +
+                │       ├──b
+                │       └──c
                 ├──Assignment <<=
                 │   ├──a
                 │   └── +
