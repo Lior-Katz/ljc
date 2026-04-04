@@ -333,6 +333,8 @@ impl AstNode for BinOp {
             BinOp::Greater => writeln!(f, "{prefix} >"),
             BinOp::LessEqual => writeln!(f, "{prefix} <="),
             BinOp::GreaterEqual => writeln!(f, "{prefix} >="),
+            BinOp::Equal => writeln!(f, "{prefix} =="),
+            BinOp::NotEqual => writeln!(f, "{prefix} !="),
         }
     }
 }

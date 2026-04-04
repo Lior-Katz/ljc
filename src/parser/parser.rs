@@ -408,7 +408,15 @@ impl Parser {
     }
 
     fn equality_expression(&mut self) -> Result<Expression, ParseError> {
-        self.relational_expression()
+        self.left_associative_binary_operation(
+            |this| this.relational_expression(),
+            |this| {
+                accept_with_value!(this,
+                    Token::Equals => BinOp::Equal,
+                    Token::NotEquals => BinOp::NotEqual,
+                )
+            },
+        )
     }
 
     fn relational_expression(&mut self) -> Result<Expression, ParseError> {

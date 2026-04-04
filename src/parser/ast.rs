@@ -124,6 +124,8 @@ pub enum BinOp {
     Greater,
     LessEqual,
     GreaterEqual,
+    Equal,
+    NotEqual,
 }
 
 #[derive(Debug, Clone)]

@@ -164,6 +164,16 @@ source: tests/snapshot/snapshot_test.rs
                 │       └──int 10
                 ├──Assignment
                 │   ├──x
+                │   └── ==
+                │       ├──int 5
+                │       └──int 5
+                ├──Assignment
+                │   ├──x
+                │   └── !=
+                │       ├──int 5
+                │       └──int 5
+                ├──Assignment
+                │   ├──x
                 │   └── +
                 │       ├──int 2
                 │       └── *
@@ -204,6 +214,13 @@ source: tests/snapshot/snapshot_test.rs
                 │       └── <<
                 │           ├──int 1
                 │           └──int 4
+                ├──Assignment
+                │   ├──x
+                │   └── ==
+                │       ├── <
+                │       │   ├──int 5
+                │       │   └──int 10
+                │       └──boolean true
                 ├──Assignment
                 │   ├──x
                 │   └── <<
