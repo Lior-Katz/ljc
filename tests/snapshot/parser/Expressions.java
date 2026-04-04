@@ -36,6 +36,12 @@ public class Expressions {
         x = 5 + 3 + 1;
         x = 5 + 3 - 1;
 
+        // Shift
+        x = 16 << 2 << 1;
+        x = 16 >> 2 >> 1;
+        x = 16 >>> 2 >>> 1;
+        x = 16 << 2 >> 1;
+
 
         // =======================
         // Adjacent precedence
@@ -44,6 +50,18 @@ public class Expressions {
         // Multiplicative vs Additive
         x = 2 + 3 * 4;
         x = 2 * 3 + 4;
+
+        // Additive vs Shift
+        x = 2 + 3 << 1;
+        x = 2 << 3 + 1;
+
+
+        // =======================
+        // Multi-level chains
+        // =======================
+
+        x = 2 + 3 * 4 << 1;
+        x = 8 << 2 + 1 * 3;
 
 
         // =======================

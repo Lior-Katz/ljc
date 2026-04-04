@@ -326,6 +326,9 @@ impl AstNode for BinOp {
             BinOp::Multiply => writeln!(f, "{prefix} *"),
             BinOp::Divide => writeln!(f, "{prefix} /"),
             BinOp::Modulo => writeln!(f, "{prefix} %"),
+            BinOp::LeftShift => writeln!(f, "{prefix} <<"),
+            BinOp::SignedRightShift => writeln!(f, "{prefix} >>"),
+            BinOp::UnsignedRightShift => writeln!(f, "{prefix} >>>"),
         }
     }
 }

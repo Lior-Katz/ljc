@@ -117,6 +117,9 @@ pub enum BinOp {
     Multiply,
     Divide,
     Modulo,
+    LeftShift,
+    SignedRightShift,
+    UnsignedRightShift,
 }
 
 #[derive(Debug, Clone)]

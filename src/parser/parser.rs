@@ -416,7 +416,16 @@ impl Parser {
     }
 
     fn shift_expression(&mut self) -> Result<Expression, ParseError> {
-        self.additive_expression()
+        self.left_associative_binary_operation(
+            |this| this.additive_expression(),
+            |this| {
+                accept_with_value!(this,
+                    Token::LeftShift => BinOp::LeftShift,
+                    Token::SignedRightShift => BinOp::SignedRightShift,
+                    Token::UnsignedRightShift => BinOp::UnsignedRightShift,
+                )
+            },
+        )
     }
 
     fn additive_expression(&mut self) -> Result<Expression, ParseError> {
