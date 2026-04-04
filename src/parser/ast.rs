@@ -22,7 +22,7 @@ pub enum ClassDeclaration {
 pub struct NormalClassDeclaration {
     pub modifiers: Vec<ClassModifier>,
     pub identifier: TypeIdentifier,
-    pub body: ClassBody,
+    pub body: Vec<ClassBodyDeclaration>,
 }
 
 #[derive(Debug)]
@@ -30,10 +30,6 @@ pub enum ClassModifier {
     Public,
     Protected,
     Private,
-}
-#[derive(Debug)]
-pub struct ClassBody {
-    pub class_body_declarations: Vec<ClassBodyDeclaration>,
 }
 
 #[derive(Debug)]

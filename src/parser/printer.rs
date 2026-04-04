@@ -121,9 +121,9 @@ impl AstNode for NormalClassDeclaration {
         let (line_prefix, new_prefix) = branch(&prefix, is_last);
 
         writeln!(f, "{line_prefix}Class {} {:?}", self.identifier, self.modifiers)?;
-        let total = self.body.class_body_declarations.len();
+        let total = self.body.len();
 
-        for (i, decl) in self.body.class_body_declarations.iter().enumerate() {
+        for (i, decl) in self.body.iter().enumerate() {
             decl.fmt_tree(f, &new_prefix, i == total - 1)?;
         }
         Ok(())

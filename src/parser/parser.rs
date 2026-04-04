@@ -1,9 +1,9 @@
 use crate::lexer::{LexError, Token};
 use crate::lexer::{Tokens, lex_single_file};
 use crate::parser::ast::{
-    ClassBody, ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration, ClassModifier,
-    CompilationUnit, Expression, FormalParameter, Identifier, LeftHandSide, MethodBody,
-    MethodDeclaration, MethodModifiers, MethodResult, NormalClassDeclaration, Program, Statement,
+    ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration, ClassModifier, CompilationUnit,
+    Expression, FormalParameter, Identifier, LeftHandSide, MethodBody, MethodDeclaration,
+    MethodModifiers, MethodResult, NormalClassDeclaration, Program, Statement,
     TopLevelClassOrInterfaceDeclaration, Type, VariableDeclaratorId,
 };
 use crate::parser::error::ParseError;
@@ -166,10 +166,8 @@ impl Parser {
         accept_with_value!(self, Token::Id)
     }
 
-    fn class_body(&mut self) -> Result<ClassBody, ParseError> {
-        Ok(ClassBody {
-            class_body_declarations: self.zero_or_more(Self::class_body_declaration),
-        })
+    fn class_body(&mut self) -> Result<Vec<ClassBodyDeclaration>, ParseError> {
+        Ok(self.zero_or_more(Self::class_body_declaration))
     }
 
     fn class_body_declaration(&mut self) -> Result<ClassBodyDeclaration, ParseError> {
