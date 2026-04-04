@@ -108,6 +108,11 @@ pub enum Expression {
         right: Box<Expression>,
         op: BinOp,
     },
+    ConditionalExpression {
+        condition: Box<Expression>,
+        if_true: Box<Expression>,
+        if_false: Box<Expression>,
+    }
 }
 
 #[derive(Debug)]

@@ -363,7 +363,19 @@ impl Parser {
     }
 
     fn conditional_expression(&mut self) -> Result<Expression, ParseError> {
-        self.conditional_or_expression()
+        let condition = self.conditional_or_expression()?;
+        if self.accept(Token::QuestionMark) {
+            let if_true = self.expression()?;
+            self.assert(Token::Colon)?;
+            let if_false = self.conditional_expression()?;
+            Ok(Expression::ConditionalExpression {
+                condition: Box::new(condition),
+                if_true: Box::new(if_true),
+                if_false: Box::new(if_false),
+            })
+        } else {
+            Ok(condition)
+        }
     }
 
     fn left_associative_binary_operation<F, G>(

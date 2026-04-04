@@ -314,6 +314,12 @@ impl AstNode for Expression {
                 left.fmt_tree(f, &new_prefix, false)?;
                 right.fmt_tree(f, &new_prefix, true)
             }
+            Expression::ConditionalExpression { condition, if_true, if_false } => {
+                writeln!(f, "{line_prefix}ConditionalExpression")?;
+                condition.fmt_tree(f, &new_prefix, false)?;
+                if_true.fmt_tree(f, &new_prefix, false)?;
+                if_false.fmt_tree(f, &new_prefix, true)
+            }
         }
     }
 }

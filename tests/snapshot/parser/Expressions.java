@@ -120,4 +120,44 @@ public class Expressions {
         x = -5 + -3;
         x = 5 + -3 * 2;
     }
+
+    void conditional_expressions() {
+        x = true ? 1 : 2;
+        x = false ? 1 : 2;
+
+        // should parse as: true ? 1 : (false ? 2 : 3)
+        x = true ? 1 : false ? 2 : 3;
+
+        // should parse as: true ? (false ? 1 : 2) : 3
+        x = true ? false ? 1 : 2 : 3;
+
+        // condition is a logical expression
+        x = 1 < 2 ? 3 : 4;
+        x = true && false ? 1 : 2;
+        x = true || false ? 1 : 2;
+
+        // expect: true ? 2 : (3 + 1)
+        x = true ? 2 : 3 + 1;
+
+        // expect: (a < b) ? c : d + e
+        x = a < b ? c : d + e;
+
+        // expect: (a < b) ? c + d : e
+        x = a < b ? c + d : e;
+
+        x = a + b > c ? d * e : f / g;
+
+        x = true ? a + b * c : d << e;
+
+        // right-heavy nesting
+        // expect a ? b : (c ? d : (e ? f :g))
+        x = a ? b : c ? d : e ? f : g;
+
+        // mixed nesting
+        // expect a ? (b ? c : d) : (e ? f : g)
+        x = a ? b ? c : d : e ? f : g;
+
+        x = -1 > 0 ? -2 : -3;
+        x = true ? -a : -b;
+    }
 }
