@@ -103,6 +103,18 @@ pub enum Expression {
     LogicalNot(Box<Expression>),
     UnaryPlus(Box<Expression>),
     UnaryMinus(Box<Expression>),
+    BinaryOp {
+        left: Box<Expression>,
+        right: Box<Expression>,
+        op: BinOp,
+    },
+}
+
+#[derive(Debug)]
+pub enum BinOp {
+    Multiply,
+    Divide,
+    Modulo,
 }
 
 #[derive(Debug, Clone)]

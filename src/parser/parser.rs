@@ -1,12 +1,13 @@
 use crate::lexer::{LexError, Token};
 use crate::lexer::{Tokens, lex_single_file};
 use crate::parser::ast::{
-    ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration, ClassModifier, CompilationUnit,
-    Expression, FormalParameter, Identifier, LeftHandSide, MethodBody, MethodDeclaration,
-    MethodModifiers, MethodResult, NormalClassDeclaration, Program, Statement,
+    BinOp, ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration, ClassModifier,
+    CompilationUnit, Expression, FormalParameter, Identifier, LeftHandSide, MethodBody,
+    MethodDeclaration, MethodModifiers, MethodResult, NormalClassDeclaration, Program, Statement,
     TopLevelClassOrInterfaceDeclaration, Type, VariableDeclaratorId,
 };
 use crate::parser::error::ParseError;
+
 use std::path::Path;
 
 macro_rules! accept_with_value {
@@ -18,6 +19,17 @@ macro_rules! accept_with_value {
                 unreachable!()
             }
         } else {
+            Err(ParseError::NoProduction)
+        }
+    }};
+
+    ($self:expr, $($token:expr => $result:expr),+ $(,)?) => {{
+        $(
+            if $self.accept($token) {
+                Ok($result)
+            } else
+        )+
+        {
             Err(ParseError::NoProduction)
         }
     }};
@@ -354,6 +366,27 @@ impl Parser {
         self.conditional_or_expression()
     }
 
+    fn left_associative_binary_operation<F, G>(
+        &mut self,
+        subexpression: F,
+        operation: G,
+    ) -> Result<Expression, ParseError>
+    where
+        F: Fn(&mut Self) -> Result<Expression, ParseError>,
+        G: Fn(&mut Self) -> Result<BinOp, ParseError>,
+    {
+        let mut expr = subexpression(self)?;
+
+        while let Ok(op) = operation(self) {
+            expr = Expression::BinaryOp {
+                left: Box::new(expr),
+                right: Box::new(subexpression(self)?),
+                op,
+            }
+        }
+        Ok(expr)
+    }
+
     fn conditional_or_expression(&mut self) -> Result<Expression, ParseError> {
         self.conditional_and_expression()
     }
@@ -391,7 +424,16 @@ impl Parser {
     }
 
     fn multiplicative_expression(&mut self) -> Result<Expression, ParseError> {
-        self.unary_expression()
+        self.left_associative_binary_operation(
+            |this| this.unary_expression(),
+            |this| {
+                accept_with_value!(this,
+                    Token::Multiply => BinOp::Multiply,
+                    Token::Divide   => BinOp::Divide,
+                    Token::Modulo   => BinOp::Modulo,
+                )
+            },
+        )
     }
 
     fn unary_expression(&mut self) -> Result<Expression, ParseError> {

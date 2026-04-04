@@ -26,38 +26,82 @@ source: tests/snapshot/snapshot_test.rs
         │       └──Assignment
         │           ├──x
         │           └──null
-        └──Method unary_operators->void []
+        ├──Method unary_operators->void []
+        │   └──Block
+        │       ├──Assignment
+        │       │   ├──x
+        │       │   └──PostIncrement
+        │       │       └──x
+        │       ├──Assignment
+        │       │   ├──x
+        │       │   └──PostDecrement
+        │       │       └──x
+        │       ├──Assignment
+        │       │   ├──x
+        │       │   └──PreIncrement
+        │       │       └──x
+        │       ├──Assignment
+        │       │   ├──x
+        │       │   └──PreDecrement
+        │       │       └──x
+        │       ├──Assignment
+        │       │   ├──x
+        │       │   └──BitwiseComplement
+        │       │       └──int 100
+        │       ├──Assignment
+        │       │   ├──x
+        │       │   └──LogicalNot
+        │       │       └──LogicalNot
+        │       │           └──boolean false
+        │       ├──Assignment
+        │       │   ├──x
+        │       │   └──UnaryPlus
+        │       │       └──int 3
+        │       └──Assignment
+        │           ├──x
+        │           └──UnaryMinus
+        │               └──int 3
+        └──Method binary_operators->void []
             └──Block
                 ├──Assignment
                 │   ├──x
-                │   └──PostIncrement
-                │       └──x
+                │   └── /
+                │       ├── /
+                │       │   ├──int 8
+                │       │   └──int 4
+                │       └──int 2
                 ├──Assignment
                 │   ├──x
-                │   └──PostDecrement
-                │       └──x
+                │   └── *
+                │       ├── *
+                │       │   ├──int 8
+                │       │   └──int 4
+                │       └──int 2
                 ├──Assignment
                 │   ├──x
-                │   └──PreIncrement
-                │       └──x
+                │   └── %
+                │       ├── %
+                │       │   ├──int 8
+                │       │   └──int 4
+                │       └──int 2
                 ├──Assignment
                 │   ├──x
-                │   └──PreDecrement
-                │       └──x
+                │   └── %
+                │       ├── /
+                │       │   ├── *
+                │       │   │   ├──int 8
+                │       │   │   └──int 4
+                │       │   └──int 2
+                │       └──int 3
                 ├──Assignment
                 │   ├──x
-                │   └──BitwiseComplement
-                │       └──int 100
-                ├──Assignment
-                │   ├──x
-                │   └──LogicalNot
-                │       └──LogicalNot
-                │           └──boolean false
-                ├──Assignment
-                │   ├──x
-                │   └──UnaryPlus
+                │   └── *
+                │       ├──UnaryMinus
+                │       │   └──int 5
                 │       └──int 3
                 └──Assignment
                     ├──x
-                    └──UnaryMinus
-                        └──int 3
+                    └── *
+                        ├──int 5
+                        └──UnaryMinus
+                            └──int 3

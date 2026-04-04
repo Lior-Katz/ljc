@@ -19,4 +19,23 @@ public class Expressions {
         x = +3;
         x = -3;
     }
+
+    void binary_operators() {
+        // =======================
+        // Associativity tests
+        // =======================
+
+        // Multiplicative
+        x = 8 / 4 / 2;
+        x = 8 * 4 * 2;
+        x = 8 % 4 % 2;
+        x = 8 * 4 / 2 % 3;
+
+        // =======================
+        // Unary interaction
+        // =======================
+
+        x = -5 * 3;
+        x = 5 * -3;
+    }
 }

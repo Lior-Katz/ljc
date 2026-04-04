@@ -1,6 +1,6 @@
 use std::fmt;
 use std::fmt::{Display, Formatter};
-use crate::parser::ast::{ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration, CompilationUnit, Expression, FormalParameter, LeftHandSide, MethodBody, MethodDeclaration, MethodResult, NormalClassDeclaration, Statement, TopLevelClassOrInterfaceDeclaration, Type};
+use crate::parser::ast::{BinOp, ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration, CompilationUnit, Expression, FormalParameter, LeftHandSide, MethodBody, MethodDeclaration, MethodResult, NormalClassDeclaration, Statement, TopLevelClassOrInterfaceDeclaration, Type};
 
 pub trait AstNode{
     // fn to_string(&self, prefix: String, is_last: bool) -> String;
@@ -309,6 +309,21 @@ impl AstNode for Expression {
                 writeln!(f, "{line_prefix}UnaryMinus")?;
                 e.fmt_tree(f, &new_prefix, true)
             }
+            Expression::BinaryOp { left, op, right } => {
+                op.fmt_tree(f, &line_prefix, is_last)?;
+                left.fmt_tree(f, &new_prefix, false)?;
+                right.fmt_tree(f, &new_prefix, true)
+            }
+        }
+    }
+}
+
+impl AstNode for BinOp {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, _is_last: bool) -> fmt::Result {
+        match self {
+            BinOp::Multiply => writeln!(f, "{prefix}*"),
+            BinOp::Divide => writeln!(f, "{prefix}/"),
+            BinOp::Modulo => writeln!(f, "{prefix}%"),
         }
     }
 }
