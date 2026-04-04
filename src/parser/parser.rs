@@ -396,15 +396,36 @@ impl Parser {
     }
 
     fn inclusive_or_expression(&mut self) -> Result<Expression, ParseError> {
-        self.exclusive_or_expression()
+        self.left_associative_binary_operation(
+            |this| this.exclusive_or_expression(),
+            |this| {
+                accept_with_value!(this,
+                    Token::BitwiseOr => BinOp::BitwiseOr
+                )
+            },
+        )
     }
 
     fn exclusive_or_expression(&mut self) -> Result<Expression, ParseError> {
-        self.and_expression()
+        self.left_associative_binary_operation(
+            |this| this.and_expression(),
+            |this| {
+                accept_with_value!(this,
+                    Token::BitwiseXor => BinOp::BitwiseXor
+                )
+            },
+        )
     }
 
     fn and_expression(&mut self) -> Result<Expression, ParseError> {
-        self.equality_expression()
+        self.left_associative_binary_operation(
+            |this| this.equality_expression(),
+            |this| {
+                accept_with_value!(this,
+                    Token::BitwiseAnd => BinOp::BitwiseAnd
+                )
+            },
+        )
     }
 
     fn equality_expression(&mut self) -> Result<Expression, ParseError> {

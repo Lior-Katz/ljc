@@ -126,6 +126,9 @@ pub enum BinOp {
     GreaterEqual,
     Equal,
     NotEqual,
+    BitwiseAnd,
+    BitwiseXor,
+    BitwiseOr,
 }
 
 #[derive(Debug, Clone)]

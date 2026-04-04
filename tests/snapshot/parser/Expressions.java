@@ -52,6 +52,11 @@ public class Expressions {
         x = 5 == 5;
         x = 5 != 5;
 
+        // Bitwise
+        x = 5 & 3 & 1;
+        x = 5 ^ 3 ^ 1;
+        x = 5 | 3 | 1;
+
 
         // =======================
         // Adjacent precedence
@@ -71,6 +76,18 @@ public class Expressions {
 
         // Relational vs Equality
         x = 5 < 10 == true;
+
+        // Equality vs Bitwise AND
+        x = 5 == 5 & 1;
+        x = 5 & 5 == 1;
+
+        // Bitwise AND vs XOR
+        x = 5 & 3 ^ 1;
+        x = 5 ^ 3 & 1;
+
+        // XOR vs OR
+        x = 5 ^ 3 | 1;
+        x = 5 | 3 ^ 1;
 
 
         // =======================
