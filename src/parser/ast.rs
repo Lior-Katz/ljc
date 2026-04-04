@@ -94,6 +94,7 @@ pub enum Expression {
     Assignment {
         lhs: LeftHandSide,
         rhs: Box<Expression>,
+        op: AssignmentOp,
     },
     PostIncrement(Box<Expression>),
     PostDecrement(Box<Expression>),
@@ -113,6 +114,22 @@ pub enum Expression {
         if_true: Box<Expression>,
         if_false: Box<Expression>,
     }
+}
+
+#[derive(Debug)]
+pub enum AssignmentOp {
+    Add,
+    Subtract,
+    Identity,
+    Multiply,
+    Divide,
+    Modulo,
+    LeftShift,
+    SignedRightShift,
+    UnsignedRightShift,
+    BitwiseAnd,
+    BitwiseXor,
+    BitwiseOr,
 }
 
 #[derive(Debug)]

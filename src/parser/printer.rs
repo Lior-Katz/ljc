@@ -1,6 +1,6 @@
 use std::fmt;
 use std::fmt::{Display, Formatter};
-use crate::parser::ast::{BinOp, ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration, CompilationUnit, Expression, FormalParameter, LeftHandSide, MethodBody, MethodDeclaration, MethodResult, NormalClassDeclaration, Statement, TopLevelClassOrInterfaceDeclaration, Type};
+use crate::parser::ast::{AssignmentOp, BinOp, ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration, CompilationUnit, Expression, FormalParameter, LeftHandSide, MethodBody, MethodDeclaration, MethodResult, NormalClassDeclaration, Statement, TopLevelClassOrInterfaceDeclaration, Type};
 
 pub trait AstNode{
     // fn to_string(&self, prefix: String, is_last: bool) -> String;
@@ -272,8 +272,8 @@ impl AstNode for Expression {
             Expression::StringLiteral(v) => writeln!(f, "{line_prefix}String \"{}\"", v),
             Expression::NullLiteral => writeln!(f, "{line_prefix}null"),
             Expression::Name(v) => writeln!(f, "{line_prefix}{}", v),
-            Expression::Assignment { lhs, rhs } => {
-                writeln!(f, "{line_prefix}Assignment")?;
+            Expression::Assignment { lhs, rhs, op } => {
+                writeln!(f, "{line_prefix}Assignment {op}")?;
                 <LeftHandSide as Into<Expression>>::into(lhs.clone()).fmt_tree(f, &new_prefix, false)?;
                 rhs.fmt_tree(f, &new_prefix, true)
             }
@@ -320,6 +320,25 @@ impl AstNode for Expression {
                 if_true.fmt_tree(f, &new_prefix, false)?;
                 if_false.fmt_tree(f, &new_prefix, true)
             }
+        }
+    }
+}
+
+impl Display for AssignmentOp {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            AssignmentOp::Identity => write!(f, "="),
+            AssignmentOp::Add => write!(f, "+="),
+            AssignmentOp::Subtract => write!(f, "-="),
+            AssignmentOp::Multiply => write!(f, "*="),
+            AssignmentOp::Divide => write!(f, "/="),
+            AssignmentOp::Modulo => write!(f, "%="),
+            AssignmentOp::LeftShift => write!(f, "<<="),
+            AssignmentOp::SignedRightShift => write!(f, ">>="),
+            AssignmentOp::UnsignedRightShift => write!(f, ">>>="),
+            AssignmentOp::BitwiseAnd => write!(f, "&="),
+            AssignmentOp::BitwiseXor => write!(f, "^="),
+            AssignmentOp::BitwiseOr => write!(f, "|="),
         }
     }
 }

@@ -1,10 +1,10 @@
 use crate::lexer::{LexError, Token};
 use crate::lexer::{Tokens, lex_single_file};
 use crate::parser::ast::{
-    BinOp, ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration, ClassModifier,
-    CompilationUnit, Expression, FormalParameter, Identifier, LeftHandSide, MethodBody,
-    MethodDeclaration, MethodModifiers, MethodResult, NormalClassDeclaration, Program, Statement,
-    TopLevelClassOrInterfaceDeclaration, Type, VariableDeclaratorId,
+    AssignmentOp, BinOp, ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration,
+    ClassModifier, CompilationUnit, Expression, FormalParameter, Identifier, LeftHandSide,
+    MethodBody, MethodDeclaration, MethodModifiers, MethodResult, NormalClassDeclaration, Program,
+    Statement, TopLevelClassOrInterfaceDeclaration, Type, VariableDeclaratorId,
 };
 use crate::parser::error::ParseError;
 
@@ -332,26 +332,42 @@ impl Parser {
     }
 
     fn assignment(&mut self) -> Result<Expression, ParseError> {
+        // Compound assignments are not strictly equivalent to assigning the result of a binary op,
+        // as there can be some differences to how the subexpressions are evaluated.
+        // For example in the following expression:
+        //     foo().x += 5
+        // foo() is evaluated only once.
+        // Transforming this expression into
+        //     f().x = f().x + 5
+        // will evaluate f() twice.
         let lhs = self.left_hand_side()?;
-        let op = self.assignment_operator()?;
-        let rhs = self.expression()?;
-        let expression = op.to_expr(lhs.clone(), rhs);
-        Ok(Expression::Assignment {
-            lhs,
-            rhs: Box::new(expression),
-        })
+        if let Ok(op) = accept_with_value!(self,
+            Token::Assign => AssignmentOp::Identity,
+            Token::AddAssign => AssignmentOp::Add,
+            Token::SubAssign=> AssignmentOp::Subtract,
+            Token::MulAssign => AssignmentOp::Multiply,
+            Token::DivAssign => AssignmentOp::Divide,
+            Token::ModAssign => AssignmentOp::Modulo,
+            Token::LeftShiftAssign => AssignmentOp::LeftShift,
+            Token::SignedRightShiftAssign => AssignmentOp::SignedRightShift,
+            Token::UnsignedRightShiftAssign => AssignmentOp::UnsignedRightShift,
+            Token::AndAssign => AssignmentOp::BitwiseAnd,
+            Token::XorAssign => AssignmentOp::BitwiseXor,
+            Token::OrAssign => AssignmentOp::BitwiseOr,
+        ) {
+            let rhs = self.expression()?;
+            Ok(Expression::Assignment {
+                lhs,
+                rhs: Box::new(rhs),
+                op,
+            })
+        } else {
+            Err(ParseError::NoProduction)
+        }
     }
 
     fn left_hand_side(&mut self) -> Result<LeftHandSide, ParseError> {
         Ok(LeftHandSide::ExpressionName(self.expression_name()?))
-    }
-
-    fn assignment_operator(&mut self) -> Result<AssignmentOperator, ParseError> {
-        if self.accept(Token::Assign) {
-            Ok(AssignmentOperator::Identity)
-        } else {
-            Err(ParseError::NoProduction)
-        }
     }
 
     fn expression(&mut self) -> Result<Expression, ParseError> {
@@ -593,22 +609,10 @@ impl From<LexError> for ParseError {
     }
 }
 
-enum AssignmentOperator {
-    Identity,
-}
-
 impl Into<Expression> for LeftHandSide {
     fn into(self) -> Expression {
         match self {
             LeftHandSide::ExpressionName(id) => Expression::Name(id),
-        }
-    }
-}
-
-impl AssignmentOperator {
-    fn to_expr(&self, _lhs: LeftHandSide, rhs: Expression) -> Expression {
-        match self {
-            AssignmentOperator::Identity => rhs,
         }
     }
 }
