@@ -436,7 +436,51 @@ impl Parser {
         Ok(Statement::ExpressionStatement(expression))
     }
 
+    /// `statement_expression` is defined as:
+    /// ```text
+    /// statement_expression:
+    ///     pre_increment_expression
+    ///     pre_decrement_expression
+    ///     assignment
+    ///     post_increment_expression
+    ///     post_decrement_expression
+    ///     method_invocation
+    ///     class_instance_creation_expression
+    /// ```
+    /// The two prefix expressions are recognizable immediately, while the others are ambiguous,
+    /// as they can all start with identifiers.
+    /// Therefore, we can group them as follows:
+    /// ```text
+    /// statement_expression:
+    ///     prefix_expression
+    ///     statement_expression_starting_with_name
+    ///
+    /// prefix_expression:
+    ///     pre_increment_expression
+    ///     pre_decrement_expression
+    ///
+    /// statement_expression_starting_with_name:
+    ///     assignment
+    ///     post_increment_expression
+    ///     post_decrement_expression
+    ///     method_invocation
+    ///     class_instance_creation_expression
+    /// ```
     fn statement_expression(&mut self) -> Result<Expression, ParseError> {
+        self
+            .prefix_expression().or_else(|_| self
+            .statement_expression_starting_with_name())
+    }
+
+    /// ```text
+    /// statement_expression_starting_with_name:
+    ///     assignment
+    ///     post_increment_expression
+    ///     post_decrement_expression
+    ///     method_invocation
+    ///     class_instance_creation_expression
+    /// ```
+    fn statement_expression_starting_with_name(&mut self) -> Result<Expression, ParseError> {
         self.assignment()
     }
 
@@ -663,12 +707,20 @@ impl Parser {
             Ok(Expression::UnaryPlus(Box::new(self.unary_expression()?)))
         } else if self.accept(Token::Minus) {
             Ok(Expression::UnaryMinus(Box::new(self.unary_expression()?)))
-        } else if self.accept(Token::Increment) {
+        } else {
+            self
+                .prefix_expression().or_else(|_| self
+                .postfix_expression())
+        }
+    }
+
+    fn prefix_expression(&mut self) -> Result<Expression, ParseError> {
+        if self.accept(Token::Increment) {
             Ok(Expression::PreIncrement(Box::new(self.unary_expression()?)))
         } else if self.accept(Token::Decrement) {
             Ok(Expression::PreDecrement(Box::new(self.unary_expression()?)))
         } else {
-            self.postfix_expression()
+            Err(ParseError::NoProduction)
         }
     }
 

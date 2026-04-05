@@ -55,4 +55,11 @@ class Statements {
         a = ++b;
         a = b++;
     }
+
+    void prefix_operators() {
+        ++a;
+        --a;
+        ++(a);
+        --(b);
+    }
 }
