@@ -297,23 +297,132 @@ impl Parser {
         if self.accept(Token::Semicolon) {
             return Ok(MethodBody::Semicolon);
         }
+        Ok(MethodBody::Block(self.block()?))
+    }
+
+    /// ```text
+    /// block:
+    ///     [ block_statements ]
+    ///
+    /// block_statements:
+    ///     {block_statement}
+    /// ```
+    fn block(&mut self) -> Result<Vec<Statement>, ParseError> {
         self.assert(Token::LeftBrace)?;
         let block_statements = self.zero_or_more(Self::block_statement);
         self.assert(Token::RightBrace)?;
-        Ok(MethodBody::Block(block_statements))
+        Ok(block_statements)
     }
 
+    /// Original grammar defines:
+    /// ```text
+    /// block_statement:
+    ///     local_class_or_interface_declaration
+    ///     local_variable_declaration_statement
+    ///     statement
+    /// ```
+    /// `local_class_or_interface_declaration` has to start with a keyword and is thus easily recognizable,
+    /// while `local_variable_declaration_statement` and `statement` are ambiguous. So they are here unified into:
+    /// ```text
+    /// block_statement:
+    ///     local_class_or_interface_declaration
+    ///     local_variable_declaration_or_statement
+    ///
+    /// local_variable_declaration_or_statement:
+    ///     statement
+    ///     local_variable_declaration_statement
+    /// ```
+    ///
     fn block_statement(&mut self) -> Result<Statement, ParseError> {
-        self.statement()
+        self.local_variable_declaration_or_statement()
     }
 
-    fn statement(&mut self) -> Result<Statement, ParseError> {
-        self.statement_without_trailing_substatement()
+    /// from [Parser::block_statement] we get
+    /// ```text
+    /// local_variable_declaration_or_statement:
+    ///     local_variable_declaration_statement
+    ///     statement
+    /// ```
+    /// `statement` is (after expanding `StatementWithoutTrailingSubstatement`):
+    /// ```text
+    /// statement:
+    ///     empty_statement
+    ///     block
+    ///     if_then_statement
+    ///     if_then_else_statement
+    ///     while_statement
+    ///     for_statement
+    ///     assert_statement
+    ///     switch_statement
+    ///     do_statement
+    ///     break_statement
+    ///     continue_statement
+    ///     return_statement
+    ///     synchronized_statement
+    ///     throw_statement
+    ///     try_statement
+    ///     yield_statement
+    ///     labeled_statement
+    ///     expression_statement
+    /// ```
+    /// Again, `EmptyStatement`, `Block` are immediately recognizable starting with a `;` or `{` respectively,
+    /// while `IfThenStatement`/`IfThenElseStatement`, `WhileStatement`, `ForStatement`, `ExpressionStatement`,
+    /// `AssertStatement`, `SwitchStatement`, `DoStatement`, `BreakStatement`, `ContinueStatement`,
+    /// `ReturnStatement`, `SynchronizedStatement`, `ThrowStatement`, `TryStatement`, `YieldStatement`
+    /// can be recognized by their respective keywords and are grouped into [Parser::simple_statement].
+    ///
+    /// Lastly, `LabeledStatement`, `ExpressionStatement`, and `LocalVariableDeclarationStatement`
+    /// are grouped into [Parser::statement_starting_with_name]
+    ///
+    /// The resulting productions are thus:
+    /// ```text
+    /// local_variable_declaration_or_statement:
+    ///        empty_statement
+    ///        block
+    ///        simple_statement
+    ///        statement_starting_with_name
+    /// ```
+    fn local_variable_declaration_or_statement(&mut self) -> Result<Statement, ParseError> {
+        self
+            .empty_statement().or_else(|_| self
+            .simple_statement()).or_else(|_| self
+            .statement_starting_with_name())
     }
 
-    fn statement_without_trailing_substatement(&mut self) -> Result<Statement, ParseError> {
-        self.empty_statement()
-            .or_else(|_| self.expression_statement())
+    /// from [Parser::local_variable_declaration_or_statement],
+    /// ```text
+    /// simple_statement:
+    ///     if_statement
+    ///     while_statement
+    ///     for_statement
+    ///     assert_statement
+    ///     switch_statement
+    ///     do_statement
+    ///     break_statement
+    ///     continue_statement
+    ///     return_statement
+    ///     synchronized_statement
+    ///     throw_statement
+    ///     try_statement
+    ///     yield_statement
+    ///
+    /// if_statement:
+    ///     if_then_statement
+    ///     if_then_else_statement
+    /// ```
+    fn simple_statement(&mut self) -> Result<Statement, ParseError> {
+        Err(ParseError::NoProduction)
+    }
+
+    /// From [Parser::local_variable_declaration_or_statement], the remaining kind of statements:
+    /// ```text
+    /// statement_starting_with_name:
+    ///     labeled_statement
+    ///     expression_statement
+    ///     local_variable_declaration_statement
+    /// ```
+    fn statement_starting_with_name(&mut self) -> Result<Statement, ParseError> {
+        self.expression_statement()
     }
 
     fn empty_statement(&mut self) -> Result<Statement, ParseError> {

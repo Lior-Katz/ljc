@@ -230,13 +230,18 @@ impl AstNode for MethodBody {
             }
             MethodBody::Block(stmts) => {
                 writeln!(f, "{line_prefix}Block")?;
-
-                for (i, stmt) in stmts.iter().enumerate() {
-                    stmt.fmt_tree(f, &new_prefix, i == stmts.len() - 1)?;
-                }
-                Ok(())
+                stmts.fmt_tree(f, &new_prefix, is_last)
             }
         }
+    }
+}
+
+impl<T: AstNode> AstNode for Vec<T> {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, _is_last: bool) -> fmt::Result {
+        for (i, stmt) in self.iter().enumerate() {
+            stmt.fmt_tree(f, &prefix, i == self.len() - 1)?;
+        }
+        Ok(())
     }
 }
 
