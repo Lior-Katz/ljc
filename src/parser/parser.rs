@@ -322,15 +322,12 @@ impl Parser {
     ///     statement
     /// ```
     /// `local_class_or_interface_declaration` has to start with a keyword and is thus easily recognizable,
-    /// while `local_variable_declaration_statement` and `statement` are ambiguous. So they are here unified into:
+    /// while `local_variable_declaration_statement` and `statement` are ambiguous. So they are here
+    /// unified into [Parser::local_variable_declaration_or_statement]:
     /// ```text
     /// block_statement:
     ///     local_class_or_interface_declaration
     ///     local_variable_declaration_or_statement
-    ///
-    /// local_variable_declaration_or_statement:
-    ///     statement
-    ///     local_variable_declaration_statement
     /// ```
     ///
     fn block_statement(&mut self) -> Result<Statement, ParseError> {
@@ -371,22 +368,42 @@ impl Parser {
     /// `ReturnStatement`, `SynchronizedStatement`, `ThrowStatement`, `TryStatement`, `YieldStatement`
     /// can be recognized by their respective keywords and are grouped into [Parser::simple_statement].
     ///
-    /// Lastly, `LabeledStatement`, `ExpressionStatement`, and `LocalVariableDeclarationStatement`
+    /// Additionally, `LabeledStatement`, `ExpressionStatement`, and `LocalVariableDeclarationStatement`
     /// are grouped into [Parser::statement_starting_with_name]
+    ///
+    /// Lastly, `pre_increment_expression` and `pre_decrement_expression` are extracted out of `expression_statement`
+    /// into [Parser::prefix_expression_statement], as they do not start with an identifier and are also immediately recognizable.
     ///
     /// The resulting productions are thus:
     /// ```text
     /// local_variable_declaration_or_statement:
-    ///        empty_statement
-    ///        block
-    ///        simple_statement
-    ///        statement_starting_with_name
+    ///     empty_statement
+    ///     block
+    ///     prefix_expression_statement
+    ///     simple_statement
+    ///     statement_starting_with_name
     /// ```
     fn local_variable_declaration_or_statement(&mut self) -> Result<Statement, ParseError> {
         self
             .empty_statement().or_else(|_| self
+            .prefix_expression_statement()).or_else(|_| self
             .simple_statement()).or_else(|_| self
             .statement_starting_with_name())
+    }
+
+    fn empty_statement(&mut self) -> Result<Statement, ParseError> {
+        self.assert(Token::Semicolon)?;
+        Ok(Statement::EmptyStatement)
+    }
+
+    /// ```text
+    /// prefix_expression_statement:
+    ///     prefix_expression ;
+    /// ```
+    fn prefix_expression_statement(&mut self) -> Result<Statement, ParseError> {
+        let expression = self.prefix_expression()?;
+        self.assert(Token::Semicolon)?;
+        Ok(Statement::ExpressionStatement(expression))
     }
 
     /// from [Parser::local_variable_declaration_or_statement],
@@ -425,11 +442,6 @@ impl Parser {
         self.expression_statement()
     }
 
-    fn empty_statement(&mut self) -> Result<Statement, ParseError> {
-        self.assert(Token::Semicolon)?;
-        Ok(Statement::EmptyStatement)
-    }
-
     fn expression_statement(&mut self) -> Result<Statement, ParseError> {
         let expression = self.statement_expression()?;
         self.assert(Token::Semicolon)?;
@@ -447,19 +459,10 @@ impl Parser {
     ///     method_invocation
     ///     class_instance_creation_expression
     /// ```
-    /// The two prefix expressions are recognizable immediately, while the others are ambiguous,
-    /// as they can all start with identifiers.
-    /// Therefore, we can group them as follows:
+    /// The two prefix expressions were extracted out to [Parser::local_variable_declaration_or_statement]
+    /// as [Parser::prefix_expression_statement], so they can be removed from here, resulting in:
     /// ```text
     /// statement_expression:
-    ///     prefix_expression
-    ///     statement_expression_starting_with_name
-    ///
-    /// prefix_expression:
-    ///     pre_increment_expression
-    ///     pre_decrement_expression
-    ///
-    /// statement_expression_starting_with_name:
     ///     assignment
     ///     post_increment_expression
     ///     post_decrement_expression
@@ -467,9 +470,7 @@ impl Parser {
     ///     class_instance_creation_expression
     /// ```
     fn statement_expression(&mut self) -> Result<Expression, ParseError> {
-        self
-            .prefix_expression().or_else(|_| self
-            .statement_expression_starting_with_name())
+        self.statement_expression_starting_with_name()
     }
 
     /// ```text
@@ -714,6 +715,11 @@ impl Parser {
         }
     }
 
+    /// ```text
+    /// prefix_expression:
+    ///     ++ unary_expression
+    ///     -- unary_exoression
+    /// ```
     fn prefix_expression(&mut self) -> Result<Expression, ParseError> {
         if self.accept(Token::Increment) {
             Ok(Expression::PreIncrement(Box::new(self.unary_expression()?)))
