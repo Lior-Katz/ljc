@@ -330,6 +330,9 @@ impl Parser {
     ///     local_variable_declaration_or_statement
     /// ```
     ///
+    /// NOTE: This is still ambiguous: both `local_class_or_interface_declaration` and `local_variable_declaration_statement`
+    /// (produced in [Parser::statement_starting_with_name]) can start with a sequence of modifiers.
+    /// TODO: when implementing `local_class_or_interface_declaration`, the list of modifiers should be factored out
     fn block_statement(&mut self) -> Result<Statement, ParseError> {
         self.local_variable_declaration_or_statement()
     }
