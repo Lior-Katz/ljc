@@ -334,6 +334,9 @@ impl AstNode for Expression {
                 if_true.fmt_tree(f, &new_prefix, false)?;
                 if_false.fmt_tree(f, &new_prefix, true)
             }
+            Expression::Type(t) => {
+                writeln!(f, "{line_prefix}{t}")
+            }
         }
     }
 }

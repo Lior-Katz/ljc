@@ -163,22 +163,96 @@ source: tests/snapshot/snapshot_test.rs
         │       │   └──a
         │       └──PostDecrement
         │           └──b
-        └──Method block_statements->void []
+        ├──Method block_statements->void []
+        │   └──Block
+        │       ├──BlockStatement
+        │       ├──BlockStatement
+        │       │   └──Assignment =
+        │       │       ├──a
+        │       │       └──int 1
+        │       └──BlockStatement
+        │           ├──Assignment =
+        │           │   ├──a
+        │           │   └──int 1
+        │           ├──BlockStatement
+        │           │   └──BlockStatement
+        │           │       └──Assignment =
+        │           │           ├──b
+        │           │           └──int 2
+        │           └──Assignment =
+        │               ├──c
+        │               └──int 3
+        └──Method variable_declarations->void []
             └──Block
-                ├──BlockStatement
-                ├──BlockStatement
-                │   └──Assignment =
-                │       ├──a
+                ├──VariableDeclaration
+                │   ├──Int
+                │   └──a1
+                ├──VariableDeclaration
+                │   ├──Boolean
+                │   └──a2
+                ├──VariableDeclaration
+                │   ├──String
+                │   └──a3
+                ├──VariableDeclaration
+                │   ├──Int
+                │   └──b1
                 │       └──int 1
-                └──BlockStatement
-                    ├──Assignment =
-                    │   ├──a
-                    │   └──int 1
-                    ├──BlockStatement
-                    │   └──BlockStatement
-                    │       └──Assignment =
-                    │           ├──b
-                    │           └──int 2
-                    └──Assignment =
-                        ├──c
-                        └──int 3
+                ├──VariableDeclaration
+                │   ├──Int
+                │   └──b2
+                │       └── +
+                │           ├──b1
+                │           └──int 2
+                ├──VariableDeclaration
+                │   ├──Int
+                │   └──b3
+                │       └── *
+                │           ├── +
+                │           │   ├──b1
+                │           │   └──b2
+                │           └──int 2
+                ├──VariableDeclaration
+                │   ├──Int
+                │   └──b4
+                │       └──ConditionalExpression
+                │           ├── >
+                │           │   ├──b1
+                │           │   └──b2
+                │           ├──b1
+                │           └──b2
+                ├──VariableDeclaration
+                │   ├──String
+                │   └──b5
+                │       └──String "hello"
+                ├──VariableDeclaration
+                │   ├──Int
+                │   ├──c1
+                │   ├──c2
+                │   └──c3
+                ├──VariableDeclaration
+                │   ├──Int
+                │   ├──c4
+                │   │   └──int 1
+                │   ├──c5
+                │   ├──c6
+                │   │   └──Assignment =
+                │   │       ├──c5
+                │   │       └──c4
+                │   └──c7
+                ├──VariableDeclaration
+                │   ├──Int
+                │   ├──c8
+                │   └──c9
+                │       └──int 5
+                ├──VariableDeclaration
+                │   ├──Int
+                │   ├──d1
+                │   └──d2
+                └──VariableDeclaration
+                    ├──Int
+                    └──d3
+                        └──Assignment =
+                            ├──d2
+                            └──Assignment =
+                                ├──d1
+                                └──int 1

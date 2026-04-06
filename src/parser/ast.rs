@@ -135,7 +135,8 @@ pub enum Expression {
         condition: Box<Expression>,
         if_true: Box<Expression>,
         if_false: Box<Expression>,
-    }
+    },
+    Type(Type),
 }
 
 #[derive(Debug)]

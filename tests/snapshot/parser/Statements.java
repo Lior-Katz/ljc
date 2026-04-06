@@ -125,4 +125,42 @@ class Statements {
             c = 3;
         }
     }
+
+    void variable_declarations() {
+        // =======================
+        // Simple declarations
+        // =======================
+
+        int a1;
+        boolean a2;
+        String a3;
+
+
+        // =======================
+        // With initialization
+        // =======================
+
+        int b1 = 1;
+        int b2 = b1 + 2;
+        int b3 = (b1 + b2) * 2;
+        int b4 = b1 > b2 ? b1 : b2;
+        String b5 = "hello";
+
+
+        // =======================
+        // Multiple declarators
+        // =======================
+
+        int c1, c2, c3;
+        int c4 = 1, c5, c6 = c5 = c4, c7;
+        int c8, c9 = 5;
+
+
+        // =======================
+        // Initialization with assignment
+        // =======================
+
+        int d1, d2;
+        int d3 = d2 = d1 = 1;
+    }
 }

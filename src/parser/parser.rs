@@ -770,6 +770,7 @@ impl Parser {
 
     fn primary(&mut self) -> Result<Expression, ParseError> {
         self.literal()
+            .or_else(|_| self.primitive_type().map(|t| Expression::Type(t)))
             .or_else(|_| self.parenthesized_expression())
             .or_else(|_| self.identifier_expression())
     }
