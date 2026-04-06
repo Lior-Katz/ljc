@@ -124,11 +124,11 @@ impl Tokens {
             return Ok(numerical_token);
         }
 
-        if c.is_alphabetic() {
+        if is_identifier_start(c) {
             let identifier_or_kw = self.eat_while(|tokens| {
                 match tokens.peek() {
                     None => false,
-                    Some(c) => c.is_alphanumeric() || c == '_',
+                    Some(c) => is_identifier_part(c),
                 }
             }, EatMode::IncludeEnd,).unwrap();
             let token = match identifier_or_kw {
@@ -539,4 +539,12 @@ impl<'a> Iterator for Walk<'a> {
         self.pos += c.len_utf8();
         Some(&self.s[..self.pos])
     }
+}
+
+fn is_identifier_start(c: char) -> bool {
+    c.is_alphabetic() || c == '_'
+}
+
+fn is_identifier_part(c: char) -> bool {
+    c.is_alphanumeric() || c == '_'
 }

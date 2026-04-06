@@ -97,6 +97,7 @@ pub struct VariableDeclarator {
 #[derive(Debug)]
 pub enum VariableDeclaratorId {
     Named(Identifier),
+    Unnamed,
 }
 
 #[derive(Debug)]

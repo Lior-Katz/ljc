@@ -248,11 +248,30 @@ source: tests/snapshot/snapshot_test.rs
                 │   ├──Int
                 │   ├──d1
                 │   └──d2
+                ├──VariableDeclaration
+                │   ├──Int
+                │   └──d3
+                │       └──Assignment =
+                │           ├──d2
+                │           └──Assignment =
+                │               ├──d1
+                │               └──int 1
+                ├──VariableDeclaration
+                │   ├──Int
+                │   ├──unnamed
+                │   │   └──int 2
+                │   └──e1
+                ├──VariableDeclaration
+                │   ├──Int
+                │   └──unnamed
+                │       └──Assignment =
+                │           ├──e1
+                │           └──int 5
                 └──VariableDeclaration
                     ├──Int
-                    └──d3
-                        └──Assignment =
-                            ├──d2
-                            └──Assignment =
-                                ├──d1
-                                └──int 1
+                    ├──unnamed
+                    │   └──int 1
+                    ├──unnamed
+                    │   └──int 2
+                    └──e2
+                        └──int 3

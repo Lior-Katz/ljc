@@ -409,6 +409,7 @@ impl Display for VariableDeclaratorId {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let name = match self {
             VariableDeclaratorId::Named(name) => name,
+            VariableDeclaratorId::Unnamed => "unnamed",
         };
         write!(f, "{}", name)
     }

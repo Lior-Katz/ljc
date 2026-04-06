@@ -162,5 +162,13 @@ class Statements {
 
         int d1, d2;
         int d3 = d2 = d1 = 1;
+
+
+        // =======================
+        // Unnamed variables
+        // =======================
+        int _ = 2, e1;
+        int _ = e1 = 5;
+        int _ = 1, _ = 2, e2 = 3;
     }
 }

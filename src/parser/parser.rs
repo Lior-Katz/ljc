@@ -840,6 +840,8 @@ impl Parser {
     fn variable_declarator_id(&mut self) -> Result<VariableDeclaratorId, ParseError> {
         if let Ok(name) = accept_with_value!(self, Token::Id) {
             Ok(VariableDeclaratorId::Named(name))
+        } else if self.accept(Token::Underscore) {
+            Ok(VariableDeclaratorId::Unnamed)
         } else {
             Err(ParseError::NoProduction)
         }
