@@ -153,6 +153,16 @@ source: tests/snapshot/snapshot_test.rs
         │       │   └──a
         │       └──PreDecrement
         │           └──b
+        ├──Method postfix_operators->void []
+        │   └──Block
+        │       ├──PostIncrement
+        │       │   └──a
+        │       ├──PostDecrement
+        │       │   └──a
+        │       ├──PostIncrement
+        │       │   └──a
+        │       └──PostDecrement
+        │           └──b
         └──Method block_statements->void []
             └──Block
                 ├──BlockStatement

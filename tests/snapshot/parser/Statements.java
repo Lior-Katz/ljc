@@ -101,6 +101,13 @@ class Statements {
         --(b);
     }
 
+    void postfix_operators() {
+        a++;
+        a--;
+        (a)++;
+        (b)--;
+    }
+
     void block_statements() {
         {}
         {
