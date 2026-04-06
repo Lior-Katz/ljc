@@ -4,7 +4,8 @@ use crate::parser::ast::{
     AssignmentOp, BinOp, ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration,
     ClassModifier, CompilationUnit, Expression, FormalParameter, Identifier, LeftHandSide,
     MethodBody, MethodDeclaration, MethodModifiers, MethodResult, NormalClassDeclaration, Program,
-    Statement, TopLevelClassOrInterfaceDeclaration, Type, VariableDeclaratorId,
+    Statement, TopLevelClassOrInterfaceDeclaration, Type, VariableDeclarator, VariableDeclaratorId,
+    VariableDeclaratorList, VariableInitializer,
 };
 use crate::parser::error::ParseError;
 
@@ -259,7 +260,7 @@ impl Parser {
             let identifier = self.identifier()?;
             Ok(FormalParameter::NormalFormalParameter(
                 param_type,
-                VariableDeclaratorId { identifier },
+                VariableDeclaratorId::Named(identifier),
             ))
         }
     }
@@ -470,7 +471,15 @@ impl Parser {
     /// ```
     fn statement_starting_with_name(&mut self) -> Result<Statement, ParseError> {
         let expression = self.term()?;
-        let statement = Statement::ExpressionStatement(expression);
+        let statement = if let Ok(var_declarations) = self.variable_declarators_list() {
+            Statement::VariableDeclaration {
+                variable_type: expression,
+                declarators: var_declarations,
+            }
+        } else {
+            Statement::ExpressionStatement(expression)
+        };
+
         self.assert(Token::Semicolon)?;
         Ok(statement)
     }
@@ -803,6 +812,46 @@ impl Parser {
 
     fn identifier_expression(&mut self) -> Result<Expression, ParseError> {
         Ok(Expression::Name(self.identifier()?))
+    }
+
+    fn variable_declarators_list(&mut self) -> Result<VariableDeclaratorList, ParseError> {
+        let mut list = Vec::new();
+        list.push(VariableDeclarator {
+            name: self.variable_declarator_id()?,
+            initializer: self
+                .variable_declarator_initializer()
+                .map_or(None, |i| Some(i)),
+        });
+        loop {
+            if !self.accept(Token::Comma) {
+                break;
+            }
+            list.push(VariableDeclarator {
+                name: self.variable_declarator_id()?,
+                initializer: self
+                    .variable_declarator_initializer()
+                    .map_or(None, |i| Some(i)),
+            });
+        }
+        Ok(list)
+    }
+
+    fn variable_declarator_id(&mut self) -> Result<VariableDeclaratorId, ParseError> {
+        if let Ok(name) = accept_with_value!(self, Token::Id) {
+            Ok(VariableDeclaratorId::Named(name))
+        } else {
+            Err(ParseError::NoProduction)
+        }
+    }
+
+    fn variable_declarator_initializer(&mut self) -> Result<VariableInitializer, ParseError> {
+        self.assert(Token::Assign)?;
+        self.variable_initializer()
+    }
+
+    fn variable_initializer(&mut self) -> Result<VariableInitializer, ParseError> {
+        self.expression()
+            .map(|expr| VariableInitializer::Expression(expr))
     }
 }
 

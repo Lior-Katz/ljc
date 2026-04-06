@@ -2,6 +2,7 @@ pub type Program = CompilationUnit;
 pub type Identifier = String;
 pub type TypeIdentifier = Identifier;
 type BlockStatements = Vec<Statement>;
+pub type VariableDeclaratorList = Vec<VariableDeclarator>;
 
 #[derive(Debug)]
 pub enum CompilationUnit {
@@ -81,6 +82,26 @@ pub enum Statement {
     EmptyStatement,
     ExpressionStatement(Expression),
     Block(BlockStatements),
+    VariableDeclaration {
+        variable_type: Expression,
+        declarators: VariableDeclaratorList,
+    },
+}
+
+#[derive(Debug)]
+pub struct VariableDeclarator {
+    pub(crate) name: VariableDeclaratorId,
+    pub(crate) initializer: Option<VariableInitializer>,
+}
+
+#[derive(Debug)]
+pub enum VariableDeclaratorId {
+    Named(Identifier),
+}
+
+#[derive(Debug)]
+pub enum VariableInitializer {
+    Expression(Expression)
 }
 
 #[derive(Debug)]
@@ -161,10 +182,6 @@ pub enum LeftHandSide {
     ExpressionName(Identifier),
 }
 
-#[derive(Debug)]
-pub struct VariableDeclaratorId {
-    pub identifier: Identifier,
-}
 
 #[derive(Debug)]
 pub enum Type {

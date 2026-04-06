@@ -1,6 +1,6 @@
 use std::fmt;
 use std::fmt::{Display, Formatter};
-use crate::parser::ast::{AssignmentOp, BinOp, ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration, CompilationUnit, Expression, FormalParameter, LeftHandSide, MethodBody, MethodDeclaration, MethodResult, NormalClassDeclaration, Statement, TopLevelClassOrInterfaceDeclaration, Type};
+use crate::parser::ast::{AssignmentOp, BinOp, ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration, CompilationUnit, Expression, FormalParameter, LeftHandSide, MethodBody, MethodDeclaration, MethodResult, NormalClassDeclaration, Statement, TopLevelClassOrInterfaceDeclaration, Type, VariableDeclarator, VariableDeclaratorId, VariableInitializer};
 
 pub trait AstNode{
     // fn to_string(&self, prefix: String, is_last: bool) -> String;
@@ -200,7 +200,7 @@ impl AstNode for FormalParameter {
 
         match self {
             FormalParameter::NormalFormalParameter(t, id) => {
-                writeln!(f, "{line_prefix}Param {} {}", t, id.identifier)
+                writeln!(f, "{line_prefix}Param {} {}", t, id)
             }
             FormalParameter::VariableArityParameter(_, id) => {
                 writeln!(f, "{line_prefix}VarArg {}", id)
@@ -264,6 +264,11 @@ impl AstNode for Statement {
             Statement::Block(statements) => {
                 writeln!(f, "{line_prefix}BlockStatement")?;
                 statements.fmt_tree(f, &new_prefix, true)
+            }
+            Statement::VariableDeclaration { variable_type, declarators } => {
+                writeln!(f, "{line_prefix}VariableDeclaration")?;
+                variable_type.fmt_tree(f, &new_prefix, false)?;
+                declarators.fmt_tree(f, &new_prefix, true)
             }
         }
     }
@@ -378,7 +383,33 @@ impl AstNode for BinOp {
     }
 }
 
+impl AstNode for VariableDeclarator {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        let (line_prefix, new_prefix) = branch(&prefix, is_last);
+        writeln!(f, "{line_prefix}{}", self.name)?;
+        if let Some(initializer) = &self.initializer {
+            initializer.fmt_tree(f, &new_prefix, true)?;
+        }
+        Ok(())
+    }
+}
 
+impl AstNode for VariableInitializer {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        match self {
+            VariableInitializer::Expression(e) => e.fmt_tree(f, prefix, is_last),
+        }
+    }
+}
+
+impl Display for VariableDeclaratorId {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        let name = match self {
+            VariableDeclaratorId::Named(name) => name,
+        };
+        write!(f, "{}", name)
+    }
+}
 
 
 
