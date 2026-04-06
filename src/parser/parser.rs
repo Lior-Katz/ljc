@@ -488,6 +488,14 @@ impl Parser {
         self.assignment()
     }
 
+    /// ```text
+    /// assignment:
+    ///     conditional_expression [ assignment_op expression ]
+    ///
+    /// assignment_op:
+    ///     one of:
+    ///         =  +=  -=  *=  /=  %=  <<=  >>=  >>>=  &=  ^=  |=
+    /// ```
     fn assignment(&mut self) -> Result<Expression, ParseError> {
         // Compound assignments are not strictly equivalent to assigning the result of a binary op,
         // as there can be some differences to how the subexpressions are evaluated.
@@ -497,7 +505,7 @@ impl Parser {
         // Transforming this expression into
         //     f().x = f().x + 5
         // will evaluate f() twice.
-        let lhs = self.left_hand_side()?;
+        let expr = self.conditional_expression()?;
         if let Ok(op) = accept_with_value!(self,
             Token::Assign => AssignmentOp::Identity,
             Token::AddAssign => AssignmentOp::Add,
@@ -512,27 +520,23 @@ impl Parser {
             Token::XorAssign => AssignmentOp::BitwiseXor,
             Token::OrAssign => AssignmentOp::BitwiseOr,
         ) {
-            let rhs = self.expression()?;
+            let lhs = match expr {
+                Expression::Name(id) => LeftHandSide::ExpressionName(id),
+                _ => return Err(ParseError::NoProduction)
+            };
+            let rhs = self.assignment()?;
             Ok(Expression::Assignment {
                 lhs,
                 rhs: Box::new(rhs),
                 op,
             })
         } else {
-            Err(ParseError::NoProduction)
+            Ok(expr)
         }
     }
 
-    fn left_hand_side(&mut self) -> Result<LeftHandSide, ParseError> {
-        Ok(LeftHandSide::ExpressionName(self.expression_name()?))
-    }
-
     fn expression(&mut self) -> Result<Expression, ParseError> {
-        self.assignment_expression()
-    }
-
-    fn assignment_expression(&mut self) -> Result<Expression, ParseError> {
-        self.conditional_expression()
+        self.assignment()
     }
 
     fn conditional_expression(&mut self) -> Result<Expression, ParseError> {

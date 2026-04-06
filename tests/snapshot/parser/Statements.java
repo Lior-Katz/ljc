@@ -10,12 +10,39 @@ class Statements {
 
 
         // =======================
+        // Right associativity
+        // =======================
+
+        // should parse as: a = (b = c)
+        a = b = c;
+
+        // deeper chaining
+        a = b = c = d;
+
+
+        // =======================
         // Assignment + arithmetic
         // =======================
 
         // RHS precedence
         a = b + c * d;
         a = (b + c) * d;
+
+        // assignment inside expression
+        a = (b = c) + d;
+
+
+        // =======================
+        // Assignment vs conditional
+        // =======================
+
+        // assignment has LOWER precedence than ?:
+
+        // expect: a = (b ? c : d)
+        x = a = b ? c : d;
+
+        // expect: (a = b) ? c : d
+        x = (a = b) ? c : d;
 
 
         // =======================
@@ -44,6 +71,17 @@ class Statements {
         a += b + c * d;
         a *= (b + c);
         a <<= b + 1;
+
+
+        // =======================
+        // Chaining with compound
+        // =======================
+
+        // should parse as: a += (b += c)
+        a += b += c;
+
+        // mixed
+        a = b += c = d;
 
 
         // =======================
