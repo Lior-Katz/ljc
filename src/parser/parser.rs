@@ -110,10 +110,7 @@ impl Parser {
         }
     }
 
-    fn zero_or_more<T: std::fmt::Debug>(
-        &mut self,
-        next: impl Fn(&mut Self) -> Result<T, ParseError>,
-    ) -> Vec<T> {
+    fn zero_or_more<T>(&mut self, next: impl Fn(&mut Self) -> Result<T, ParseError>) -> Vec<T> {
         let mut v = Vec::new();
         loop {
             match next(self) {
@@ -268,10 +265,10 @@ impl Parser {
     }
 
     fn unannotated_type(&mut self) -> Result<Type, ParseError> {
-        self.unannotated_primitive_type()
+        self.primitive_type()
     }
 
-    fn unannotated_primitive_type(&mut self) -> Result<Type, ParseError> {
+    fn primitive_type(&mut self) -> Result<Type, ParseError> {
         if self.accept(Token::Byte) {
             Ok(Type::Byte)
         } else if self.accept(Token::Short) {
@@ -371,18 +368,14 @@ impl Parser {
     /// `ReturnStatement`, `SynchronizedStatement`, `ThrowStatement`, `TryStatement`, `YieldStatement`
     /// can be recognized by their respective keywords and are grouped into [Parser::simple_statement].
     ///
-    /// Additionally, `LabeledStatement`, `ExpressionStatement`, and `LocalVariableDeclarationStatement`
+    /// Lastly, `LabeledStatement`, `ExpressionStatement`, and `LocalVariableDeclarationStatement`
     /// are grouped into [Parser::statement_starting_with_name]
-    ///
-    /// Lastly, `pre_increment_expression` and `pre_decrement_expression` are extracted out of `expression_statement`
-    /// into [Parser::prefix_expression_statement], as they do not start with an identifier and are also immediately recognizable.
     ///
     /// The resulting productions are thus:
     /// ```text
     /// local_variable_declaration_or_statement:
     ///     empty_statement
     ///     block
-    ///     prefix_expression_statement
     ///     simple_statement
     ///     statement_starting_with_name
     /// ```
@@ -390,7 +383,6 @@ impl Parser {
         self
             .empty_statement().or_else(|_| self
             .block().map(|v| Statement::Block(v))).or_else(|_| self
-            .prefix_expression_statement()).or_else(|_| self
             .simple_statement()).or_else(|_| self
             .statement_starting_with_name())
     }
@@ -398,16 +390,6 @@ impl Parser {
     fn empty_statement(&mut self) -> Result<Statement, ParseError> {
         self.assert(Token::Semicolon)?;
         Ok(Statement::EmptyStatement)
-    }
-
-    /// ```text
-    /// prefix_expression_statement:
-    ///     prefix_expression ;
-    /// ```
-    fn prefix_expression_statement(&mut self) -> Result<Statement, ParseError> {
-        let expression = self.prefix_expression()?;
-        self.assert(Token::Semicolon)?;
-        Ok(Statement::ExpressionStatement(expression))
     }
 
     /// from [Parser::local_variable_declaration_or_statement],
@@ -442,70 +424,83 @@ impl Parser {
     ///     expression_statement
     ///     local_variable_declaration_statement
     /// ```
-    fn statement_starting_with_name(&mut self) -> Result<Statement, ParseError> {
-        self.expression_statement()
-    }
-
-    fn expression_statement(&mut self) -> Result<Statement, ParseError> {
-        let expression = self.statement_expression()?;
-        self.assert(Token::Semicolon)?;
-        Ok(Statement::ExpressionStatement(expression))
-    }
-
-    /// `statement_expression` is defined as:
+    /// All three alternatives can start with an `Identifier`, they look roughly like this:
     /// ```text
-    /// statement_expression:
-    ///     pre_increment_expression
-    ///     pre_decrement_expression
-    ///     assignment
-    ///     post_increment_expression
-    ///     post_decrement_expression
-    ///     method_invocation
-    ///     class_instance_creation_expression
-    /// ```
-    /// The two prefix expressions were extracted out to [Parser::local_variable_declaration_or_statement]
-    /// as [Parser::prefix_expression_statement], so they can be removed from here, resulting in:
-    /// ```text
-    /// statement_expression:
-    ///     assignment
-    ///     post_increment_expression
-    ///     post_decrement_expression
-    ///     method_invocation
-    ///     class_instance_creation_expression
-    /// ```
-    fn statement_expression(&mut self) -> Result<Expression, ParseError> {
-        self.statement_expression_starting_with_name()
-    }
-
-    /// ```text
-    /// statement_expression_starting_with_name:
-    ///     assignment
-    ///     post_increment_expression
-    ///     post_decrement_expression
-    ///     method_invocation
-    ///     class_instance_creation_expression
-    /// ```
-    fn statement_expression_starting_with_name(&mut self) -> Result<Expression, ParseError> {
-        self.assignment()
-    }
-
-    /// ```text
-    /// assignment:
-    ///     conditional_expression [ assignment_op expression ]
+    /// labeled_statement:
+    ///     identifier : statement
     ///
-    /// assignment_op:
-    ///     one of:
-    ///         =  +=  -=  *=  /=  %=  <<=  >>=  >>>=  &=  ^=  |=
+    /// expression_statement:
+    ///     Assignment ;
+    ///     PostIncrementExpression ;
+    ///     PostDecrementExpression ;
+    ///     MethodInvocation ;
+    ///     ClassInstanceCreationExpression ;
+    ///
+    /// local_variable_declaration_statement
+    ///     Type VariableDeclaratorList ;
+    ///```
+    /// At this point we cannot distinguish between the identifier part of the `labeled_statement`,
+    /// the first primary in some of the possible derivations of `expression_statement`, and the type
+    /// of `local_variable_declaration_statement`, so we factor them out into [Parser::term].
+    ///
+    /// At this point in the parser, `term` should be understood operationally rather than
+    /// strictly grammatically: it parses any construct that can begin with an identifier and
+    /// form a complete expression, a type, or a standalone identifier.
+    /// - simple names: `x`
+    /// - qualified names: `a.b.c`
+    /// - field accesses: `a.b`
+    /// - array accesses: `a[i]`
+    /// - method calls: `a.b()`
+    /// - assignments: `x = y`, `a.b = c`
+    ///
+    /// By parsing `term` first, we defer the decision between these alternatives until
+    /// additional tokens (such as `:`, `identifier`, or `;`) make the distinction unambiguous.
+    /// ```text
+    /// statement_starting_with_name:
+    ///     term [statement_ending]
+    ///
+    /// statement_ending:
+    ///     : statement // labeled statement
+    ///     variable_declarator {, variable_declarator} ;// local variable declaration statement
+    ///     ; // just a term - in this case it's a complete expression_statement
+    ///
+    /// variable_declarator:
+    ///     identifier [= variable_initializer]
+    ///     _          [= variable_initializer]
     /// ```
-    fn assignment(&mut self) -> Result<Expression, ParseError> {
-        // Compound assignments are not strictly equivalent to assigning the result of a binary op,
-        // as there can be some differences to how the subexpressions are evaluated.
-        // For example in the following expression:
-        //     foo().x += 5
-        // foo() is evaluated only once.
-        // Transforming this expression into
-        //     f().x = f().x + 5
-        // will evaluate f() twice.
+    fn statement_starting_with_name(&mut self) -> Result<Statement, ParseError> {
+        let expression = self.term()?;
+        let statement = Statement::ExpressionStatement(expression);
+        self.assert(Token::Semicolon)?;
+        Ok(statement)
+    }
+
+    /// `term` defines the maximal construct we can parse at this point without yet knowing
+    /// whether it is:
+    /// - an assignment
+    /// - a value-producing construct,
+    /// - a type,
+    /// - or the start of a labeled statement.
+    ///
+    /// While it often begins with an identifier, it may also start with other constructs
+    /// (e.g. primitive types, parenthesized forms, casts). From that starting point,
+    /// `term` continues consuming input as long as it can legally extend the construct
+    /// through qualified names, member accesses, ternary/binary/unary operators, etc.
+    ///
+    /// The minimum precedence construct consumed are the ternary `conditional_expression`, the binary
+    /// operators, the left side of an assignment, and type names
+    ///
+    /// ```text
+    /// term:
+    ///     left_hand_side = term
+    ///     conditional_expression
+    ///
+    /// left_hand_side:
+    ///     identifier {. identifier}
+    ///     field_access
+    ///     array_access
+    /// ```
+    fn term(&mut self) -> Result<Expression, ParseError> {
         let expr = self.conditional_expression()?;
         if let Ok(op) = accept_with_value!(self,
             Token::Assign => AssignmentOp::Identity,
@@ -523,9 +518,17 @@ impl Parser {
         ) {
             let lhs = match expr {
                 Expression::Name(id) => LeftHandSide::ExpressionName(id),
-                _ => return Err(ParseError::NoProduction)
+                _ => return Err(ParseError::NoProduction),
             };
-            let rhs = self.assignment()?;
+            let rhs = self.term()?;
+            // Compound assignments are not strictly equivalent to assigning the result of a binary op,
+            // as there can be some differences to how the subexpressions are evaluated.
+            // For example in the following expression:
+            //     foo().x += 5
+            // foo() is evaluated only once.
+            // Transforming this expression into
+            //     f().x = f().x + 5
+            // will evaluate f() twice.
             Ok(Expression::Assignment {
                 lhs,
                 rhs: Box::new(rhs),
@@ -537,9 +540,13 @@ impl Parser {
     }
 
     fn expression(&mut self) -> Result<Expression, ParseError> {
-        self.assignment()
+        self.term()
     }
 
+    /// ```text
+    /// conditional_expression:
+    ///     conditional_or_expression [? expression : conditional_expression]
+    /// ```
     fn conditional_expression(&mut self) -> Result<Expression, ParseError> {
         let condition = self.conditional_or_expression()?;
         if self.accept(Token::QuestionMark) {
@@ -707,6 +714,14 @@ impl Parser {
         )
     }
 
+    /// ```text
+    /// unary_expression:
+    ///     {prefix_oprerator} postfix_expression
+    ///
+    /// prefix_operator:
+    ///     one of:
+    ///         ~  !  +  -  ++  --
+    /// ```
     fn unary_expression(&mut self) -> Result<Expression, ParseError> {
         if self.accept(Token::Tilde) {
             Ok(Expression::BitwiseComplement(Box::new(self.unary_expression()?)))
@@ -716,71 +731,78 @@ impl Parser {
             Ok(Expression::UnaryPlus(Box::new(self.unary_expression()?)))
         } else if self.accept(Token::Minus) {
             Ok(Expression::UnaryMinus(Box::new(self.unary_expression()?)))
+        } else if self.accept(Token::Increment) {
+            Ok(Expression::PreIncrement(Box::new(self.unary_expression()?)))
+        } else if self.accept(Token::Decrement) {
+            Ok(Expression::PreDecrement(Box::new(self.unary_expression()?)))
         } else {
-            self
-                .prefix_expression().or_else(|_| self
-                .postfix_expression())
+            self.postfix_expression()
         }
     }
 
     /// ```text
-    /// prefix_expression:
-    ///     ++ unary_expression
-    ///     -- unary_exoression
+    /// postfix_expression:
+    ///     primary {selector} [postfix_operator]
+    ///
+    /// postfix_operator:
+    ///     ++
+    ///     --
     /// ```
-    fn prefix_expression(&mut self) -> Result<Expression, ParseError> {
+    fn postfix_expression(&mut self) -> Result<Expression, ParseError> {
+        let mut expr = self.primary()?;
         if self.accept(Token::Increment) {
-            Ok(Expression::PreIncrement(Box::new(self.unary_expression()?)))
+            expr = Expression::PostIncrement(Box::new(expr));
         } else if self.accept(Token::Decrement) {
-            Ok(Expression::PreDecrement(Box::new(self.unary_expression()?)))
+            expr = Expression::PostDecrement(Box::new(expr));
+        }
+
+        Ok(expr)
+    }
+
+    fn primary(&mut self) -> Result<Expression, ParseError> {
+        self.literal()
+            .or_else(|_| self.parenthesized_expression())
+            .or_else(|_| self.identifier_expression())
+    }
+
+    /// ```text
+    /// literal:
+    ///     integer_literal
+    ///     long_literal
+    ///     boolean_literal
+    ///     char_literal
+    ///     string_literal
+    ///     null_literal
+    /// ```
+    fn literal(&mut self) -> Result<Expression, ParseError> {
+        self.integer_literal()
+            .map(|v| Expression::IntegerLiteral(v))
+            .or_else(|_| self.long_literal().map(|v| Expression::LongLiteral(v)))
+            .or_else(|_| {
+                self.boolean_literal()
+                    .map(|v| Expression::BooleanLiteral(v))
+            })
+            .or_else(|_| self.char_literal().map(|v| Expression::CharLiteral(v)))
+            .or_else(|_| self.string_literal().map(|v| Expression::StringLiteral(v)))
+            .or_else(|_| {
+                self.accept(Token::NullLiteral)
+                    .then_some(Expression::NullLiteral)
+                    .ok_or(ParseError::NoProduction)
+            })
+    }
+
+    fn parenthesized_expression(&mut self) -> Result<Expression, ParseError> {
+        if self.accept(Token::LeftParen) {
+            let expr = self.expression()?; // assuming you have this
+            self.assert(Token::RightParen)?;
+            Ok(expr)
         } else {
             Err(ParseError::NoProduction)
         }
     }
 
-    fn postfix_expression(&mut self) -> Result<Expression, ParseError> {
-        let mut expression = self
-            .primary().or_else(|_| self
-            .expression_name().map(|name| Expression::Name(name)))?;
-
-        // the semantic structure doesn't actually allow multiple consecutive postfix operators
-        // but the grammar is defined in a way that does.
-        // the openJDK parser also allows multiple, maybe it helps in error diagnostics
-        // maybe we can get away without this loop.
-        loop {
-            if self.accept(Token::Increment) {
-                expression = Expression::PostIncrement(Box::new(expression));
-            } else if self.accept(Token::Decrement) {
-                expression = Expression::PostDecrement(Box::new(expression));
-            } else {
-                break;
-            }
-        }
-        Ok(expression)
-    }
-
-    fn primary(&mut self) -> Result<Expression, ParseError> {
-        self.primary_no_new_array()
-    }
-
-    fn primary_no_new_array(&mut self) -> Result<Expression, ParseError> {
-        self
-            .integer_literal().map(|v| Expression::IntegerLiteral(v)).or_else(|_| self
-            .long_literal().map(|v| Expression::LongLiteral(v))).or_else(|_| self
-            .boolean_literal().map(|v| Expression::BooleanLiteral(v))).or_else(|_| self
-            .char_literal().map(|v| Expression::CharLiteral(v))).or_else(|_| self
-            .string_literal().map(|v| Expression::StringLiteral(v))).or_else(|_| self
-            .accept(Token::NullLiteral).then_some(Expression::NullLiteral).ok_or(ParseError::NoProduction))
-            .or_else(|_| {
-                self.assert(Token::LeftParen)?;
-                let expr = self.expression()?;
-                self.assert(Token::RightParen)?;
-                Ok(expr)
-            })
-    }
-
-    fn expression_name(&mut self) -> Result<Identifier, ParseError> {
-        self.identifier()
+    fn identifier_expression(&mut self) -> Result<Expression, ParseError> {
+        Ok(Expression::Name(self.identifier()?))
     }
 }
 
