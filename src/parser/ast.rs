@@ -80,6 +80,7 @@ pub enum MethodBody {
 pub enum Statement {
     EmptyStatement,
     ExpressionStatement(Expression),
+    Block(BlockStatements),
 }
 
 #[derive(Debug)]

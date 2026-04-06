@@ -389,6 +389,7 @@ impl Parser {
     fn local_variable_declaration_or_statement(&mut self) -> Result<Statement, ParseError> {
         self
             .empty_statement().or_else(|_| self
+            .block().map(|v| Statement::Block(v))).or_else(|_| self
             .prefix_expression_statement()).or_else(|_| self
             .simple_statement()).or_else(|_| self
             .statement_starting_with_name())

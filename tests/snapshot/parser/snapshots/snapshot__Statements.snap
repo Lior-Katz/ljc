@@ -143,13 +143,32 @@ source: tests/snapshot/snapshot_test.rs
         │           ├──a
         │           └──PostIncrement
         │               └──b
-        └──Method prefix_operators->void []
+        ├──Method prefix_operators->void []
+        │   └──Block
+        │       ├──PreIncrement
+        │       │   └──a
+        │       ├──PreDecrement
+        │       │   └──a
+        │       ├──PreIncrement
+        │       │   └──a
+        │       └──PreDecrement
+        │           └──b
+        └──Method block_statements->void []
             └──Block
-                ├──PreIncrement
-                │   └──a
-                ├──PreDecrement
-                │   └──a
-                ├──PreIncrement
-                │   └──a
-                └──PreDecrement
-                    └──b
+                ├──BlockStatement
+                ├──BlockStatement
+                │   └──Assignment =
+                │       ├──a
+                │       └──int 1
+                └──BlockStatement
+                    ├──Assignment =
+                    │   ├──a
+                    │   └──int 1
+                    ├──BlockStatement
+                    │   └──BlockStatement
+                    │       └──Assignment =
+                    │           ├──b
+                    │           └──int 2
+                    └──Assignment =
+                        ├──c
+                        └──int 3

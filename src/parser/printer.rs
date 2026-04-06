@@ -252,7 +252,7 @@ impl AstNode for Statement {
         prefix: &str,
         is_last: bool,
     ) -> fmt::Result {
-        let (line_prefix, _) = branch(&prefix, is_last);
+        let (line_prefix, new_prefix) = branch(&prefix, is_last);
 
         match self {
             Statement::EmptyStatement => {
@@ -260,6 +260,10 @@ impl AstNode for Statement {
             },
             Statement::ExpressionStatement(e) => {
                 e.fmt_tree(f, &prefix, is_last)
+            }
+            Statement::Block(statements) => {
+                writeln!(f, "{line_prefix}BlockStatement")?;
+                statements.fmt_tree(f, &new_prefix, true)
             }
         }
     }

@@ -100,4 +100,22 @@ class Statements {
         ++(a);
         --(b);
     }
+
+    void block_statements() {
+        {}
+        {
+            a = 1;
+        }
+        {
+            a = 1;
+
+            {
+                {
+                    b = 2;
+                }
+            }
+
+            c = 3;
+        }
+    }
 }
