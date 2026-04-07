@@ -1,0 +1,78 @@
+---
+source: tests/snapshot/snapshot_test.rs
+---
+└──Compilation Unit
+    └──Class MemberAccess []
+        ├──Method member_access->void []
+        │   └──Block
+        │       ├──MemberAccess
+        │       │   ├──field: b
+        │       │   └──target:
+        │       │       └──a
+        │       ├──MemberAccess
+        │       │   ├──field: d
+        │       │   └──target:
+        │       │       └──MemberAccess
+        │       │           ├──field: c
+        │       │           └──target:
+        │       │               └──MemberAccess
+        │       │                   ├──field: b
+        │       │                   └──target:
+        │       │                       └──a
+        │       ├──MemberAccess
+        │       │   ├──field: b
+        │       │   └──target:
+        │       │       └──a
+        │       ├──MemberAccess
+        │       │   ├──field: c
+        │       │   └──target:
+        │       │       └──MemberAccess
+        │       │           ├──field: b
+        │       │           └──target:
+        │       │               └──a
+        │       ├──Assignment =
+        │       │   ├──MemberAccess
+        │       │   │   ├──field: b
+        │       │   │   └──target:
+        │       │   │       └──a
+        │       │   └──UnaryMinus
+        │       │       └──MemberAccess
+        │       │           ├──field: d
+        │       │           └──target:
+        │       │               └──c
+        │       ├──Assignment =
+        │       │   ├──MemberAccess
+        │       │   │   ├──field: z
+        │       │   │   └──target:
+        │       │   │       └──MemberAccess
+        │       │   │           ├──field: y
+        │       │   │           └──target:
+        │       │   │               └──x
+        │       │   └── +
+        │       │       ├──MemberAccess
+        │       │       │   ├──field: c
+        │       │       │   └──target:
+        │       │       │       └──MemberAccess
+        │       │       │           ├──field: b
+        │       │       │           └──target:
+        │       │       │               └──a
+        │       │       └──MemberAccess
+        │       │           ├──field: e
+        │       │           └──target:
+        │       │               └──d
+        │       └──Assignment *=
+        │           ├──MemberAccess
+        │           │   ├──field: c
+        │           │   └──target:
+        │           │       └──MemberAccess
+        │           │           ├──field: b
+        │           │           └──target:
+        │           │               └──a
+        │           └──MemberAccess
+        │               ├──field: e
+        │               └──target:
+        │                   └──d
+        ├──Method method_invocation->void []
+        │   └──Block
+        └──Method array_access->void []
+            └──Block

@@ -138,6 +138,7 @@ pub enum Expression {
         if_false: Box<Expression>,
     },
     Type(Type),
+    MemberAccess(MemberAccess),
 }
 
 #[derive(Debug)]
@@ -179,9 +180,16 @@ pub enum BinOp {
     LogicalOr,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub enum LeftHandSide {
     ExpressionName(Identifier),
+    MemberAccess(MemberAccess)
+}
+
+#[derive(Debug)]
+pub struct MemberAccess {
+    pub target: Box<Expression>,
+    pub name: Identifier,
 }
 
 

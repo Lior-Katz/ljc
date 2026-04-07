@@ -3,9 +3,9 @@ use crate::lexer::{Tokens, lex_single_file};
 use crate::parser::ast::{
     AssignmentOp, BinOp, ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration,
     ClassModifier, CompilationUnit, Expression, FormalParameter, Identifier, LeftHandSide,
-    MethodBody, MethodDeclaration, MethodModifiers, MethodResult, NormalClassDeclaration, Program,
-    Statement, TopLevelClassOrInterfaceDeclaration, Type, VariableDeclarator, VariableDeclaratorId,
-    VariableDeclaratorList, VariableInitializer,
+    MemberAccess, MethodBody, MethodDeclaration, MethodModifiers, MethodResult,
+    NormalClassDeclaration, Program, Statement, TopLevelClassOrInterfaceDeclaration, Type,
+    VariableDeclarator, VariableDeclaratorId, VariableDeclaratorList, VariableInitializer,
 };
 use crate::parser::error::ParseError;
 
@@ -527,6 +527,9 @@ impl Parser {
         ) {
             let lhs = match expr {
                 Expression::Name(id) => LeftHandSide::ExpressionName(id),
+                Expression::MemberAccess(member_access) => {
+                    LeftHandSide::MemberAccess(member_access)
+                }
                 _ => return Err(ParseError::NoProduction),
             };
             let rhs = self.term()?;
@@ -759,6 +762,7 @@ impl Parser {
     /// ```
     fn postfix_expression(&mut self) -> Result<Expression, ParseError> {
         let mut expr = self.primary()?;
+        expr = self.parse_selectors(expr)?;
         if self.accept(Token::Increment) {
             expr = Expression::PostIncrement(Box::new(expr));
         } else if self.accept(Token::Decrement) {
@@ -811,6 +815,38 @@ impl Parser {
         }
     }
 
+    /// ```text
+    /// selector:
+    ///     . this
+    ///     .class // class literal
+    ///     . super
+    ///     . identfier // field access
+    ///     . identifier ( [arg_list] ) // method invocation
+    ///     [ expression ] // array access
+    ///     [ ] // array type
+    /// ```
+    fn parse_selectors(&mut self, expr: Expression) -> Result<Expression, ParseError> {
+        let mut expr = expr;
+        loop {
+            if self.accept(Token::Dot) {
+                if let Ok(id) = accept_with_value!(self, Token::Id) {
+                    if self.accept(Token::LeftParen) {
+                        // TODO
+                    } else {
+                        expr = Expression::MemberAccess(MemberAccess {
+                            target: Box::new(expr),
+                            name: id,
+                        })
+                    }
+                }
+            } else {
+                break;
+            }
+        }
+
+        Ok(expr)
+    }
+
     fn identifier_expression(&mut self) -> Result<Expression, ParseError> {
         Ok(Expression::Name(self.identifier()?))
     }
@@ -861,13 +897,5 @@ impl Parser {
 impl From<LexError> for ParseError {
     fn from(_e: LexError) -> Self {
         ParseError::NoProduction
-    }
-}
-
-impl Into<Expression> for LeftHandSide {
-    fn into(self) -> Expression {
-        match self {
-            LeftHandSide::ExpressionName(id) => Expression::Name(id),
-        }
     }
 }

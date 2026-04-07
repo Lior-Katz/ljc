@@ -1,6 +1,12 @@
+use crate::parser::ast::{
+    AssignmentOp, BinOp, ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration,
+    CompilationUnit, Expression, FormalParameter, LeftHandSide, MemberAccess, MethodBody,
+    MethodDeclaration, MethodResult, NormalClassDeclaration, Statement,
+    TopLevelClassOrInterfaceDeclaration, Type, VariableDeclarator, VariableDeclaratorId,
+    VariableInitializer,
+};
 use std::fmt;
 use std::fmt::{Display, Formatter};
-use crate::parser::ast::{AssignmentOp, BinOp, ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration, CompilationUnit, Expression, FormalParameter, LeftHandSide, MethodBody, MethodDeclaration, MethodResult, NormalClassDeclaration, Statement, TopLevelClassOrInterfaceDeclaration, Type, VariableDeclarator, VariableDeclaratorId, VariableInitializer};
 
 pub trait AstNode{
     // fn to_string(&self, prefix: String, is_last: bool) -> String;
@@ -288,7 +294,7 @@ impl AstNode for Expression {
             Expression::Name(v) => writeln!(f, "{line_prefix}{}", v),
             Expression::Assignment { lhs, rhs, op } => {
                 writeln!(f, "{line_prefix}Assignment {op}")?;
-                <LeftHandSide as Into<Expression>>::into(lhs.clone()).fmt_tree(f, &new_prefix, false)?;
+                lhs.fmt_tree(f, &new_prefix, false)?;
                 rhs.fmt_tree(f, &new_prefix, true)
             }
             Expression::PostIncrement(e) => {
@@ -337,6 +343,9 @@ impl AstNode for Expression {
             Expression::Type(t) => {
                 writeln!(f, "{line_prefix}{t}")
             }
+            Expression::MemberAccess(v) => {
+                v.fmt_tree(f, &prefix, is_last)
+            }
         }
     }
 }
@@ -356,6 +365,16 @@ impl Display for AssignmentOp {
             AssignmentOp::BitwiseAnd => write!(f, "&="),
             AssignmentOp::BitwiseXor => write!(f, "^="),
             AssignmentOp::BitwiseOr => write!(f, "|="),
+        }
+    }
+}
+
+impl LeftHandSide {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        let (line_prefix, _new_prefix) = branch(&prefix, is_last);
+        match self {
+            LeftHandSide::ExpressionName(v) => writeln!(f, "{line_prefix}{}", v),
+            LeftHandSide::MemberAccess(v) => v.fmt_tree(f, prefix, is_last),
         }
     }
 }
@@ -415,9 +434,17 @@ impl Display for VariableDeclaratorId {
     }
 }
 
+impl MemberAccess {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        let (line_prefix, new_prefix) = branch(prefix, is_last);
 
+        writeln!(f, "{line_prefix}MemberAccess")?;
 
+        let (field_prefix, _) = branch(&new_prefix, false);
+        writeln!(f, "{field_prefix}field: {}", self.name)?;
 
-
-
-
+        let (target_prefix, target_new_prefix) = branch(&new_prefix, true);
+        writeln!(f, "{target_prefix}target:")?;
+        self.target.fmt_tree(f, &target_new_prefix, true)
+    }
+}
