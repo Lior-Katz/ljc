@@ -102,7 +102,7 @@ pub enum VariableDeclaratorId {
 
 #[derive(Debug)]
 pub enum VariableInitializer {
-    Expression(Expression)
+    Expression(Expression),
 }
 
 #[derive(Debug)]
@@ -191,7 +191,6 @@ pub struct MemberAccess {
     pub target: Box<Expression>,
     pub name: Identifier,
 }
-
 
 #[derive(Debug)]
 pub enum Type {

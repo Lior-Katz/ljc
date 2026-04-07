@@ -128,9 +128,7 @@ impl Parser {
     fn ordinary_compilation_unit(&mut self) -> Result<CompilationUnit, ParseError> {
         let top_level_class_or_interface_declarations =
             self.zero_or_more(Self::top_level_class_or_interface_declaration);
-        Ok(CompilationUnit::Ordinary(
-            top_level_class_or_interface_declarations,
-        ))
+        Ok(CompilationUnit::Ordinary(top_level_class_or_interface_declarations))
     }
 
     fn top_level_class_or_interface_declaration(
@@ -152,11 +150,7 @@ impl Parser {
         self.assert(Token::LeftBrace)?;
         let body = self.class_body()?;
         self.assert(Token::RightBrace)?;
-        let class_decl = NormalClassDeclaration {
-            modifiers,
-            identifier,
-            body,
-        };
+        let class_decl = NormalClassDeclaration { modifiers, identifier, body };
         Ok(class_decl)
     }
 
@@ -253,9 +247,7 @@ impl Parser {
         if self.accept(Token::Ellipsis) {
             // variable arity
             let identifier = self.identifier()?;
-            Ok(FormalParameter::VariableArityParameter(
-                param_type, identifier,
-            ))
+            Ok(FormalParameter::VariableArityParameter(param_type, identifier))
         } else {
             let identifier = self.identifier()?;
             Ok(FormalParameter::NormalFormalParameter(
@@ -541,11 +533,7 @@ impl Parser {
             // Transforming this expression into
             //     f().x = f().x + 5
             // will evaluate f() twice.
-            Ok(Expression::Assignment {
-                lhs,
-                rhs: Box::new(rhs),
-                op,
-            })
+            Ok(Expression::Assignment { lhs, rhs: Box::new(rhs), op })
         } else {
             Ok(expr)
         }

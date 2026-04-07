@@ -1,4 +1,4 @@
-use crate::lexer::error::{LexError, invalid_sequence, numeric_literal_error, unexpected_error, invalid_escape};
+use crate::lexer::error::{LexError, invalid_escape, invalid_sequence, numeric_literal_error};
 use crate::lexer::tokens::Token;
 use crate::lexer::util::{Radix, convert_to_int, is_whitespace};
 use std::path::Path;
@@ -43,8 +43,14 @@ impl Tokens {
                 self.eat_to_line_end();
             } else if self.accept_sequence("/*") {
                 match self.eat_until("*/", EatMode::IncludeEnd) {
-                    Err(_) => return invalid_sequence(self.line, self.column, "end of comment not found"),
-                    _ => {},
+                    Err(_) => {
+                        return invalid_sequence(
+                            self.line,
+                            self.column,
+                            "end of comment not found",
+                        );
+                    }
+                    _ => {}
                 };
             } else {
                 break;
@@ -85,11 +91,16 @@ impl Tokens {
                 return Ok(Token::CharLiteral(c));
             }
             let column = self.column;
-            self.eat_while(|tokens| {
-                !matches!(tokens.peek(), Some('\r') | Some('\n') | Some('\''))
-            }, EatMode::IncludeEnd);
+            self.eat_while(
+                |tokens| !matches!(tokens.peek(), Some('\r') | Some('\n') | Some('\'')),
+                EatMode::IncludeEnd,
+            );
             if self.accept('\'') {
-                return invalid_sequence(self.line, column, "Too many characters in character literal");
+                return invalid_sequence(
+                    self.line,
+                    column,
+                    "Too many characters in character literal",
+                );
             }
             return invalid_sequence(self.line, column, "Unclosed character literal");
         }
@@ -125,12 +136,15 @@ impl Tokens {
         }
 
         if is_identifier_start(c) {
-            let identifier_or_kw = self.eat_while(|tokens| {
-                match tokens.peek() {
-                    None => false,
-                    Some(c) => is_identifier_part(c),
-                }
-            }, EatMode::IncludeEnd,).unwrap();
+            let identifier_or_kw = self
+                .eat_while(
+                    |tokens| match tokens.peek() {
+                        None => false,
+                        Some(c) => is_identifier_part(c),
+                    },
+                    EatMode::IncludeEnd,
+                )
+                .unwrap();
             let token = match identifier_or_kw {
                 // keywords
                 "abstract" => Token::Abstract,
@@ -220,31 +234,47 @@ impl Tokens {
 
     fn scan_char_literal(&mut self) -> Result<char, LexError> {
         if self.accept('\\') {
-            if self.accept('b') { return Ok('\u{0008}') }
-            if self.accept('s') { return Ok(' ') }
-            if self.accept('t') { return Ok('\t') }
-            if self.accept('n') { return Ok('\n') }
-            if self.accept('f') { return Ok('\u{000C}') }
-            if self.accept('r') { return Ok('\r') }
-            if self.accept('"') { return Ok('"') }
-            if self.accept('\'') { return Ok('\'') }
-            if self.accept('\\') { return Ok('\\') }
+            if self.accept('b') {
+                return Ok('\u{0008}');
+            }
+            if self.accept('s') {
+                return Ok(' ');
+            }
+            if self.accept('t') {
+                return Ok('\t');
+            }
+            if self.accept('n') {
+                return Ok('\n');
+            }
+            if self.accept('f') {
+                return Ok('\u{000C}');
+            }
+            if self.accept('r') {
+                return Ok('\r');
+            }
+            if self.accept('"') {
+                return Ok('"');
+            }
+            if self.accept('\'') {
+                return Ok('\'');
+            }
+            if self.accept('\\') {
+                return Ok('\\');
+            }
             if let Some((n, len)) = Walk::while_holds(&self.input[self.pos..], |c| c.is_digit(8))
                 .take(3)
                 .zip(1..)
-                .last() {
-                let r = match u8::from_str_radix(n, 8) {
-                    Ok(n) => Ok(n as char),
-                    Err(e) => unexpected_error(self.line, self.pos, e)
-                };
+                .last()
+            {
+                let r = u8::from_str_radix(n, 8).unwrap() as char;
                 self.eat_n(len);
-                return r;
+                return Ok(r);
             }
             return invalid_escape(self.line, self.column);
         }
         match self.eat() {
             Some(c) => Ok(c),
-            None => invalid_sequence(self.line, self.column, "Unclosed character literal")
+            None => invalid_sequence(self.line, self.column, "Unclosed character literal"),
         }
     }
 
@@ -252,7 +282,7 @@ impl Tokens {
         let mut s = String::new();
         // let start = self.pos;
         loop {
-            if self.peek() == Some('"'){
+            if self.peek() == Some('"') {
                 break;
             }
             s.push(self.scan_char_literal()?);
@@ -264,17 +294,28 @@ impl Tokens {
     fn scan_number(&mut self, radix: Radix) -> Result<Token, LexError> {
         let radix: u32 = radix.into();
         match self.peek() {
-            Some('_') => return numeric_literal_error(self.line, self.column, "Illegal underscore"),
-            None => return numeric_literal_error(self.line, self.column, "Numbers must contain at least one digit"),
+            Some('_') => {
+                return numeric_literal_error(self.line, self.column, "Illegal underscore");
+            }
+            None => {
+                return numeric_literal_error(
+                    self.line,
+                    self.column,
+                    "Numbers must contain at least one digit",
+                );
+            }
             _ => {}
         }
-        let whole = self.eat_while(|tokens| {
-            match tokens.peek() {
-                Some(c) if c.is_digit(radix) => true,
-                Some('_') => true,
-                _ => false,
-            }
-        }, EatMode::IncludeEnd).unwrap();
+        let whole = self
+            .eat_while(
+                |tokens| match tokens.peek() {
+                    Some(c) if c.is_digit(radix) => true,
+                    Some('_') => true,
+                    _ => false,
+                },
+                EatMode::IncludeEnd,
+            )
+            .unwrap();
         let value = convert_to_int(whole, radix).unwrap();
         if matches!(self.peek(), Some('_')) {
             return numeric_literal_error(self.line, self.column, "Illegal underscore");
@@ -298,7 +339,8 @@ impl Tokens {
     fn scan_operator(&mut self) -> Option<Token> {
         let walk = Walk::new(&self.input[self.pos..]);
 
-        let (token, len) = walk.into_iter()
+        let (token, len) = walk
+            .into_iter()
             .map(|s| Self::take_operator(s))
             .take_while(|t| t.is_some())
             .last()
@@ -352,27 +394,31 @@ impl Tokens {
     }
 
     fn skip_whitespace(&mut self) {
-        self.eat_while(|tokens| {
-            if let Some(c) = tokens.peek() {
-                return is_whitespace(&c);
-            }
-            false
-        }, EatMode::IncludeEnd);
+        self.eat_while(
+            |tokens| {
+                if let Some(c) = tokens.peek() {
+                    return is_whitespace(&c);
+                }
+                false
+            },
+            EatMode::IncludeEnd,
+        );
     }
 
     fn eat_to_line_end(&mut self) {
-        self.eat_while(|tokens| {
-            if let Some(c) = tokens.peek() {
-                return match c {
-                    '\r' if tokens.next_is('\n') => true,
-                    '\n' | '\r' => {
-                        false
-                    }
-                    _ => true,
-                };
-            }
-            false
-        }, EatMode::IncludeEnd);
+        self.eat_while(
+            |tokens| {
+                if let Some(c) = tokens.peek() {
+                    return match c {
+                        '\r' if tokens.next_is('\n') => true,
+                        '\n' | '\r' => false,
+                        _ => true,
+                    };
+                }
+                false
+            },
+            EatMode::IncludeEnd,
+        );
     }
 
     fn next_line(&mut self) {
@@ -461,12 +507,7 @@ impl Tokens {
             return Ok(&self.input[self.pos..self.pos]);
         }
         if let Some(i) = self.input[self.pos..].find(&sequence[0..]) {
-            let slice_len = i
-                + (if eat_mode.include_end() {
-                    sequence.len()
-                } else {
-                    0
-                });
+            let slice_len = i + (if eat_mode.include_end() { sequence.len() } else { 0 });
             let advance_len = i + sequence.len();
             let s = &self.input[self.pos..self.pos + slice_len];
             self.pos += advance_len;
@@ -492,7 +533,11 @@ impl Tokens {
             }
             self.eat();
         }
-        let end = if eat_mode.include_end() { self.pos } else { self.pos - last_char.len_utf8() };
+        let end = if eat_mode.include_end() {
+            self.pos
+        } else {
+            self.pos - last_char.len_utf8()
+        };
         Some(&self.input[start..end])
     }
 }
@@ -520,11 +565,15 @@ struct Walk<'a> {
 
 impl<'a> Walk<'a> {
     pub fn new(tokens: &'a str) -> Self {
-        Self { s: tokens, pos: 0, predicate: |_c| true }
+        Self {
+            s: tokens,
+            pos: 0,
+            predicate: |_c| true,
+        }
     }
 
-    pub fn while_holds(tokens: &'a str, predicate: fn(&char) -> bool) -> Self{
-        Self {s: tokens, pos: 0, predicate }
+    pub fn while_holds(tokens: &'a str, predicate: fn(&char) -> bool) -> Self {
+        Self { s: tokens, pos: 0, predicate }
     }
 }
 
@@ -534,7 +583,7 @@ impl<'a> Iterator for Walk<'a> {
     fn next(&mut self) -> Option<Self::Item> {
         let c = &self.s[self.pos..].chars().next()?;
         if !(self.predicate)(&c) {
-            return None
+            return None;
         }
         self.pos += c.len_utf8();
         Some(&self.s[..self.pos])
