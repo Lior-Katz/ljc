@@ -3,6 +3,7 @@ pub type Identifier = String;
 pub type TypeIdentifier = Identifier;
 type BlockStatements = Vec<Statement>;
 pub type VariableDeclaratorList = Vec<VariableDeclarator>;
+pub type ArgumentList = Vec<Expression>;
 
 #[derive(Debug)]
 pub enum CompilationUnit {
@@ -139,6 +140,7 @@ pub enum Expression {
     },
     Type(Type),
     MemberAccess(MemberAccess),
+    MethodCall(MethodCall),
 }
 
 #[derive(Debug)]
@@ -183,13 +185,20 @@ pub enum BinOp {
 #[derive(Debug)]
 pub enum LeftHandSide {
     ExpressionName(Identifier),
-    MemberAccess(MemberAccess)
+    MemberAccess(MemberAccess),
 }
 
 #[derive(Debug)]
 pub struct MemberAccess {
     pub target: Box<Expression>,
     pub name: Identifier,
+}
+
+#[derive(Debug)]
+pub struct MethodCall {
+    pub target: Box<Expression>,
+    pub name: Identifier,
+    pub arguments: ArgumentList,
 }
 
 #[derive(Debug)]

@@ -1,11 +1,12 @@
 use crate::lexer::{LexError, Token};
 use crate::lexer::{Tokens, lex_single_file};
 use crate::parser::ast::{
-    AssignmentOp, BinOp, ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration,
-    ClassModifier, CompilationUnit, Expression, FormalParameter, Identifier, LeftHandSide,
-    MemberAccess, MethodBody, MethodDeclaration, MethodModifiers, MethodResult,
-    NormalClassDeclaration, Program, Statement, TopLevelClassOrInterfaceDeclaration, Type,
-    VariableDeclarator, VariableDeclaratorId, VariableDeclaratorList, VariableInitializer,
+    ArgumentList, AssignmentOp, BinOp, ClassBodyDeclaration, ClassDeclaration,
+    ClassMemberDeclaration, ClassModifier, CompilationUnit, Expression, FormalParameter,
+    Identifier, LeftHandSide, MemberAccess, MethodBody, MethodCall, MethodDeclaration,
+    MethodModifiers, MethodResult, NormalClassDeclaration, Program, Statement,
+    TopLevelClassOrInterfaceDeclaration, Type, VariableDeclarator, VariableDeclaratorId,
+    VariableDeclaratorList, VariableInitializer,
 };
 use crate::parser::error::ParseError;
 
@@ -119,6 +120,30 @@ impl Parser {
                 Err(ParseError::NoProduction) => return v,
             }
         }
+    }
+
+    fn delimited_list<T, S>(
+        &mut self,
+        next: impl Fn(&mut Self) -> Result<T, ParseError>,
+        delim: impl Fn(&mut Self) -> Result<S, ParseError>,
+    ) -> Vec<T> {
+        let mut list = Vec::new();
+        if let Ok(elem) = next(self) {
+            list.push(elem);
+        } else {
+            return list;
+        }
+        loop {
+            if delim(self).is_err() {
+                break;
+            }
+            if let Ok(elem) = next(self) {
+                list.push(elem);
+            } else {
+                break;
+            }
+        }
+        list
     }
 
     fn compilation_unit(&mut self) -> Result<CompilationUnit, ParseError> {
@@ -819,7 +844,13 @@ impl Parser {
             if self.accept(Token::Dot) {
                 if let Ok(id) = accept_with_value!(self, Token::Id) {
                     if self.accept(Token::LeftParen) {
-                        // TODO
+                        let arg_list = self.argument_list()?;
+                        self.assert(Token::RightParen)?;
+                        expr = Expression::MethodCall(MethodCall {
+                            target: Box::new(expr),
+                            name: id,
+                            arguments: arg_list,
+                        })
                     } else {
                         expr = Expression::MemberAccess(MemberAccess {
                             target: Box::new(expr),
@@ -879,6 +910,10 @@ impl Parser {
     fn variable_initializer(&mut self) -> Result<VariableInitializer, ParseError> {
         self.expression()
             .map(|expr| VariableInitializer::Expression(expr))
+    }
+
+    fn argument_list(&mut self) -> Result<ArgumentList, ParseError> {
+        Ok(self.delimited_list(|this| this.expression(), |this| this.assert(Token::Comma)))
     }
 }
 

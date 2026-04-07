@@ -74,5 +74,81 @@ source: tests/snapshot/snapshot_test.rs
         │                   └──d
         ├──Method method_invocation->void []
         │   └──Block
+        │       ├──MethodInvocation
+        │       │   ├──method: println
+        │       │   ├──target:
+        │       │   │   └──MemberAccess
+        │       │   │       ├──field: out
+        │       │   │       └──target:
+        │       │   │           └──System
+        │       │   └──args:
+        │       │       └──String "Hello, world!"
+        │       ├──MethodInvocation
+        │       │   ├──method: currentTimeMillis
+        │       │   └──target:
+        │       │       └──System
+        │       ├──MethodInvocation
+        │       │   ├──method: max
+        │       │   ├──target:
+        │       │   │   └──Math
+        │       │   └──args:
+        │       │       ├──int 1
+        │       │       └──MethodInvocation
+        │       │           ├──method: abs
+        │       │           ├──target:
+        │       │           │   └──Math
+        │       │           └──args:
+        │       │               └──UnaryMinus
+        │       │                   └──int 1
+        │       ├──MethodInvocation
+        │       │   ├──method: trim
+        │       │   └──target:
+        │       │       └──MethodInvocation
+        │       │           ├──method: toUpperCase
+        │       │           └──target:
+        │       │               └──String "hello"
+        │       ├──MethodInvocation
+        │       │   ├──method: toLowerCase
+        │       │   └──target:
+        │       │       └──MethodInvocation
+        │       │           ├──method: substring
+        │       │           ├──target:
+        │       │           │   └──String "test"
+        │       │           └──args:
+        │       │               ├──int 0
+        │       │               └──int 2
+        │       ├──VariableDeclaration
+        │       │   ├──Int
+        │       │   └──x
+        │       │       └── +
+        │       │           ├──MethodInvocation
+        │       │           │   ├──method: abs
+        │       │           │   ├──target:
+        │       │           │   │   └──Math
+        │       │           │   └──args:
+        │       │           │       └──UnaryMinus
+        │       │           │           └──int 5
+        │       │           └──MethodInvocation
+        │       │               ├──method: max
+        │       │               ├──target:
+        │       │               │   └──Math
+        │       │               └──args:
+        │       │                   ├──int 1
+        │       │                   └──int 2
+        │       └──VariableDeclaration
+        │           ├──Int
+        │           └──y
+        │               └── *
+        │                   ├──MethodInvocation
+        │                   │   ├──method: length
+        │                   │   └──target:
+        │                   │       └──String "abc"
+        │                   └──MethodInvocation
+        │                       ├──method: min
+        │                       ├──target:
+        │                       │   └──Math
+        │                       └──args:
+        │                           ├──int 2
+        │                           └──int 3
         └──Method array_access->void []
             └──Block

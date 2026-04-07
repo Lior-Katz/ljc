@@ -1,7 +1,7 @@
 use crate::parser::ast::{
     AssignmentOp, BinOp, ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration,
     CompilationUnit, Expression, FormalParameter, LeftHandSide, MemberAccess, MethodBody,
-    MethodDeclaration, MethodResult, NormalClassDeclaration, Statement,
+    MethodCall, MethodDeclaration, MethodResult, NormalClassDeclaration, Statement,
     TopLevelClassOrInterfaceDeclaration, Type, VariableDeclarator, VariableDeclaratorId,
     VariableInitializer,
 };
@@ -282,9 +282,8 @@ impl AstNode for Expression {
             Expression::Type(t) => {
                 writeln!(f, "{line_prefix}{t}")
             }
-            Expression::MemberAccess(v) => {
-                v.fmt_tree(f, &prefix, is_last)
-            }
+            Expression::MemberAccess(v) => v.fmt_tree(f, &prefix, is_last),
+            Expression::MethodCall(v) => v.fmt_tree(f, &prefix, is_last),
         }
     }
 }
@@ -373,7 +372,7 @@ impl Display for VariableDeclaratorId {
     }
 }
 
-impl MemberAccess {
+impl AstNode for MemberAccess {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(prefix, is_last);
 
@@ -385,5 +384,29 @@ impl MemberAccess {
         let (target_prefix, target_new_prefix) = branch(&new_prefix, true);
         writeln!(f, "{target_prefix}target:")?;
         self.target.fmt_tree(f, &target_new_prefix, true)
+    }
+}
+
+impl AstNode for MethodCall {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        let (line_prefix, new_prefix) = branch(prefix, is_last);
+        let has_args = self.arguments.is_empty();
+
+        writeln!(f, "{line_prefix}MethodInvocation")?;
+
+        let (method_prefix, _) = branch(&new_prefix, false);
+        writeln!(f, "{method_prefix}method: {}", self.name)?;
+
+        let (target_prefix, target_new_prefix) = branch(&new_prefix, has_args);
+        writeln!(f, "{target_prefix}target:")?;
+        self.target.fmt_tree(f, &target_new_prefix, true)?;
+
+        if !has_args {
+            let (args_prefix, args_new_prefix) = branch(&new_prefix, true);
+            writeln!(f, "{args_prefix}args:")?;
+            self.arguments.fmt_tree(f, &args_new_prefix, true)?;
+        }
+
+        Ok(())
     }
 }
