@@ -5,7 +5,7 @@ pub enum Whitespace {
     TAB,
     FF,
     LF,
-    CR
+    CR,
 }
 
 impl TryFrom<&char> for Whitespace {
@@ -13,7 +13,7 @@ impl TryFrom<&char> for Whitespace {
 
     fn try_from(c: &char) -> Result<Self, Self::Error> {
         match c {
-            ' '  => Ok(Whitespace::SPACE),
+            ' ' => Ok(Whitespace::SPACE),
             '\t' => Ok(Whitespace::TAB),
             '\x0c' => Ok(Whitespace::FF),
             '\n' => Ok(Whitespace::LF),
@@ -52,6 +52,6 @@ impl Into<u32> for Radix {
 }
 
 pub fn convert_to_int(s: &str, radix: u32) -> Result<u64, ParseIntError> {
-    let cleaned: String = s.chars().filter(|&c| {c != '_'}).collect();
+    let cleaned: String = s.chars().filter(|&c| c != '_').collect();
     u64::from_str_radix(&cleaned, radix)
 }

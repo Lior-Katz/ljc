@@ -13,7 +13,7 @@ impl Display for LexError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             LexError::IoError(e) => write!(f, "IO error: {}", e),
-            | LexError::InvalidSequence(desc)
+            LexError::InvalidSequence(desc)
             | LexError::NumericLiteralError(desc)
             | LexError::InvalidEscape(desc) => {
                 write!(f, "{}:{}\t{}", desc.line, desc.column, desc.cause)
@@ -33,11 +33,7 @@ pub struct ErrorDescription {
 
 impl ErrorDescription {
     pub fn new(line: usize, column: usize, cause: String) -> Self {
-        Self {
-            line,
-            column,
-            cause,
-        }
+        Self { line, column, cause }
     }
 }
 

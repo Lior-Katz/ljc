@@ -1,15 +1,15 @@
+use crate::parser::ast::{
+    AssignmentOp, BinOp, ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration,
+    CompilationUnit, Expression, FormalParameter, LeftHandSide, MethodBody, MethodDeclaration,
+    MethodResult, NormalClassDeclaration, Statement, TopLevelClassOrInterfaceDeclaration, Type,
+    VariableDeclarator, VariableDeclaratorId, VariableInitializer,
+};
 use std::fmt;
 use std::fmt::{Display, Formatter};
-use crate::parser::ast::{AssignmentOp, BinOp, ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration, CompilationUnit, Expression, FormalParameter, LeftHandSide, MethodBody, MethodDeclaration, MethodResult, NormalClassDeclaration, Statement, TopLevelClassOrInterfaceDeclaration, Type, VariableDeclarator, VariableDeclaratorId, VariableInitializer};
 
-pub trait AstNode{
+pub trait AstNode {
     // fn to_string(&self, prefix: String, is_last: bool) -> String;
-    fn fmt_tree(
-        &self,
-        f: &mut Formatter<'_>,
-        prefix: &str,
-        is_last: bool,
-    ) -> fmt::Result;
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result;
 }
 
 impl Display for dyn AstNode {
@@ -46,25 +46,14 @@ fn branch(prefix: &str, is_last: bool) -> (String, String) {
     let last_child_indent = "    ";
 
     if is_last {
-        (
-            format!("{prefix}{last_child_prefix}"),
-            format!("{prefix}{last_child_indent}"),
-        )
+        (format!("{prefix}{last_child_prefix}"), format!("{prefix}{last_child_indent}"))
     } else {
-        (
-            format!("{prefix}{child_prefix}"),
-            format!("{prefix}{child_indent}"),
-        )
+        (format!("{prefix}{child_prefix}"), format!("{prefix}{child_indent}"))
     }
 }
 
 impl AstNode for CompilationUnit {
-    fn fmt_tree(
-        &self,
-        f: &mut Formatter<'_>,
-        prefix: &str,
-        is_last: bool,
-    ) -> fmt::Result {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(&prefix, is_last);
 
         match self {
@@ -81,12 +70,7 @@ impl AstNode for CompilationUnit {
 }
 
 impl AstNode for TopLevelClassOrInterfaceDeclaration {
-    fn fmt_tree(
-        &self,
-        f: &mut Formatter<'_>,
-        prefix: &str,
-        is_last: bool,
-    ) -> fmt::Result {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         match self {
             TopLevelClassOrInterfaceDeclaration::ClassDeclaration(c) => {
                 c.fmt_tree(f, prefix, is_last)
@@ -96,12 +80,7 @@ impl AstNode for TopLevelClassOrInterfaceDeclaration {
 }
 
 impl AstNode for ClassDeclaration {
-    fn fmt_tree(
-        &self,
-        f: &mut Formatter<'_>,
-        prefix: &str,
-        is_last: bool,
-    ) -> fmt::Result {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         match self {
             ClassDeclaration::NormalClassDeclaration(c) => {
                 c.fmt_tree(f, prefix, is_last)?;
@@ -112,12 +91,7 @@ impl AstNode for ClassDeclaration {
 }
 
 impl AstNode for NormalClassDeclaration {
-    fn fmt_tree(
-        &self,
-        f: &mut Formatter<'_>,
-        prefix: &str,
-        is_last: bool,
-    ) -> fmt::Result {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(&prefix, is_last);
 
         writeln!(f, "{line_prefix}Class {} {:?}", self.identifier, self.modifiers)?;
@@ -131,32 +105,24 @@ impl AstNode for NormalClassDeclaration {
 }
 
 impl AstNode for ClassBodyDeclaration {
-    fn fmt_tree(
-        &self,
-        f: &mut Formatter<'_>,
-        prefix: &str,
-        is_last: bool,
-    ) -> fmt::Result {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         match self {
-            ClassBodyDeclaration::ClassMemberDeclaration(m) => {
-                m.fmt_tree(f, prefix, is_last)
-            }
+            ClassBodyDeclaration::ClassMemberDeclaration(m) => m.fmt_tree(f, prefix, is_last),
         }
     }
 }
 
 impl AstNode for ClassMemberDeclaration {
-    fn fmt_tree(
-        &self,
-        f: &mut Formatter<'_>,
-        prefix: &str,
-        is_last: bool,
-    ) -> fmt::Result {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(&prefix, is_last);
 
         match self {
             ClassMemberDeclaration::MethodDeclaration(m) => {
-                writeln!(f, "{line_prefix}Method {}->{} {:?}", m.identifier, m.result, m.modifiers)?;
+                writeln!(
+                    f,
+                    "{line_prefix}Method {}->{} {:?}",
+                    m.identifier, m.result, m.modifiers
+                )?;
                 m.fmt_tree(f, &new_prefix, true)
             }
         }
@@ -173,12 +139,7 @@ impl Display for MethodResult {
 }
 
 impl AstNode for MethodDeclaration {
-    fn fmt_tree(
-        &self,
-        f: &mut Formatter<'_>,
-        prefix: &str,
-        _is_last: bool,
-    ) -> fmt::Result {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, _is_last: bool) -> fmt::Result {
         let total = self.parameters.len() + 1;
 
         for (i, param) in self.parameters.iter().enumerate() {
@@ -190,12 +151,7 @@ impl AstNode for MethodDeclaration {
 }
 
 impl AstNode for FormalParameter {
-    fn fmt_tree(
-        &self,
-        f: &mut Formatter<'_>,
-        prefix: &str,
-        is_last: bool,
-    ) -> fmt::Result {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         let (line_prefix, _) = branch(&prefix, is_last);
 
         match self {
@@ -216,12 +172,7 @@ impl Display for Type {
 }
 
 impl AstNode for MethodBody {
-    fn fmt_tree(
-        &self,
-        f: &mut Formatter<'_>,
-        prefix: &str,
-        is_last: bool,
-    ) -> fmt::Result {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(&prefix, is_last);
 
         match self {
@@ -246,21 +197,14 @@ impl<T: AstNode> AstNode for Vec<T> {
 }
 
 impl AstNode for Statement {
-    fn fmt_tree(
-        &self,
-        f: &mut Formatter<'_>,
-        prefix: &str,
-        is_last: bool,
-    ) -> fmt::Result {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(&prefix, is_last);
 
         match self {
             Statement::EmptyStatement => {
                 writeln!(f, "{line_prefix}EmptyStatement")
-            },
-            Statement::ExpressionStatement(e) => {
-                e.fmt_tree(f, &prefix, is_last)
             }
+            Statement::ExpressionStatement(e) => e.fmt_tree(f, &prefix, is_last),
             Statement::Block(statements) => {
                 writeln!(f, "{line_prefix}BlockStatement")?;
                 statements.fmt_tree(f, &new_prefix, true)
@@ -288,7 +232,11 @@ impl AstNode for Expression {
             Expression::Name(v) => writeln!(f, "{line_prefix}{}", v),
             Expression::Assignment { lhs, rhs, op } => {
                 writeln!(f, "{line_prefix}Assignment {op}")?;
-                <LeftHandSide as Into<Expression>>::into(lhs.clone()).fmt_tree(f, &new_prefix, false)?;
+                <LeftHandSide as Into<Expression>>::into(lhs.clone()).fmt_tree(
+                    f,
+                    &new_prefix,
+                    false,
+                )?;
                 rhs.fmt_tree(f, &new_prefix, true)
             }
             Expression::PostIncrement(e) => {
@@ -414,10 +362,3 @@ impl Display for VariableDeclaratorId {
         write!(f, "{}", name)
     }
 }
-
-
-
-
-
-
-

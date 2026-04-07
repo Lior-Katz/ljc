@@ -102,7 +102,7 @@ pub enum VariableDeclaratorId {
 
 #[derive(Debug)]
 pub enum VariableInitializer {
-    Expression(Expression)
+    Expression(Expression),
 }
 
 #[derive(Debug)]
@@ -183,7 +183,6 @@ pub enum BinOp {
 pub enum LeftHandSide {
     ExpressionName(Identifier),
 }
-
 
 #[derive(Debug)]
 pub enum Type {
