@@ -1,5 +1,5 @@
 class Statements {
-    void assignment_statements() {
+    void assignment_statements(int a, int b, int c, int d, int x) {
         // =======================
         // Basic assignments
         // =======================
@@ -38,11 +38,12 @@ class Statements {
 
         // assignment has LOWER precedence than ?:
 
-        // expect: a = (b ? c : d)
-        x = a = b ? c : d;
+        // expect: a = (true ? c : d)
+        x = a = true ? c : d;
 
         // expect: (a = b) ? c : d
-        x = (a = b) ? c : d;
+        boolean bool;
+        x = (bool = true) ? c : d;
 
 
         // =======================
@@ -94,14 +95,14 @@ class Statements {
         a = b++;
     }
 
-    void prefix_operators() {
+    void prefix_operators(int a, int b) {
         ++a;
         --a;
         ++(a);
         --(b);
     }
 
-    void postfix_operators() {
+    void postfix_operators(int a, int b) {
         a++;
         a--;
         (a)++;
@@ -111,18 +112,18 @@ class Statements {
     void block_statements() {
         {}
         {
-            a = 1;
+            int a = 1;
         }
         {
-            a = 1;
+            int a = 1;
 
             {
                 {
-                    b = 2;
+                    int b = 2;
                 }
             }
 
-            c = 3;
+            int c = 3;
         }
     }
 

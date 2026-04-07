@@ -4,6 +4,11 @@ source: tests/snapshot/snapshot_test.rs
 └──Compilation Unit
     └──Class Statements []
         ├──Method assignment_statements->void []
+        │   ├──Param Int a
+        │   ├──Param Int b
+        │   ├──Param Int c
+        │   ├──Param Int d
+        │   ├──Param Int x
         │   └──Block
         │       ├──Assignment =
         │       │   ├──a
@@ -54,15 +59,18 @@ source: tests/snapshot/snapshot_test.rs
         │       │   └──Assignment =
         │       │       ├──a
         │       │       └──ConditionalExpression
-        │       │           ├──b
+        │       │           ├──boolean true
         │       │           ├──c
         │       │           └──d
+        │       ├──VariableDeclaration
+        │       │   ├──Boolean
+        │       │   └──bool
         │       ├──Assignment =
         │       │   ├──x
         │       │   └──ConditionalExpression
         │       │       ├──Assignment =
-        │       │       │   ├──a
-        │       │       │   └──b
+        │       │       │   ├──bool
+        │       │       │   └──boolean true
         │       │       ├──c
         │       │       └──d
         │       ├──Assignment +=
@@ -144,6 +152,8 @@ source: tests/snapshot/snapshot_test.rs
         │           └──PostIncrement
         │               └──b
         ├──Method prefix_operators->void []
+        │   ├──Param Int a
+        │   ├──Param Int b
         │   └──Block
         │       ├──PreIncrement
         │       │   └──a
@@ -154,6 +164,8 @@ source: tests/snapshot/snapshot_test.rs
         │       └──PreDecrement
         │           └──b
         ├──Method postfix_operators->void []
+        │   ├──Param Int a
+        │   ├──Param Int b
         │   └──Block
         │       ├──PostIncrement
         │       │   └──a
@@ -167,21 +179,25 @@ source: tests/snapshot/snapshot_test.rs
         │   └──Block
         │       ├──BlockStatement
         │       ├──BlockStatement
-        │       │   └──Assignment =
-        │       │       ├──a
-        │       │       └──int 1
+        │       │   └──VariableDeclaration
+        │       │       ├──Int
+        │       │       └──a
+        │       │           └──int 1
         │       └──BlockStatement
-        │           ├──Assignment =
-        │           │   ├──a
-        │           │   └──int 1
+        │           ├──VariableDeclaration
+        │           │   ├──Int
+        │           │   └──a
+        │           │       └──int 1
         │           ├──BlockStatement
         │           │   └──BlockStatement
-        │           │       └──Assignment =
-        │           │           ├──b
-        │           │           └──int 2
-        │           └──Assignment =
-        │               ├──c
-        │               └──int 3
+        │           │       └──VariableDeclaration
+        │           │           ├──Int
+        │           │           └──b
+        │           │               └──int 2
+        │           └──VariableDeclaration
+        │               ├──Int
+        │               └──c
+        │                   └──int 3
         └──Method variable_declarations->void []
             └──Block
                 ├──VariableDeclaration

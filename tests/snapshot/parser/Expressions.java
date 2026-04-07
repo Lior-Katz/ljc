@@ -1,23 +1,24 @@
 public class Expressions {
     void literal_expressions() {
-        x = 5;
-        x = 10L;
-        x = true;
-        x = false;
-        x = 'A';
-        x = "abc";
-        x = null;
+        int n = 5;
+        long l = 10L;
+        boolean b = true;
+        b = false;
+        char c = 'A';
+        String s = "abc";
+        Object o = null;
     }
 
     void unary_operators() {
-        x = x++;
-        x = x--;
-        x = ++x;
-        x = --x;
-        x = ~100;
-        x = !!false;
-        x = +3;
-        x = -3;
+         int x = 0;
+         x = x++;
+         x = x--;
+         x = ++x;
+         x = --x;
+         x = ~100;
+         boolean b = !!false;
+         x = +3;
+         x = -3;
     }
 
     void binary_operators() {
@@ -26,7 +27,7 @@ public class Expressions {
         // =======================
 
         // Multiplicative
-        x = 8 / 4 / 2;
+        int x = 8 / 4 / 2;
         x = 8 * 4 * 2;
         x = 8 % 4 % 2;
         x = 8 * 4 / 2 % 3;
@@ -43,14 +44,14 @@ public class Expressions {
         x = 16 << 2 >> 1;
 
         // Relational
-        x = 5 < 10;
-        x = 5 > 10;
-        x = 5 <= 10;
-        x = 5 >= 10;
+        boolean b = 5 < 10;
+        b = 5 > 10;
+        b = 5 <= 10;
+        b = 5 >= 10;
 
         // Equality
-        x = 5 == 5;
-        x = 5 != 5;
+        b = 5 == 5;
+        b = 5 != 5;
 
         // Bitwise
         x = 5 & 3 & 1;
@@ -58,8 +59,8 @@ public class Expressions {
         x = 5 | 3 | 1;
 
         // Logical
-        x = true && false && true;
-        x = true || false || true;
+        b = true && false && true;
+        b = true || false || true;
 
 
         // =======================
@@ -75,15 +76,15 @@ public class Expressions {
         x = 2 << 3 + 1;
 
         // Shift vs Relational
-        x = 8 << 1 < 20;
-        x = 8 < 1 << 4;
+        b = 8 << 1 < 20;
+        b = 8 < 1 << 4;
 
         // Relational vs Equality
-        x = 5 < 10 == true;
+        b = 5 < 10 == true;
 
         // Equality vs Bitwise AND
-        x = 5 == 5 & 1;
-        x = 5 & 5 == 1;
+        b = 5 == 5 & true;
+        b = false & 5 == 1;
 
         // Bitwise AND vs XOR
         x = 5 & 3 ^ 1;
@@ -94,11 +95,11 @@ public class Expressions {
         x = 5 | 3 ^ 1;
 
         // Bitwise OR vs Logical AND
-        x = 1 | 0 && 0;
+        b = true | false && true;
 
         // Logical AND vs OR
-        x = true && false || true;
-        x = true || false && true;
+        b = true && false || true;
+        b = true || false && true;
 
 
         // =======================
@@ -107,8 +108,8 @@ public class Expressions {
 
         x = 2 + 3 * 4 << 1;
         x = 8 << 2 + 1 * 3;
-        x = 5 < 10 && 3 + 4 > 6;
-        x = 5 == 5 || 3 * 2 < 4;
+        b = 5 < 10 && 3 + 4 > 6;
+        b = 5 == 5 || 3 * 2 < 4;
 
 
         // =======================
@@ -132,22 +133,22 @@ public class Expressions {
     }
 
     void conditional_expressions() {
-        x = true ? 1 : 2;
-        x = false ? 1 : 2;
+        int x = true ? 1 : 2;
+        int a = false ? 1 : 2;
 
         // should parse as: true ? 1 : (false ? 2 : 3)
-        x = true ? 1 : false ? 2 : 3;
+        int b = true ? 1 : false ? 2 : 3;
 
         // should parse as: true ? (false ? 1 : 2) : 3
-        x = true ? false ? 1 : 2 : 3;
+        int c = true ? false ? 1 : 2 : 3;
 
         // condition is a logical expression
-        x = 1 < 2 ? 3 : 4;
-        x = true && false ? 1 : 2;
-        x = true || false ? 1 : 2;
+        int d = 1 < 2 ? 3 : 4;
+        int e = true && false ? 1 : 2;
+        int f = true || false ? 1 : 2;
 
         // expect: true ? 2 : (3 + 1)
-        x = true ? 2 : 3 + 1;
+        int g = true ? 2 : 3 + 1;
 
         // expect: (a < b) ? c : d + e
         x = a < b ? c : d + e;
@@ -161,11 +162,12 @@ public class Expressions {
 
         // right-heavy nesting
         // expect a ? b : (c ? d : (e ? f :g))
-        x = a ? b : c ? d : e ? f : g;
+        boolean b1 = false, b2 = false, b3 = false;
+        x = b1 ? b : b2 ? d : b3 ? f : g;
 
         // mixed nesting
         // expect a ? (b ? c : d) : (e ? f : g)
-        x = a ? b ? c : d : e ? f : g;
+        x = b1 ? b2 ? c : d : b3 ? f : g;
 
         x = -1 > 0 ? -2 : -3;
         x = true ? -a : -b;

@@ -5,29 +5,39 @@ source: tests/snapshot/snapshot_test.rs
     └──Class Expressions [Public]
         ├──Method literal_expressions->void []
         │   └──Block
+        │       ├──VariableDeclaration
+        │       │   ├──Int
+        │       │   └──n
+        │       │       └──int 5
+        │       ├──VariableDeclaration
+        │       │   ├──Long
+        │       │   └──l
+        │       │       └──long 10
+        │       ├──VariableDeclaration
+        │       │   ├──Boolean
+        │       │   └──b
+        │       │       └──boolean true
         │       ├──Assignment =
-        │       │   ├──x
-        │       │   └──int 5
-        │       ├──Assignment =
-        │       │   ├──x
-        │       │   └──long 10
-        │       ├──Assignment =
-        │       │   ├──x
-        │       │   └──boolean true
-        │       ├──Assignment =
-        │       │   ├──x
+        │       │   ├──b
         │       │   └──boolean false
-        │       ├──Assignment =
-        │       │   ├──x
-        │       │   └──char 'A'
-        │       ├──Assignment =
-        │       │   ├──x
-        │       │   └──String "abc"
-        │       └──Assignment =
-        │           ├──x
-        │           └──null
+        │       ├──VariableDeclaration
+        │       │   ├──Char
+        │       │   └──c
+        │       │       └──char 'A'
+        │       ├──VariableDeclaration
+        │       │   ├──String
+        │       │   └──s
+        │       │       └──String "abc"
+        │       └──VariableDeclaration
+        │           ├──Object
+        │           └──o
+        │               └──null
         ├──Method unary_operators->void []
         │   └──Block
+        │       ├──VariableDeclaration
+        │       │   ├──Int
+        │       │   └──x
+        │       │       └──int 0
         │       ├──Assignment =
         │       │   ├──x
         │       │   └──PostIncrement
@@ -48,11 +58,12 @@ source: tests/snapshot/snapshot_test.rs
         │       │   ├──x
         │       │   └──BitwiseComplement
         │       │       └──int 100
-        │       ├──Assignment =
-        │       │   ├──x
-        │       │   └──LogicalNot
+        │       ├──VariableDeclaration
+        │       │   ├──Boolean
+        │       │   └──b
         │       │       └──LogicalNot
-        │       │           └──boolean false
+        │       │           └──LogicalNot
+        │       │               └──boolean false
         │       ├──Assignment =
         │       │   ├──x
         │       │   └──UnaryPlus
@@ -63,13 +74,14 @@ source: tests/snapshot/snapshot_test.rs
         │               └──int 3
         ├──Method binary_operators->void []
         │   └──Block
-        │       ├──Assignment =
-        │       │   ├──x
-        │       │   └── /
-        │       │       ├── /
-        │       │       │   ├──int 8
-        │       │       │   └──int 4
-        │       │       └──int 2
+        │       ├──VariableDeclaration
+        │       │   ├──Int
+        │       │   └──x
+        │       │       └── /
+        │       │           ├── /
+        │       │           │   ├──int 8
+        │       │           │   └──int 4
+        │       │           └──int 2
         │       ├──Assignment =
         │       │   ├──x
         │       │   └── *
@@ -142,33 +154,34 @@ source: tests/snapshot/snapshot_test.rs
         │       │       │   ├──int 16
         │       │       │   └──int 2
         │       │       └──int 1
+        │       ├──VariableDeclaration
+        │       │   ├──Boolean
+        │       │   └──b
+        │       │       └── <
+        │       │           ├──int 5
+        │       │           └──int 10
         │       ├──Assignment =
-        │       │   ├──x
-        │       │   └── <
-        │       │       ├──int 5
-        │       │       └──int 10
-        │       ├──Assignment =
-        │       │   ├──x
+        │       │   ├──b
         │       │   └── >
         │       │       ├──int 5
         │       │       └──int 10
         │       ├──Assignment =
-        │       │   ├──x
+        │       │   ├──b
         │       │   └── <=
         │       │       ├──int 5
         │       │       └──int 10
         │       ├──Assignment =
-        │       │   ├──x
+        │       │   ├──b
         │       │   └── >=
         │       │       ├──int 5
         │       │       └──int 10
         │       ├──Assignment =
-        │       │   ├──x
+        │       │   ├──b
         │       │   └── ==
         │       │       ├──int 5
         │       │       └──int 5
         │       ├──Assignment =
-        │       │   ├──x
+        │       │   ├──b
         │       │   └── !=
         │       │       ├──int 5
         │       │       └──int 5
@@ -194,14 +207,14 @@ source: tests/snapshot/snapshot_test.rs
         │       │       │   └──int 3
         │       │       └──int 1
         │       ├──Assignment =
-        │       │   ├──x
+        │       │   ├──b
         │       │   └── &&
         │       │       ├── &&
         │       │       │   ├──boolean true
         │       │       │   └──boolean false
         │       │       └──boolean true
         │       ├──Assignment =
-        │       │   ├──x
+        │       │   ├──b
         │       │   └── ||
         │       │       ├── ||
         │       │       │   ├──boolean true
@@ -236,37 +249,37 @@ source: tests/snapshot/snapshot_test.rs
         │       │           ├──int 3
         │       │           └──int 1
         │       ├──Assignment =
-        │       │   ├──x
+        │       │   ├──b
         │       │   └── <
         │       │       ├── <<
         │       │       │   ├──int 8
         │       │       │   └──int 1
         │       │       └──int 20
         │       ├──Assignment =
-        │       │   ├──x
+        │       │   ├──b
         │       │   └── <
         │       │       ├──int 8
         │       │       └── <<
         │       │           ├──int 1
         │       │           └──int 4
         │       ├──Assignment =
-        │       │   ├──x
+        │       │   ├──b
         │       │   └── ==
         │       │       ├── <
         │       │       │   ├──int 5
         │       │       │   └──int 10
         │       │       └──boolean true
         │       ├──Assignment =
-        │       │   ├──x
+        │       │   ├──b
         │       │   └── &
         │       │       ├── ==
         │       │       │   ├──int 5
         │       │       │   └──int 5
-        │       │       └──int 1
+        │       │       └──boolean true
         │       ├──Assignment =
-        │       │   ├──x
+        │       │   ├──b
         │       │   └── &
-        │       │       ├──int 5
+        │       │       ├──boolean false
         │       │       └── ==
         │       │           ├──int 5
         │       │           └──int 1
@@ -299,21 +312,21 @@ source: tests/snapshot/snapshot_test.rs
         │       │           ├──int 3
         │       │           └──int 1
         │       ├──Assignment =
-        │       │   ├──x
+        │       │   ├──b
         │       │   └── &&
         │       │       ├── |
-        │       │       │   ├──int 1
-        │       │       │   └──int 0
-        │       │       └──int 0
+        │       │       │   ├──boolean true
+        │       │       │   └──boolean false
+        │       │       └──boolean true
         │       ├──Assignment =
-        │       │   ├──x
+        │       │   ├──b
         │       │   └── ||
         │       │       ├── &&
         │       │       │   ├──boolean true
         │       │       │   └──boolean false
         │       │       └──boolean true
         │       ├──Assignment =
-        │       │   ├──x
+        │       │   ├──b
         │       │   └── ||
         │       │       ├──boolean true
         │       │       └── &&
@@ -338,7 +351,7 @@ source: tests/snapshot/snapshot_test.rs
         │       │               ├──int 1
         │       │               └──int 3
         │       ├──Assignment =
-        │       │   ├──x
+        │       │   ├──b
         │       │   └── &&
         │       │       ├── <
         │       │       │   ├──int 5
@@ -349,7 +362,7 @@ source: tests/snapshot/snapshot_test.rs
         │       │           │   └──int 4
         │       │           └──int 6
         │       ├──Assignment =
-        │       │   ├──x
+        │       │   ├──b
         │       │   └── ||
         │       │       ├── ==
         │       │       │   ├──int 5
@@ -416,68 +429,76 @@ source: tests/snapshot/snapshot_test.rs
         │                   └──int 1
         └──Method conditional_expressions->void []
             └──Block
-                ├──Assignment =
-                │   ├──x
-                │   └──ConditionalExpression
-                │       ├──boolean true
-                │       ├──int 1
-                │       └──int 2
-                ├──Assignment =
-                │   ├──x
-                │   └──ConditionalExpression
-                │       ├──boolean false
-                │       ├──int 1
-                │       └──int 2
-                ├──Assignment =
-                │   ├──x
-                │   └──ConditionalExpression
-                │       ├──boolean true
-                │       ├──int 1
+                ├──VariableDeclaration
+                │   ├──Int
+                │   └──x
+                │       └──ConditionalExpression
+                │           ├──boolean true
+                │           ├──int 1
+                │           └──int 2
+                ├──VariableDeclaration
+                │   ├──Int
+                │   └──a
                 │       └──ConditionalExpression
                 │           ├──boolean false
-                │           ├──int 2
+                │           ├──int 1
+                │           └──int 2
+                ├──VariableDeclaration
+                │   ├──Int
+                │   └──b
+                │       └──ConditionalExpression
+                │           ├──boolean true
+                │           ├──int 1
+                │           └──ConditionalExpression
+                │               ├──boolean false
+                │               ├──int 2
+                │               └──int 3
+                ├──VariableDeclaration
+                │   ├──Int
+                │   └──c
+                │       └──ConditionalExpression
+                │           ├──boolean true
+                │           ├──ConditionalExpression
+                │           │   ├──boolean false
+                │           │   ├──int 1
+                │           │   └──int 2
                 │           └──int 3
-                ├──Assignment =
-                │   ├──x
-                │   └──ConditionalExpression
-                │       ├──boolean true
-                │       ├──ConditionalExpression
-                │       │   ├──boolean false
-                │       │   ├──int 1
-                │       │   └──int 2
-                │       └──int 3
-                ├──Assignment =
-                │   ├──x
-                │   └──ConditionalExpression
-                │       ├── <
-                │       │   ├──int 1
-                │       │   └──int 2
-                │       ├──int 3
-                │       └──int 4
-                ├──Assignment =
-                │   ├──x
-                │   └──ConditionalExpression
-                │       ├── &&
-                │       │   ├──boolean true
-                │       │   └──boolean false
-                │       ├──int 1
-                │       └──int 2
-                ├──Assignment =
-                │   ├──x
-                │   └──ConditionalExpression
-                │       ├── ||
-                │       │   ├──boolean true
-                │       │   └──boolean false
-                │       ├──int 1
-                │       └──int 2
-                ├──Assignment =
-                │   ├──x
-                │   └──ConditionalExpression
-                │       ├──boolean true
-                │       ├──int 2
-                │       └── +
+                ├──VariableDeclaration
+                │   ├──Int
+                │   └──d
+                │       └──ConditionalExpression
+                │           ├── <
+                │           │   ├──int 1
+                │           │   └──int 2
                 │           ├──int 3
-                │           └──int 1
+                │           └──int 4
+                ├──VariableDeclaration
+                │   ├──Int
+                │   └──e
+                │       └──ConditionalExpression
+                │           ├── &&
+                │           │   ├──boolean true
+                │           │   └──boolean false
+                │           ├──int 1
+                │           └──int 2
+                ├──VariableDeclaration
+                │   ├──Int
+                │   └──f
+                │       └──ConditionalExpression
+                │           ├── ||
+                │           │   ├──boolean true
+                │           │   └──boolean false
+                │           ├──int 1
+                │           └──int 2
+                ├──VariableDeclaration
+                │   ├──Int
+                │   └──g
+                │       └──ConditionalExpression
+                │           ├──boolean true
+                │           ├──int 2
+                │           └── +
+                │               ├──int 3
+                │               └──int 1
                 ├──Assignment =
                 │   ├──x
                 │   └──ConditionalExpression
@@ -524,28 +545,36 @@ source: tests/snapshot/snapshot_test.rs
                 │       └── <<
                 │           ├──d
                 │           └──e
+                ├──VariableDeclaration
+                │   ├──Boolean
+                │   ├──b1
+                │   │   └──boolean false
+                │   ├──b2
+                │   │   └──boolean false
+                │   └──b3
+                │       └──boolean false
                 ├──Assignment =
                 │   ├──x
                 │   └──ConditionalExpression
-                │       ├──a
+                │       ├──b1
                 │       ├──b
                 │       └──ConditionalExpression
-                │           ├──c
+                │           ├──b2
                 │           ├──d
                 │           └──ConditionalExpression
-                │               ├──e
+                │               ├──b3
                 │               ├──f
                 │               └──g
                 ├──Assignment =
                 │   ├──x
                 │   └──ConditionalExpression
-                │       ├──a
+                │       ├──b1
                 │       ├──ConditionalExpression
-                │       │   ├──b
+                │       │   ├──b2
                 │       │   ├──c
                 │       │   └──d
                 │       └──ConditionalExpression
-                │           ├──e
+                │           ├──b3
                 │           ├──f
                 │           └──g
                 ├──Assignment =
