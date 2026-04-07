@@ -126,12 +126,12 @@ impl Parser {
         &mut self,
         next: impl Fn(&mut Self) -> Result<T, ParseError>,
         delim: impl Fn(&mut Self) -> Result<S, ParseError>,
-    ) -> Vec<T> {
+    ) -> Result<Vec<T>, ParseError> {
         let mut list = Vec::new();
         if let Ok(elem) = next(self) {
             list.push(elem);
         } else {
-            return list;
+            return Ok(list);
         }
         loop {
             if delim(self).is_err() {
@@ -140,10 +140,21 @@ impl Parser {
             if let Ok(elem) = next(self) {
                 list.push(elem);
             } else {
-                break;
+                return Err(ParseError::NoProduction);
             }
         }
-        list
+        Ok(list)
+    }
+
+    fn delimited_at_least_1<T, S>(
+        &mut self,
+        next: impl Fn(&mut Self) -> Result<T, ParseError>,
+        delim: impl Fn(&mut Self) -> Result<S, ParseError>,
+    ) -> Result<Vec<T>, ParseError> {
+        match self.delimited_list(next, delim) {
+            Ok(l) if !l.is_empty() => Ok(l),
+            _ => Err(ParseError::NoProduction),
+        }
     }
 
     fn compilation_unit(&mut self) -> Result<CompilationUnit, ParseError> {
@@ -214,7 +225,7 @@ impl Parser {
         let result = self.result()?;
         let identifier = self.identifier()?;
         self.assert(Token::LeftParen)?;
-        let parameters = self.formal_parameters();
+        let parameters = self.formal_parameters()?;
         self.assert(Token::RightParen)?;
         let body = self.method_body()?;
         Ok(MethodDeclaration {
@@ -246,25 +257,8 @@ impl Parser {
         }
     }
 
-    fn formal_parameters(&mut self) -> Vec<FormalParameter> {
-        let mut v = Vec::new();
-        if let Ok(formal_parameter) = self.formal_parameter() {
-            v.push(formal_parameter);
-        } else {
-            return v;
-        }
-        loop {
-            if !self.accept(Token::Comma) {
-                break;
-            }
-            if let Ok(fp) = self.formal_parameter() {
-                v.push(fp);
-            } else {
-                // TODO: if not a format parameter, should get "identifier or type expected" error
-                break;
-            }
-        }
-        v
+    fn formal_parameters(&mut self) -> Result<Vec<FormalParameter>, ParseError> {
+        self.delimited_list(|this| this.formal_parameter(), |this| this.assert(Token::Comma))
     }
 
     fn formal_parameter(&mut self) -> Result<FormalParameter, ParseError> {
@@ -871,25 +865,17 @@ impl Parser {
     }
 
     fn variable_declarators_list(&mut self) -> Result<VariableDeclaratorList, ParseError> {
-        let mut list = Vec::new();
-        list.push(VariableDeclarator {
-            name: self.variable_declarator_id()?,
-            initializer: self
-                .variable_declarator_initializer()
-                .map_or(None, |i| Some(i)),
-        });
-        loop {
-            if !self.accept(Token::Comma) {
-                break;
-            }
-            list.push(VariableDeclarator {
-                name: self.variable_declarator_id()?,
-                initializer: self
-                    .variable_declarator_initializer()
-                    .map_or(None, |i| Some(i)),
-            });
-        }
-        Ok(list)
+        self.delimited_at_least_1(
+            |this| {
+                Ok(VariableDeclarator {
+                    name: this.variable_declarator_id()?,
+                    initializer: this
+                        .variable_declarator_initializer()
+                        .map_or(None, |i| Some(i)),
+                })
+            },
+            |this| this.assert(Token::Comma),
+        )
     }
 
     fn variable_declarator_id(&mut self) -> Result<VariableDeclaratorId, ParseError> {
@@ -913,7 +899,7 @@ impl Parser {
     }
 
     fn argument_list(&mut self) -> Result<ArgumentList, ParseError> {
-        Ok(self.delimited_list(|this| this.expression(), |this| this.assert(Token::Comma)))
+        self.delimited_list(|this| this.expression(), |this| this.assert(Token::Comma))
     }
 }
 
