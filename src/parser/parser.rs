@@ -2,11 +2,10 @@ use crate::lexer::{LexError, Token};
 use crate::lexer::{Tokens, lex_single_file};
 use crate::parser::ast::{
     ArgumentList, AssignmentOp, BinOp, ClassBodyDeclaration, ClassDeclaration,
-    ClassMemberDeclaration, ClassModifier, CompilationUnit, Expression, FormalParameter,
-    Identifier, LeftHandSide, MemberAccess, MethodBody, MethodCall, MethodDeclaration,
-    MethodModifiers, MethodResult, NormalClassDeclaration, Program, Statement,
-    TopLevelClassOrInterfaceDeclaration, Type, VariableDeclarator, VariableDeclaratorId,
-    VariableDeclaratorList, VariableInitializer,
+    ClassMemberDeclaration, CompilationUnit, Expression, FormalParameter, Identifier, LeftHandSide,
+    MemberAccess, MethodBody, MethodCall, MethodDeclaration, MethodResult, Modifiable, Modifier,
+    NormalClassDeclaration, Program, Statement, TopLevelClassOrInterfaceDeclaration, Type,
+    VariableDeclarator, VariableDeclaratorId, VariableDeclaratorList, VariableInitializer,
 };
 use crate::parser::error::ParseError;
 
@@ -167,38 +166,50 @@ impl Parser {
         Ok(CompilationUnit::Ordinary(top_level_class_or_interface_declarations))
     }
 
+    /// a top level class or interface can be either a class or an interface declaration, both of which
+    /// can begin with modifiers, so [modifier parsing](Parser::modifier) is factored out:
+    /// ```text
+    /// top_level_class_or_interface_declaration:
+    ///     {modifier} top_level_class_or_interface_declaration_no_modifier
+    ///
+    /// top_level_class_or_interface_declaration_no_modifier:
+    ///     class_declaration
+    ///     interface_declaration
+    ///     ;
+    /// ```
     fn top_level_class_or_interface_declaration(
         &mut self,
     ) -> Result<TopLevelClassOrInterfaceDeclaration, ParseError> {
         while self.accept(Token::Semicolon) {} // §7.6 (p. 231), ignore semicolons at class or interface declarations level
-        self.class_declaration()
+
+        let modifiers = self.zero_or_more(Self::modifier);
+        self.class_declaration().map(|class_decl| {
+            TopLevelClassOrInterfaceDeclaration::ClassDeclaration(
+                class_decl.with_modifiers(modifiers),
+            )
+        })
     }
 
-    fn class_declaration(&mut self) -> Result<TopLevelClassOrInterfaceDeclaration, ParseError> {
-        self.normal_class_declaration()/*.or_else(|_| self.enum_declaration()).or_else(|_| self.record_declaration())*/
-            .map(|class_decl| TopLevelClassOrInterfaceDeclaration::ClassDeclaration(ClassDeclaration::NormalClassDeclaration(class_decl)))
+    fn class_declaration(&mut self) -> Result<ClassDeclaration, ParseError> {
+        self.normal_class_declaration()
+            .map(|class_decl| ClassDeclaration::NormalClassDeclaration(class_decl))
     }
 
     fn normal_class_declaration(&mut self) -> Result<NormalClassDeclaration, ParseError> {
-        let modifiers = self.zero_or_more(Self::class_modifier);
         self.assert(Token::Class)?;
         let identifier = self.identifier()?;
         self.assert(Token::LeftBrace)?;
         let body = self.class_body()?;
         self.assert(Token::RightBrace)?;
-        let class_decl = NormalClassDeclaration { modifiers, identifier, body };
+        let class_decl = NormalClassDeclaration { identifier, body };
         Ok(class_decl)
     }
 
-    fn class_modifier(&mut self) -> Result<ClassModifier, ParseError> {
-        self.accept(Token::Public)
-            .then_some(ClassModifier::Public)
-            .or(self
-                .accept(Token::Private)
-                .then_some(ClassModifier::Private))
-            .or(self
-                .accept(Token::Protected)
-                .then_some(ClassModifier::Protected))
+    fn modifier(&mut self) -> Result<Modifier, ParseError> {
+        self
+            .accept(Token::Public).then_some(Modifier::Public).or_else(|| self
+            .accept(Token::Private).then_some(Modifier::Private)).or_else(|| self
+            .accept(Token::Protected).then_some(Modifier::Protected))
             .ok_or(ParseError::NoProduction)
     }
 
@@ -215,13 +226,39 @@ impl Parser {
             .map(|m| ClassBodyDeclaration::ClassMemberDeclaration(m))
     }
 
+    /// class_member_declaration is defined as:
+    /// ```text
+    /// class_member_declaration:
+    ///     FieldDeclaration
+    ///     MethodDeclaration
+    ///     ClassDeclaration
+    ///     InterfaceDeclaration
+    ///     ;
+    /// ```
+    /// All four begin with modifiers, so parsing [modifier](Parser::modifier)s is factored out, to arrive at:
+    /// ```text
+    /// class_member_declaration:
+    ///     {modifier} class_member_declaration_no_modifier:
+    ///
+    /// class_member_declaration_no_modifier:
+    ///     FieldDeclaration
+    ///     MethodDeclaration
+    ///     ClassDeclaration
+    ///     InterfaceDeclaration
+    ///     ;
     fn class_member_declaration(&mut self) -> Result<ClassMemberDeclaration, ParseError> {
+        let modifiers = self.zero_or_more(Self::modifier);
         self.method_declaration()
-            .map(|m| ClassMemberDeclaration::MethodDeclaration(m))
+            .map(|m| ClassMemberDeclaration::MethodDeclaration(m.with_modifiers(modifiers)))
     }
 
+    /// modifiers were extracted at the [class member](Parser::class_member_declaration) level,
+    /// so a method declaration is defined as:
+    /// ```text
+    /// method_declaration:
+    ///     [type_parameters] result identifier ( [formal_parameters] )method_body
+    /// ```
     fn method_declaration(&mut self) -> Result<MethodDeclaration, ParseError> {
-        let modifiers = self.zero_or_more(Self::method_modifier);
         let result = self.result()?;
         let identifier = self.identifier()?;
         self.assert(Token::LeftParen)?;
@@ -229,24 +266,11 @@ impl Parser {
         self.assert(Token::RightParen)?;
         let body = self.method_body()?;
         Ok(MethodDeclaration {
-            modifiers,
             result,
             identifier,
             parameters,
             body,
         })
-    }
-
-    fn method_modifier(&mut self) -> Result<MethodModifiers, ParseError> {
-        self.accept(Token::Public)
-            .then_some(MethodModifiers::Public)
-            .or(self
-                .accept(Token::Private)
-                .then_some(MethodModifiers::Private))
-            .or(self
-                .accept(Token::Protected)
-                .then_some(MethodModifiers::Protected))
-            .ok_or(ParseError::NoProduction)
     }
 
     fn result(&mut self) -> Result<MethodResult, ParseError> {

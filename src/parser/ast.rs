@@ -4,6 +4,8 @@ pub type TypeIdentifier = Identifier;
 type BlockStatements = Vec<Statement>;
 pub type VariableDeclaratorList = Vec<VariableDeclarator>;
 pub type ArgumentList = Vec<Expression>;
+pub type Modifiers = Vec<Modifier>;
+pub type Modified<T> = WithModifiers<T>;
 
 #[derive(Debug)]
 pub enum CompilationUnit {
@@ -12,8 +14,32 @@ pub enum CompilationUnit {
 
 #[derive(Debug)]
 pub enum TopLevelClassOrInterfaceDeclaration {
-    ClassDeclaration(ClassDeclaration),
+    ClassDeclaration(Modified<ClassDeclaration>),
 }
+
+#[derive(Debug)]
+pub struct WithModifiers<T> {
+    pub modifiers: Vec<Modifier>,
+    pub item: T,
+}
+
+#[derive(Debug)]
+pub enum Modifier {
+    Public,
+    Protected,
+    Private,
+}
+
+pub trait Modifiable {
+    fn with_modifiers(self, modifiers: Modifiers) -> WithModifiers<Self>
+    where
+        Self: Sized,
+    {
+        WithModifiers { modifiers, item: self }
+    }
+}
+
+impl<T> Modifiable for T {}
 
 #[derive(Debug)]
 pub enum ClassDeclaration {
@@ -22,16 +48,8 @@ pub enum ClassDeclaration {
 
 #[derive(Debug)]
 pub struct NormalClassDeclaration {
-    pub modifiers: Vec<ClassModifier>,
     pub identifier: TypeIdentifier,
     pub body: Vec<ClassBodyDeclaration>,
-}
-
-#[derive(Debug)]
-pub enum ClassModifier {
-    Public,
-    Protected,
-    Private,
 }
 
 #[derive(Debug)]
@@ -41,23 +59,15 @@ pub enum ClassBodyDeclaration {
 
 #[derive(Debug)]
 pub enum ClassMemberDeclaration {
-    MethodDeclaration(MethodDeclaration),
+    MethodDeclaration(Modified<MethodDeclaration>),
 }
 
 #[derive(Debug)]
 pub struct MethodDeclaration {
-    pub modifiers: Vec<MethodModifiers>,
     pub result: MethodResult,
     pub identifier: Identifier,
     pub parameters: Vec<FormalParameter>,
     pub body: MethodBody,
-}
-
-#[derive(Debug)]
-pub enum MethodModifiers {
-    Public,
-    Protected,
-    Private,
 }
 
 #[derive(Debug)]
@@ -91,8 +101,8 @@ pub enum Statement {
 
 #[derive(Debug)]
 pub struct VariableDeclarator {
-    pub(crate) name: VariableDeclaratorId,
-    pub(crate) initializer: Option<VariableInitializer>,
+    pub name: VariableDeclaratorId,
+    pub initializer: Option<VariableInitializer>,
 }
 
 #[derive(Debug)]

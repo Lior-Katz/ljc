@@ -1,16 +1,25 @@
 use crate::parser::ast::{
     AssignmentOp, BinOp, ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration,
     CompilationUnit, Expression, FormalParameter, LeftHandSide, MemberAccess, MethodBody,
-    MethodCall, MethodDeclaration, MethodResult, NormalClassDeclaration, Statement,
-    TopLevelClassOrInterfaceDeclaration, Type, VariableDeclarator, VariableDeclaratorId,
+    MethodCall, MethodDeclaration, MethodResult, Modified, Modifiers, NormalClassDeclaration,
+    Statement, TopLevelClassOrInterfaceDeclaration, Type, VariableDeclarator, VariableDeclaratorId,
     VariableInitializer,
 };
 use std::fmt;
 use std::fmt::{Display, Formatter};
 
-pub trait AstNode {
+pub trait AstNode<Context = ()> {
     // fn to_string(&self, prefix: String, is_last: bool) -> String;
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result;
+    fn fmt_tree_with_context(
+        &self,
+        f: &mut Formatter<'_>,
+        prefix: &str,
+        is_last: bool,
+        _context: Context,
+    ) -> fmt::Result {
+        self.fmt_tree(f, prefix, is_last)
+    }
 }
 
 impl Display for dyn AstNode {
@@ -30,15 +39,6 @@ macro_rules! impl_display_via_ast_node {
 }
 
 impl_display_via_ast_node!(CompilationUnit);
-impl_display_via_ast_node!(TopLevelClassOrInterfaceDeclaration);
-impl_display_via_ast_node!(ClassDeclaration);
-impl_display_via_ast_node!(NormalClassDeclaration);
-impl_display_via_ast_node!(ClassBodyDeclaration);
-impl_display_via_ast_node!(ClassMemberDeclaration);
-impl_display_via_ast_node!(MethodDeclaration);
-impl_display_via_ast_node!(FormalParameter);
-impl_display_via_ast_node!(MethodBody);
-impl_display_via_ast_node!(Statement);
 
 fn branch(prefix: &str, is_last: bool) -> (String, String) {
     let child_prefix = "├──";
@@ -80,22 +80,48 @@ impl AstNode for TopLevelClassOrInterfaceDeclaration {
     }
 }
 
-impl AstNode for ClassDeclaration {
+impl Modified<ClassDeclaration> {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
-        match self {
-            ClassDeclaration::NormalClassDeclaration(c) => {
-                c.fmt_tree(f, prefix, is_last)?;
-            }
-        }
-        Ok(())
+        self.item
+            .fmt_tree_with_context(f, prefix, is_last, &self.modifiers)
     }
 }
 
-impl AstNode for NormalClassDeclaration {
+impl AstNode<&Modifiers> for ClassDeclaration {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        self.fmt_tree_with_context(f, prefix, is_last, &vec![])
+    }
+
+    fn fmt_tree_with_context(
+        &self,
+        f: &mut Formatter<'_>,
+        prefix: &str,
+        is_last: bool,
+        modifiers: &Modifiers,
+    ) -> fmt::Result {
+        match self {
+            ClassDeclaration::NormalClassDeclaration(c) => {
+                c.fmt_tree_with_context(f, prefix, is_last, modifiers)
+            }
+        }
+    }
+}
+
+impl AstNode<&Modifiers> for NormalClassDeclaration {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        self.fmt_tree_with_context(f, prefix, is_last, &vec![])
+    }
+
+    fn fmt_tree_with_context(
+        &self,
+        f: &mut Formatter<'_>,
+        prefix: &str,
+        is_last: bool,
+        modifiers: &Modifiers,
+    ) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(&prefix, is_last);
 
-        writeln!(f, "{line_prefix}Class {} {:?}", self.identifier, self.modifiers)?;
+        writeln!(f, "{line_prefix}Class {} {:?}", self.identifier, modifiers)?;
         let total = self.body.len();
 
         for (i, decl) in self.body.iter().enumerate() {
@@ -118,12 +144,8 @@ impl AstNode for ClassMemberDeclaration {
         let (line_prefix, new_prefix) = branch(&prefix, is_last);
 
         match self {
-            ClassMemberDeclaration::MethodDeclaration(m) => {
-                writeln!(
-                    f,
-                    "{line_prefix}Method {}->{} {:?}",
-                    m.identifier, m.result, m.modifiers
-                )?;
+            ClassMemberDeclaration::MethodDeclaration(Modified { modifiers, item: m }) => {
+                writeln!(f, "{line_prefix}Method {}->{} {:?}", m.identifier, m.result, modifiers)?;
                 m.fmt_tree(f, &new_prefix, true)
             }
         }
