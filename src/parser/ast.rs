@@ -60,6 +60,7 @@ pub enum ClassBodyDeclaration {
 #[derive(Debug)]
 pub enum ClassMemberDeclaration {
     MethodDeclaration(Modified<MethodDeclaration>),
+    NestedClassDeclaration(Modified<ClassDeclaration>),
 }
 
 #[derive(Debug)]

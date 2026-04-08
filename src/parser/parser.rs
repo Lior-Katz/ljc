@@ -248,8 +248,13 @@ impl Parser {
     ///     ;
     fn class_member_declaration(&mut self) -> Result<ClassMemberDeclaration, ParseError> {
         let modifiers = self.zero_or_more(Self::modifier);
-        self.method_declaration()
-            .map(|m| ClassMemberDeclaration::MethodDeclaration(m.with_modifiers(modifiers)))
+
+        if let Ok(class) = self.class_declaration() {
+            Ok(ClassMemberDeclaration::NestedClassDeclaration(class.with_modifiers(modifiers)))
+        } else {
+            self.method_declaration()
+                .map(|m| ClassMemberDeclaration::MethodDeclaration(m.with_modifiers(modifiers)))
+        }
     }
 
     /// modifiers were extracted at the [class member](Parser::class_member_declaration) level,

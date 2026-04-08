@@ -148,6 +148,7 @@ impl AstNode for ClassMemberDeclaration {
                 writeln!(f, "{line_prefix}Method {}->{} {:?}", m.identifier, m.result, modifiers)?;
                 m.fmt_tree(f, &new_prefix, true)
             }
+            ClassMemberDeclaration::NestedClassDeclaration(c) => c.fmt_tree(f, prefix, is_last),
         }
     }
 }

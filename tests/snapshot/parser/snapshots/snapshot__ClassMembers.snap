@@ -1,0 +1,13 @@
+---
+source: tests/snapshot/snapshot_test.rs
+---
+└──Compilation Unit
+    └──Class ClassMembers []
+        ├──Method foo->void [Public]
+        │   └──Block
+        ├──Method bar->Int [Protected]
+        │   ├──Param Int x
+        │   └──Block
+        └──Class InnerClass [Public]
+            └──Method innerMethod->void []
+                └──Block
