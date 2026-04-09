@@ -3,7 +3,8 @@ source: tests/snapshot/snapshot_test.rs
 ---
 └──Compilation Unit
     └──Class Expressions [Public]
-        ├──Method literal_expressions->void []
+        ├──Method literal_expressions []
+        │   ├──Void
         │   └──Block
         │       ├──VariableDeclaration
         │       │   ├──Int
@@ -32,7 +33,8 @@ source: tests/snapshot/snapshot_test.rs
         │           ├──Object
         │           └──o
         │               └──null
-        ├──Method unary_operators->void []
+        ├──Method unary_operators []
+        │   ├──Void
         │   └──Block
         │       ├──VariableDeclaration
         │       │   ├──Int
@@ -72,7 +74,8 @@ source: tests/snapshot/snapshot_test.rs
         │           ├──x
         │           └──UnaryMinus
         │               └──int 3
-        ├──Method binary_operators->void []
+        ├──Method binary_operators []
+        │   ├──Void
         │   └──Block
         │       ├──VariableDeclaration
         │       │   ├──Int
@@ -427,7 +430,8 @@ source: tests/snapshot/snapshot_test.rs
         │               └── +
         │                   ├──int 3
         │                   └──int 1
-        └──Method conditional_expressions->void []
+        └──Method conditional_expressions []
+            ├──Void
             └──Block
                 ├──VariableDeclaration
                 │   ├──Int

@@ -3,7 +3,7 @@ use crate::lexer::{Tokens, lex_single_file};
 use crate::parser::ast::{
     ArgumentList, AssignmentOp, BinOp, ClassBodyDeclaration, ClassDeclaration,
     ClassMemberDeclaration, CompilationUnit, Expression, FormalParameter, Identifier, LeftHandSide,
-    MemberAccess, MethodBody, MethodCall, MethodDeclaration, MethodResult, Modifiable, Modifier,
+    MemberAccess, MethodBody, MethodCall, MethodDeclaration, Modifiable, Modified, Modifier,
     NormalClassDeclaration, Program, Statement, TopLevelClassOrInterfaceDeclaration, Type,
     VariableDeclarator, VariableDeclaratorId, VariableDeclaratorList, VariableInitializer,
 };
@@ -229,60 +229,73 @@ impl Parser {
     /// class_member_declaration is defined as:
     /// ```text
     /// class_member_declaration:
-    ///     FieldDeclaration
-    ///     MethodDeclaration
-    ///     ClassDeclaration
-    ///     InterfaceDeclaration
+    ///     field_declaration
+    ///     method_declaration
+    ///     class_declaration
+    ///     interface_declaration
     ///     ;
     /// ```
-    /// All four begin with modifiers, so parsing [modifier](Parser::modifier)s is factored out, to arrive at:
+    /// All four begin with modifiers, so parsing [modifier](Parser::modifier)s is factored out,
+    /// while methods fields both follow with a type so are combined. Thus, we arrive at:
     /// ```text
     /// class_member_declaration:
     ///     {modifier} class_member_declaration_no_modifier:
     ///
     /// class_member_declaration_no_modifier:
-    ///     FieldDeclaration
-    ///     MethodDeclaration
-    ///     ClassDeclaration
-    ///     InterfaceDeclaration
+    ///     method_or_field_declaration
+    ///     class_declaration
+    ///     interface_declaration
     ///     ;
-    fn class_member_declaration(&mut self) -> Result<ClassMemberDeclaration, ParseError> {
+    /// ```
+    fn class_member_declaration(&mut self) -> Result<Modified<ClassMemberDeclaration>, ParseError> {
         let modifiers = self.zero_or_more(Self::modifier);
 
         if let Ok(class) = self.class_declaration() {
-            Ok(ClassMemberDeclaration::NestedClassDeclaration(class.with_modifiers(modifiers)))
+            Ok(ClassMemberDeclaration::NestedClassDeclaration(class).with_modifiers(modifiers))
         } else {
-            self.method_declaration()
-                .map(|m| ClassMemberDeclaration::MethodDeclaration(m.with_modifiers(modifiers)))
+            self.method_or_field_declaration()
+                .map(|m| m.with_modifiers(modifiers))
         }
     }
 
     /// modifiers were extracted at the [class member](Parser::class_member_declaration) level,
     /// so a method declaration is defined as:
     /// ```text
+    /// method_or_field_declaration:
+    ///     method_declaration
+    ///     field_declaration
+    ///
     /// method_declaration:
-    ///     [type_parameters] result identifier ( [formal_parameters] )method_body
+    ///     term identifier ( [formal_parameters] ) method_body
+    ///
+    /// field_declaration:
+    ///     term identifier [= variable_initializer] {, identifier [= variable_initializer]}
     /// ```
-    fn method_declaration(&mut self) -> Result<MethodDeclaration, ParseError> {
-        let result = self.result()?;
+    fn method_or_field_declaration(&mut self) -> Result<ClassMemberDeclaration, ParseError> {
+        let result = self.term()?;
         let identifier = self.identifier()?;
-        self.assert(Token::LeftParen)?;
-        let parameters = self.formal_parameters()?;
-        self.assert(Token::RightParen)?;
-        let body = self.method_body()?;
-        Ok(MethodDeclaration {
-            result,
-            identifier,
-            parameters,
-            body,
-        })
-    }
-
-    fn result(&mut self) -> Result<MethodResult, ParseError> {
-        if self.accept(Token::Void) {
-            Ok(MethodResult::Void)
+        if self.accept(Token::LeftParen) {
+            let parameters = self.formal_parameters()?;
+            self.assert(Token::RightParen)?;
+            let body = self.method_body()?;
+            Ok(ClassMemberDeclaration::MethodDeclaration(MethodDeclaration {
+                result,
+                identifier,
+                parameters,
+                body,
+            }))
         } else {
-            Ok(MethodResult::Type(self.unannotated_type()?))
+            let mut field_declaration = vec![VariableDeclarator {
+                name: VariableDeclaratorId::Named(identifier),
+                initializer: self
+                    .variable_declarator_initializer()
+                    .map_or(None, |i| Some(i)),
+            }];
+            if self.accept(Token::Comma) {
+                field_declaration.append(&mut self.variable_declarators_list()?);
+            }
+            self.assert(Token::Semicolon)?;
+            Ok(ClassMemberDeclaration::FieldDeclaration { variable_type: result, declarations: field_declaration })
         }
     }
 
@@ -306,7 +319,10 @@ impl Parser {
     }
 
     fn unannotated_type(&mut self) -> Result<Type, ParseError> {
-        self.primitive_type()
+        match self.term()? {
+            Expression::Type(t) => Ok(t),
+            _ => Err(ParseError::NoProduction),
+        }
     }
 
     fn primitive_type(&mut self) -> Result<Type, ParseError> {
@@ -326,6 +342,8 @@ impl Parser {
             Ok(Type::Double)
         } else if self.accept(Token::Boolean) {
             Ok(Type::Boolean)
+        } else if self.accept(Token::Void) {
+            Ok(Type::Void)
         } else {
             Err(ParseError::NoProduction)
         }

@@ -3,7 +3,8 @@ source: tests/snapshot/snapshot_test.rs
 ---
 └──Compilation Unit
     └──Class MemberAccess []
-        ├──Method member_access->void []
+        ├──Method member_access []
+        │   ├──Void
         │   └──Block
         │       ├──MemberAccess
         │       │   ├──field: b
@@ -72,7 +73,8 @@ source: tests/snapshot/snapshot_test.rs
         │               ├──field: e
         │               └──target:
         │                   └──d
-        ├──Method method_invocation->void []
+        ├──Method method_invocation []
+        │   ├──Void
         │   └──Block
         │       ├──MethodInvocation
         │       │   ├──method: println
@@ -150,5 +152,6 @@ source: tests/snapshot/snapshot_test.rs
         │                       └──args:
         │                           ├──int 2
         │                           └──int 3
-        └──Method array_access->void []
+        └──Method array_access []
+            ├──Void
             └──Block

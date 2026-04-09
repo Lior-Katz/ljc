@@ -3,11 +3,25 @@ source: tests/snapshot/snapshot_test.rs
 ---
 └──Compilation Unit
     └──Class ClassMembers []
-        ├──Method foo->void [Public]
+        ├──Field declaration [Private]
+        │   ├──Int
+        │   └──a
+        ├──Field declaration [Protected]
+        │   ├──Int
+        │   ├──b
+        │   │   └──int 1
+        │   └──c
+        ├──Method foo [Public]
+        │   ├──Void
         │   └──Block
-        ├──Method bar->Int [Protected]
+        ├──Method bar [Protected]
+        │   ├──Int
         │   ├──Param Int x
         │   └──Block
         └──Class InnerClass [Public]
-            └──Method innerMethod->void []
+            ├──Field declaration []
+            │   ├──Int
+            │   └──x
+            └──Method innerMethod []
+                ├──Void
                 └──Block

@@ -6,6 +6,7 @@ pub type VariableDeclaratorList = Vec<VariableDeclarator>;
 pub type ArgumentList = Vec<Expression>;
 pub type Modifiers = Vec<Modifier>;
 pub type Modified<T> = WithModifiers<T>;
+pub type MethodResult = Expression;
 
 #[derive(Debug)]
 pub enum CompilationUnit {
@@ -54,13 +55,17 @@ pub struct NormalClassDeclaration {
 
 #[derive(Debug)]
 pub enum ClassBodyDeclaration {
-    ClassMemberDeclaration(ClassMemberDeclaration),
+    ClassMemberDeclaration(Modified<ClassMemberDeclaration>),
 }
 
 #[derive(Debug)]
 pub enum ClassMemberDeclaration {
-    MethodDeclaration(Modified<MethodDeclaration>),
-    NestedClassDeclaration(Modified<ClassDeclaration>),
+    MethodDeclaration(MethodDeclaration),
+    NestedClassDeclaration(ClassDeclaration),
+    FieldDeclaration {
+        variable_type: Expression,
+        declarations: VariableDeclaratorList,
+    },
 }
 
 #[derive(Debug)]
@@ -69,12 +74,6 @@ pub struct MethodDeclaration {
     pub identifier: Identifier,
     pub parameters: Vec<FormalParameter>,
     pub body: MethodBody,
-}
-
-#[derive(Debug)]
-pub enum MethodResult {
-    Void,
-    Type(Type),
 }
 
 #[derive(Debug)]
@@ -223,4 +222,5 @@ pub enum Type {
     Float,
     Double,
     Boolean,
+    Void,
 }
