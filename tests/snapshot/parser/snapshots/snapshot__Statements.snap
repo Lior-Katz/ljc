@@ -63,7 +63,7 @@ source: tests/snapshot/snapshot_test.rs
         │       │           ├──boolean true
         │       │           ├──c
         │       │           └──d
-        │       ├──VariableDeclaration
+        │       ├──VariableDeclaration []
         │       │   ├──Boolean
         │       │   └──bool
         │       ├──Assignment =
@@ -183,48 +183,48 @@ source: tests/snapshot/snapshot_test.rs
         │   └──Block
         │       ├──BlockStatement
         │       ├──BlockStatement
-        │       │   └──VariableDeclaration
+        │       │   └──VariableDeclaration []
         │       │       ├──Int
         │       │       └──a
         │       │           └──int 1
         │       └──BlockStatement
-        │           ├──VariableDeclaration
+        │           ├──VariableDeclaration []
         │           │   ├──Int
         │           │   └──a
         │           │       └──int 1
         │           ├──BlockStatement
         │           │   └──BlockStatement
-        │           │       └──VariableDeclaration
+        │           │       └──VariableDeclaration []
         │           │           ├──Int
         │           │           └──b
         │           │               └──int 2
-        │           └──VariableDeclaration
+        │           └──VariableDeclaration []
         │               ├──Int
         │               └──c
         │                   └──int 3
         └──Method variable_declarations []
             ├──Void
             └──Block
-                ├──VariableDeclaration
+                ├──VariableDeclaration []
                 │   ├──Int
                 │   └──a1
-                ├──VariableDeclaration
+                ├──VariableDeclaration []
                 │   ├──Boolean
                 │   └──a2
-                ├──VariableDeclaration
+                ├──VariableDeclaration []
                 │   ├──String
                 │   └──a3
-                ├──VariableDeclaration
+                ├──VariableDeclaration []
                 │   ├──Int
                 │   └──b1
                 │       └──int 1
-                ├──VariableDeclaration
+                ├──VariableDeclaration []
                 │   ├──Int
                 │   └──b2
                 │       └── +
                 │           ├──b1
                 │           └──int 2
-                ├──VariableDeclaration
+                ├──VariableDeclaration []
                 │   ├──Int
                 │   └──b3
                 │       └── *
@@ -232,7 +232,7 @@ source: tests/snapshot/snapshot_test.rs
                 │           │   ├──b1
                 │           │   └──b2
                 │           └──int 2
-                ├──VariableDeclaration
+                ├──VariableDeclaration []
                 │   ├──Int
                 │   └──b4
                 │       └──ConditionalExpression
@@ -241,16 +241,16 @@ source: tests/snapshot/snapshot_test.rs
                 │           │   └──b2
                 │           ├──b1
                 │           └──b2
-                ├──VariableDeclaration
+                ├──VariableDeclaration []
                 │   ├──String
                 │   └──b5
                 │       └──String "hello"
-                ├──VariableDeclaration
+                ├──VariableDeclaration []
                 │   ├──Int
                 │   ├──c1
                 │   ├──c2
                 │   └──c3
-                ├──VariableDeclaration
+                ├──VariableDeclaration []
                 │   ├──Int
                 │   ├──c4
                 │   │   └──int 1
@@ -260,16 +260,16 @@ source: tests/snapshot/snapshot_test.rs
                 │   │       ├──c5
                 │   │       └──c4
                 │   └──c7
-                ├──VariableDeclaration
+                ├──VariableDeclaration []
                 │   ├──Int
                 │   ├──c8
                 │   └──c9
                 │       └──int 5
-                ├──VariableDeclaration
+                ├──VariableDeclaration []
                 │   ├──Int
                 │   ├──d1
                 │   └──d2
-                ├──VariableDeclaration
+                ├──VariableDeclaration []
                 │   ├──Int
                 │   └──d3
                 │       └──Assignment =
@@ -277,18 +277,18 @@ source: tests/snapshot/snapshot_test.rs
                 │           └──Assignment =
                 │               ├──d1
                 │               └──int 1
-                ├──VariableDeclaration
+                ├──VariableDeclaration []
                 │   ├──Int
                 │   ├──unnamed
                 │   │   └──int 2
                 │   └──e1
-                ├──VariableDeclaration
+                ├──VariableDeclaration []
                 │   ├──Int
                 │   └──unnamed
                 │       └──Assignment =
                 │           ├──e1
                 │           └──int 5
-                └──VariableDeclaration
+                └──VariableDeclaration []
                     ├──Int
                     ├──unnamed
                     │   └──int 1

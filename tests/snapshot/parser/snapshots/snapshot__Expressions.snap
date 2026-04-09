@@ -6,37 +6,37 @@ source: tests/snapshot/snapshot_test.rs
         ├──Method literal_expressions []
         │   ├──Void
         │   └──Block
-        │       ├──VariableDeclaration
+        │       ├──VariableDeclaration []
         │       │   ├──Int
         │       │   └──n
         │       │       └──int 5
-        │       ├──VariableDeclaration
+        │       ├──VariableDeclaration []
         │       │   ├──Long
         │       │   └──l
         │       │       └──long 10
-        │       ├──VariableDeclaration
+        │       ├──VariableDeclaration []
         │       │   ├──Boolean
         │       │   └──b
         │       │       └──boolean true
         │       ├──Assignment =
         │       │   ├──b
         │       │   └──boolean false
-        │       ├──VariableDeclaration
+        │       ├──VariableDeclaration []
         │       │   ├──Char
         │       │   └──c
         │       │       └──char 'A'
-        │       ├──VariableDeclaration
+        │       ├──VariableDeclaration []
         │       │   ├──String
         │       │   └──s
         │       │       └──String "abc"
-        │       └──VariableDeclaration
+        │       └──VariableDeclaration []
         │           ├──Object
         │           └──o
         │               └──null
         ├──Method unary_operators []
         │   ├──Void
         │   └──Block
-        │       ├──VariableDeclaration
+        │       ├──VariableDeclaration []
         │       │   ├──Int
         │       │   └──x
         │       │       └──int 0
@@ -60,7 +60,7 @@ source: tests/snapshot/snapshot_test.rs
         │       │   ├──x
         │       │   └──BitwiseComplement
         │       │       └──int 100
-        │       ├──VariableDeclaration
+        │       ├──VariableDeclaration []
         │       │   ├──Boolean
         │       │   └──b
         │       │       └──LogicalNot
@@ -77,7 +77,7 @@ source: tests/snapshot/snapshot_test.rs
         ├──Method binary_operators []
         │   ├──Void
         │   └──Block
-        │       ├──VariableDeclaration
+        │       ├──VariableDeclaration []
         │       │   ├──Int
         │       │   └──x
         │       │       └── /
@@ -157,7 +157,7 @@ source: tests/snapshot/snapshot_test.rs
         │       │       │   ├──int 16
         │       │       │   └──int 2
         │       │       └──int 1
-        │       ├──VariableDeclaration
+        │       ├──VariableDeclaration []
         │       │   ├──Boolean
         │       │   └──b
         │       │       └── <
@@ -433,21 +433,21 @@ source: tests/snapshot/snapshot_test.rs
         └──Method conditional_expressions []
             ├──Void
             └──Block
-                ├──VariableDeclaration
+                ├──VariableDeclaration []
                 │   ├──Int
                 │   └──x
                 │       └──ConditionalExpression
                 │           ├──boolean true
                 │           ├──int 1
                 │           └──int 2
-                ├──VariableDeclaration
+                ├──VariableDeclaration []
                 │   ├──Int
                 │   └──a
                 │       └──ConditionalExpression
                 │           ├──boolean false
                 │           ├──int 1
                 │           └──int 2
-                ├──VariableDeclaration
+                ├──VariableDeclaration []
                 │   ├──Int
                 │   └──b
                 │       └──ConditionalExpression
@@ -457,7 +457,7 @@ source: tests/snapshot/snapshot_test.rs
                 │               ├──boolean false
                 │               ├──int 2
                 │               └──int 3
-                ├──VariableDeclaration
+                ├──VariableDeclaration []
                 │   ├──Int
                 │   └──c
                 │       └──ConditionalExpression
@@ -467,7 +467,7 @@ source: tests/snapshot/snapshot_test.rs
                 │           │   ├──int 1
                 │           │   └──int 2
                 │           └──int 3
-                ├──VariableDeclaration
+                ├──VariableDeclaration []
                 │   ├──Int
                 │   └──d
                 │       └──ConditionalExpression
@@ -476,7 +476,7 @@ source: tests/snapshot/snapshot_test.rs
                 │           │   └──int 2
                 │           ├──int 3
                 │           └──int 4
-                ├──VariableDeclaration
+                ├──VariableDeclaration []
                 │   ├──Int
                 │   └──e
                 │       └──ConditionalExpression
@@ -485,7 +485,7 @@ source: tests/snapshot/snapshot_test.rs
                 │           │   └──boolean false
                 │           ├──int 1
                 │           └──int 2
-                ├──VariableDeclaration
+                ├──VariableDeclaration []
                 │   ├──Int
                 │   └──f
                 │       └──ConditionalExpression
@@ -494,7 +494,7 @@ source: tests/snapshot/snapshot_test.rs
                 │           │   └──boolean false
                 │           ├──int 1
                 │           └──int 2
-                ├──VariableDeclaration
+                ├──VariableDeclaration []
                 │   ├──Int
                 │   └──g
                 │       └──ConditionalExpression
@@ -549,7 +549,7 @@ source: tests/snapshot/snapshot_test.rs
                 │       └── <<
                 │           ├──d
                 │           └──e
-                ├──VariableDeclaration
+                ├──VariableDeclaration []
                 │   ├──Boolean
                 │   ├──b1
                 │   │   └──boolean false

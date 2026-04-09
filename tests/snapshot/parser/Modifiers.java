@@ -6,6 +6,7 @@ public abstract class ModifierTest {
     public abstract void abstractMethod();
 
     protected static void staticMethod(final int x) {
+        final int y = x + 1;
     }
 
     public static final class Inner {
@@ -13,7 +14,7 @@ public abstract class ModifierTest {
         private int x;
 
         public final void method(final int param) {
-            int local = param;
+            final int local = param;
         }
     }
 }

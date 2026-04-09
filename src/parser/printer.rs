@@ -2,8 +2,8 @@ use crate::parser::ast::{
     AssignmentOp, BinOp, ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration,
     CompilationUnit, Expression, FormalParameter, LeftHandSide, MemberAccess, MethodBody,
     MethodCall, MethodDeclaration, Modified, Modifiers, NormalClassDeclaration, Statement,
-    TopLevelClassOrInterfaceDeclaration, Type, VariableDeclarator, VariableDeclaratorId,
-    VariableInitializer,
+    TopLevelClassOrInterfaceDeclaration, Type, VariableDeclaration, VariableDeclarator,
+    VariableDeclaratorId, VariableInitializer,
 };
 use std::fmt;
 use std::fmt::{Display, Formatter};
@@ -23,7 +23,8 @@ pub trait AstNode<Context = ()> {
 
 impl<T: AstNode<Modifiers>> Modified<T> {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
-        self.item.fmt_tree_with_context(f, prefix, is_last, &self.modifiers)
+        self.item
+            .fmt_tree_with_context(f, prefix, is_last, &self.modifiers)
     }
 }
 
@@ -159,10 +160,10 @@ impl AstNode<Modifiers> for ClassMemberDeclaration {
             ClassMemberDeclaration::NestedClassDeclaration(c) => {
                 c.fmt_tree_with_context(f, prefix, is_last, modifiers)
             }
-            ClassMemberDeclaration::FieldDeclaration { variable_type, declarations: declrations } => {
+            ClassMemberDeclaration::FieldDeclaration { variable_type, declarations } => {
                 writeln!(f, "{line_prefix}Field declaration {:?}", modifiers)?;
                 variable_type.fmt_tree(f, &new_prefix, false)?;
-                declrations.fmt_tree(f, &new_prefix, true)
+                declarations.fmt_tree(f, &new_prefix, true)
             }
         }
     }
@@ -185,7 +186,13 @@ impl AstNode<Modifiers> for FormalParameter {
         self.fmt_tree_with_context(f, prefix, is_last, &vec![])
     }
 
-    fn fmt_tree_with_context(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool, modifiers: &Modifiers) -> fmt::Result {
+    fn fmt_tree_with_context(
+        &self,
+        f: &mut Formatter<'_>,
+        prefix: &str,
+        is_last: bool,
+        modifiers: &Modifiers,
+    ) -> fmt::Result {
         let (line_prefix, _) = branch(&prefix, is_last);
 
         match self {
@@ -243,11 +250,7 @@ impl AstNode for Statement {
                 writeln!(f, "{line_prefix}BlockStatement")?;
                 statements.fmt_tree(f, &new_prefix, true)
             }
-            Statement::VariableDeclaration { variable_type, declarators } => {
-                writeln!(f, "{line_prefix}VariableDeclaration")?;
-                variable_type.fmt_tree(f, &new_prefix, false)?;
-                declarators.fmt_tree(f, &new_prefix, true)
-            }
+            Statement::VariableDeclaration(v) => v.fmt_tree(f, &prefix, is_last),
         }
     }
 }
@@ -373,6 +376,27 @@ impl AstNode for BinOp {
             BinOp::LogicalAnd => writeln!(f, "{prefix} &&"),
             BinOp::LogicalOr => writeln!(f, "{prefix} ||"),
         }
+    }
+}
+
+impl AstNode<Modifiers> for VariableDeclaration {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        self.fmt_tree_with_context(f, prefix, is_last, &vec![])
+    }
+
+    fn fmt_tree_with_context(
+        &self,
+        f: &mut Formatter<'_>,
+        prefix: &str,
+        is_last: bool,
+        modifiers: &Modifiers,
+    ) -> fmt::Result {
+        let (line_prefix, new_prefix) = branch(&prefix, is_last);
+
+        writeln!(f, "{line_prefix}VariableDeclaration {:?}", modifiers)?;
+
+        self.variable_type.fmt_tree(f, &new_prefix, false)?;
+        self.declarators.fmt_tree(f, &new_prefix, true)
     }
 }
 

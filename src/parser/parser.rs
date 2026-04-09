@@ -5,8 +5,8 @@ use crate::parser::ast::{
     ClassMemberDeclaration, CompilationUnit, Expression, FormalParameter, FormalParameterList,
     Identifier, LeftHandSide, MemberAccess, MethodBody, MethodCall, MethodDeclaration, Modifiable,
     Modified, Modifier, NormalClassDeclaration, Program, Statement,
-    TopLevelClassOrInterfaceDeclaration, Type, VariableDeclarator, VariableDeclaratorId,
-    VariableDeclaratorList, VariableInitializer,
+    TopLevelClassOrInterfaceDeclaration, Type, VariableDeclaration, VariableDeclarator,
+    VariableDeclaratorId, VariableDeclaratorList, VariableInitializer,
 };
 use crate::parser::error::ParseError;
 
@@ -507,7 +507,7 @@ impl Parser {
     ///     ClassInstanceCreationExpression ;
     ///
     /// local_variable_declaration_statement
-    ///     Type VariableDeclaratorList ;
+    ///     {modifier} typr variable_declarator_list ;
     ///```
     /// At this point we cannot distinguish between the identifier part of the `labeled_statement`,
     /// the first primary in some of the possible derivations of `expression_statement`, and the type
@@ -527,11 +527,11 @@ impl Parser {
     /// additional tokens (such as `:`, `identifier`, or `;`) make the distinction unambiguous.
     /// ```text
     /// statement_starting_with_name:
+    ///     {modifier} term variable_declarator {, variable_declarator}
     ///     term [statement_ending]
     ///
     /// statement_ending:
     ///     : statement // labeled statement
-    ///     variable_declarator {, variable_declarator} ;// local variable declaration statement
     ///     ; // just a term - in this case it's a complete expression_statement
     ///
     /// variable_declarator:
@@ -539,14 +539,20 @@ impl Parser {
     ///     _          [= variable_initializer]
     /// ```
     fn statement_starting_with_name(&mut self) -> Result<Statement, ParseError> {
+        let modifiers = self.zero_or_more(|this| this.modifier());
         let expression = self.term()?;
         let statement = if let Ok(var_declarations) = self.variable_declarators_list() {
-            Statement::VariableDeclaration {
-                variable_type: expression,
-                declarators: var_declarations,
-            }
-        } else {
+            Statement::VariableDeclaration(
+                VariableDeclaration {
+                    variable_type: expression,
+                    declarators: var_declarations,
+                }
+                    .with_modifiers(modifiers),
+            )
+        } else if modifiers.is_empty() {
             Statement::ExpressionStatement(expression)
+        } else {
+            return Err(ParseError::NoProduction);
         };
 
         self.assert(Token::Semicolon)?;

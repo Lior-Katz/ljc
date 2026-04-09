@@ -20,6 +20,12 @@ source: tests/snapshot/snapshot_test.rs
         │   ├──Void
         │   ├──Param Int x [Final]
         │   └──Block
+        │       └──VariableDeclaration [Final]
+        │           ├──Int
+        │           └──y
+        │               └── +
+        │                   ├──x
+        │                   └──int 1
         └──Class Inner [Public, Static, Final]
             ├──Field declaration [Private]
             │   ├──Int
@@ -28,7 +34,7 @@ source: tests/snapshot/snapshot_test.rs
                 ├──Void
                 ├──Param Int param [Final]
                 └──Block
-                    └──VariableDeclaration
+                    └──VariableDeclaration [Final]
                         ├──Int
                         └──local
                             └──param

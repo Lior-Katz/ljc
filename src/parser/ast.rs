@@ -97,10 +97,13 @@ pub enum Statement {
     EmptyStatement,
     ExpressionStatement(Expression),
     Block(BlockStatements),
-    VariableDeclaration {
-        variable_type: Expression,
-        declarators: VariableDeclaratorList,
-    },
+    VariableDeclaration(Modified<VariableDeclaration>),
+}
+
+#[derive(Debug)]
+pub struct VariableDeclaration {
+    pub variable_type: Expression,
+    pub declarators: VariableDeclaratorList,
 }
 
 #[derive(Debug)]
