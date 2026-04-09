@@ -1,11 +1,11 @@
 class ClassMembers {
     private int a;
-    protected int b = 1, c;
+    protected static int b = 1, c;
     ;;
     public void foo() {};
-    protected int bar(int x) {}
+    protected static int bar(int x) {}
 
-    public class InnerClass {
+    public static class InnerClass {
         int x;
 
         void innerMethod() {}

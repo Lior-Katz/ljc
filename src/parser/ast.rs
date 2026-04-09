@@ -29,6 +29,9 @@ pub enum Modifier {
     Public,
     Protected,
     Private,
+    Abstract,
+    Static,
+    Final,
 }
 
 pub trait Modifiable {

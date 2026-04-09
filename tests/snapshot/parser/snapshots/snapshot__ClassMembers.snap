@@ -6,7 +6,7 @@ source: tests/snapshot/snapshot_test.rs
         ├──Field declaration [Private]
         │   ├──Int
         │   └──a
-        ├──Field declaration [Protected]
+        ├──Field declaration [Protected, Static]
         │   ├──Int
         │   ├──b
         │   │   └──int 1
@@ -14,11 +14,11 @@ source: tests/snapshot/snapshot_test.rs
         ├──Method foo [Public]
         │   ├──Void
         │   └──Block
-        ├──Method bar [Protected]
+        ├──Method bar [Protected, Static]
         │   ├──Int
         │   ├──Param Int x
         │   └──Block
-        └──Class InnerClass [Public]
+        └──Class InnerClass [Public, Static]
             ├──Field declaration []
             │   ├──Int
             │   └──x

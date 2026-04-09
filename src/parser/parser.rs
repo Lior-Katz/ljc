@@ -209,7 +209,10 @@ impl Parser {
         self
             .accept(Token::Public).then_some(Modifier::Public).or_else(|| self
             .accept(Token::Private).then_some(Modifier::Private)).or_else(|| self
-            .accept(Token::Protected).then_some(Modifier::Protected))
+            .accept(Token::Protected).then_some(Modifier::Protected)).or_else(|| self
+            .accept(Token::Abstract).then_some(Modifier::Abstract)).or_else(|| self
+            .accept(Token::Static).then_some(Modifier::Static)).or_else(|| self
+            .accept(Token::Final).then_some(Modifier::Final))
             .ok_or(ParseError::NoProduction)
     }
 
