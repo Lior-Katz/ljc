@@ -248,6 +248,7 @@ impl Parser {
     ///     ;
     /// ```
     fn class_member_declaration(&mut self) -> Result<Modified<ClassMemberDeclaration>, ParseError> {
+        while self.accept(Token::Semicolon) {} // ignore stray semicolons
         let modifiers = self.zero_or_more(Self::modifier);
 
         if let Ok(class) = self.class_declaration() {
