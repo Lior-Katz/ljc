@@ -5,14 +5,14 @@ public abstract class ModifierTest {
 
     public abstract void abstractMethod();
 
-    protected static void staticMethod(int x) {
+    protected static void staticMethod(final int x) {
     }
 
     public static final class Inner {
 
         private int x;
 
-        public final void method(int param) {
+        public final void method(final int param) {
             int local = param;
         }
     }

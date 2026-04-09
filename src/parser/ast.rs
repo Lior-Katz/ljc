@@ -3,6 +3,7 @@ pub type Identifier = String;
 pub type TypeIdentifier = Identifier;
 type BlockStatements = Vec<Statement>;
 pub type VariableDeclaratorList = Vec<VariableDeclarator>;
+pub type FormalParameterList = Vec<Modified<FormalParameter>>;
 pub type ArgumentList = Vec<Expression>;
 pub type Modifiers = Vec<Modifier>;
 pub type Modified<T> = WithModifiers<T>;
@@ -75,7 +76,7 @@ pub enum ClassMemberDeclaration {
 pub struct MethodDeclaration {
     pub result: MethodResult,
     pub identifier: Identifier,
-    pub parameters: Vec<FormalParameter>,
+    pub parameters: FormalParameterList,
     pub body: MethodBody,
 }
 

@@ -2,10 +2,11 @@ use crate::lexer::{LexError, Token};
 use crate::lexer::{Tokens, lex_single_file};
 use crate::parser::ast::{
     ArgumentList, AssignmentOp, BinOp, ClassBodyDeclaration, ClassDeclaration,
-    ClassMemberDeclaration, CompilationUnit, Expression, FormalParameter, Identifier, LeftHandSide,
-    MemberAccess, MethodBody, MethodCall, MethodDeclaration, Modifiable, Modified, Modifier,
-    NormalClassDeclaration, Program, Statement, TopLevelClassOrInterfaceDeclaration, Type,
-    VariableDeclarator, VariableDeclaratorId, VariableDeclaratorList, VariableInitializer,
+    ClassMemberDeclaration, CompilationUnit, Expression, FormalParameter, FormalParameterList,
+    Identifier, LeftHandSide, MemberAccess, MethodBody, MethodCall, MethodDeclaration, Modifiable,
+    Modified, Modifier, NormalClassDeclaration, Program, Statement,
+    TopLevelClassOrInterfaceDeclaration, Type, VariableDeclarator, VariableDeclaratorId,
+    VariableDeclaratorList, VariableInitializer,
 };
 use crate::parser::error::ParseError;
 
@@ -299,26 +300,32 @@ impl Parser {
                 field_declaration.append(&mut self.variable_declarators_list()?);
             }
             self.assert(Token::Semicolon)?;
-            Ok(ClassMemberDeclaration::FieldDeclaration { variable_type: result, declarations: field_declaration })
+            Ok(ClassMemberDeclaration::FieldDeclaration {
+                variable_type: result,
+                declarations: field_declaration,
+            })
         }
     }
 
-    fn formal_parameters(&mut self) -> Result<Vec<FormalParameter>, ParseError> {
+    fn formal_parameters(&mut self) -> Result<FormalParameterList, ParseError> {
         self.delimited_list(|this| this.formal_parameter(), |this| this.assert(Token::Comma))
     }
 
-    fn formal_parameter(&mut self) -> Result<FormalParameter, ParseError> {
+    fn formal_parameter(&mut self) -> Result<Modified<FormalParameter>, ParseError> {
+        let modifiers = self.zero_or_more(|this| this.modifier());
         let param_type = self.unannotated_type()?;
         if self.accept(Token::Ellipsis) {
             // variable arity
             let identifier = self.identifier()?;
-            Ok(FormalParameter::VariableArityParameter(param_type, identifier))
+            Ok(FormalParameter::VariableArityParameter(param_type, identifier)
+                .with_modifiers(modifiers))
         } else {
             let identifier = self.identifier()?;
             Ok(FormalParameter::NormalFormalParameter(
                 param_type,
                 VariableDeclaratorId::Named(identifier),
-            ))
+            )
+                .with_modifiers(modifiers))
         }
     }
 

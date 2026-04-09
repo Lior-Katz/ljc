@@ -5,11 +5,11 @@ source: tests/snapshot/snapshot_test.rs
     └──Class Statements []
         ├──Method assignment_statements []
         │   ├──Void
-        │   ├──Param Int a
-        │   ├──Param Int b
-        │   ├──Param Int c
-        │   ├──Param Int d
-        │   ├──Param Int x
+        │   ├──Param Int a []
+        │   ├──Param Int b []
+        │   ├──Param Int c []
+        │   ├──Param Int d []
+        │   ├──Param Int x []
         │   └──Block
         │       ├──Assignment =
         │       │   ├──a
@@ -154,8 +154,8 @@ source: tests/snapshot/snapshot_test.rs
         │               └──b
         ├──Method prefix_operators []
         │   ├──Void
-        │   ├──Param Int a
-        │   ├──Param Int b
+        │   ├──Param Int a []
+        │   ├──Param Int b []
         │   └──Block
         │       ├──PreIncrement
         │       │   └──a
@@ -167,8 +167,8 @@ source: tests/snapshot/snapshot_test.rs
         │           └──b
         ├──Method postfix_operators []
         │   ├──Void
-        │   ├──Param Int a
-        │   ├──Param Int b
+        │   ├──Param Int a []
+        │   ├──Param Int b []
         │   └──Block
         │       ├──PostIncrement
         │       │   └──a

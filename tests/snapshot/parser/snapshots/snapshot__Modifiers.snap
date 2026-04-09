@@ -18,7 +18,7 @@ source: tests/snapshot/snapshot_test.rs
         │   └──;
         ├──Method staticMethod [Protected, Static]
         │   ├──Void
-        │   ├──Param Int x
+        │   ├──Param Int x [Final]
         │   └──Block
         └──Class Inner [Public, Static, Final]
             ├──Field declaration [Private]
@@ -26,7 +26,7 @@ source: tests/snapshot/snapshot_test.rs
             │   └──x
             └──Method method [Public, Final]
                 ├──Void
-                ├──Param Int param
+                ├──Param Int param [Final]
                 └──Block
                     └──VariableDeclaration
                         ├──Int

@@ -16,7 +16,7 @@ source: tests/snapshot/snapshot_test.rs
         │   └──Block
         ├──Method bar [Protected, Static]
         │   ├──Int
-        │   ├──Param Int x
+        │   ├──Param Int x []
         │   └──Block
         └──Class InnerClass [Public, Static]
             ├──Field declaration []

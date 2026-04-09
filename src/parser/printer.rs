@@ -9,7 +9,6 @@ use std::fmt;
 use std::fmt::{Display, Formatter};
 
 pub trait AstNode<Context = ()> {
-    // fn to_string(&self, prefix: String, is_last: bool) -> String;
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result;
     fn fmt_tree_with_context(
         &self,
@@ -19,6 +18,12 @@ pub trait AstNode<Context = ()> {
         _context: &Context,
     ) -> fmt::Result {
         self.fmt_tree(f, prefix, is_last)
+    }
+}
+
+impl<T: AstNode<Modifiers>> Modified<T> {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        self.item.fmt_tree_with_context(f, prefix, is_last, &self.modifiers)
     }
 }
 
@@ -80,13 +85,6 @@ impl AstNode for TopLevelClassOrInterfaceDeclaration {
     }
 }
 
-impl Modified<ClassDeclaration> {
-    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
-        self.item
-            .fmt_tree_with_context(f, prefix, is_last, &self.modifiers)
-    }
-}
-
 impl AstNode<Modifiers> for ClassDeclaration {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         self.fmt_tree_with_context(f, prefix, is_last, &vec![])
@@ -139,13 +137,6 @@ impl AstNode for ClassBodyDeclaration {
     }
 }
 
-impl Modified<ClassMemberDeclaration> {
-    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
-        self.item
-            .fmt_tree_with_context(f, prefix, is_last, &self.modifiers)
-    }
-}
-
 impl AstNode<Modifiers> for ClassMemberDeclaration {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         self.fmt_tree_with_context(f, prefix, is_last, &vec![])
@@ -189,13 +180,17 @@ impl AstNode for MethodDeclaration {
     }
 }
 
-impl AstNode for FormalParameter {
+impl AstNode<Modifiers> for FormalParameter {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        self.fmt_tree_with_context(f, prefix, is_last, &vec![])
+    }
+
+    fn fmt_tree_with_context(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool, modifiers: &Modifiers) -> fmt::Result {
         let (line_prefix, _) = branch(&prefix, is_last);
 
         match self {
             FormalParameter::NormalFormalParameter(t, id) => {
-                writeln!(f, "{line_prefix}Param {} {}", t, id)
+                writeln!(f, "{line_prefix}Param {} {} {:?}", t, id, modifiers)
             }
             FormalParameter::VariableArityParameter(_, id) => {
                 writeln!(f, "{line_prefix}VarArg {}", id)
