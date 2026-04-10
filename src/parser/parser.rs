@@ -37,6 +37,28 @@ macro_rules! accept_with_value {
     }};
 }
 
+macro_rules! one_of {
+    ($($x:expr),+ $(,)?) => {{
+        let mut res = Err(ParseError::NoProduction);
+        $(
+            res = match res {
+                Ok(_) => res,
+                Err(_) => $x
+            };
+        )+
+        res
+    }};
+}
+
+macro_rules! one_of_opt {
+    ($($x:expr),+ $(,)?) => {{
+        $(
+            match $x {  Some(v) => return Ok(v), None => {} };
+        )+
+        Err(ParseError::NoProduction)
+    }};
+}
+
 pub fn parse_single_file(path: &Path) -> Result<Program, ParseError> {
     let mut parser = Parser::new(path).unwrap();
     parser.parse()
@@ -207,14 +229,14 @@ impl Parser {
     }
 
     fn modifier(&mut self) -> Result<Modifier, ParseError> {
-        self
-            .accept(Token::Public).then_some(Modifier::Public).or_else(|| self
-            .accept(Token::Private).then_some(Modifier::Private)).or_else(|| self
-            .accept(Token::Protected).then_some(Modifier::Protected)).or_else(|| self
-            .accept(Token::Abstract).then_some(Modifier::Abstract)).or_else(|| self
-            .accept(Token::Static).then_some(Modifier::Static)).or_else(|| self
-            .accept(Token::Final).then_some(Modifier::Final))
-            .ok_or(ParseError::NoProduction)
+        one_of_opt!(
+            self.accept(Token::Public).then_some(Modifier::Public),
+            self.accept(Token::Private).then_some(Modifier::Private),
+            self.accept(Token::Protected).then_some(Modifier::Protected),
+            self.accept(Token::Abstract).then_some(Modifier::Abstract),
+            self.accept(Token::Static).then_some(Modifier::Static),
+            self.accept(Token::Final).then_some(Modifier::Final)
+        )
     }
 
     fn identifier(&mut self) -> Result<Identifier, ParseError> {
@@ -466,11 +488,12 @@ impl Parser {
     ///     statement_starting_with_name
     /// ```
     fn local_variable_declaration_or_statement(&mut self) -> Result<Statement, ParseError> {
-        self
-            .empty_statement().or_else(|_| self
-            .block().map(|v| Statement::Block(v))).or_else(|_| self
-            .simple_statement()).or_else(|_| self
-            .statement_starting_with_name())
+        one_of!(
+            self.empty_statement(),
+            self.block().map(|v| Statement::Block(v)),
+            self.simple_statement(),
+            self.statement_starting_with_name(),
+        )
     }
 
     fn empty_statement(&mut self) -> Result<Statement, ParseError> {
@@ -860,12 +883,13 @@ impl Parser {
     }
 
     fn primary(&mut self) -> Result<Expression, ParseError> {
-        self
-            .literal().or_else(|_| self
-            .primitive_type().map(|t| Expression::Type(t))).or_else(|_| self
-            .parenthesized_expression()).or_else(|_| self
-            .unqualified_class_instance_creation_expression()).or_else(|_| self
-            .identifier_expression())
+        one_of!(
+            self.literal(),
+            self.primitive_type().map(|t| Expression::Type(t)),
+            self.parenthesized_expression(),
+            self.unqualified_class_instance_creation_expression(),
+            self.identifier_expression()
+        )
     }
 
     /// ```text
@@ -878,20 +902,14 @@ impl Parser {
     ///     null_literal
     /// ```
     fn literal(&mut self) -> Result<Expression, ParseError> {
-        self.integer_literal()
-            .map(|v| Expression::IntegerLiteral(v))
-            .or_else(|_| self.long_literal().map(|v| Expression::LongLiteral(v)))
-            .or_else(|_| {
-                self.boolean_literal()
-                    .map(|v| Expression::BooleanLiteral(v))
-            })
-            .or_else(|_| self.char_literal().map(|v| Expression::CharLiteral(v)))
-            .or_else(|_| self.string_literal().map(|v| Expression::StringLiteral(v)))
-            .or_else(|_| {
-                self.accept(Token::NullLiteral)
-                    .then_some(Expression::NullLiteral)
-                    .ok_or(ParseError::NoProduction)
-            })
+        one_of!(
+            self.integer_literal().map(|v| Expression::IntegerLiteral(v)),
+            self.long_literal().map(|v| Expression::LongLiteral(v)),
+            self.boolean_literal().map(|v| Expression::BooleanLiteral(v)),
+            self.char_literal().map(|v| Expression::CharLiteral(v)),
+            self.string_literal().map(|v| Expression::StringLiteral(v)),
+            self.accept(Token::NullLiteral).then_some(Expression::NullLiteral).ok_or(ParseError::NoProduction)
+        )
     }
 
     fn parenthesized_expression(&mut self) -> Result<Expression, ParseError> {
