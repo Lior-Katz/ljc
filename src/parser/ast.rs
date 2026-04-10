@@ -8,6 +8,7 @@ pub type ArgumentList = Vec<Expression>;
 pub type Modifiers = Vec<Modifier>;
 pub type Modified<T> = WithModifiers<T>;
 pub type MethodResult = Expression;
+pub type TypeToInstantiate = Vec<Identifier>;
 
 #[derive(Debug)]
 pub enum CompilationUnit {
@@ -175,6 +176,10 @@ pub enum Expression {
     Type(Type),
     MemberAccess(MemberAccess),
     MethodCall(MethodCall),
+    UnqualifiedClassInstanceCreationExpression {
+        type_to_instantiate: TypeToInstantiate,
+        arguments: ArgumentList,
+    }
 }
 
 #[derive(Debug)]

@@ -328,6 +328,13 @@ impl AstNode for Expression {
             }
             Expression::MemberAccess(v) => v.fmt_tree(f, &prefix, is_last),
             Expression::MethodCall(v) => v.fmt_tree(f, &prefix, is_last),
+            Expression::UnqualifiedClassInstanceCreationExpression {
+                type_to_instantiate,
+                arguments,
+            } => {
+                writeln!(f, "{line_prefix}new {}", type_to_instantiate.join("."))?;
+                arguments.fmt_tree(f, &new_prefix, true)
+            }
         }
     }
 }

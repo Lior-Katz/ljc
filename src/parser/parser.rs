@@ -860,10 +860,12 @@ impl Parser {
     }
 
     fn primary(&mut self) -> Result<Expression, ParseError> {
-        self.literal()
-            .or_else(|_| self.primitive_type().map(|t| Expression::Type(t)))
-            .or_else(|_| self.parenthesized_expression())
-            .or_else(|_| self.identifier_expression())
+        self
+            .literal().or_else(|_| self
+            .primitive_type().map(|t| Expression::Type(t))).or_else(|_| self
+            .parenthesized_expression()).or_else(|_| self
+            .unqualified_class_instance_creation_expression()).or_else(|_| self
+            .identifier_expression())
     }
 
     /// ```text
@@ -1019,6 +1021,25 @@ impl Parser {
             prologue,
             constructor_invocation,
             epilogue,
+        })
+    }
+
+    /// ```text
+    /// unqualified_class_instance_creation_expression:
+    ///     new class_or_interface_to_instantiate ( argument_list )
+    ///
+    /// class_or_interface_to_instantiate:
+    ///     identifier {. identifier}
+    fn unqualified_class_instance_creation_expression(&mut self) -> Result<Expression, ParseError> {
+        self.assert(Token::New)?;
+        let type_to_instantiate =
+            self.delimited_at_least_1(Self::identifier, |this| this.assert(Token::Dot))?;
+        self.assert(Token::LeftParen)?;
+        let arguments = self.argument_list()?;
+        self.assert(Token::RightParen)?;
+        Ok(Expression::UnqualifiedClassInstanceCreationExpression {
+            type_to_instantiate,
+            arguments,
         })
     }
 }
