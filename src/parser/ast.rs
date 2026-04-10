@@ -70,6 +70,11 @@ pub enum ClassMemberDeclaration {
         variable_type: Expression,
         declarations: VariableDeclaratorList,
     },
+    ConstructorDeclaration {
+        name: Identifier, // this is just for validating that the name matches the class
+        parameters: FormalParameterList,
+        body: ConstructorBody,
+    }
 }
 
 #[derive(Debug)]
@@ -90,6 +95,18 @@ pub enum FormalParameter {
 pub enum MethodBody {
     Semicolon,
     Block(BlockStatements),
+}
+
+#[derive(Debug)]
+pub struct ConstructorBody {
+    pub prologue: Option<BlockStatements>,
+    pub constructor_invocation: Option<ConstructorInvocation>,
+    pub epilogue: BlockStatements,
+}
+
+#[derive(Debug)]
+pub enum ConstructorInvocation {
+    Alternate { arguments: ArgumentList },
 }
 
 #[derive(Debug)]

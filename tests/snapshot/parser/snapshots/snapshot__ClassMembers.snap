@@ -11,8 +11,56 @@ source: tests/snapshot/snapshot_test.rs
         │   ├──b
         │   │   └──int 1
         │   └──c
+        ├──Constructor declaration []
+        │   └──ConstructorBody
+        ├──Constructor declaration [Public]
+        │   ├──Param Int x []
+        │   └──ConstructorBody
+        ├──Constructor declaration [Protected]
+        │   ├──Param Int x []
+        │   ├──Param Int y []
+        │   └──ConstructorBody
+        │       └──Epilogue
+        │           └──VariableDeclaration []
+        │               ├──Int
+        │               └──z
+        │                   └── +
+        │                       ├──x
+        │                       └──y
+        ├──Constructor declaration []
+        │   ├──Param Int x []
+        │   └──ConstructorBody
+        │       └──ConstructorInvocation
+        │           ├──int 1
+        │           └──int 2
+        ├──Constructor declaration []
+        │   ├──Param Double d []
+        │   └──ConstructorBody
+        │       ├──ConstructorInvocation
+        │       │   └──int 2
+        │       └──Epilogue
+        │           └──VariableDeclaration []
+        │               ├──Int
+        │               └──x
+        │                   └──int 0
+        ├──Constructor declaration []
+        │   ├──Param Boolean flag []
+        │   └──ConstructorBody
+        │       ├──Prologue
+        │       │   └──VariableDeclaration []
+        │       │       ├──Int
+        │       │       └──x
+        │       │           └──int 10
+        │       ├──ConstructorInvocation
+        │       │   └── +
+        │       │       ├──int 1
+        │       │       └──int 1
+        │       └──Epilogue
+        │           └──Assignment =
+        │               ├──x
+        │               └──int 5
         ├──Method foo [Public]
-        │   ├──Void
+        │   ├──ClassMembers
         │   └──Block
         ├──Method bar [Protected, Static]
         │   ├──Int

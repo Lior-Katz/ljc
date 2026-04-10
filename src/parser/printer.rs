@@ -1,9 +1,9 @@
 use crate::parser::ast::{
     AssignmentOp, BinOp, ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration,
-    CompilationUnit, Expression, FormalParameter, LeftHandSide, MemberAccess, MethodBody,
-    MethodCall, MethodDeclaration, Modified, Modifiers, NormalClassDeclaration, Statement,
-    TopLevelClassOrInterfaceDeclaration, Type, VariableDeclaration, VariableDeclarator,
-    VariableDeclaratorId, VariableInitializer,
+    CompilationUnit, ConstructorBody, ConstructorInvocation, Expression, FormalParameter,
+    LeftHandSide, MemberAccess, MethodBody, MethodCall, MethodDeclaration, Modified,
+    Modifiers, NormalClassDeclaration, Statement, TopLevelClassOrInterfaceDeclaration, Type,
+    VariableDeclaration, VariableDeclarator, VariableDeclaratorId, VariableInitializer,
 };
 use std::fmt;
 use std::fmt::{Display, Formatter};
@@ -21,7 +21,7 @@ pub trait AstNode<Context = ()> {
     }
 }
 
-impl<T: AstNode<Modifiers>> Modified<T> {
+impl<T: AstNode<Modifiers>> AstNode<Modifiers> for Modified<T> {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         self.item
             .fmt_tree_with_context(f, prefix, is_last, &self.modifiers)
@@ -165,6 +165,11 @@ impl AstNode<Modifiers> for ClassMemberDeclaration {
                 variable_type.fmt_tree(f, &new_prefix, false)?;
                 declarations.fmt_tree(f, &new_prefix, true)
             }
+            ClassMemberDeclaration::ConstructorDeclaration { parameters, body, name: _ } => {
+                writeln!(f, "{line_prefix}Constructor declaration {:?}", modifiers)?;
+                parameters.fmt_tree(f, &new_prefix, false)?;
+                body.fmt_tree(f, &new_prefix, true)
+            }
         }
     }
 }
@@ -228,10 +233,13 @@ impl AstNode for MethodBody {
     }
 }
 
-impl<T: AstNode> AstNode for Vec<T> {
-    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, _is_last: bool) -> fmt::Result {
+impl<T, C> AstNode<C> for Vec<T>
+where
+    T: AstNode<C>,
+{
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         for (i, stmt) in self.iter().enumerate() {
-            stmt.fmt_tree(f, &prefix, i == self.len() - 1)?;
+            stmt.fmt_tree(f, &prefix, i == self.len() - 1 && is_last)?;
         }
         Ok(())
     }
@@ -465,5 +473,49 @@ impl AstNode for MethodCall {
         }
 
         Ok(())
+    }
+}
+
+impl AstNode for ConstructorBody {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        let (line_prefix, new_prefix) = branch(prefix, is_last);
+        writeln!(f, "{line_prefix}ConstructorBody")?;
+
+        // Collect present children
+        let mut children: Vec<(&str, &dyn AstNode)> = Vec::new();
+
+        if let Some(prologue) = &self.prologue {
+            children.push(("Prologue", prologue));
+        }
+
+        if let Some(constructor_invocation) = &self.constructor_invocation {
+            children.push(("ConstructorInvocation", constructor_invocation));
+        }
+
+        if !self.epilogue.is_empty() {
+            children.push(("Epilogue", &self.epilogue));
+        }
+
+        // Iterate with correct is_last
+        for (i, (label, node)) in children.iter().enumerate() {
+            let is_last_child = i == children.len() - 1;
+            let (label_prefix, child_prefix) = branch(&new_prefix, is_last_child);
+
+            writeln!(f, "{label_prefix}{label}")?;
+            node.fmt_tree(f, &child_prefix, true)?;
+        }
+
+        Ok(())
+    }
+}
+
+impl AstNode for ConstructorInvocation {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        // let (line_prefix, _) = branch(prefix, is_last);
+        match self {
+            ConstructorInvocation::Alternate { arguments } => {
+                arguments.fmt_tree(f, &prefix, is_last)
+            }
+        }
     }
 }

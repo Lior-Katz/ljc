@@ -2,10 +2,10 @@ use crate::lexer::{LexError, Token};
 use crate::lexer::{Tokens, lex_single_file};
 use crate::parser::ast::{
     ArgumentList, AssignmentOp, BinOp, ClassBodyDeclaration, ClassDeclaration,
-    ClassMemberDeclaration, CompilationUnit, Expression, FormalParameter, FormalParameterList,
-    Identifier, LeftHandSide, MemberAccess, MethodBody, MethodCall, MethodDeclaration, Modifiable,
-    Modified, Modifier, NormalClassDeclaration, Program, Statement,
-    TopLevelClassOrInterfaceDeclaration, Type, VariableDeclaration, VariableDeclarator,
+    ClassMemberDeclaration, CompilationUnit, ConstructorBody, ConstructorInvocation, Expression,
+    FormalParameter, FormalParameterList, Identifier, LeftHandSide, MemberAccess, MethodBody,
+    MethodCall, MethodDeclaration, Modifiable, Modified, Modifier, NormalClassDeclaration, Program,
+    Statement, TopLevelClassOrInterfaceDeclaration, Type, VariableDeclaration, VariableDeclarator,
     VariableDeclaratorId, VariableDeclaratorList, VariableInitializer,
 };
 use crate::parser::error::ParseError;
@@ -240,7 +240,7 @@ impl Parser {
     ///     ;
     /// ```
     /// All four begin with modifiers, so parsing [modifier](Parser::modifier)s is factored out,
-    /// while methods fields both follow with a type so are combined. Thus, we arrive at:
+    /// while methods and fields both follow with a type so are combined. Thus, we arrive at:
     /// ```text
     /// class_member_declaration:
     ///     {modifier} class_member_declaration_no_modifier:
@@ -268,16 +268,32 @@ impl Parser {
     /// ```text
     /// method_or_field_declaration:
     ///     method_declaration
+    ///     constructor_declaration
     ///     field_declaration
     ///
     /// method_declaration:
     ///     term identifier ( [formal_parameters] ) method_body
+    ///
+    /// constructor_declaration:
+    ///     identifier ( [formal_parameters] ) constructor_body
     ///
     /// field_declaration:
     ///     term identifier [= variable_initializer] {, identifier [= variable_initializer]}
     /// ```
     fn method_or_field_declaration(&mut self) -> Result<ClassMemberDeclaration, ParseError> {
         let result = self.term()?;
+        if self.accept(Token::LeftParen) {
+            if let Expression::Name(name) = result {
+                let parameters = self.formal_parameters()?;
+                self.assert(Token::RightParen)?;
+                let body = self.constructor_body()?;
+                return Ok(ClassMemberDeclaration::ConstructorDeclaration {
+                    name,
+                    parameters,
+                    body,
+                });
+            }
+        }
         let identifier = self.identifier()?;
         if self.accept(Token::LeftParen) {
             let parameters = self.formal_parameters()?;
@@ -964,6 +980,46 @@ impl Parser {
 
     fn argument_list(&mut self) -> Result<ArgumentList, ParseError> {
         self.delimited_list(|this| this.expression(), |this| this.assert(Token::Comma))
+    }
+
+    /// ```text
+    /// constructor_body:
+    ///     { {block_statement} [constructor_invocation] {block_statement} }
+    ///
+    /// constructor_invocation:
+    ///     this ( [argument_list] ) ;
+    /// ```
+    fn constructor_body(&mut self) -> Result<ConstructorBody, ParseError> {
+        self.assert(Token::LeftBrace)?;
+        let first_part = self.zero_or_more(Self::block_statement);
+        let constructor_invocation = if self.accept(Token::This) {
+            self.assert(Token::LeftParen)?;
+            let arguments = self.argument_list()?;
+            self.assert(Token::RightParen)?;
+            self.assert(Token::Semicolon)?;
+            Some(ConstructorInvocation::Alternate { arguments })
+        } else {
+            None
+        };
+        let (prologue, epilogue) = match constructor_invocation {
+            Some(_) => {
+                let prologue = if first_part.is_empty() { None } else { Some(first_part) };
+
+                let epilogue = self.zero_or_more(Self::block_statement);
+
+                (prologue, epilogue)
+            }
+            None => {
+                // No constructor call → everything is epilogue
+                (None, first_part)
+            }
+        };
+        self.assert(Token::RightBrace)?;
+        Ok(ConstructorBody {
+            prologue,
+            constructor_invocation,
+            epilogue,
+        })
     }
 }
 
