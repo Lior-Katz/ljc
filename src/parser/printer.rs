@@ -7,6 +7,7 @@ use crate::parser::ast::{
 };
 use std::fmt;
 use std::fmt::{Display, Formatter};
+use std::ops::Deref;
 
 pub trait AstNode<Context = ()> {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result;
@@ -259,6 +260,23 @@ impl AstNode for Statement {
                 statements.fmt_tree(f, &new_prefix, true)
             }
             Statement::VariableDeclaration(v) => v.fmt_tree(f, &prefix, is_last),
+            Statement::IfStatement { condition, if_true, if_false } => {
+                writeln!(f, "{line_prefix}IfStatement")?;
+                let mut children: Vec<(&str, &dyn AstNode)> = Vec::new();
+                children.push(("condition", condition));
+                children.push(("if_true", if_true.deref()));
+                if let Some(if_false) = if_false {
+                    children.push(("if_false", if_false.deref()));
+                };
+                for (i, (label, node)) in children.iter().enumerate() {
+                    let is_last_child = i == children.len() - 1;
+                    let (label_prefix, child_prefix) = branch(&new_prefix, is_last_child);
+
+                    writeln!(f, "{label_prefix}{label}")?;
+                    node.fmt_tree(f, &child_prefix, true)?;
+                }
+                Ok(())
+            }
         }
     }
 }

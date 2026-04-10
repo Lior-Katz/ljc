@@ -116,6 +116,11 @@ pub enum Statement {
     ExpressionStatement(Expression),
     Block(BlockStatements),
     VariableDeclaration(Modified<VariableDeclaration>),
+    IfStatement {
+        condition: Expression,
+        if_true: Box<Statement>,
+        if_false: Option<Box<Statement>>,
+    }
 }
 
 #[derive(Debug)]

@@ -523,7 +523,9 @@ impl Parser {
     ///     if_then_else_statement
     /// ```
     fn simple_statement(&mut self) -> Result<Statement, ParseError> {
-        Err(ParseError::NoProduction)
+        one_of!(
+            self.if_statement()
+        )
     }
 
     /// From [Parser::local_variable_declaration_or_statement], the remaining kind of statements:
@@ -1060,6 +1062,35 @@ impl Parser {
             arguments,
         })
     }
+
+    /// The general structure of the if statement is as follows:
+    /// ```text
+    /// if_statement:
+    ///     if ( expression ) statement [else_clause]
+    ///
+    /// else_clause:
+    ///     else statement
+    /// ```
+    /// To solve the dangling else problem, Java defines that the else clause belongs to the
+    /// innermost `if` ([§7.6](https://docs.oracle.com/javase/specs/jls/se26/html/jls-14.html#jls-14.5))
+    /// This means that if the else clause exists, the middle statement (then clause) must not end
+    /// in a short-if statement (without an `else` clause).
+    /// Here this is achieved simply by a recursive call, which consumes the else clause if it
+    /// appears.
+    fn if_statement(&mut self) -> Result<Statement, ParseError> {
+        self.assert(Token::If)?;
+        self.assert(Token::LeftParen)?;
+        let condition = self.expression()?;
+        self.assert(Token::RightParen)?;
+        let if_true = Box::new(self.block_statement()?);
+        let if_false = if self.accept(Token::Else) {
+            Some(Box::new(self.block_statement()?))
+        } else {
+            None
+        };
+        Ok(Statement::IfStatement { condition, if_true, if_false })
+    }
+
 }
 
 impl From<LexError> for ParseError {
