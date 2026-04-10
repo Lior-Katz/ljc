@@ -524,7 +524,8 @@ impl Parser {
     /// ```
     fn simple_statement(&mut self) -> Result<Statement, ParseError> {
         one_of!(
-            self.if_statement()
+            self.if_statement(),
+            self.while_statement(),
         )
     }
 
@@ -1091,6 +1092,14 @@ impl Parser {
         Ok(Statement::IfStatement { condition, if_true, if_false })
     }
 
+    fn while_statement(&mut self) -> Result<Statement, ParseError> {
+        self.assert(Token::While)?;
+        self.assert(Token::LeftParen)?;
+        let condition = self.expression()?;
+        self.assert(Token::RightParen)?;
+        let statement = Box::new(self.block_statement()?);
+        Ok(Statement::WhileStatement { condition, statement })
+    }
 }
 
 impl From<LexError> for ParseError {

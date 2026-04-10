@@ -75,7 +75,7 @@ pub enum ClassMemberDeclaration {
         name: Identifier, // this is just for validating that the name matches the class
         parameters: FormalParameterList,
         body: ConstructorBody,
-    }
+    },
 }
 
 #[derive(Debug)]
@@ -120,7 +120,11 @@ pub enum Statement {
         condition: Expression,
         if_true: Box<Statement>,
         if_false: Option<Box<Statement>>,
-    }
+    },
+    WhileStatement {
+        condition: Expression,
+        statement: Box<Statement>,
+    },
 }
 
 #[derive(Debug)]
@@ -184,7 +188,7 @@ pub enum Expression {
     UnqualifiedClassInstanceCreationExpression {
         type_to_instantiate: TypeToInstantiate,
         arguments: ArgumentList,
-    }
+    },
 }
 
 #[derive(Debug)]
