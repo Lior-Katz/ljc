@@ -1,0 +1,150 @@
+---
+source: tests/snapshot/snapshot_test.rs
+---
+└──Compilation Unit
+    └──Class ForStatements []
+        └──Method basic_for []
+            ├──Void
+            ├──Param Int a []
+            ├──Param Int b []
+            └──Block
+                ├──ForStatement
+                │   ├──Initializer
+                │   │   └──VariableDeclaration []
+                │   │       ├──Int
+                │   │       └──i
+                │   │           └──int 0
+                │   ├──Condition
+                │   │   └── <
+                │   │       ├──i
+                │   │       └──int 10
+                │   ├──Update
+                │   │   └──PostIncrement
+                │   │       └──i
+                │   └──Body
+                │       └──Assignment +=
+                │           ├──a
+                │           └──i
+                ├──ForStatement
+                │   ├──Initializer
+                │   │   └──VariableDeclaration []
+                │   │       ├──Int
+                │   │       ├──i
+                │   │       │   └──int 0
+                │   │       └──j
+                │   │           └──int 10
+                │   ├──Condition
+                │   │   └── <
+                │   │       ├──i
+                │   │       └──j
+                │   ├──Update
+                │   │   ├──PostIncrement
+                │   │   │   └──i
+                │   │   └──PostDecrement
+                │   │       └──j
+                │   └──Body
+                │       └──BlockStatement
+                │           └──Assignment +=
+                │               ├──a
+                │               └── +
+                │                   ├──i
+                │                   └──j
+                ├──ForStatement
+                │   ├──Initializer
+                │   ├──Update
+                │   └──Body
+                │       └──BlockStatement
+                ├──ForStatement
+                │   ├──Initializer
+                │   ├──Condition
+                │   │   └── <
+                │   │       ├──a
+                │   │       └──int 10
+                │   ├──Update
+                │   └──Body
+                │       └──PostIncrement
+                │           └──a
+                ├──ForStatement
+                │   ├──Initializer
+                │   │   └──VariableDeclaration []
+                │   │       ├──Int
+                │   │       └──i
+                │   │           └──int 0
+                │   ├──Update
+                │   │   └──PostIncrement
+                │   │       └──i
+                │   └──Body
+                │       └──BlockStatement
+                ├──ForStatement
+                │   ├──Initializer
+                │   │   └──VariableDeclaration []
+                │   │       ├──Int
+                │   │       └──i
+                │   │           └──int 0
+                │   ├──Condition
+                │   │   └── >
+                │   │       ├──Assignment =
+                │   │       │   ├──a
+                │   │       │   └── -
+                │   │       │       ├──a
+                │   │       │       └──int 1
+                │   │       └──int 0
+                │   ├──Update
+                │   │   └──PostIncrement
+                │   │       └──i
+                │   └──Body
+                │       └──PostIncrement
+                │           └──b
+                ├──VariableDeclaration []
+                │   ├──Int
+                │   └──i
+                │       └──int 0
+                ├──ForStatement
+                │   ├──Initializer
+                │   │   └──Assignment =
+                │   │       ├──i
+                │   │       └──int 0
+                │   ├──Condition
+                │   │   └── <
+                │   │       ├──i
+                │   │       └──int 10
+                │   ├──Update
+                │   │   └──PostIncrement
+                │   │       └──i
+                │   └──Body
+                │       └──Assignment +=
+                │           ├──a
+                │           └──i
+                └──ForStatement
+                    ├──Initializer
+                    │   └──VariableDeclaration []
+                    │       ├──Int
+                    │       └──x
+                    │           └──int 0
+                    ├──Condition
+                    │   └── <
+                    │       ├──x
+                    │       └──int 3
+                    ├──Update
+                    │   └──PostIncrement
+                    │       └──x
+                    └──Body
+                        └──ForStatement
+                            ├──Initializer
+                            │   └──VariableDeclaration []
+                            │       ├──Int
+                            │       └──y
+                            │           └──int 0
+                            ├──Condition
+                            │   └── <
+                            │       ├──y
+                            │       └──int 3
+                            ├──Update
+                            │   └──PostIncrement
+                            │       └──y
+                            └──Body
+                                └──Assignment +=
+                                    ├──a
+                                    └── *
+                                        ├──x
+                                        └──y

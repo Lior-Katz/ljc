@@ -3,10 +3,11 @@ use crate::lexer::{Tokens, lex_single_file};
 use crate::parser::ast::{
     ArgumentList, AssignmentOp, BinOp, ClassBodyDeclaration, ClassDeclaration,
     ClassMemberDeclaration, CompilationUnit, ConstructorBody, ConstructorInvocation, Expression,
-    FormalParameter, FormalParameterList, Identifier, LeftHandSide, MemberAccess, MethodBody,
-    MethodCall, MethodDeclaration, Modifiable, Modified, Modifier, NormalClassDeclaration, Program,
-    Statement, TopLevelClassOrInterfaceDeclaration, Type, VariableDeclaration, VariableDeclarator,
-    VariableDeclaratorId, VariableDeclaratorList, VariableInitializer,
+    ForInit, ForUpdate, FormalParameter, FormalParameterList, Identifier, LeftHandSide,
+    MemberAccess, MethodBody, MethodCall, MethodDeclaration, Modifiable, Modified, Modifier,
+    NormalClassDeclaration, Program, Statement, TopLevelClassOrInterfaceDeclaration, Type,
+    VariableDeclaration, VariableDeclarator, VariableDeclaratorId, VariableDeclaratorList,
+    VariableInitializer,
 };
 use crate::parser::error::ParseError;
 
@@ -526,6 +527,7 @@ impl Parser {
         one_of!(
             self.if_statement(),
             self.while_statement(),
+            self.for_statement(),
         )
     }
 
@@ -549,7 +551,7 @@ impl Parser {
     ///     ClassInstanceCreationExpression ;
     ///
     /// local_variable_declaration_statement
-    ///     {modifier} typr variable_declarator_list ;
+    ///     {modifier} type variable_declarator_list ;
     ///```
     /// At this point we cannot distinguish between the identifier part of the `labeled_statement`,
     /// the first primary in some of the possible derivations of `expression_statement`, and the type
@@ -1100,6 +1102,132 @@ impl Parser {
         let statement = Box::new(self.block_statement()?);
         Ok(Statement::WhileStatement { condition, statement })
     }
+
+    /// ```text
+    /// for_statement:
+    ///     for ( for_header ) statement
+    /// ```
+    fn for_statement(&mut self) -> Result<Statement, ParseError> {
+        self.assert(Token::For)?;
+        self.assert(Token::LeftParen)?;
+        let header = self.for_header()?;
+        self.assert(Token::RightParen)?;
+        let statement = Box::new(self.block_statement()?);
+        match header {
+            ForHeader::BasicForHeader { initializer, condition, update } => {
+                Ok(Statement::ForStatement {
+                    initializer,
+                    condition,
+                    update,
+                    statement,
+                })
+            }
+            ForHeader::ForEachHeader { variable_declaration, iterable } => {
+                Ok(Statement::ForEachStatement {
+                    variable_declaration,
+                    iterable,
+                    statement,
+                })
+            }
+        }
+    }
+
+    /// ```text
+    /// for_header:
+    ///     [for_init] ; [expression] ; [statement_expression_list] ;
+    ///     local_variable_declaration : expression
+    ///
+    /// for_init:
+    ///     statement_expression_list
+    ///     local_variable_declaration
+    ///
+    /// statement_expression_list:
+    ///     term {, term}
+    /// ```
+    fn for_header(&mut self) -> Result<ForHeader, ParseError> {
+        let modifiers = self.zero_or_more(|this| this.modifier());
+
+        if self.accept(Token::Semicolon) {
+            // basic for, empty init
+            let initializer = ForInit::Expressions(vec![]);
+            let (condition, update) = self.basic_for_condition_and_update()?;
+            return Ok(ForHeader::BasicForHeader { initializer, condition, update });
+        }
+
+        let expression = self.term()?;
+
+        if self.accept(Token::Comma) {
+            // basic for, init is a statement_expression_list
+            let mut init_expressions = vec![expression];
+            init_expressions.extend(self.statement_expression_list()?);
+            let initializer = ForInit::Expressions(init_expressions);
+            self.assert(Token::Semicolon)?;
+            let (condition, update) = self.basic_for_condition_and_update()?;
+            return Ok(ForHeader::BasicForHeader { initializer, condition, update });
+        }
+
+        if self.accept(Token::Semicolon) {
+            // basic for, single expression init
+            let initializer = ForInit::Expressions(vec![expression]);
+            let (condition, update) = self.basic_for_condition_and_update()?;
+            return Ok(ForHeader::BasicForHeader { initializer, condition, update });
+        }
+
+        // either a basic for with local_variable_declaration init, or a for-each
+        let var_declarators = self.variable_declarators_list()?;
+        let var_declarations = VariableDeclaration {
+            variable_type: expression,
+            declarators: var_declarators,
+        }
+            .with_modifiers(modifiers);
+        if self.accept(Token::Semicolon) {
+            // basic for init is a local_variable_declaration
+            let (condition, update) = self.basic_for_condition_and_update()?;
+            return Ok(ForHeader::BasicForHeader {
+                initializer: ForInit::LocalVarDeclaration(var_declarations),
+                condition,
+                update,
+            });
+        }
+
+        // for each
+        self.assert(Token::Colon)?;
+        let iterable = self.expression()?;
+        Ok(ForHeader::ForEachHeader {
+            variable_declaration: var_declarations,
+            iterable,
+        })
+    }
+
+    fn basic_for_condition_and_update(
+        &mut self,
+    ) -> Result<(Option<Expression>, ForUpdate), ParseError> {
+        let condition = if self.accept(Token::Semicolon) {
+            None
+        } else {
+            let expression = self.expression()?;
+            self.assert(Token::Semicolon)?;
+            Some(expression)
+        };
+        let update = self.statement_expression_list()?;
+        Ok((condition, update))
+    }
+
+    fn statement_expression_list(&mut self) -> Result<Vec<Expression>, ParseError> {
+        self.delimited_list(|this| this.term(), |this| this.assert(Token::Comma))
+    }
+}
+
+enum ForHeader {
+    BasicForHeader {
+        initializer: ForInit,
+        condition: Option<Expression>,
+        update: ForUpdate,
+    },
+    ForEachHeader {
+        variable_declaration: Modified<VariableDeclaration>,
+        iterable: Expression,
+    },
 }
 
 impl From<LexError> for ParseError {

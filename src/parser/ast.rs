@@ -9,6 +9,8 @@ pub type Modifiers = Vec<Modifier>;
 pub type Modified<T> = WithModifiers<T>;
 pub type MethodResult = Expression;
 pub type TypeToInstantiate = Vec<Identifier>;
+pub type ExpressionList = Vec<Expression>;
+pub type ForUpdate = ExpressionList;
 
 #[derive(Debug)]
 pub enum CompilationUnit {
@@ -125,6 +127,23 @@ pub enum Statement {
         condition: Expression,
         statement: Box<Statement>,
     },
+    ForStatement {
+        initializer: ForInit,
+        condition: Option<Expression>,
+        update: ForUpdate,
+        statement: Box<Statement>,
+    },
+    ForEachStatement {
+        variable_declaration: Modified<VariableDeclaration>,
+        iterable: Expression,
+        statement: Box<Statement>,
+    },
+}
+
+#[derive(Debug)]
+pub enum ForInit {
+    LocalVarDeclaration(Modified<VariableDeclaration>),
+    Expressions(ExpressionList),
 }
 
 #[derive(Debug)]

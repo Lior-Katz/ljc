@@ -1,8 +1,8 @@
 use crate::parser::ast::{
     AssignmentOp, BinOp, ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration,
-    CompilationUnit, ConstructorBody, ConstructorInvocation, Expression, FormalParameter,
-    LeftHandSide, MemberAccess, MethodBody, MethodCall, MethodDeclaration, Modified,
-    Modifiers, NormalClassDeclaration, Statement, TopLevelClassOrInterfaceDeclaration, Type,
+    CompilationUnit, ConstructorBody, ConstructorInvocation, Expression, ForInit, FormalParameter,
+    LeftHandSide, MemberAccess, MethodBody, MethodCall, MethodDeclaration, Modified, Modifiers,
+    NormalClassDeclaration, Statement, TopLevelClassOrInterfaceDeclaration, Type,
     VariableDeclaration, VariableDeclarator, VariableDeclaratorId, VariableInitializer,
 };
 use std::fmt;
@@ -288,6 +288,52 @@ impl AstNode for Statement {
                 writeln!(f, "{statement_label_prefix}Body")?;
                 statement.fmt_tree(f, &statement_prefix, true)
             }
+            Statement::ForStatement {
+                initializer,
+                condition,
+                update,
+                statement,
+            } => {
+                writeln!(f, "{line_prefix}ForStatement")?;
+                let (initializer_label_prefix, initializer_prefix) = branch(&new_prefix, false);
+                let (condition_label_prefix, condition_prefix) = branch(&new_prefix, false);
+                let (update_label_prefix, update_prefix) = branch(&new_prefix, false);
+                let (statement_label_prefix, statement_prefix) = branch(&new_prefix, true);
+
+                writeln!(f, "{initializer_label_prefix}Initializer")?;
+                initializer.fmt_tree(f, &initializer_prefix, true)?;
+
+                if let Some(condition) = condition {
+                    writeln!(f, "{condition_label_prefix}Condition")?;
+                    condition.fmt_tree(f, &condition_prefix, true)?;
+                }
+
+                writeln!(f, "{update_label_prefix}Update")?;
+                update.fmt_tree(f, &update_prefix, true)?;
+
+                writeln!(f, "{statement_label_prefix}Body")?;
+                statement.fmt_tree(f, &statement_prefix, true)
+            }
+            Statement::ForEachStatement {
+                variable_declaration,
+                iterable,
+                statement,
+            } => {
+                writeln!(f, "{line_prefix}ForEachStatement")?;
+                let (var_declaration_label_prefix, var_declaration_prefix) =
+                    branch(&new_prefix, false);
+                let (iterable_label_prefix, iterable_prefix) = branch(&new_prefix, false);
+                let (statement_label_prefix, statement_prefix) = branch(&new_prefix, true);
+
+                writeln!(f, "{var_declaration_label_prefix}Initializer")?;
+                variable_declaration.fmt_tree(f, &var_declaration_prefix, true)?;
+
+                writeln!(f, "{iterable_label_prefix}Iterable")?;
+                iterable.fmt_tree(f, &iterable_prefix, true)?;
+
+                writeln!(f, "{statement_label_prefix}Body")?;
+                statement.fmt_tree(f, &statement_prefix, true)
+            }
         }
     }
 }
@@ -552,6 +598,15 @@ impl AstNode for ConstructorInvocation {
             ConstructorInvocation::Alternate { arguments } => {
                 arguments.fmt_tree(f, &prefix, is_last)
             }
+        }
+    }
+}
+
+impl AstNode for ForInit {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        match self {
+            ForInit::LocalVarDeclaration(v) => v.fmt_tree(f, prefix, is_last),
+            ForInit::Expressions(e) => e.fmt_tree(f, prefix, is_last),
         }
     }
 }
