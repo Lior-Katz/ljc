@@ -334,6 +334,17 @@ impl AstNode for Statement {
                 writeln!(f, "{statement_label_prefix}Body")?;
                 statement.fmt_tree(f, &statement_prefix, true)
             }
+            Statement::DoWhile { statement, condition } => {
+                writeln!(f, "{line_prefix}DoWhileStatement")?;
+                let (statement_label_prefix, statement_prefix) = branch(&new_prefix, false);
+                let (condition_label_prefix, condition_prefix) = branch(&new_prefix, true);
+
+                writeln!(f, "{statement_label_prefix}Body")?;
+                statement.fmt_tree(f, &statement_prefix, true)?;
+
+                writeln!(f, "{condition_label_prefix}Condition")?;
+                condition.fmt_tree(f, &condition_prefix, true)
+            }
         }
     }
 }

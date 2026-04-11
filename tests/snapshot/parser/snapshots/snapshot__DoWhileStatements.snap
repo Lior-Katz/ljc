@@ -1,0 +1,94 @@
+---
+source: tests/snapshot/snapshot_test.rs
+---
+└──Compilation Unit
+    └──Class DoWhileStatements []
+        └──Method test []
+            ├──Void
+            ├──Param Int a []
+            ├──Param Int b []
+            └──Block
+                ├──DoWhileStatement
+                │   ├──Body
+                │   │   └──PostDecrement
+                │   │       └──a
+                │   └──Condition
+                │       └── >
+                │           ├──a
+                │           └──int 0
+                ├──DoWhileStatement
+                │   ├──Body
+                │   │   └──BlockStatement
+                │   │       ├──PostDecrement
+                │   │       │   └──a
+                │   │       └──PostIncrement
+                │   │           └──b
+                │   └──Condition
+                │       └── >
+                │           ├──a
+                │           └──int 0
+                ├──DoWhileStatement
+                │   ├──Body
+                │   │   └──DoWhileStatement
+                │   │       ├──Body
+                │   │       │   └──PostDecrement
+                │   │       │       └──b
+                │   │       └──Condition
+                │   │           └── >
+                │   │               ├──b
+                │   │               └──int 0
+                │   └──Condition
+                │       └── >
+                │           ├──a
+                │           └──int 0
+                ├──DoWhileStatement
+                │   ├──Body
+                │   │   └──IfStatement
+                │   │       ├──condition
+                │   │       │   └── >
+                │   │       │       ├──b
+                │   │       │       └──int 0
+                │   │       ├──if_true
+                │   │       │   └──PostDecrement
+                │   │       │       └──b
+                │   │       └──if_false
+                │   │           └──PostDecrement
+                │   │               └──a
+                │   └──Condition
+                │       └── >
+                │           ├──a
+                │           └──int 0
+                ├──IfStatement
+                │   ├──condition
+                │   │   └── >
+                │   │       ├──a
+                │   │       └──int 0
+                │   └──if_true
+                │       └──DoWhileStatement
+                │           ├──Body
+                │           │   └──PostDecrement
+                │           │       └──b
+                │           └──Condition
+                │               └── >
+                │                   ├──b
+                │                   └──int 0
+                ├──DoWhileStatement
+                │   ├──Body
+                │   │   └──BlockStatement
+                │   │       └──PostDecrement
+                │   │           └──a
+                │   └──Condition
+                │       └── >
+                │           ├──Assignment =
+                │           │   ├──a
+                │           │   └── -
+                │           │       ├──a
+                │           │       └──int 1
+                │           └──int 0
+                └──DoWhileStatement
+                    ├──Body
+                    │   └──EmptyStatement
+                    └──Condition
+                        └── >
+                            ├──a
+                            └──int 0

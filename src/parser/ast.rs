@@ -138,6 +138,10 @@ pub enum Statement {
         iterable: Expression,
         statement: Box<Statement>,
     },
+    DoWhile {
+        statement: Box<Statement>,
+        condition: Expression,
+    },
 }
 
 #[derive(Debug)]

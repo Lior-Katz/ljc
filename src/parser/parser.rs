@@ -528,6 +528,7 @@ impl Parser {
             self.if_statement(),
             self.while_statement(),
             self.for_statement(),
+            self.do_statement(),
         )
     }
 
@@ -1215,6 +1216,17 @@ impl Parser {
 
     fn statement_expression_list(&mut self) -> Result<Vec<Expression>, ParseError> {
         self.delimited_list(|this| this.term(), |this| this.assert(Token::Comma))
+    }
+
+    fn do_statement(&mut self) -> Result<Statement, ParseError> {
+        self.assert(Token::Do)?;
+        let statement = Box::new(self.block_statement()?);
+        self.assert(Token::While)?;
+        self.assert(Token::LeftParen)?;
+        let condition = self.expression()?;
+        self.assert(Token::RightParen)?;
+        self.assert(Token::Semicolon)?;
+        Ok(Statement::DoWhile { statement, condition })
     }
 }
 
