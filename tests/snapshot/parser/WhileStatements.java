@@ -11,9 +11,11 @@ class WhileStatements {
             while (b > 0)
                 b--;
 
+        loop:
         while (a > 0) {
             while (b > 0) {
                 b--;
+                if (b == 1) continue loop;
             }
             a--;
         }

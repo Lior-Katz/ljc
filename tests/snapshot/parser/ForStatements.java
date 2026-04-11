@@ -4,6 +4,7 @@ class ForStatements {
             a += i;
 
         for (int i = 0, j = 10; i < j; i++, j--) {
+            if (a == 5) continue;
             a += i + j;
         }
 

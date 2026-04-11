@@ -356,6 +356,13 @@ impl AstNode for Statement {
                 };
                 writeln!(f, "{line_prefix}BreakStatement{label}")
             }
+            Statement::Continue(label) => {
+                let label = match label {
+                    None => "",
+                    Some(v) => &format!(" {}", &v),
+                };
+                writeln!(f, "{line_prefix}ContinueStatement{label}")
+            }
         }
     }
 }

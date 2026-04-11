@@ -508,11 +508,11 @@ impl Parser {
     ///     if_statement
     ///     while_statement
     ///     for_statement
-    ///     assert_statement
-    ///     switch_statement
     ///     do_statement
     ///     break_statement
     ///     continue_statement
+    ///     assert_statement
+    ///     switch_statement
     ///     return_statement
     ///     synchronized_statement
     ///     throw_statement
@@ -530,6 +530,7 @@ impl Parser {
             self.for_statement(),
             self.do_statement(),
             self.break_statement(),
+            self.continue_statement(),
         )
     }
 
@@ -1245,6 +1246,13 @@ impl Parser {
         let label = self.identifier().ok();
         self.assert(Token::Semicolon)?;
         Ok(Statement::Break(label))
+    }
+
+    fn continue_statement(&mut self) -> Result<Statement, ParseError> {
+        self.assert(Token::Continue)?;
+        let label = self.identifier().ok();
+        self.assert(Token::Semicolon)?;
+        Ok(Statement::Continue(label))
     }
 }
 

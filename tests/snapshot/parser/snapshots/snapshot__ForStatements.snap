@@ -44,6 +44,13 @@ source: tests/snapshot/snapshot_test.rs
                 │   │       └──j
                 │   └──Body
                 │       └──BlockStatement
+                │           ├──IfStatement
+                │           │   ├──condition
+                │           │   │   └── ==
+                │           │   │       ├──a
+                │           │   │       └──int 5
+                │           │   └──if_true
+                │           │       └──ContinueStatement
                 │           └──Assignment +=
                 │               ├──a
                 │               └── +

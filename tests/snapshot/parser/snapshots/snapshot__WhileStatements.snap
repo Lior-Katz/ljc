@@ -41,24 +41,32 @@ source: tests/snapshot/snapshot_test.rs
         │       │           └──Body
         │       │               └──PostDecrement
         │       │                   └──b
-        │       ├──WhileStatement
-        │       │   ├──Condition
-        │       │   │   └── >
-        │       │   │       ├──a
-        │       │   │       └──int 0
-        │       │   └──Body
-        │       │       └──BlockStatement
-        │       │           ├──WhileStatement
-        │       │           │   ├──Condition
-        │       │           │   │   └── >
-        │       │           │   │       ├──b
-        │       │           │   │       └──int 0
-        │       │           │   └──Body
-        │       │           │       └──BlockStatement
-        │       │           │           └──PostDecrement
-        │       │           │               └──b
-        │       │           └──PostDecrement
-        │       │               └──a
+        │       ├──LabeledStatement: loop
+        │       │   └──WhileStatement
+        │       │       ├──Condition
+        │       │       │   └── >
+        │       │       │       ├──a
+        │       │       │       └──int 0
+        │       │       └──Body
+        │       │           └──BlockStatement
+        │       │               ├──WhileStatement
+        │       │               │   ├──Condition
+        │       │               │   │   └── >
+        │       │               │   │       ├──b
+        │       │               │   │       └──int 0
+        │       │               │   └──Body
+        │       │               │       └──BlockStatement
+        │       │               │           ├──PostDecrement
+        │       │               │           │   └──b
+        │       │               │           └──IfStatement
+        │       │               │               ├──condition
+        │       │               │               │   └── ==
+        │       │               │               │       ├──b
+        │       │               │               │       └──int 1
+        │       │               │               └──if_true
+        │       │               │                   └──ContinueStatement loop
+        │       │               └──PostDecrement
+        │       │                   └──a
         │       ├──LabeledStatement: loop
         │       │   └──WhileStatement
         │       │       ├──Condition
