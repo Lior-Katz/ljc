@@ -146,6 +146,7 @@ pub enum Statement {
         label: Identifier,
         body: Box<Statement>,
     },
+    Break(Option<Identifier>),
 }
 
 #[derive(Debug)]

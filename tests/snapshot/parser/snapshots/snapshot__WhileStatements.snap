@@ -59,23 +59,23 @@ source: tests/snapshot/snapshot_test.rs
         │       │           │               └──b
         │       │           └──PostDecrement
         │       │               └──a
-        │       ├──WhileStatement
-        │       │   ├──Condition
-        │       │   │   └── >
-        │       │   │       ├──a
-        │       │   │       └──int 0
-        │       │   └──Body
-        │       │       └──IfStatement
-        │       │           ├──condition
-        │       │           │   └── >
-        │       │           │       ├──b
-        │       │           │       └──int 0
-        │       │           ├──if_true
-        │       │           │   └──PostDecrement
-        │       │           │       └──b
-        │       │           └──if_false
-        │       │               └──PostDecrement
-        │       │                   └──a
+        │       ├──LabeledStatement: loop
+        │       │   └──WhileStatement
+        │       │       ├──Condition
+        │       │       │   └── >
+        │       │       │       ├──a
+        │       │       │       └──int 0
+        │       │       └──Body
+        │       │           └──IfStatement
+        │       │               ├──condition
+        │       │               │   └── >
+        │       │               │       ├──b
+        │       │               │       └──int 0
+        │       │               ├──if_true
+        │       │               │   └──BreakStatement loop
+        │       │               └──if_false
+        │       │                   └──PostDecrement
+        │       │                       └──a
         │       ├──IfStatement
         │       │   ├──condition
         │       │   │   └── >

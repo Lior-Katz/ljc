@@ -7,12 +7,15 @@ class ForStatements {
             a += i + j;
         }
 
-        for (; ; ) {}
+        for (; ; )
+            break;
 
         for (; a < 10; )
             a++;
 
-        for (int i = 0; ; i++) {}
+        loop:
+        for (int i = 0; ; i++)
+            break loop;
 
         for (int i = 0; (a = a - 1) > 0; i++)
             b++;

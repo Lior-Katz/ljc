@@ -349,6 +349,13 @@ impl AstNode for Statement {
                 writeln!(f, "{line_prefix}LabeledStatement: {label}")?;
                 body.fmt_tree(f, &new_prefix, true)
             }
+            Statement::Break(label) => {
+                let label = match label {
+                    None => "",
+                    Some(v) => &format!(" {}", &v),
+                };
+                writeln!(f, "{line_prefix}BreakStatement{label}")
+            }
         }
     }
 }

@@ -41,23 +41,23 @@ source: tests/snapshot/snapshot_test.rs
                 │       └── >
                 │           ├──a
                 │           └──int 0
-                ├──DoWhileStatement
-                │   ├──Body
-                │   │   └──IfStatement
-                │   │       ├──condition
-                │   │       │   └── >
-                │   │       │       ├──b
-                │   │       │       └──int 0
-                │   │       ├──if_true
-                │   │       │   └──PostDecrement
-                │   │       │       └──b
-                │   │       └──if_false
-                │   │           └──PostDecrement
-                │   │               └──a
-                │   └──Condition
-                │       └── >
-                │           ├──a
-                │           └──int 0
+                ├──LabeledStatement: loop
+                │   └──DoWhileStatement
+                │       ├──Body
+                │       │   └──IfStatement
+                │       │       ├──condition
+                │       │       │   └── >
+                │       │       │       ├──b
+                │       │       │       └──int 0
+                │       │       ├──if_true
+                │       │       │   └──BreakStatement loop
+                │       │       └──if_false
+                │       │           └──PostDecrement
+                │       │               └──a
+                │       └──Condition
+                │           └── >
+                │               ├──a
+                │               └──int 0
                 ├──IfStatement
                 │   ├──condition
                 │   │   └── >

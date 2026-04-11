@@ -15,9 +15,10 @@ class DoWhileStatements {
             while (b > 0);
         while (a > 0);
 
+        loop:
         do
             if (b > 0)
-                b--;
+                break loop;
             else
                 a--;
         while (a > 0);

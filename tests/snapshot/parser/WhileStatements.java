@@ -18,8 +18,9 @@ class WhileStatements {
             a--;
         }
 
+        loop:
         while (a > 0)
-            if (b > 0) b--;
+            if (b > 0) break loop;
             else a--;
 
         if (a > 0) while (b > 0) b--;

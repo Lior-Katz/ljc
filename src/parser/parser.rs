@@ -529,6 +529,7 @@ impl Parser {
             self.while_statement(),
             self.for_statement(),
             self.do_statement(),
+            self.break_statement(),
         )
     }
 
@@ -1237,6 +1238,13 @@ impl Parser {
         self.assert(Token::RightParen)?;
         self.assert(Token::Semicolon)?;
         Ok(Statement::DoWhile { statement, condition })
+    }
+
+    fn break_statement(&mut self) -> Result<Statement, ParseError> {
+        self.assert(Token::Break)?;
+        let label = self.identifier().ok();
+        self.assert(Token::Semicolon)?;
+        Ok(Statement::Break(label))
     }
 }
 

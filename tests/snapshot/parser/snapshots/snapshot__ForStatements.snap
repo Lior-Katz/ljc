@@ -53,7 +53,7 @@ source: tests/snapshot/snapshot_test.rs
                 │   ├──Initializer
                 │   ├──Update
                 │   └──Body
-                │       └──BlockStatement
+                │       └──BreakStatement
                 ├──ForStatement
                 │   ├──Initializer
                 │   ├──Condition
@@ -64,17 +64,18 @@ source: tests/snapshot/snapshot_test.rs
                 │   └──Body
                 │       └──PostIncrement
                 │           └──a
-                ├──ForStatement
-                │   ├──Initializer
-                │   │   └──VariableDeclaration []
-                │   │       ├──Int
-                │   │       └──i
-                │   │           └──int 0
-                │   ├──Update
-                │   │   └──PostIncrement
-                │   │       └──i
-                │   └──Body
-                │       └──BlockStatement
+                ├──LabeledStatement: loop
+                │   └──ForStatement
+                │       ├──Initializer
+                │       │   └──VariableDeclaration []
+                │       │       ├──Int
+                │       │       └──i
+                │       │           └──int 0
+                │       ├──Update
+                │       │   └──PostIncrement
+                │       │       └──i
+                │       └──Body
+                │           └──BreakStatement loop
                 ├──ForStatement
                 │   ├──Initializer
                 │   │   └──VariableDeclaration []
