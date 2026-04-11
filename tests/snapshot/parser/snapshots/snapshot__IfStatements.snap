@@ -9,7 +9,7 @@ source: tests/snapshot/snapshot_test.rs
             ├──Param Int b []
             └──Block
                 ├──IfStatement
-                │   ├──condition
+                │   ├──Condition
                 │   │   └── >
                 │   │       ├──a
                 │   │       └──int 0
@@ -18,7 +18,7 @@ source: tests/snapshot/snapshot_test.rs
                 │           ├──a
                 │           └──int 1
                 ├──IfStatement
-                │   ├──condition
+                │   ├──Condition
                 │   │   └── >
                 │   │       ├──a
                 │   │       └──int 0
@@ -31,7 +31,7 @@ source: tests/snapshot/snapshot_test.rs
                 │           ├──a
                 │           └──int 2
                 ├──IfStatement
-                │   ├──condition
+                │   ├──Condition
                 │   │   └── >
                 │   │       ├──a
                 │   │       └──int 0
@@ -46,13 +46,13 @@ source: tests/snapshot/snapshot_test.rs
                 │               ├──a
                 │               └──int 2
                 ├──IfStatement
-                │   ├──condition
+                │   ├──Condition
                 │   │   └── >
                 │   │       ├──a
                 │   │       └──int 0
                 │   └──if_true
                 │       └──IfStatement
-                │           ├──condition
+                │           ├──Condition
                 │           │   └── >
                 │           │       ├──b
                 │           │       └──int 0
@@ -61,13 +61,13 @@ source: tests/snapshot/snapshot_test.rs
                 │                   ├──a
                 │                   └──b
                 ├──IfStatement
-                │   ├──condition
+                │   ├──Condition
                 │   │   └── >
                 │   │       ├──a
                 │   │       └──int 0
                 │   └──if_true
                 │       └──IfStatement
-                │           ├──condition
+                │           ├──Condition
                 │           │   └── >
                 │           │       ├──b
                 │           │       └──int 0
@@ -81,14 +81,14 @@ source: tests/snapshot/snapshot_test.rs
                 │                   └──UnaryMinus
                 │                       └──b
                 ├──IfStatement
-                │   ├──condition
+                │   ├──Condition
                 │   │   └── >
                 │   │       ├──a
                 │   │       └──int 0
                 │   ├──if_true
                 │   │   └──BlockStatement
                 │   │       └──IfStatement
-                │   │           ├──condition
+                │   │           ├──Condition
                 │   │           │   └── >
                 │   │           │       ├──b
                 │   │           │       └──int 0
@@ -103,7 +103,7 @@ source: tests/snapshot/snapshot_test.rs
                 │               └──UnaryMinus
                 │                   └──b
                 ├──IfStatement
-                │   ├──condition
+                │   ├──Condition
                 │   │   └── >
                 │   │       ├──a
                 │   │       └──int 0
@@ -113,7 +113,7 @@ source: tests/snapshot/snapshot_test.rs
                 │   │       └──int 1
                 │   └──if_false
                 │       └──IfStatement
-                │           ├──condition
+                │           ├──Condition
                 │           │   └── <
                 │           │       ├──a
                 │           │       └──int 0
@@ -127,14 +127,14 @@ source: tests/snapshot/snapshot_test.rs
                 │                   ├──a
                 │                   └──int 0
                 ├──IfStatement
-                │   ├──condition
+                │   ├──Condition
                 │   │   └── >
                 │   │       ├──a
                 │   │       └──int 0
                 │   └──if_true
                 │       └──BlockStatement
                 │           └──IfStatement
-                │               ├──condition
+                │               ├──Condition
                 │               │   └── >
                 │               │       ├──b
                 │               │       └──int 0
@@ -150,19 +150,19 @@ source: tests/snapshot/snapshot_test.rs
                 │                           └──UnaryMinus
                 │                               └──b
                 └──IfStatement
-                    ├──condition
+                    ├──Condition
                     │   └── >
                     │       ├──a
                     │       └──int 0
                     └──if_true
                         └──IfStatement
-                            ├──condition
+                            ├──Condition
                             │   └── >
                             │       ├──b
                             │       └──int 0
                             └──if_true
                                 └──IfStatement
-                                    ├──condition
+                                    ├──Condition
                                     │   └── >
                                     │       ├──a
                                     │       └──b

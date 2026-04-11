@@ -531,6 +531,7 @@ impl Parser {
             self.do_statement(),
             self.break_statement(),
             self.continue_statement(),
+            self.assert_statement(),
         )
     }
 
@@ -1253,6 +1254,18 @@ impl Parser {
         let label = self.identifier().ok();
         self.assert(Token::Semicolon)?;
         Ok(Statement::Continue(label))
+    }
+
+    fn assert_statement(&mut self) -> Result<Statement, ParseError> {
+        self.assert(Token::Assert)?;
+        let condition = self.expression()?;
+        let detail_message = if self.accept(Token::Colon) {
+            Some(self.expression()?)
+        } else {
+            None
+        };
+        self.assert(Token::Semicolon)?;
+        Ok(Statement::Assert { condition, detail_message })
     }
 }
 

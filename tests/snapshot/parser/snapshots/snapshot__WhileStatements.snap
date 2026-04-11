@@ -59,7 +59,7 @@ source: tests/snapshot/snapshot_test.rs
         │       │               │           ├──PostDecrement
         │       │               │           │   └──b
         │       │               │           └──IfStatement
-        │       │               │               ├──condition
+        │       │               │               ├──Condition
         │       │               │               │   └── ==
         │       │               │               │       ├──b
         │       │               │               │       └──int 1
@@ -75,7 +75,7 @@ source: tests/snapshot/snapshot_test.rs
         │       │       │       └──int 0
         │       │       └──Body
         │       │           └──IfStatement
-        │       │               ├──condition
+        │       │               ├──Condition
         │       │               │   └── >
         │       │               │       ├──b
         │       │               │       └──int 0
@@ -85,7 +85,7 @@ source: tests/snapshot/snapshot_test.rs
         │       │                   └──PostDecrement
         │       │                       └──a
         │       ├──IfStatement
-        │       │   ├──condition
+        │       │   ├──Condition
         │       │   │   └── >
         │       │   │       ├──a
         │       │   │       └──int 0
@@ -111,7 +111,7 @@ source: tests/snapshot/snapshot_test.rs
             ├──Param Int b []
             └──Block
                 ├──IfStatement
-                │   ├──condition
+                │   ├──Condition
                 │   │   └── >
                 │   │       ├──a
                 │   │       └──int 0
@@ -123,7 +123,7 @@ source: tests/snapshot/snapshot_test.rs
                 │           │       └──int 0
                 │           └──Body
                 │               └──IfStatement
-                │                   ├──condition
+                │                   ├──Condition
                 │                   │   └── >
                 │                   │       ├──a
                 │                   │       └──b
@@ -134,7 +134,7 @@ source: tests/snapshot/snapshot_test.rs
                 │                       └──PostDecrement
                 │                           └──b
                 ├──IfStatement
-                │   ├──condition
+                │   ├──Condition
                 │   │   └── >
                 │   │       ├──a
                 │   │       └──int 0
@@ -147,7 +147,7 @@ source: tests/snapshot/snapshot_test.rs
                 │   │           │       └──int 0
                 │   │           └──Body
                 │   │               └──IfStatement
-                │   │                   ├──condition
+                │   │                   ├──Condition
                 │   │                   │   └── >
                 │   │                   │       ├──a
                 │   │                   │       └──b
@@ -159,13 +159,13 @@ source: tests/snapshot/snapshot_test.rs
                 │           └──PostDecrement
                 │               └──b
                 └──IfStatement
-                    ├──condition
+                    ├──Condition
                     │   └── >
                     │       ├──a
                     │       └──int 0
                     └──if_true
                         └──IfStatement
-                            ├──condition
+                            ├──Condition
                             │   └── >
                             │       ├──b
                             │       └──int 0

@@ -45,7 +45,7 @@ source: tests/snapshot/snapshot_test.rs
                 │   └──DoWhileStatement
                 │       ├──Body
                 │       │   └──IfStatement
-                │       │       ├──condition
+                │       │       ├──Condition
                 │       │       │   └── >
                 │       │       │       ├──b
                 │       │       │       └──int 0
@@ -59,7 +59,7 @@ source: tests/snapshot/snapshot_test.rs
                 │               ├──a
                 │               └──int 0
                 ├──IfStatement
-                │   ├──condition
+                │   ├──Condition
                 │   │   └── >
                 │   │       ├──a
                 │   │       └──int 0

@@ -172,4 +172,11 @@ class Statements {
         int _ = e1 = 5;
         int _ = 1, _ = 2, e2 = 3;
     }
+
+    void assert_statements(int a, int b) {
+        assert a > 0;
+        assert b > 0 : "b must be positive";
+        assert (a + b) > 0;
+        assert a != b : a + " should not equal " + b;
+    }
 }

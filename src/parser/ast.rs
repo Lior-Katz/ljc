@@ -148,6 +148,10 @@ pub enum Statement {
     },
     Break(Option<Identifier>),
     Continue(Option<Identifier>),
+    Assert {
+        condition: Expression,
+        detail_message: Option<Expression>,
+    },
 }
 
 #[derive(Debug)]

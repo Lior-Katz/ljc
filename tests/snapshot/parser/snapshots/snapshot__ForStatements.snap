@@ -45,7 +45,7 @@ source: tests/snapshot/snapshot_test.rs
                 │   └──Body
                 │       └──BlockStatement
                 │           ├──IfStatement
-                │           │   ├──condition
+                │           │   ├──Condition
                 │           │   │   └── ==
                 │           │   │       ├──a
                 │           │   │       └──int 5

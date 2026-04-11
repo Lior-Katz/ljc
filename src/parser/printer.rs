@@ -29,6 +29,36 @@ impl<T: AstNode<Modifiers>> AstNode<Modifiers> for Modified<T> {
     }
 }
 
+impl<T, C> AstNode<C> for Vec<T>
+where
+    T: AstNode<C>,
+{
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        for (i, stmt) in self.iter().enumerate() {
+            stmt.fmt_tree(f, &prefix, i == self.len() - 1 && is_last)?;
+        }
+        Ok(())
+    }
+}
+
+impl<T, C> AstNode<C> for Box<T>
+where
+    T: AstNode<C>,
+{
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        self.deref().fmt_tree(f, prefix, is_last)
+    }
+}
+
+impl<T, C> AstNode<C> for &T
+where
+    T: AstNode<C>,
+{
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        <T as AstNode<C>>::fmt_tree(self, f, prefix, is_last)
+    }
+}
+
 impl Display for dyn AstNode {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         self.fmt_tree(f, "", false)
@@ -234,18 +264,6 @@ impl AstNode for MethodBody {
     }
 }
 
-impl<T, C> AstNode<C> for Vec<T>
-where
-    T: AstNode<C>,
-{
-    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
-        for (i, stmt) in self.iter().enumerate() {
-            stmt.fmt_tree(f, &prefix, i == self.len() - 1 && is_last)?;
-        }
-        Ok(())
-    }
-}
-
 impl AstNode for Statement {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(&prefix, is_last);
@@ -262,20 +280,11 @@ impl AstNode for Statement {
             Statement::VariableDeclaration(v) => v.fmt_tree(f, &prefix, is_last),
             Statement::IfStatement { condition, if_true, if_false } => {
                 writeln!(f, "{line_prefix}IfStatement")?;
-                let mut children: Vec<(&str, &dyn AstNode)> = Vec::new();
-                children.push(("condition", condition));
-                children.push(("if_true", if_true.deref()));
-                if let Some(if_false) = if_false {
-                    children.push(("if_false", if_false.deref()));
-                };
-                for (i, (label, node)) in children.iter().enumerate() {
-                    let is_last_child = i == children.len() - 1;
-                    let (label_prefix, child_prefix) = branch(&new_prefix, is_last_child);
-
-                    writeln!(f, "{label_prefix}{label}")?;
-                    node.fmt_tree(f, &child_prefix, true)?;
-                }
-                Ok(())
+                let children = Children::new()
+                    .push("Condition", condition)
+                    .push("if_true", if_true)
+                    .push_opt("if_false", if_false);
+                children.fmt_tree(f, &new_prefix, true)
             }
             Statement::WhileStatement { condition, statement } => {
                 writeln!(f, "{line_prefix}WhileStatement")?;
@@ -362,6 +371,13 @@ impl AstNode for Statement {
                     Some(v) => &format!(" {}", &v),
                 };
                 writeln!(f, "{line_prefix}ContinueStatement{label}")
+            }
+            Statement::Assert { condition, detail_message } => {
+                writeln!(f, "{line_prefix}AssertStatement")?;
+                let children = Children::new()
+                    .push("Condition", condition)
+                    .push_opt("DetailMessage", detail_message);
+                children.fmt_tree(f, &new_prefix, true)
             }
         }
     }
@@ -592,31 +608,17 @@ impl AstNode for ConstructorBody {
         let (line_prefix, new_prefix) = branch(prefix, is_last);
         writeln!(f, "{line_prefix}ConstructorBody")?;
 
-        // Collect present children
-        let mut children: Vec<(&str, &dyn AstNode)> = Vec::new();
+        let epilogue = if self.epilogue.is_empty() {
+            None
+        } else {
+            Some(&self.epilogue)
+        };
 
-        if let Some(prologue) = &self.prologue {
-            children.push(("Prologue", prologue));
-        }
-
-        if let Some(constructor_invocation) = &self.constructor_invocation {
-            children.push(("ConstructorInvocation", constructor_invocation));
-        }
-
-        if !self.epilogue.is_empty() {
-            children.push(("Epilogue", &self.epilogue));
-        }
-
-        // Iterate with correct is_last
-        for (i, (label, node)) in children.iter().enumerate() {
-            let is_last_child = i == children.len() - 1;
-            let (label_prefix, child_prefix) = branch(&new_prefix, is_last_child);
-
-            writeln!(f, "{label_prefix}{label}")?;
-            node.fmt_tree(f, &child_prefix, true)?;
-        }
-
-        Ok(())
+        let children = Children::new()
+            .push_opt("Prologue", &self.prologue)
+            .push_opt("ConstructorInvocation", &self.constructor_invocation)
+            .push_opt("Epilogue", &epilogue);
+        children.fmt_tree(f, &new_prefix, true)
     }
 }
 
@@ -637,5 +639,43 @@ impl AstNode for ForInit {
             ForInit::LocalVarDeclaration(v) => v.fmt_tree(f, prefix, is_last),
             ForInit::Expressions(e) => e.fmt_tree(f, prefix, is_last),
         }
+    }
+}
+
+struct Children<'a> {
+    inner: Vec<(&'a str, &'a dyn AstNode)>,
+}
+
+impl<'a> Children<'a> {
+    fn new() -> Self {
+        Self { inner: Vec::new() }
+    }
+
+    fn push(mut self, label: &'a str, node: &'a dyn AstNode) -> Self {
+        self.inner.push((label, node));
+        self
+    }
+
+    fn push_opt<T>(mut self, label: &'a str, node: &'a Option<T>) -> Self
+    where
+        T: AstNode,
+    {
+        if let Some(n) = node {
+            self.inner.push((label, n));
+        }
+        self
+    }
+}
+
+impl AstNode for Children<'_> {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, _is_last: bool) -> fmt::Result {
+        for (i, (label, node)) in self.inner.iter().enumerate() {
+            let is_last_child = i == self.inner.len() - 1;
+            let (label_prefix, child_prefix) = branch(prefix, is_last_child);
+
+            writeln!(f, "{label_prefix}{label}")?;
+            node.fmt_tree(f, &child_prefix, true)?;
+        }
+        Ok(())
     }
 }
