@@ -1,5 +1,5 @@
 class Statements {
-    void assignment_statements(int a, int b, int c, int d, int x) {
+    int assignment_statements(int a, int b, int c, int d, int x) {
         // =======================
         // Basic assignments
         // =======================
@@ -93,13 +93,16 @@ class Statements {
         a += -b;
         a = ++b;
         a = b++;
+
+        return a;
     }
 
-    void prefix_operators(int a, int b) {
+    boolean prefix_operators(int a, int b) {
         ++a;
         --a;
         ++(a);
         --(b);
+        return a > b;
     }
 
     void postfix_operators(int a, int b) {
@@ -107,6 +110,7 @@ class Statements {
         a--;
         (a)++;
         (b)--;
+        return;
     }
 
     void block_statements() {

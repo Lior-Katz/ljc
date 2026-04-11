@@ -152,6 +152,7 @@ pub enum Statement {
         condition: Expression,
         detail_message: Option<Expression>,
     },
+    Return(Option<Expression>),
 }
 
 #[derive(Debug)]

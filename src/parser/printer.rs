@@ -379,6 +379,13 @@ impl AstNode for Statement {
                     .push_opt("DetailMessage", detail_message);
                 children.fmt_tree(f, &new_prefix, true)
             }
+            Statement::Return(e) => {
+                writeln!(f, "{line_prefix}ReturnStatement")?;
+                if let Some(e) = e {
+                    e.fmt_tree(f, &new_prefix, true)?;
+                }
+                Ok(())
+            }
         }
     }
 }

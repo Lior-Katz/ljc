@@ -512,12 +512,12 @@ impl Parser {
     ///     break_statement
     ///     continue_statement
     ///     assert_statement
-    ///     switch_statement
     ///     return_statement
+    ///     yield_statement
+    ///     switch_statement
     ///     synchronized_statement
     ///     throw_statement
     ///     try_statement
-    ///     yield_statement
     ///
     /// if_statement:
     ///     if_then_statement
@@ -532,6 +532,7 @@ impl Parser {
             self.break_statement(),
             self.continue_statement(),
             self.assert_statement(),
+            self.return_statement(),
         )
     }
 
@@ -1213,6 +1214,7 @@ impl Parser {
         })
     }
 
+    //noinspection DuplicatedCode
     fn basic_for_condition_and_update(
         &mut self,
     ) -> Result<(Option<Expression>, ForUpdate), ParseError> {
@@ -1266,6 +1268,17 @@ impl Parser {
         };
         self.assert(Token::Semicolon)?;
         Ok(Statement::Assert { condition, detail_message })
+    }
+
+    //noinspection DuplicatedCode
+    fn return_statement(&mut self) -> Result<Statement, ParseError> {
+        self.assert(Token::Return)?;
+        let expression = if self.accept(Token::Semicolon) { None } else {
+            let expression = self.expression()?;
+            self.assert(Token::Semicolon)?;
+            Some(expression)
+        };
+        Ok(Statement::Return(expression))
     }
 }
 

@@ -4,7 +4,7 @@ source: tests/snapshot/snapshot_test.rs
 └──Compilation Unit
     └──Class Statements []
         ├──Method assignment_statements []
-        │   ├──Void
+        │   ├──Int
         │   ├──Param Int a []
         │   ├──Param Int b []
         │   ├──Param Int c []
@@ -148,12 +148,14 @@ source: tests/snapshot/snapshot_test.rs
         │       │   ├──a
         │       │   └──PreIncrement
         │       │       └──b
-        │       └──Assignment =
-        │           ├──a
-        │           └──PostIncrement
-        │               └──b
+        │       ├──Assignment =
+        │       │   ├──a
+        │       │   └──PostIncrement
+        │       │       └──b
+        │       └──ReturnStatement
+        │           └──a
         ├──Method prefix_operators []
-        │   ├──Void
+        │   ├──Boolean
         │   ├──Param Int a []
         │   ├──Param Int b []
         │   └──Block
@@ -163,8 +165,12 @@ source: tests/snapshot/snapshot_test.rs
         │       │   └──a
         │       ├──PreIncrement
         │       │   └──a
-        │       └──PreDecrement
-        │           └──b
+        │       ├──PreDecrement
+        │       │   └──b
+        │       └──ReturnStatement
+        │           └── >
+        │               ├──a
+        │               └──b
         ├──Method postfix_operators []
         │   ├──Void
         │   ├──Param Int a []
@@ -176,8 +182,9 @@ source: tests/snapshot/snapshot_test.rs
         │       │   └──a
         │       ├──PostIncrement
         │       │   └──a
-        │       └──PostDecrement
-        │           └──b
+        │       ├──PostDecrement
+        │       │   └──b
+        │       └──ReturnStatement
         ├──Method block_statements []
         │   ├──Void
         │   └──Block
