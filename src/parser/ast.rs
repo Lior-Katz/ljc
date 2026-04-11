@@ -142,6 +142,10 @@ pub enum Statement {
         statement: Box<Statement>,
         condition: Expression,
     },
+    Labeled {
+        label: Identifier,
+        body: Box<Statement>,
+    },
 }
 
 #[derive(Debug)]

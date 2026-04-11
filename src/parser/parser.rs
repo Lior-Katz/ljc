@@ -572,7 +572,7 @@ impl Parser {
     /// additional tokens (such as `:`, `identifier`, or `;`) make the distinction unambiguous.
     /// ```text
     /// statement_starting_with_name:
-    ///     {modifier} term variable_declarator {, variable_declarator}
+    ///     {modifier} term variable_declarator {, variable_declarator} ;
     ///     term [statement_ending]
     ///
     /// statement_ending:
@@ -586,22 +586,32 @@ impl Parser {
     fn statement_starting_with_name(&mut self) -> Result<Statement, ParseError> {
         let modifiers = self.zero_or_more(|this| this.modifier());
         let expression = self.term()?;
-        let statement = if let Ok(var_declarations) = self.variable_declarators_list() {
-            Statement::VariableDeclaration(
+        if let Ok(var_declarations) = self.variable_declarators_list() {
+            self.assert(Token::Semicolon)?;
+            return Ok(Statement::VariableDeclaration(
                 VariableDeclaration {
                     variable_type: expression,
                     declarators: var_declarations,
                 }
                     .with_modifiers(modifiers),
-            )
-        } else if modifiers.is_empty() {
-            Statement::ExpressionStatement(expression)
-        } else {
-            return Err(ParseError::NoProduction);
-        };
+            ));
+        }
 
-        self.assert(Token::Semicolon)?;
-        Ok(statement)
+        if self.accept(Token::Colon) {
+            return match expression {
+                Expression::Name(id) => {
+                    let body = Box::new(self.block_statement()?);
+                    Ok(Statement::Labeled { label: id, body })
+                }
+                _ => Err(ParseError::NoProduction),
+            };
+        }
+
+        if self.accept(Token::Semicolon) {
+            return Ok(Statement::ExpressionStatement(expression));
+        }
+
+        Err(ParseError::NoProduction)
     }
 
     /// `term` defines the maximal construct we can parse at this point without yet knowing

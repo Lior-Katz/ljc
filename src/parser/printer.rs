@@ -345,6 +345,10 @@ impl AstNode for Statement {
                 writeln!(f, "{condition_label_prefix}Condition")?;
                 condition.fmt_tree(f, &condition_prefix, true)
             }
+            Statement::Labeled { label, body } => {
+                writeln!(f, "{line_prefix}LabeledStatement: {label}")?;
+                body.fmt_tree(f, &new_prefix, true)
+            }
         }
     }
 }
