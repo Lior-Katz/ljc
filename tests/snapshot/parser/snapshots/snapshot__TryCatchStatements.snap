@@ -292,10 +292,37 @@ source: tests/snapshot/snapshot_test.rs
         │                   ├──CatchType
         │                   │   └──Modifiers []
         │                   │       └──IOException
-        │                   └──MethodInvocation
-        │                       ├──method: getMessage
-        │                       └──target:
+        │                   └──ThrowStatement
+        │                       └──new RuntimeException
         │                           └──e
+        ├──Method throw_in_try_catch []
+        │   ├──Void
+        │   └──Block
+        │       └──TryStatement
+        │           ├──TryBlock
+        │           │   └──ThrowStatement
+        │           │       └──new RuntimeException
+        │           │           └──String "error"
+        │           └──ExceptionHandlers
+        │               └──CatchClause
+        │                   ├──e
+        │                   ├──CatchType
+        │                   │   └──Modifiers []
+        │                   │       └──RuntimeException
+        │                   └──ThrowStatement
+        │                       └──e
+        ├──Method throw_in_finally []
+        │   ├──Void
+        │   └──Block
+        │       └──TryStatement
+        │           ├──TryBlock
+        │           │   └──VariableDeclaration []
+        │           │       ├──Int
+        │           │       └──x
+        │           │           └──int 1
+        │           └──FinallyBlock
+        │               └──ThrowStatement
+        │                   └──new RuntimeException
         └──Class Holder [Static]
             └──Field declaration [Final]
                 ├──Scanner

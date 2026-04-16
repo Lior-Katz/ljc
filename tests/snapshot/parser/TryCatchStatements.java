@@ -98,7 +98,23 @@ class TryCatchStatements {
         try (in; h.scanner; StringWriter out = new StringWriter()) {
             out.write(1);
         } catch (IOException e) {
-            e.getMessage();
+            throw new RuntimeException(e);
+        }
+    }
+
+    void throw_in_try_catch() {
+        try {
+            throw new RuntimeException("error");
+        } catch (RuntimeException e) {
+            throw e;
+        }
+    }
+
+    void throw_in_finally() {
+        try {
+            int x = 1;
+        } finally {
+            throw new RuntimeException();
         }
     }
 

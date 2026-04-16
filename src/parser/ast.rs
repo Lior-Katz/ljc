@@ -161,7 +161,8 @@ pub enum Statement {
         try_block: BlockStatements,
         exception_handlers: CatchClauseList,
         finally_block: Option<BlockStatements>,
-    }
+    },
+    Throw(Expression),
 }
 
 #[derive(Debug)]

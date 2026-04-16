@@ -410,6 +410,10 @@ impl AstNode for Statement {
 
                 children.fmt_tree(f, &new_prefix, true)
             }
+            Statement::Throw(e) => {
+                writeln!(f, "{line_prefix}ThrowStatement")?;
+                e.fmt_tree(f, &new_prefix, true)
+            }
         }
     }
 }

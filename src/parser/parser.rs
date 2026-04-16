@@ -534,6 +534,7 @@ impl Parser {
             self.assert_statement(),
             self.return_statement(),
             self.try_statement(),
+            self.throw_statement(),
         )
     }
 
@@ -1371,6 +1372,13 @@ impl Parser {
             })
         }
         Ok(type_name)
+    }
+
+    fn throw_statement(&mut self) -> Result<Statement, ParseError> {
+        self.assert(Token::Throw)?;
+        let expression = self.expression()?;
+        self.assert(Token::Semicolon)?;
+        Ok(Statement::Throw(expression))
     }
 }
 
