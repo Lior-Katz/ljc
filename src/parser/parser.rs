@@ -1,12 +1,12 @@
 use crate::lexer::{LexError, Token};
 use crate::lexer::{Tokens, lex_single_file};
 use crate::parser::ast::{
-    ArgumentList, AssignmentOp, BinOp, ClassBodyDeclaration, ClassDeclaration,
+    ArgumentList, AssignmentOp, BinOp, CatchClause, ClassBodyDeclaration, ClassDeclaration,
     ClassMemberDeclaration, CompilationUnit, ConstructorBody, ConstructorInvocation, Expression,
     ForInit, ForUpdate, FormalParameter, FormalParameterList, Identifier, LeftHandSide,
     MemberAccess, MethodBody, MethodCall, MethodDeclaration, Modifiable, Modified, Modifier,
-    NormalClassDeclaration, Program, Statement, TopLevelClassOrInterfaceDeclaration, Type,
-    VariableDeclaration, VariableDeclarator, VariableDeclaratorId, VariableDeclaratorList,
+    NormalClassDeclaration, Program, Resource, Statement, TopLevelClassOrInterfaceDeclaration,
+    Type, VariableDeclaration, VariableDeclarator, VariableDeclaratorId, VariableDeclaratorList,
     VariableInitializer,
 };
 use crate::parser::error::ParseError;
@@ -364,7 +364,7 @@ impl Parser {
                 param_type,
                 VariableDeclaratorId::Named(identifier),
             )
-                .with_modifiers(modifiers))
+            .with_modifiers(modifiers))
         }
     }
 
@@ -513,11 +513,11 @@ impl Parser {
     ///     continue_statement
     ///     assert_statement
     ///     return_statement
-    ///     yield_statement
-    ///     switch_statement
-    ///     synchronized_statement
-    ///     throw_statement
     ///     try_statement
+    ///     throw_statement
+    ///     switch_statement
+    ///     yield_statement
+    ///     synchronized_statement
     ///
     /// if_statement:
     ///     if_then_statement
@@ -533,6 +533,7 @@ impl Parser {
             self.continue_statement(),
             self.assert_statement(),
             self.return_statement(),
+            self.try_statement(),
         )
     }
 
@@ -597,7 +598,7 @@ impl Parser {
                     variable_type: expression,
                     declarators: var_declarations,
                 }
-                    .with_modifiers(modifiers),
+                .with_modifiers(modifiers),
             ));
         }
 
@@ -1194,7 +1195,7 @@ impl Parser {
             variable_type: expression,
             declarators: var_declarators,
         }
-            .with_modifiers(modifiers);
+        .with_modifiers(modifiers);
         if self.accept(Token::Semicolon) {
             // basic for init is a local_variable_declaration
             let (condition, update) = self.basic_for_condition_and_update()?;
@@ -1273,12 +1274,103 @@ impl Parser {
     //noinspection DuplicatedCode
     fn return_statement(&mut self) -> Result<Statement, ParseError> {
         self.assert(Token::Return)?;
-        let expression = if self.accept(Token::Semicolon) { None } else {
+        let expression = if self.accept(Token::Semicolon) {
+            None
+        } else {
             let expression = self.expression()?;
             self.assert(Token::Semicolon)?;
             Some(expression)
         };
         Ok(Statement::Return(expression))
+    }
+
+    /// ```text
+    /// try_statement:
+    ///     try [( resource_list )] block {catch_clause} [finally]
+    ///
+    /// resource_list:
+    ///     resource {; resource} [;]
+    /// ```
+    fn try_statement(&mut self) -> Result<Statement, ParseError> {
+        self.assert(Token::Try)?;
+        let resources = if self.accept(Token::LeftParen) {
+            let resources = self
+                .delimited_at_least_1(Self::try_resource, |this| this.assert(Token::Semicolon))?;
+            self.accept(Token::Semicolon);
+            self.assert(Token::RightParen)?;
+            resources
+        } else {
+            vec![]
+        };
+        let body = self.block()?;
+        let catch_clauses = self.zero_or_more(Self::catch_clause);
+        let finally_block = if self.accept(Token::Finally) {
+            Some(self.block()?)
+        } else {
+            None
+        };
+        Ok(Statement::Try {
+            resource: resources,
+            try_block: body,
+            exception_handlers: catch_clauses,
+            finally_block,
+        })
+    }
+
+    /// ```text
+    /// resource:
+    ///     local_variable_declaration
+    ///     variable_access
+    /// ```
+    fn try_resource(&mut self) -> Result<Resource, ParseError> {
+        let modifiers = self.zero_or_more(|this| this.modifier());
+        let expression = self.term()?;
+        if let Ok(var_declarations) = self.variable_declarators_list() {
+            Ok(Resource::VariableDeclaration(
+                VariableDeclaration {
+                    variable_type: expression,
+                    declarators: var_declarations,
+                }
+                .with_modifiers(modifiers),
+            ))
+        } else {
+            Ok(Resource::VariableAccess(expression))
+        }
+    }
+
+    /// ```text
+    /// catch_clause:
+    ///     catch ( {modifier} catch_type variable_declarator_id ) block
+    /// ```
+    fn catch_clause(&mut self) -> Result<CatchClause, ParseError> {
+        self.assert(Token::Catch)?;
+        self.assert(Token::LeftParen)?;
+        let catch_type = self.delimited_at_least_1(
+            |this| Ok(this.type_term()?),
+            |this| this.assert(Token::BitwiseOr),
+        )?;
+        let var_id = self.variable_declarator_id()?;
+        self.assert(Token::RightParen)?;
+        let body = self.block()?;
+        Ok(CatchClause { catch_type, var_id, body })
+    }
+
+    fn type_term(&mut self) -> Result<Modified<Expression>, ParseError> {
+        let modifiers = self.zero_or_more(Self::modifier);
+        let type_term =
+            one_of!(self.primitive_type().map(|v| Expression::Type(v)), self.reference_type())?;
+        Ok(type_term.with_modifiers(modifiers))
+    }
+
+    fn reference_type(&mut self) -> Result<Expression, ParseError> {
+        let mut type_name = Expression::Name(self.identifier()?);
+        while self.accept(Token::Dot) {
+            type_name = Expression::MemberAccess(MemberAccess {
+                target: Box::new(type_name),
+                name: self.identifier()?,
+            })
+        }
+        Ok(type_name)
     }
 }
 

@@ -1,9 +1,10 @@
 use crate::parser::ast::{
-    AssignmentOp, BinOp, ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration,
-    CompilationUnit, ConstructorBody, ConstructorInvocation, Expression, ForInit, FormalParameter,
-    LeftHandSide, MemberAccess, MethodBody, MethodCall, MethodDeclaration, Modified, Modifiers,
-    NormalClassDeclaration, Statement, TopLevelClassOrInterfaceDeclaration, Type,
-    VariableDeclaration, VariableDeclarator, VariableDeclaratorId, VariableInitializer,
+    AssignmentOp, BinOp, CatchClause, ClassBodyDeclaration, ClassDeclaration,
+    ClassMemberDeclaration, CompilationUnit, ConstructorBody, ConstructorInvocation, Expression,
+    ForInit, FormalParameter, LeftHandSide, MemberAccess, MethodBody, MethodCall,
+    MethodDeclaration, Modified, Modifiers, NormalClassDeclaration, Resource, Statement,
+    TopLevelClassOrInterfaceDeclaration, Type, VariableDeclaration, VariableDeclarator,
+    VariableDeclaratorId, VariableInitializer,
 };
 use std::fmt;
 use std::fmt::{Display, Formatter};
@@ -386,6 +387,29 @@ impl AstNode for Statement {
                 }
                 Ok(())
             }
+            Statement::Try {
+                resource,
+                try_block,
+                exception_handlers,
+                finally_block,
+            } => {
+                writeln!(f, "{line_prefix}TryStatement")?;
+                let resources = if resource.is_empty() { None } else { Some(resource) };
+
+                let exception_handlers = if exception_handlers.is_empty() {
+                    None
+                } else {
+                    Some(exception_handlers)
+                };
+
+                let children = Children::new()
+                    .push_opt("Resources", &resources)
+                    .push("TryBlock", try_block)
+                    .push_opt("ExceptionHandlers", &exception_handlers)
+                    .push_opt("FinallyBlock", finally_block);
+
+                children.fmt_tree(f, &new_prefix, true)
+            }
         }
     }
 }
@@ -463,6 +487,14 @@ impl AstNode for Expression {
                 arguments.fmt_tree(f, &new_prefix, true)
             }
         }
+    }
+}
+
+impl AstNode for Modified<Expression> {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        let (line_prefix, new_prefix) = branch(&prefix, is_last);
+        writeln!(f, "{line_prefix}Modifiers {:?}", self.modifiers)?;
+        <Expression as AstNode<()>>::fmt_tree(&self.item, f, &new_prefix, true)
     }
 }
 
@@ -646,6 +678,29 @@ impl AstNode for ForInit {
             ForInit::LocalVarDeclaration(v) => v.fmt_tree(f, prefix, is_last),
             ForInit::Expressions(e) => e.fmt_tree(f, prefix, is_last),
         }
+    }
+}
+
+impl AstNode for Resource {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        match self {
+            Resource::VariableDeclaration(v) => v.fmt_tree(f, prefix, is_last),
+            Resource::VariableAccess(v) => v.fmt_tree(f, prefix, is_last),
+        }
+    }
+}
+
+impl AstNode for CatchClause {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        let (line_prefix, new_prefix) = branch(prefix, is_last);
+        // let children = Children::new().push()
+        writeln!(f, "{line_prefix}CatchClause")?;
+        let (catch_parameter_label_prefix, catch_parameter_prefix) = branch(&new_prefix, false);
+        writeln!(f, "{catch_parameter_label_prefix}{}", self.var_id)?;
+
+        writeln!(f, "{catch_parameter_label_prefix}CatchType")?;
+        self.catch_type.fmt_tree(f, &catch_parameter_prefix, true)?;
+        self.body.fmt_tree(f, &new_prefix, true)
     }
 }
 

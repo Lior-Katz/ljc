@@ -1,0 +1,304 @@
+---
+source: tests/snapshot/snapshot_test.rs
+---
+└──Compilation Unit
+    └──Class TryCatchStatements []
+        ├──Method basic_try_catch []
+        │   ├──Void
+        │   └──Block
+        │       └──TryStatement
+        │           ├──TryBlock
+        │           │   └──VariableDeclaration []
+        │           │       ├──Int
+        │           │       └──x
+        │           │           └── /
+        │           │               ├──int 1
+        │           │               └──int 0
+        │           └──ExceptionHandlers
+        │               └──CatchClause
+        │                   ├──e
+        │                   ├──CatchType
+        │                   │   └──Modifiers []
+        │                   │       └──ArithmeticException
+        │                   └──MethodInvocation
+        │                       ├──method: getMessage
+        │                       └──target:
+        │                           └──e
+        ├──Method multiple_catch []
+        │   ├──Void
+        │   └──Block
+        │       └──TryStatement
+        │           ├──TryBlock
+        │           │   └──MethodInvocation
+        │           │       ├──method: parseInt
+        │           │       ├──target:
+        │           │       │   └──Integer
+        │           │       └──args:
+        │           │           └──String "abc"
+        │           └──ExceptionHandlers
+        │               ├──CatchClause
+        │               │   ├──e
+        │               │   ├──CatchType
+        │               │   │   └──Modifiers []
+        │               │   │       └──NumberFormatException
+        │               │   └──MethodInvocation
+        │               │       ├──method: getMessage
+        │               │       └──target:
+        │               │           └──e
+        │               └──CatchClause
+        │                   ├──e
+        │                   ├──CatchType
+        │                   │   └──Modifiers []
+        │                   │       └──Exception
+        │                   └──MethodInvocation
+        │                       ├──method: getMessage
+        │                       └──target:
+        │                           └──e
+        ├──Method union_catch []
+        │   ├──Void
+        │   └──Block
+        │       └──TryStatement
+        │           ├──TryBlock
+        │           │   └──MethodInvocation
+        │           │       ├──method: parseInt
+        │           │       ├──target:
+        │           │       │   └──Integer
+        │           │       └──args:
+        │           │           └──String "abc"
+        │           └──ExceptionHandlers
+        │               └──CatchClause
+        │                   ├──e
+        │                   ├──CatchType
+        │                   │   ├──Modifiers []
+        │                   │   │   └──NumberFormatException
+        │                   │   └──Modifiers []
+        │                   │       └──NullPointerException
+        │                   └──MethodInvocation
+        │                       ├──method: getMessage
+        │                       └──target:
+        │                           └──e
+        ├──Method try_catch_finally []
+        │   ├──Void
+        │   └──Block
+        │       └──TryStatement
+        │           ├──TryBlock
+        │           │   └──VariableDeclaration []
+        │           │       ├──Int
+        │           │       └──x
+        │           │           └── /
+        │           │               ├──int 10
+        │           │               └──int 2
+        │           ├──ExceptionHandlers
+        │           │   └──CatchClause
+        │           │       ├──e
+        │           │       ├──CatchType
+        │           │       │   └──Modifiers []
+        │           │       │       └──Exception
+        │           │       └──MethodInvocation
+        │           │           ├──method: getMessage
+        │           │           └──target:
+        │           │               └──e
+        │           └──FinallyBlock
+        │               └──MethodInvocation
+        │                   ├──method: gc
+        │                   └──target:
+        │                       └──System
+        ├──Method try_finally []
+        │   ├──Void
+        │   └──Block
+        │       ├──VariableDeclaration []
+        │       │   ├──Int
+        │       │   └──x
+        │       │       └──int 0
+        │       └──TryStatement
+        │           ├──TryBlock
+        │           │   └──Assignment =
+        │           │       ├──x
+        │           │       └──int 1
+        │           └──FinallyBlock
+        │               └──PostIncrement
+        │                   └──x
+        ├──Method try_with_resources []
+        │   ├──Void
+        │   └──Block
+        │       └──TryStatement
+        │           ├──Resources
+        │           │   └──VariableDeclaration []
+        │           │       ├──StringReader
+        │           │       └──in
+        │           │           └──new StringReader
+        │           │               └──String "abc"
+        │           ├──TryBlock
+        │           │   └──MethodInvocation
+        │           │       ├──method: read
+        │           │       └──target:
+        │           │           └──in
+        │           └──ExceptionHandlers
+        │               └──CatchClause
+        │                   ├──e
+        │                   ├──CatchType
+        │                   │   └──Modifiers []
+        │                   │       └──IOException
+        │                   └──MethodInvocation
+        │                       ├──method: getMessage
+        │                       └──target:
+        │                           └──e
+        ├──Method multiple_resources []
+        │   ├──Void
+        │   └──Block
+        │       └──TryStatement
+        │           ├──Resources
+        │           │   ├──VariableDeclaration []
+        │           │   │   ├──StringReader
+        │           │   │   └──in
+        │           │   │       └──new StringReader
+        │           │   │           └──String "abc"
+        │           │   └──VariableDeclaration []
+        │           │       ├──StringWriter
+        │           │       └──out
+        │           │           └──new StringWriter
+        │           ├──TryBlock
+        │           │   └──MethodInvocation
+        │           │       ├──method: write
+        │           │       ├──target:
+        │           │       │   └──out
+        │           │       └──args:
+        │           │           └──MethodInvocation
+        │           │               ├──method: read
+        │           │               └──target:
+        │           │                   └──in
+        │           └──ExceptionHandlers
+        │               └──CatchClause
+        │                   ├──e
+        │                   ├──CatchType
+        │                   │   └──Modifiers []
+        │                   │       └──IOException
+        │                   └──MethodInvocation
+        │                       ├──method: getMessage
+        │                       └──target:
+        │                           └──e
+        ├──Method try_with_resources_finally []
+        │   ├──Void
+        │   └──Block
+        │       └──TryStatement
+        │           ├──Resources
+        │           │   └──VariableDeclaration []
+        │           │       ├──StringReader
+        │           │       └──in
+        │           │           └──new StringReader
+        │           │               └──String "abc"
+        │           ├──TryBlock
+        │           │   └──MethodInvocation
+        │           │       ├──method: read
+        │           │       └──target:
+        │           │           └──in
+        │           ├──ExceptionHandlers
+        │           │   └──CatchClause
+        │           │       ├──e
+        │           │       ├──CatchType
+        │           │       │   └──Modifiers []
+        │           │       │       └──IOException
+        │           │       └──MethodInvocation
+        │           │           ├──method: getMessage
+        │           │           └──target:
+        │           │               └──e
+        │           └──FinallyBlock
+        │               └──MethodInvocation
+        │                   ├──method: gc
+        │                   └──target:
+        │                       └──System
+        ├──Method try_with_resources_only []
+        │   ├──Void
+        │   └──Block
+        │       └──TryStatement
+        │           ├──Resources
+        │           │   └──VariableDeclaration []
+        │           │       ├──StringReader
+        │           │       └──in
+        │           │           └──new StringReader
+        │           │               └──String "abc"
+        │           └──TryBlock
+        │               └──VariableDeclaration []
+        │                   ├──Int
+        │                   └──x
+        │                       └──int 1
+        ├──Method resource_local_variable []
+        │   ├──Void
+        │   └──Block
+        │       ├──VariableDeclaration []
+        │       │   ├──StringReader
+        │       │   └──in
+        │       │       └──new StringReader
+        │       │           └──String "abc"
+        │       └──TryStatement
+        │           ├──Resources
+        │           │   └──in
+        │           └──TryBlock
+        │               └──VariableDeclaration []
+        │                   ├──Int
+        │                   └──x
+        │                       └──int 1
+        ├──Method resource_field_access []
+        │   ├──Void
+        │   └──Block
+        │       ├──VariableDeclaration []
+        │       │   ├──Holder
+        │       │   └──h
+        │       │       └──new Holder
+        │       └──TryStatement
+        │           ├──Resources
+        │           │   └──MemberAccess
+        │           │       ├──field: scanner
+        │           │       └──target:
+        │           │           └──h
+        │           └──TryBlock
+        │               └──VariableDeclaration []
+        │                   ├──Int
+        │                   └──x
+        │                       └──int 1
+        ├──Method mixed_resources []
+        │   ├──Void
+        │   └──Block
+        │       ├──VariableDeclaration []
+        │       │   ├──Holder
+        │       │   └──h
+        │       │       └──new Holder
+        │       ├──VariableDeclaration []
+        │       │   ├──Scanner
+        │       │   └──in
+        │       │       └──new Scanner
+        │       │           └──String "abc"
+        │       └──TryStatement
+        │           ├──Resources
+        │           │   ├──in
+        │           │   ├──MemberAccess
+        │           │   │   ├──field: scanner
+        │           │   │   └──target:
+        │           │   │       └──h
+        │           │   └──VariableDeclaration []
+        │           │       ├──StringWriter
+        │           │       └──out
+        │           │           └──new StringWriter
+        │           ├──TryBlock
+        │           │   └──MethodInvocation
+        │           │       ├──method: write
+        │           │       ├──target:
+        │           │       │   └──out
+        │           │       └──args:
+        │           │           └──int 1
+        │           └──ExceptionHandlers
+        │               └──CatchClause
+        │                   ├──e
+        │                   ├──CatchType
+        │                   │   └──Modifiers []
+        │                   │       └──IOException
+        │                   └──MethodInvocation
+        │                       ├──method: getMessage
+        │                       └──target:
+        │                           └──e
+        └──Class Holder [Static]
+            └──Field declaration [Final]
+                ├──Scanner
+                └──scanner
+                    └──new Scanner
+                        └──String "abc"

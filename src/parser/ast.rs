@@ -11,6 +11,9 @@ pub type MethodResult = Expression;
 pub type TypeToInstantiate = Vec<Identifier>;
 pub type ExpressionList = Vec<Expression>;
 pub type ForUpdate = ExpressionList;
+pub type CatchClauseList = Vec<CatchClause>;
+pub type CatchType = Vec<Modified<Expression>>;
+pub type Resources = Vec<Resource>;
 
 #[derive(Debug)]
 pub enum CompilationUnit {
@@ -153,6 +156,12 @@ pub enum Statement {
         detail_message: Option<Expression>,
     },
     Return(Option<Expression>),
+    Try {
+        resource: Resources,
+        try_block: BlockStatements,
+        exception_handlers: CatchClauseList,
+        finally_block: Option<BlockStatements>,
+    }
 }
 
 #[derive(Debug)]
@@ -182,6 +191,19 @@ pub enum VariableDeclaratorId {
 #[derive(Debug)]
 pub enum VariableInitializer {
     Expression(Expression),
+}
+
+#[derive(Debug)]
+pub enum Resource {
+    VariableDeclaration(Modified<VariableDeclaration>),
+    VariableAccess(Expression),
+}
+
+#[derive(Debug)]
+pub struct CatchClause {
+    pub catch_type: CatchType,
+    pub var_id: VariableDeclaratorId,
+    pub body: BlockStatements,
 }
 
 #[derive(Debug)]
