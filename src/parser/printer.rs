@@ -1,5 +1,5 @@
 use crate::parser::ast::{
-    AssignmentOp, BinOp, CatchClause, ClassBodyDeclaration, ClassDeclaration,
+    ArrayType, AssignmentOp, BinOp, CatchClause, ClassBodyDeclaration, ClassDeclaration,
     ClassMemberDeclaration, ClassTypePart, CompilationUnit, ConstructorBody, ConstructorInvocation,
     Expression, ForInit, FormalParameter, LeftHandSide, MemberAccess, MethodBody, MethodCall,
     MethodDeclaration, Modified, Modifier, Modifiers, NormalClassDeclaration, Resource, Statement,
@@ -261,18 +261,22 @@ impl AstNode<Modifiers> for Type {
         writeln!(f, "{line_prefix}Type")?;
         modifiers.fmt_tree(f, &new_prefix, false)?;
 
-        let (type_prefix, _) = branch(&new_prefix, true);
+        let (type_line_prefix, type_prefix) = branch(&new_prefix, true);
         match self {
-            Type::Byte => writeln!(f, "{type_prefix}byte"),
-            Type::Short => writeln!(f, "{type_prefix}short"),
-            Type::Int => writeln!(f, "{type_prefix}int"),
-            Type::Long => writeln!(f, "{type_prefix}long"),
-            Type::Char => writeln!(f, "{type_prefix}char"),
-            Type::Float => writeln!(f, "{type_prefix}float"),
-            Type::Double => writeln!(f, "{type_prefix}double"),
-            Type::Boolean => writeln!(f, "{type_prefix}boolean"),
-            Type::Void => writeln!(f, "{type_prefix}void"),
+            Type::Byte => writeln!(f, "{type_line_prefix}byte"),
+            Type::Short => writeln!(f, "{type_line_prefix}short"),
+            Type::Int => writeln!(f, "{type_line_prefix}int"),
+            Type::Long => writeln!(f, "{type_line_prefix}long"),
+            Type::Char => writeln!(f, "{type_line_prefix}char"),
+            Type::Float => writeln!(f, "{type_line_prefix}float"),
+            Type::Double => writeln!(f, "{type_line_prefix}double"),
+            Type::Boolean => writeln!(f, "{type_line_prefix}boolean"),
+            Type::Void => writeln!(f, "{type_line_prefix}void"),
             Type::ClassType(c) => c.fmt_tree(f, &new_prefix, true),
+            Type::ArrayType(ArrayType { element_type, }) => {
+                writeln!(f, "{type_line_prefix}ArrayType")?;
+                element_type.fmt_tree(f, &type_prefix, true)
+            }
         }
     }
 }

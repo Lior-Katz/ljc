@@ -321,9 +321,15 @@ pub enum Type {
 
     // reference types
     ClassType(ClassType),
+    ArrayType(ArrayType),
 }
 
 #[derive(Debug)]
 pub struct ClassTypePart {
     pub identifier: Identifier,
+}
+
+#[derive(Debug)]
+pub struct ArrayType {
+    pub element_type: Box<Type>,
 }

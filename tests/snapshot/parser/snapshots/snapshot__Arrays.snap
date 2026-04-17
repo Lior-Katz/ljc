@@ -1,0 +1,77 @@
+---
+source: tests/snapshot/snapshot_test.rs
+---
+└──Compilation Unit
+    └──Class Arrays []
+        ├──Field declaration []
+        │   ├──Type
+        │   │   └──ArrayType
+        │   │       └──Type
+        │   │           └──int
+        │   └──a
+        ├──Field declaration []
+        │   ├──Type
+        │   │   └──ArrayType
+        │   │       └──Type
+        │   │           └──ArrayType
+        │   │               └──Type
+        │   │                   └──int
+        │   └──b
+        ├──Field declaration []
+        │   ├──Type
+        │   │   └──ArrayType
+        │   │       └──Type
+        │   │           └──ArrayType
+        │   │               └──Type
+        │   │                   └──ArrayType
+        │   │                       └──Type
+        │   │                           ├──java
+        │   │                           ├──lang
+        │   │                           └──String
+        │   └──t
+        ├──Field declaration []
+        │   ├──Type
+        │   │   └──ArrayType
+        │   │       └──Type
+        │   │           └──int
+        │   ├──m
+        │   └──n
+        └──Method arrayTypes []
+            ├──Type
+            │   └──ArrayType
+            │       └──Type
+            │           └──ArrayType
+            │               └──Type
+            │                   └──int
+            ├──Param x
+            │   └──Type
+            │       └──int
+            ├──Param y
+            │   └──Type
+            │       └──ArrayType
+            │           └──Type
+            │               └──int
+            ├──Param z
+            │   └──Type
+            │       └──ArrayType
+            │           └──Type
+            │               └──ArrayType
+            │                   └──Type
+            │                       └──String
+            └──Block
+                ├──VariableDeclaration []
+                │   ├──Type
+                │   │   └──ArrayType
+                │   │       └──Type
+                │   │           └──int
+                │   └──a
+                ├──VariableDeclaration []
+                │   ├──Type
+                │   │   └──ArrayType
+                │   │       └──Type
+                │   │           └──ArrayType
+                │   │               └──Type
+                │   │                   └──String
+                │   └──b
+                └──ReturnStatement
+                    └──null

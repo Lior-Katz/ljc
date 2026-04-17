@@ -1,13 +1,13 @@
 use crate::lexer::{LexError, Token};
 use crate::lexer::{Tokens, lex_single_file};
 use crate::parser::ast::{
-    ArgumentList, AssignmentOp, BinOp, CatchClause, ClassBodyDeclaration, ClassDeclaration,
-    ClassMemberDeclaration, ClassTypePart, CompilationUnit, ConstructorBody, ConstructorInvocation,
-    Expression, ForInit, ForUpdate, FormalParameter, FormalParameterList, Identifier, LeftHandSide,
-    MemberAccess, MethodBody, MethodCall, MethodDeclaration, Modifiable, Modified, Modifier,
-    NormalClassDeclaration, Program, Resource, Statement, TopLevelClassOrInterfaceDeclaration,
-    Type, VariableDeclaration, VariableDeclarator, VariableDeclaratorId, VariableDeclaratorList,
-    VariableInitializer,
+    ArgumentList, ArrayType, AssignmentOp, BinOp, CatchClause, ClassBodyDeclaration,
+    ClassDeclaration, ClassMemberDeclaration, ClassTypePart, CompilationUnit, ConstructorBody,
+    ConstructorInvocation, Expression, ForInit, ForUpdate, FormalParameter, FormalParameterList,
+    Identifier, LeftHandSide, MemberAccess, MethodBody, MethodCall, MethodDeclaration, Modifiable,
+    Modified, Modifier, NormalClassDeclaration, Program, Resource, Statement,
+    TopLevelClassOrInterfaceDeclaration, Type, VariableDeclaration, VariableDeclarator,
+    VariableDeclaratorId, VariableDeclaratorList, VariableInitializer,
 };
 use crate::parser::error::ParseError;
 
@@ -940,7 +940,7 @@ impl Parser {
     /// ```text
     /// selector:
     ///     . this
-    ///     .class // class literal
+    ///     . class // class literal
     ///     . super
     ///     . identfier // field access
     ///     . identifier ( [arg_list] ) // method invocation
@@ -966,6 +966,12 @@ impl Parser {
                             name: id,
                         })
                     }
+                }
+            } else if self.accept(Token::LeftBracket) {
+                if self.accept(Token::RightBracket) {
+                    expr = Expression::Type(Type::ArrayType(ArrayType {
+                        element_type: Box::new(Type::try_from(expr)?),
+                    }))
                 }
             } else {
                 break;
@@ -1347,11 +1353,20 @@ impl Parser {
 
     /// ```text
     /// type_term:
-    ///     primitive_type
-    ///     reference_type
+    ///     primitive_type {dims}
+    ///     reference_type {dims}
+    ///
+    /// dims:
+    ///     [ ]
     /// ```
     fn type_term(&mut self) -> Result<Type, ParseError> {
-        let type_term = one_of!(self.primitive_type(), self.reference_type())?;
+        let mut type_term = one_of!(self.primitive_type(), self.reference_type())?;
+        while self.accept(Token::LeftBracket) {
+            self.assert(Token::RightBracket)?;
+            type_term = Type::ArrayType(ArrayType {
+                element_type: Box::new(type_term),
+            })
+        }
         Ok(type_term)
     }
 
@@ -1396,5 +1411,32 @@ enum ForHeader {
 impl From<LexError> for ParseError {
     fn from(_e: LexError) -> Self {
         ParseError::NoProduction
+    }
+}
+
+impl From<Identifier> for Type {
+    fn from(value: Identifier) -> Self {
+        Self::ClassType(vec![ClassTypePart { identifier: value }])
+    }
+}
+
+impl TryFrom<Expression> for Type {
+    type Error = ParseError;
+
+    fn try_from(value: Expression) -> Result<Self, Self::Error> {
+        match value {
+            Expression::Type(t) => Ok(t),
+            Expression::Name(n) => Ok(Self::from(n)),
+            Expression::MemberAccess(MemberAccess { target, name }) => {
+                match Self::try_from(*target)? {
+                    Type::ClassType(mut ct) => {
+                        ct.push(ClassTypePart { identifier: name });
+                        Ok(Type::ClassType(ct))
+                    }
+                    _ => Err(ParseError::NoProduction),
+                }
+            }
+            _ => Err(ParseError::NoProduction),
+        }
     }
 }
