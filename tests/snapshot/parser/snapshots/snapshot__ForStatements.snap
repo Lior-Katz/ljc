@@ -119,9 +119,12 @@ source: tests/snapshot/snapshot_test.rs
                 │       └──int 0
                 ├──ForStatement
                 │   ├──Initializer
+                │   │   ├──Assignment =
+                │   │   │   ├──i
+                │   │   │   └──int 0
                 │   │   └──Assignment =
-                │   │       ├──i
-                │   │       └──int 0
+                │   │       ├──a
+                │   │       └──int 1
                 │   ├──Condition
                 │   │   └── <
                 │   │       ├──i

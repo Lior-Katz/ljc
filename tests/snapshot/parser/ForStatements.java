@@ -22,7 +22,7 @@ class ForStatements {
             b++;
 
         int i = 0;
-        for (i = 0; i < 10; i++)
+        for (i = 0, a = 1; i < 10; i++)
             a += i;
 
         for (int x = 0; x < 3; x++)
