@@ -4,9 +4,14 @@ source: tests/snapshot/snapshot_test.rs
 └──Compilation Unit
     └──Class WhileStatements []
         ├──Method test []
-        │   ├──Void
-        │   ├──Param Int a []
-        │   ├──Param Int b []
+        │   ├──Type
+        │   │   └──void
+        │   ├──Param a
+        │   │   └──Type
+        │   │       └──int
+        │   ├──Param b
+        │   │   └──Type
+        │   │       └──int
         │   └──Block
         │       ├──WhileStatement
         │       │   ├──Condition
@@ -106,9 +111,14 @@ source: tests/snapshot/snapshot_test.rs
         │           └──Body
         │               └──EmptyStatement
         └──Method danglingElse []
-            ├──Void
-            ├──Param Int a []
-            ├──Param Int b []
+            ├──Type
+            │   └──void
+            ├──Param a
+            │   └──Type
+            │       └──int
+            ├──Param b
+            │   └──Type
+            │       └──int
             └──Block
                 ├──IfStatement
                 │   ├──Condition

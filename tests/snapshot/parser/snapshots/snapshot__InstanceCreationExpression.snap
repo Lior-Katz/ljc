@@ -4,25 +4,42 @@ source: tests/snapshot/snapshot_test.rs
 └──Compilation Unit
     └──Class InstaceCreationExpression []
         └──Method unqualified_class_instance_creation []
-            ├──Void
+            ├──Type
+            │   └──void
             └──Block
-                ├──new String
-                ├──new Integer
+                ├──NewInstance
+                │   └──Type
+                │       └──String
+                ├──NewInstance
+                │   ├──Type
+                │   │   └──Integer
                 │   └──int 5
-                ├──new String
-                │   └──new String
+                ├──NewInstance
+                │   ├──Type
+                │   │   └──String
+                │   └──NewInstance
+                │       ├──Type
+                │       │   └──String
                 │       └──String "abc"
                 ├──VariableDeclaration []
                 │   ├──String
                 │   └──s
                 │       └── +
-                │           ├──new String
+                │           ├──NewInstance
+                │           │   ├──Type
+                │           │   │   └──String
                 │           │   └──String "hi"
-                │           └──new String
+                │           └──NewInstance
+                │               ├──Type
+                │               │   └──String
                 │               └──String "there"
                 └──MethodInvocation
                     ├──method: compareTo
                     ├──target:
-                    │   └──new String
+                    │   └──NewInstance
+                    │       └──Type
+                    │           └──String
                     └──args:
-                        └──new String
+                        └──NewInstance
+                            └──Type
+                                └──String

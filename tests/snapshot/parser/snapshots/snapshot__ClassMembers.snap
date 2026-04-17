@@ -4,51 +4,68 @@ source: tests/snapshot/snapshot_test.rs
 └──Compilation Unit
     └──Class ClassMembers []
         ├──Field declaration [Private]
-        │   ├──Int
+        │   ├──Type
+        │   │   └──int
         │   └──a
         ├──Field declaration [Protected, Static]
-        │   ├──Int
+        │   ├──Type
+        │   │   └──int
         │   ├──b
         │   │   └──int 1
         │   └──c
         ├──Constructor declaration []
         │   └──ConstructorBody
         ├──Constructor declaration [Public]
-        │   ├──Param Int x []
+        │   ├──Param x
+        │   │   └──Type
+        │   │       └──int
         │   └──ConstructorBody
         ├──Constructor declaration [Protected]
-        │   ├──Param Int x []
-        │   ├──Param Int y []
+        │   ├──Param x
+        │   │   └──Type
+        │   │       └──int
+        │   ├──Param y
+        │   │   └──Type
+        │   │       └──int
         │   └──ConstructorBody
         │       └──Epilogue
         │           └──VariableDeclaration []
-        │               ├──Int
+        │               ├──Type
+        │               │   └──int
         │               └──z
         │                   └── +
         │                       ├──x
         │                       └──y
         ├──Constructor declaration []
-        │   ├──Param Int x []
+        │   ├──Param x
+        │   │   └──Type
+        │   │       └──int
         │   └──ConstructorBody
         │       └──ConstructorInvocation
         │           ├──int 1
         │           └──int 2
         ├──Constructor declaration []
-        │   ├──Param Double d []
+        │   ├──Param d
+        │   │   └──Type
+        │   │       └──double
         │   └──ConstructorBody
         │       ├──ConstructorInvocation
         │       │   └──int 2
         │       └──Epilogue
         │           └──VariableDeclaration []
-        │               ├──Int
+        │               ├──Type
+        │               │   └──int
         │               └──x
         │                   └──int 0
         ├──Constructor declaration []
-        │   ├──Param Boolean flag []
+        │   ├──Param flag
+        │   │   └──Type
+        │   │       └──boolean
         │   └──ConstructorBody
         │       ├──Prologue
         │       │   └──VariableDeclaration []
-        │       │       ├──Int
+        │       │       ├──Type
+        │       │       │   └──int
         │       │       └──x
         │       │           └──int 10
         │       ├──ConstructorInvocation
@@ -63,13 +80,18 @@ source: tests/snapshot/snapshot_test.rs
         │   ├──ClassMembers
         │   └──Block
         ├──Method bar [Protected, Static]
-        │   ├──Int
-        │   ├──Param Int x []
+        │   ├──Type
+        │   │   └──int
+        │   ├──Param x
+        │   │   └──Type
+        │   │       └──int
         │   └──Block
         └──Class InnerClass [Public, Static]
             ├──Field declaration []
-            │   ├──Int
+            │   ├──Type
+            │   │   └──int
             │   └──x
             └──Method innerMethod []
-                ├──Void
+                ├──Type
+                │   └──void
                 └──Block

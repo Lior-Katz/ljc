@@ -2,8 +2,8 @@ use crate::lexer::{LexError, Token};
 use crate::lexer::{Tokens, lex_single_file};
 use crate::parser::ast::{
     ArgumentList, AssignmentOp, BinOp, CatchClause, ClassBodyDeclaration, ClassDeclaration,
-    ClassMemberDeclaration, CompilationUnit, ConstructorBody, ConstructorInvocation, Expression,
-    ForInit, ForUpdate, FormalParameter, FormalParameterList, Identifier, LeftHandSide,
+    ClassMemberDeclaration, ClassTypePart, CompilationUnit, ConstructorBody, ConstructorInvocation,
+    Expression, ForInit, ForUpdate, FormalParameter, FormalParameterList, Identifier, LeftHandSide,
     MemberAccess, MethodBody, MethodCall, MethodDeclaration, Modifiable, Modified, Modifier,
     NormalClassDeclaration, Program, Resource, Statement, TopLevelClassOrInterfaceDeclaration,
     Type, VariableDeclaration, VariableDeclarator, VariableDeclaratorId, VariableDeclaratorList,
@@ -1072,15 +1072,11 @@ impl Parser {
     ///     identifier {. identifier}
     fn unqualified_class_instance_creation_expression(&mut self) -> Result<Expression, ParseError> {
         self.assert(Token::New)?;
-        let type_to_instantiate =
-            self.delimited_at_least_1(Self::identifier, |this| this.assert(Token::Dot))?;
+        let type_to_instantiate = self.type_term()?;
         self.assert(Token::LeftParen)?;
         let arguments = self.argument_list()?;
         self.assert(Token::RightParen)?;
-        Ok(Expression::UnqualifiedClassInstanceCreationExpression {
-            type_to_instantiate,
-            arguments,
-        })
+        Ok(Expression::InstanceCreation { type_to_instantiate, arguments })
     }
 
     /// The general structure of the if statement is as follows:
@@ -1356,22 +1352,32 @@ impl Parser {
         Ok(CatchClause { catch_type, var_id, body })
     }
 
-    fn type_term(&mut self) -> Result<Modified<Expression>, ParseError> {
-        let modifiers = self.zero_or_more(Self::modifier);
-        let type_term =
-            one_of!(self.primitive_type().map(|v| Expression::Type(v)), self.reference_type())?;
-        Ok(type_term.with_modifiers(modifiers))
+    /// ```text
+    /// type_term:
+    ///     primitive_type
+    ///     reference_type
+    /// ```
+    fn type_term(&mut self) -> Result<Type, ParseError> {
+        let type_term = one_of!(self.primitive_type(), self.reference_type())?;
+        Ok(type_term)
     }
 
-    fn reference_type(&mut self) -> Result<Expression, ParseError> {
-        let mut type_name = Expression::Name(self.identifier()?);
-        while self.accept(Token::Dot) {
-            type_name = Expression::MemberAccess(MemberAccess {
-                target: Box::new(type_name),
-                name: self.identifier()?,
-            })
-        }
-        Ok(type_name)
+    /// ```text
+    /// reference_type:
+    ///     type_part {. type_part}
+    /// ```
+    fn reference_type(&mut self) -> Result<Type, ParseError> {
+        let type_parts =
+            self.delimited_at_least_1(Self::type_part, |this| this.assert(Token::Dot))?;
+        Ok(Type::ClassType(type_parts))
+    }
+
+    /// ```text
+    /// type_part:
+    ///     identifier
+    /// ```
+    fn type_part(&mut self) -> Result<ClassTypePart, ParseError> {
+        Ok(ClassTypePart { identifier: self.identifier()? })
     }
 
     fn throw_statement(&mut self) -> Result<Statement, ParseError> {

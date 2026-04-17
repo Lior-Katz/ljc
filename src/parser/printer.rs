@@ -1,8 +1,8 @@
 use crate::parser::ast::{
     AssignmentOp, BinOp, CatchClause, ClassBodyDeclaration, ClassDeclaration,
-    ClassMemberDeclaration, CompilationUnit, ConstructorBody, ConstructorInvocation, Expression,
-    ForInit, FormalParameter, LeftHandSide, MemberAccess, MethodBody, MethodCall,
-    MethodDeclaration, Modified, Modifiers, NormalClassDeclaration, Resource, Statement,
+    ClassMemberDeclaration, ClassTypePart, CompilationUnit, ConstructorBody, ConstructorInvocation,
+    Expression, ForInit, FormalParameter, LeftHandSide, MemberAccess, MethodBody, MethodCall,
+    MethodDeclaration, Modified, Modifier, Modifiers, NormalClassDeclaration, Resource, Statement,
     TopLevelClassOrInterfaceDeclaration, Type, VariableDeclaration, VariableDeclarator,
     VariableDeclaratorId, VariableInitializer,
 };
@@ -230,22 +230,71 @@ impl AstNode<Modifiers> for FormalParameter {
         is_last: bool,
         modifiers: &Modifiers,
     ) -> fmt::Result {
-        let (line_prefix, _) = branch(&prefix, is_last);
-
+        let (line_prefix, new_prefix) = branch(&prefix, is_last);
         match self {
             FormalParameter::NormalFormalParameter(t, id) => {
-                writeln!(f, "{line_prefix}Param {} {} {:?}", t, id, modifiers)
+                writeln!(f, "{line_prefix}Param {}", id)?;
+                t.fmt_tree(f, &new_prefix, modifiers.is_empty())?;
             }
             FormalParameter::VariableArityParameter(_, id) => {
-                writeln!(f, "{line_prefix}VarArg {}", id)
+                writeln!(f, "{line_prefix}VarArg {}", id)?;
             }
+        };
+        modifiers.fmt_tree(f, &new_prefix, true)
+    }
+}
+
+impl AstNode<Modifiers> for Type {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        self.fmt_tree_with_context(f, prefix, is_last, &vec![])
+    }
+
+    fn fmt_tree_with_context(
+        &self,
+        f: &mut Formatter<'_>,
+        prefix: &str,
+        is_last: bool,
+        modifiers: &Modifiers,
+    ) -> fmt::Result {
+        let (line_prefix, new_prefix) = branch(&prefix, is_last);
+
+        writeln!(f, "{line_prefix}Type")?;
+        modifiers.fmt_tree(f, &new_prefix, false)?;
+
+        let (type_prefix, _) = branch(&new_prefix, true);
+        match self {
+            Type::Byte => writeln!(f, "{type_prefix}byte"),
+            Type::Short => writeln!(f, "{type_prefix}short"),
+            Type::Int => writeln!(f, "{type_prefix}int"),
+            Type::Long => writeln!(f, "{type_prefix}long"),
+            Type::Char => writeln!(f, "{type_prefix}char"),
+            Type::Float => writeln!(f, "{type_prefix}float"),
+            Type::Double => writeln!(f, "{type_prefix}double"),
+            Type::Boolean => writeln!(f, "{type_prefix}boolean"),
+            Type::Void => writeln!(f, "{type_prefix}void"),
+            Type::ClassType(c) => c.fmt_tree(f, &new_prefix, true),
         }
     }
 }
 
-impl Display for Type {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "{:?}", self)
+impl AstNode for Modifier {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        let (line_prefix, _) = branch(&prefix, is_last);
+        match self {
+            Modifier::Public => writeln!(f, "{line_prefix}public"),
+            Modifier::Protected => writeln!(f, "{line_prefix}protected"),
+            Modifier::Private => writeln!(f, "{line_prefix}private"),
+            Modifier::Abstract => writeln!(f, "{line_prefix}abstract"),
+            Modifier::Static => writeln!(f, "{line_prefix}static"),
+            Modifier::Final => writeln!(f, "{line_prefix}final"),
+        }
+    }
+}
+
+impl AstNode for ClassTypePart {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        let (line_prefix, _) = branch(&prefix, is_last);
+        writeln!(f, "{line_prefix}{}", self.identifier)
     }
 }
 
@@ -478,16 +527,12 @@ impl AstNode for Expression {
                 if_true.fmt_tree(f, &new_prefix, false)?;
                 if_false.fmt_tree(f, &new_prefix, true)
             }
-            Expression::Type(t) => {
-                writeln!(f, "{line_prefix}{t}")
-            }
+            Expression::Type(t) => t.fmt_tree(f, &prefix, is_last),
             Expression::MemberAccess(v) => v.fmt_tree(f, &prefix, is_last),
             Expression::MethodCall(v) => v.fmt_tree(f, &prefix, is_last),
-            Expression::UnqualifiedClassInstanceCreationExpression {
-                type_to_instantiate,
-                arguments,
-            } => {
-                writeln!(f, "{line_prefix}new {}", type_to_instantiate.join("."))?;
+            Expression::InstanceCreation { type_to_instantiate, arguments } => {
+                writeln!(f, "{line_prefix}NewInstance")?;
+                type_to_instantiate.fmt_tree(f, &new_prefix, arguments.is_empty())?;
                 arguments.fmt_tree(f, &new_prefix, true)
             }
         }

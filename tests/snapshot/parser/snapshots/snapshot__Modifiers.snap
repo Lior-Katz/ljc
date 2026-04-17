@@ -4,37 +4,52 @@ source: tests/snapshot/snapshot_test.rs
 └──Compilation Unit
     └──Class ModifierTest [Public, Abstract]
         ├──Field declaration [Public]
-        │   ├──Int
+        │   ├──Type
+        │   │   └──int
         │   └──a
         ├──Field declaration [Protected, Static]
-        │   ├──Int
+        │   ├──Type
+        │   │   └──int
         │   └──b
         ├──Field declaration [Private, Final]
-        │   ├──Int
+        │   ├──Type
+        │   │   └──int
         │   └──c
         │       └──int 1
         ├──Method abstractMethod [Public, Abstract]
-        │   ├──Void
+        │   ├──Type
+        │   │   └──void
         │   └──;
         ├──Method staticMethod [Protected, Static]
-        │   ├──Void
-        │   ├──Param Int x [Final]
+        │   ├──Type
+        │   │   └──void
+        │   ├──Param x
+        │   │   ├──Type
+        │   │   │   └──int
+        │   │   └──final
         │   └──Block
         │       └──VariableDeclaration [Final]
-        │           ├──Int
+        │           ├──Type
+        │           │   └──int
         │           └──y
         │               └── +
         │                   ├──x
         │                   └──int 1
         └──Class Inner [Public, Static, Final]
             ├──Field declaration [Private]
-            │   ├──Int
+            │   ├──Type
+            │   │   └──int
             │   └──x
             └──Method method [Public, Final]
-                ├──Void
-                ├──Param Int param [Final]
+                ├──Type
+                │   └──void
+                ├──Param param
+                │   ├──Type
+                │   │   └──int
+                │   └──final
                 └──Block
                     └──VariableDeclaration [Final]
-                        ├──Int
+                        ├──Type
+                        │   └──int
                         └──local
                             └──param

@@ -8,11 +8,11 @@ pub type ArgumentList = Vec<Expression>;
 pub type Modifiers = Vec<Modifier>;
 pub type Modified<T> = WithModifiers<T>;
 pub type MethodResult = Expression;
-pub type TypeToInstantiate = Vec<Identifier>;
 pub type ExpressionList = Vec<Expression>;
 pub type ForUpdate = ExpressionList;
 pub type CatchClauseList = Vec<CatchClause>;
-pub type CatchType = Vec<Modified<Expression>>;
+pub type ClassType = Vec<ClassTypePart>;
+pub type CatchType = Vec<Type>;
 pub type Resources = Vec<Resource>;
 
 #[derive(Debug)]
@@ -242,8 +242,8 @@ pub enum Expression {
     Type(Type),
     MemberAccess(MemberAccess),
     MethodCall(MethodCall),
-    UnqualifiedClassInstanceCreationExpression {
-        type_to_instantiate: TypeToInstantiate,
+    InstanceCreation {
+        type_to_instantiate: Type,
         arguments: ArgumentList,
     },
 }
@@ -318,4 +318,12 @@ pub enum Type {
     Double,
     Boolean,
     Void,
+
+    // reference types
+    ClassType(ClassType),
+}
+
+#[derive(Debug)]
+pub struct ClassTypePart {
+    pub identifier: Identifier,
 }

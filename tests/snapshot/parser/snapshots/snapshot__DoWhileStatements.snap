@@ -4,9 +4,14 @@ source: tests/snapshot/snapshot_test.rs
 └──Compilation Unit
     └──Class DoWhileStatements []
         └──Method test []
-            ├──Void
-            ├──Param Int a []
-            ├──Param Int b []
+            ├──Type
+            │   └──void
+            ├──Param a
+            │   └──Type
+            │       └──int
+            ├──Param b
+            │   └──Type
+            │       └──int
             └──Block
                 ├──DoWhileStatement
                 │   ├──Body

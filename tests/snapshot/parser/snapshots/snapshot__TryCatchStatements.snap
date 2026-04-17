@@ -4,12 +4,14 @@ source: tests/snapshot/snapshot_test.rs
 └──Compilation Unit
     └──Class TryCatchStatements []
         ├──Method basic_try_catch []
-        │   ├──Void
+        │   ├──Type
+        │   │   └──void
         │   └──Block
         │       └──TryStatement
         │           ├──TryBlock
         │           │   └──VariableDeclaration []
-        │           │       ├──Int
+        │           │       ├──Type
+        │           │       │   └──int
         │           │       └──x
         │           │           └── /
         │           │               ├──int 1
@@ -18,14 +20,15 @@ source: tests/snapshot/snapshot_test.rs
         │               └──CatchClause
         │                   ├──e
         │                   ├──CatchType
-        │                   │   └──Modifiers []
+        │                   │   └──Type
         │                   │       └──ArithmeticException
         │                   └──MethodInvocation
         │                       ├──method: getMessage
         │                       └──target:
         │                           └──e
         ├──Method multiple_catch []
-        │   ├──Void
+        │   ├──Type
+        │   │   └──void
         │   └──Block
         │       └──TryStatement
         │           ├──TryBlock
@@ -39,7 +42,7 @@ source: tests/snapshot/snapshot_test.rs
         │               ├──CatchClause
         │               │   ├──e
         │               │   ├──CatchType
-        │               │   │   └──Modifiers []
+        │               │   │   └──Type
         │               │   │       └──NumberFormatException
         │               │   └──MethodInvocation
         │               │       ├──method: getMessage
@@ -48,14 +51,15 @@ source: tests/snapshot/snapshot_test.rs
         │               └──CatchClause
         │                   ├──e
         │                   ├──CatchType
-        │                   │   └──Modifiers []
+        │                   │   └──Type
         │                   │       └──Exception
         │                   └──MethodInvocation
         │                       ├──method: getMessage
         │                       └──target:
         │                           └──e
         ├──Method union_catch []
-        │   ├──Void
+        │   ├──Type
+        │   │   └──void
         │   └──Block
         │       └──TryStatement
         │           ├──TryBlock
@@ -69,21 +73,23 @@ source: tests/snapshot/snapshot_test.rs
         │               └──CatchClause
         │                   ├──e
         │                   ├──CatchType
-        │                   │   ├──Modifiers []
+        │                   │   ├──Type
         │                   │   │   └──NumberFormatException
-        │                   │   └──Modifiers []
+        │                   │   └──Type
         │                   │       └──NullPointerException
         │                   └──MethodInvocation
         │                       ├──method: getMessage
         │                       └──target:
         │                           └──e
         ├──Method try_catch_finally []
-        │   ├──Void
+        │   ├──Type
+        │   │   └──void
         │   └──Block
         │       └──TryStatement
         │           ├──TryBlock
         │           │   └──VariableDeclaration []
-        │           │       ├──Int
+        │           │       ├──Type
+        │           │       │   └──int
         │           │       └──x
         │           │           └── /
         │           │               ├──int 10
@@ -92,7 +98,7 @@ source: tests/snapshot/snapshot_test.rs
         │           │   └──CatchClause
         │           │       ├──e
         │           │       ├──CatchType
-        │           │       │   └──Modifiers []
+        │           │       │   └──Type
         │           │       │       └──Exception
         │           │       └──MethodInvocation
         │           │           ├──method: getMessage
@@ -104,10 +110,12 @@ source: tests/snapshot/snapshot_test.rs
         │                   └──target:
         │                       └──System
         ├──Method try_finally []
-        │   ├──Void
+        │   ├──Type
+        │   │   └──void
         │   └──Block
         │       ├──VariableDeclaration []
-        │       │   ├──Int
+        │       │   ├──Type
+        │       │   │   └──int
         │       │   └──x
         │       │       └──int 0
         │       └──TryStatement
@@ -119,14 +127,17 @@ source: tests/snapshot/snapshot_test.rs
         │               └──PostIncrement
         │                   └──x
         ├──Method try_with_resources []
-        │   ├──Void
+        │   ├──Type
+        │   │   └──void
         │   └──Block
         │       └──TryStatement
         │           ├──Resources
         │           │   └──VariableDeclaration []
         │           │       ├──StringReader
         │           │       └──in
-        │           │           └──new StringReader
+        │           │           └──NewInstance
+        │           │               ├──Type
+        │           │               │   └──StringReader
         │           │               └──String "abc"
         │           ├──TryBlock
         │           │   └──MethodInvocation
@@ -137,26 +148,31 @@ source: tests/snapshot/snapshot_test.rs
         │               └──CatchClause
         │                   ├──e
         │                   ├──CatchType
-        │                   │   └──Modifiers []
+        │                   │   └──Type
         │                   │       └──IOException
         │                   └──MethodInvocation
         │                       ├──method: getMessage
         │                       └──target:
         │                           └──e
         ├──Method multiple_resources []
-        │   ├──Void
+        │   ├──Type
+        │   │   └──void
         │   └──Block
         │       └──TryStatement
         │           ├──Resources
         │           │   ├──VariableDeclaration []
         │           │   │   ├──StringReader
         │           │   │   └──in
-        │           │   │       └──new StringReader
+        │           │   │       └──NewInstance
+        │           │   │           ├──Type
+        │           │   │           │   └──StringReader
         │           │   │           └──String "abc"
         │           │   └──VariableDeclaration []
         │           │       ├──StringWriter
         │           │       └──out
-        │           │           └──new StringWriter
+        │           │           └──NewInstance
+        │           │               └──Type
+        │           │                   └──StringWriter
         │           ├──TryBlock
         │           │   └──MethodInvocation
         │           │       ├──method: write
@@ -171,21 +187,24 @@ source: tests/snapshot/snapshot_test.rs
         │               └──CatchClause
         │                   ├──e
         │                   ├──CatchType
-        │                   │   └──Modifiers []
+        │                   │   └──Type
         │                   │       └──IOException
         │                   └──MethodInvocation
         │                       ├──method: getMessage
         │                       └──target:
         │                           └──e
         ├──Method try_with_resources_finally []
-        │   ├──Void
+        │   ├──Type
+        │   │   └──void
         │   └──Block
         │       └──TryStatement
         │           ├──Resources
         │           │   └──VariableDeclaration []
         │           │       ├──StringReader
         │           │       └──in
-        │           │           └──new StringReader
+        │           │           └──NewInstance
+        │           │               ├──Type
+        │           │               │   └──StringReader
         │           │               └──String "abc"
         │           ├──TryBlock
         │           │   └──MethodInvocation
@@ -196,7 +215,7 @@ source: tests/snapshot/snapshot_test.rs
         │           │   └──CatchClause
         │           │       ├──e
         │           │       ├──CatchType
-        │           │       │   └──Modifiers []
+        │           │       │   └──Type
         │           │       │       └──IOException
         │           │       └──MethodInvocation
         │           │           ├──method: getMessage
@@ -208,43 +227,54 @@ source: tests/snapshot/snapshot_test.rs
         │                   └──target:
         │                       └──System
         ├──Method try_with_resources_only []
-        │   ├──Void
+        │   ├──Type
+        │   │   └──void
         │   └──Block
         │       └──TryStatement
         │           ├──Resources
         │           │   └──VariableDeclaration []
         │           │       ├──StringReader
         │           │       └──in
-        │           │           └──new StringReader
+        │           │           └──NewInstance
+        │           │               ├──Type
+        │           │               │   └──StringReader
         │           │               └──String "abc"
         │           └──TryBlock
         │               └──VariableDeclaration []
-        │                   ├──Int
+        │                   ├──Type
+        │                   │   └──int
         │                   └──x
         │                       └──int 1
         ├──Method resource_local_variable []
-        │   ├──Void
+        │   ├──Type
+        │   │   └──void
         │   └──Block
         │       ├──VariableDeclaration []
         │       │   ├──StringReader
         │       │   └──in
-        │       │       └──new StringReader
+        │       │       └──NewInstance
+        │       │           ├──Type
+        │       │           │   └──StringReader
         │       │           └──String "abc"
         │       └──TryStatement
         │           ├──Resources
         │           │   └──in
         │           └──TryBlock
         │               └──VariableDeclaration []
-        │                   ├──Int
+        │                   ├──Type
+        │                   │   └──int
         │                   └──x
         │                       └──int 1
         ├──Method resource_field_access []
-        │   ├──Void
+        │   ├──Type
+        │   │   └──void
         │   └──Block
         │       ├──VariableDeclaration []
         │       │   ├──Holder
         │       │   └──h
-        │       │       └──new Holder
+        │       │       └──NewInstance
+        │       │           └──Type
+        │       │               └──Holder
         │       └──TryStatement
         │           ├──Resources
         │           │   └──MemberAccess
@@ -253,20 +283,26 @@ source: tests/snapshot/snapshot_test.rs
         │           │           └──h
         │           └──TryBlock
         │               └──VariableDeclaration []
-        │                   ├──Int
+        │                   ├──Type
+        │                   │   └──int
         │                   └──x
         │                       └──int 1
         ├──Method mixed_resources []
-        │   ├──Void
+        │   ├──Type
+        │   │   └──void
         │   └──Block
         │       ├──VariableDeclaration []
         │       │   ├──Holder
         │       │   └──h
-        │       │       └──new Holder
+        │       │       └──NewInstance
+        │       │           └──Type
+        │       │               └──Holder
         │       ├──VariableDeclaration []
         │       │   ├──Scanner
         │       │   └──in
-        │       │       └──new Scanner
+        │       │       └──NewInstance
+        │       │           ├──Type
+        │       │           │   └──Scanner
         │       │           └──String "abc"
         │       └──TryStatement
         │           ├──Resources
@@ -278,7 +314,9 @@ source: tests/snapshot/snapshot_test.rs
         │           │   └──VariableDeclaration []
         │           │       ├──StringWriter
         │           │       └──out
-        │           │           └──new StringWriter
+        │           │           └──NewInstance
+        │           │               └──Type
+        │           │                   └──StringWriter
         │           ├──TryBlock
         │           │   └──MethodInvocation
         │           │       ├──method: write
@@ -290,42 +328,53 @@ source: tests/snapshot/snapshot_test.rs
         │               └──CatchClause
         │                   ├──e
         │                   ├──CatchType
-        │                   │   └──Modifiers []
+        │                   │   └──Type
         │                   │       └──IOException
         │                   └──ThrowStatement
-        │                       └──new RuntimeException
+        │                       └──NewInstance
+        │                           ├──Type
+        │                           │   └──RuntimeException
         │                           └──e
         ├──Method throw_in_try_catch []
-        │   ├──Void
+        │   ├──Type
+        │   │   └──void
         │   └──Block
         │       └──TryStatement
         │           ├──TryBlock
         │           │   └──ThrowStatement
-        │           │       └──new RuntimeException
+        │           │       └──NewInstance
+        │           │           ├──Type
+        │           │           │   └──RuntimeException
         │           │           └──String "error"
         │           └──ExceptionHandlers
         │               └──CatchClause
         │                   ├──e
         │                   ├──CatchType
-        │                   │   └──Modifiers []
+        │                   │   └──Type
         │                   │       └──RuntimeException
         │                   └──ThrowStatement
         │                       └──e
         ├──Method throw_in_finally []
-        │   ├──Void
+        │   ├──Type
+        │   │   └──void
         │   └──Block
         │       └──TryStatement
         │           ├──TryBlock
         │           │   └──VariableDeclaration []
-        │           │       ├──Int
+        │           │       ├──Type
+        │           │       │   └──int
         │           │       └──x
         │           │           └──int 1
         │           └──FinallyBlock
         │               └──ThrowStatement
-        │                   └──new RuntimeException
+        │                   └──NewInstance
+        │                       └──Type
+        │                           └──RuntimeException
         └──Class Holder [Static]
             └──Field declaration [Final]
                 ├──Scanner
                 └──scanner
-                    └──new Scanner
+                    └──NewInstance
+                        ├──Type
+                        │   └──Scanner
                         └──String "abc"
