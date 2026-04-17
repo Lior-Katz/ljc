@@ -4,6 +4,6 @@ class InstaceCreationExpression {
         new Integer(5);
         new String(new String("abc"));
         String s = new String("hi") + new String("there");
-        new String().compareTo(new String());
+        new String().compareTo(new java.lang.String());
     }
 }

@@ -42,4 +42,6 @@ source: tests/snapshot/snapshot_test.rs
                     └──args:
                         └──NewInstance
                             └──Type
+                                ├──java
+                                ├──lang
                                 └──String
