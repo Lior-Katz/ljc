@@ -29,4 +29,20 @@ class ForStatements {
             for (int y = 0; y < 3; y++)
                 a += x * y;
     }
+
+   void for_each(int[] arr) {
+       int a = 0;
+       int b = 0;
+
+       for (int x : arr)
+           a += x;
+
+       for (int x : arr) {
+           a += x;
+           b++;
+       }
+
+       for (String s : new String[]{"a", "b", "c"})
+           b += s.length();
+   }
 }
