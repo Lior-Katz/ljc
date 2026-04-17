@@ -84,15 +84,13 @@ class TryCatchStatements {
         }
     }
 
-    void resource_field_access() {
-        Holder h = new Holder();
+    void resource_field_access(Holder h) {
         try (h.scanner) {
             int x = 1;
         }
     }
 
-    void mixed_resources() {
-        Holder h = new Holder();
+    void mixed_resources(Holder h) {
         Scanner in = new Scanner("abc");
 
         try (in; h.scanner; StringWriter out = new StringWriter()) {

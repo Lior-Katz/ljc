@@ -352,7 +352,7 @@ impl Parser {
 
     fn formal_parameter(&mut self) -> Result<Modified<FormalParameter>, ParseError> {
         let modifiers = self.zero_or_more(|this| this.modifier());
-        let param_type = self.unannotated_type()?;
+        let param_type = self.type_term()?;
         if self.accept(Token::Ellipsis) {
             // variable arity
             let identifier = self.identifier()?;
@@ -365,13 +365,6 @@ impl Parser {
                 VariableDeclaratorId::Named(identifier),
             )
             .with_modifiers(modifiers))
-        }
-    }
-
-    fn unannotated_type(&mut self) -> Result<Type, ParseError> {
-        match self.term()? {
-            Expression::Type(t) => Ok(t),
-            _ => Err(ParseError::NoProduction),
         }
     }
 

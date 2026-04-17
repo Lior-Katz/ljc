@@ -33,6 +33,7 @@ class ClassMembers {
     ;; // should be discarded
     public ClassMembers foo() {}; // should not be confused with constructor
     protected static int bar(int x) {}
+    abstract void referenceTypeParam(java.lang.String s);
 
     public static class InnerClass {
         int x;

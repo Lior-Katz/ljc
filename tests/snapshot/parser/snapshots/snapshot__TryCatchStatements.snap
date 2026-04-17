@@ -268,13 +268,10 @@ source: tests/snapshot/snapshot_test.rs
         ├──Method resource_field_access []
         │   ├──Type
         │   │   └──void
+        │   ├──Param h
+        │   │   └──Type
+        │   │       └──Holder
         │   └──Block
-        │       ├──VariableDeclaration []
-        │       │   ├──Holder
-        │       │   └──h
-        │       │       └──NewInstance
-        │       │           └──Type
-        │       │               └──Holder
         │       └──TryStatement
         │           ├──Resources
         │           │   └──MemberAccess
@@ -290,13 +287,10 @@ source: tests/snapshot/snapshot_test.rs
         ├──Method mixed_resources []
         │   ├──Type
         │   │   └──void
+        │   ├──Param h
+        │   │   └──Type
+        │   │       └──Holder
         │   └──Block
-        │       ├──VariableDeclaration []
-        │       │   ├──Holder
-        │       │   └──h
-        │       │       └──NewInstance
-        │       │           └──Type
-        │       │               └──Holder
         │       ├──VariableDeclaration []
         │       │   ├──Scanner
         │       │   └──in
