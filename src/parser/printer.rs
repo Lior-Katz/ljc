@@ -1,10 +1,10 @@
 use crate::parser::ast::{
-    ArrayType, AssignmentOp, BinOp, CatchClause, ClassBodyDeclaration, ClassDeclaration,
-    ClassMemberDeclaration, ClassTypePart, CompilationUnit, ConstructorBody, ConstructorInvocation,
-    Expression, ForInit, FormalParameter, LeftHandSide, MemberAccess, MethodBody, MethodCall,
-    MethodDeclaration, Modified, Modifier, Modifiers, NormalClassDeclaration, Resource, Statement,
-    TopLevelClassOrInterfaceDeclaration, Type, VariableDeclaration, VariableDeclarator,
-    VariableDeclaratorId, VariableInitializer,
+    ArrayCreationMode, ArrayType, AssignmentOp, BinOp, CatchClause, ClassBodyDeclaration,
+    ClassDeclaration, ClassMemberDeclaration, ClassTypePart, CompilationUnit, ConstructorBody,
+    ConstructorInvocation, Expression, ForInit, FormalParameter, LeftHandSide, MemberAccess,
+    MethodBody, MethodCall, MethodDeclaration, Modified, Modifier, Modifiers,
+    NormalClassDeclaration, Resource, Statement, TopLevelClassOrInterfaceDeclaration, Type,
+    VariableDeclaration, VariableDeclarator, VariableDeclaratorId, VariableInitializer,
 };
 use std::fmt;
 use std::fmt::{Display, Formatter};
@@ -273,7 +273,7 @@ impl AstNode<Modifiers> for Type {
             Type::Boolean => writeln!(f, "{type_line_prefix}boolean"),
             Type::Void => writeln!(f, "{type_line_prefix}void"),
             Type::ClassType(c) => c.fmt_tree(f, &new_prefix, true),
-            Type::ArrayType(ArrayType { element_type, }) => {
+            Type::ArrayType(ArrayType { element_type }) => {
                 writeln!(f, "{type_line_prefix}ArrayType")?;
                 element_type.fmt_tree(f, &type_prefix, true)
             }
@@ -539,6 +539,14 @@ impl AstNode for Expression {
                 type_to_instantiate.fmt_tree(f, &new_prefix, arguments.is_empty())?;
                 arguments.fmt_tree(f, &new_prefix, true)
             }
+            Expression::ArrayCreation {
+                element_type,
+                array_creation_mode,
+            } => {
+                writeln!(f, "{line_prefix}ArrayCreation")?;
+                element_type.fmt_tree(f, &new_prefix, false)?;
+                array_creation_mode.fmt_tree(f, &new_prefix, true)
+            }
         }
     }
 }
@@ -642,6 +650,11 @@ impl AstNode for VariableInitializer {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         match self {
             VariableInitializer::Expression(e) => e.fmt_tree(f, prefix, is_last),
+            VariableInitializer::ArrayInitializer(v) => {
+                let (line_prefix, new_prefix) = branch(&prefix, is_last);
+                writeln!(f, "{line_prefix}ArrayInitializer")?;
+                v.fmt_tree(f, &new_prefix, true)
+            },
         }
     }
 }
@@ -792,5 +805,30 @@ impl AstNode for Children<'_> {
             node.fmt_tree(f, &child_prefix, true)?;
         }
         Ok(())
+    }
+}
+
+impl AstNode for ArrayCreationMode {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        match self {
+            ArrayCreationMode::Sized {
+                sized_dimensions,
+                unsized_dimensions,
+            } => {
+                let (line_prefix, new_prefix) = branch(prefix, *unsized_dimensions == 0);
+                writeln!(f, "{line_prefix}SizedArray")?;
+                sized_dimensions.fmt_tree(f, &new_prefix, true)?;
+                if *unsized_dimensions != 0 {
+                    let (line_prefix, _) = branch(prefix, true);
+                    writeln!(f, "{line_prefix}UnsizedDimensions: {unsized_dimensions}")?;
+                }
+                Ok(())
+            }
+            ArrayCreationMode::Initialized(v) => {
+                let (line_prefix, new_prefix) = branch(prefix, is_last);
+                writeln!(f, "{line_prefix}Initialized")?;
+                v.fmt_tree(f, &new_prefix, true)
+            }
+        }
     }
 }

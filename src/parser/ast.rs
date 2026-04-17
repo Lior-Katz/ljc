@@ -3,6 +3,7 @@ pub type Identifier = String;
 pub type TypeIdentifier = Identifier;
 type BlockStatements = Vec<Statement>;
 pub type VariableDeclaratorList = Vec<VariableDeclarator>;
+pub type VariableInitializerList = Vec<VariableInitializer>;
 pub type FormalParameterList = Vec<Modified<FormalParameter>>;
 pub type ArgumentList = Vec<Expression>;
 pub type Modifiers = Vec<Modifier>;
@@ -192,6 +193,7 @@ pub enum VariableDeclaratorId {
 #[derive(Debug)]
 pub enum VariableInitializer {
     Expression(Expression),
+    ArrayInitializer(VariableInitializerList)
 }
 
 #[derive(Debug)]
@@ -246,6 +248,10 @@ pub enum Expression {
         type_to_instantiate: Type,
         arguments: ArgumentList,
     },
+    ArrayCreation {
+        element_type: Type,
+        array_creation_mode: ArrayCreationMode,
+    }
 }
 
 #[derive(Debug)]
@@ -332,4 +338,13 @@ pub struct ClassTypePart {
 #[derive(Debug)]
 pub struct ArrayType {
     pub element_type: Box<Type>,
+}
+
+#[derive(Debug)]
+pub enum ArrayCreationMode {
+    Sized {
+        sized_dimensions: Vec<Expression>,
+        unsized_dimensions: usize,
+    },
+    Initialized(VariableInitializerList),
 }

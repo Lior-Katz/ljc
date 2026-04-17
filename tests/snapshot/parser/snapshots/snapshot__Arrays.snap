@@ -65,6 +65,11 @@ source: tests/snapshot/snapshot_test.rs
                 │   │       └──Type
                 │   │           └──int
                 │   └──a
+                │       └──ArrayCreation
+                │           ├──Type
+                │           │   └──int
+                │           └──SizedArray
+                │               └──int 10
                 ├──VariableDeclaration []
                 │   ├──Type
                 │   │   └──ArrayType
@@ -73,5 +78,59 @@ source: tests/snapshot/snapshot_test.rs
                 │   │               └──Type
                 │   │                   └──String
                 │   └──b
+                │       └──ArrayCreation
+                │           ├──Type
+                │           │   └──String
+                │           └──SizedArray
+                │               ├──int 5
+                │               └──int 10
+                ├──VariableDeclaration []
+                │   ├──Type
+                │   │   └──ArrayType
+                │   │       └──Type
+                │   │           └──ArrayType
+                │   │               └──Type
+                │   │                   └──int
+                │   └──c
+                │       └──ArrayCreation
+                │           ├──Type
+                │           │   └──ArrayType
+                │           │       └──Type
+                │           │           └──ArrayType
+                │           │               └──Type
+                │           │                   └──int
+                │           └──Initialized
+                │               ├──ArrayInitializer
+                │               │   ├──int 1
+                │               │   └──int 2
+                │               ├──ArrayInitializer
+                │               └──ArrayCreation
+                │                   ├──Type
+                │                   │   └──ArrayType
+                │                   │       └──Type
+                │                   │           └──int
+                │                   └──Initialized
+                ├──VariableDeclaration []
+                │   ├──Type
+                │   │   └──ArrayType
+                │   │       └──Type
+                │   │           └──ArrayType
+                │   │               └──Type
+                │   │                   └──int
+                │   └──d
+                │       └──ArrayCreation
+                │           ├──Type
+                │           │   └──int
+                │           ├──SizedArray
+                │           │   └──int 3
+                │           └──UnsizedDimensions: 1
+                ├──VariableDeclaration []
+                │   ├──Type
+                │   │   └──ArrayType
+                │   │       └──Type
+                │   │           └──int
+                │   └──e
+                │       └──ArrayInitializer
+                │           └──int 1
                 └──ReturnStatement
                     └──null

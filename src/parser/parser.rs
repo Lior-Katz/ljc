@@ -1,13 +1,13 @@
 use crate::lexer::{LexError, Token};
 use crate::lexer::{Tokens, lex_single_file};
 use crate::parser::ast::{
-    ArgumentList, ArrayType, AssignmentOp, BinOp, CatchClause, ClassBodyDeclaration,
-    ClassDeclaration, ClassMemberDeclaration, ClassTypePart, CompilationUnit, ConstructorBody,
-    ConstructorInvocation, Expression, ForInit, ForUpdate, FormalParameter, FormalParameterList,
-    Identifier, LeftHandSide, MemberAccess, MethodBody, MethodCall, MethodDeclaration, Modifiable,
-    Modified, Modifier, NormalClassDeclaration, Program, Resource, Statement,
-    TopLevelClassOrInterfaceDeclaration, Type, VariableDeclaration, VariableDeclarator,
-    VariableDeclaratorId, VariableDeclaratorList, VariableInitializer,
+    ArgumentList, ArrayCreationMode, ArrayType, AssignmentOp, BinOp, CatchClause,
+    ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration, ClassTypePart, CompilationUnit,
+    ConstructorBody, ConstructorInvocation, Expression, ForInit, ForUpdate, FormalParameter,
+    FormalParameterList, Identifier, LeftHandSide, MemberAccess, MethodBody, MethodCall,
+    MethodDeclaration, Modifiable, Modified, Modifier, NormalClassDeclaration, Program, Resource,
+    Statement, TopLevelClassOrInterfaceDeclaration, Type, VariableDeclaration, VariableDeclarator,
+    VariableDeclaratorId, VariableDeclaratorList, VariableInitializer, VariableInitializerList,
 };
 use crate::parser::error::ParseError;
 
@@ -97,14 +97,19 @@ impl Parser {
         Ok(&self.buffer[0])
     }
 
-    fn accept(&mut self, desired: Token) -> bool {
+    fn next_is(&mut self, desired: Token) -> bool {
         match self.peek() {
-            Ok(current) if *current == desired => {
-                self.next().unwrap();
-                true
-            }
+            Ok(current) if *current == desired => true,
             _ => false,
         }
+    }
+
+    fn accept(&mut self, desired: Token) -> bool {
+        let matches = self.next_is(desired);
+        if matches {
+            self.next().unwrap();
+        }
+        matches
     }
 
     fn integer_literal(&mut self) -> Result<u64, ParseError> {
@@ -902,7 +907,7 @@ impl Parser {
             self.literal(),
             self.primitive_type().map(|t| Expression::Type(t)),
             self.parenthesized_expression(),
-            self.unqualified_class_instance_creation_expression(),
+            self.instance_creation_expression(),
             self.identifier_expression()
         )
     }
@@ -918,12 +923,16 @@ impl Parser {
     /// ```
     fn literal(&mut self) -> Result<Expression, ParseError> {
         one_of!(
-            self.integer_literal().map(|v| Expression::IntegerLiteral(v)),
+            self.integer_literal()
+                .map(|v| Expression::IntegerLiteral(v)),
             self.long_literal().map(|v| Expression::LongLiteral(v)),
-            self.boolean_literal().map(|v| Expression::BooleanLiteral(v)),
+            self.boolean_literal()
+                .map(|v| Expression::BooleanLiteral(v)),
             self.char_literal().map(|v| Expression::CharLiteral(v)),
             self.string_literal().map(|v| Expression::StringLiteral(v)),
-            self.accept(Token::NullLiteral).then_some(Expression::NullLiteral).ok_or(ParseError::NoProduction)
+            self.accept(Token::NullLiteral)
+                .then_some(Expression::NullLiteral)
+                .ok_or(ParseError::NoProduction)
         )
     }
 
@@ -1015,8 +1024,12 @@ impl Parser {
     }
 
     fn variable_initializer(&mut self) -> Result<VariableInitializer, ParseError> {
-        self.expression()
-            .map(|expr| VariableInitializer::Expression(expr))
+        one_of!(
+            self.expression()
+                .map(|expr| VariableInitializer::Expression(expr)),
+            self.array_initializer()
+                .map(|i| VariableInitializer::ArrayInitializer(i)),
+        )
     }
 
     fn argument_list(&mut self) -> Result<ArgumentList, ParseError> {
@@ -1065,17 +1078,120 @@ impl Parser {
 
     /// ```text
     /// unqualified_class_instance_creation_expression:
-    ///     new class_or_interface_to_instantiate ( argument_list )
+    ///     new base_type ( argument_list )
+    ///     new base_type array_creation
     ///
-    /// class_or_interface_to_instantiate:
-    ///     identifier {. identifier}
-    fn unqualified_class_instance_creation_expression(&mut self) -> Result<Expression, ParseError> {
+    /// base_type:
+    ///     primitive_type
+    ///     reference_type
+    /// ```
+    fn instance_creation_expression(&mut self) -> Result<Expression, ParseError> {
         self.assert(Token::New)?;
-        let type_to_instantiate = self.type_term()?;
+        // not using type_term here because we want to get the base type only, without possible brackets
+        let type_to_instantiate = one_of!(self.primitive_type(), self.reference_type())?;
+        if self.next_is(Token::LeftParen) {
+            self.class_instance_creation(type_to_instantiate)
+        } else if self.next_is(Token::LeftBracket) {
+            self.array_creation(type_to_instantiate)
+        } else {
+            Err(ParseError::NoProduction)
+        }
+    }
+
+    fn class_instance_creation(
+        &mut self,
+        type_to_instantiate: Type,
+    ) -> Result<Expression, ParseError> {
         self.assert(Token::LeftParen)?;
         let arguments = self.argument_list()?;
         self.assert(Token::RightParen)?;
         Ok(Expression::InstanceCreation { type_to_instantiate, arguments })
+    }
+
+    /// ```text
+    /// array_creation:
+    ///     dim_expression {dim_expression} {dims}
+    ///     dims {dims} array_initializer
+    ///
+    /// dim_expression:
+    ///     [ expression ]
+    ///
+    /// dims:
+    ///     [ ]
+    /// ```
+    fn array_creation(&mut self, mut element_type: Type) -> Result<Expression, ParseError> {
+        // FIXME: can be refactored with peek_n
+        self.assert(Token::LeftBracket)?;
+        let array_creation_mode = if self.accept(Token::RightBracket) {
+            element_type = Type::ArrayType(ArrayType {
+                element_type: Box::new(element_type),
+            });
+            while self.accept(Token::LeftBracket) {
+                self.assert(Token::RightBracket)?;
+                element_type = Type::ArrayType(ArrayType {
+                    element_type: Box::new(element_type),
+                });
+            }
+            let initializer = self.array_initializer()?;
+            ArrayCreationMode::Initialized(initializer)
+        } else {
+            let mut sized_dimensions = vec![self.expression()?];
+            let mut unsized_dimensions = 0;
+            self.assert(Token::RightBracket)?;
+            loop {
+                if !self.accept(Token::LeftBracket) {
+                    break;
+                }
+                if self.accept(Token::RightBracket) {
+                    unsized_dimensions += 1;
+                    break;
+                }
+                sized_dimensions.push(self.expression()?);
+                self.assert(Token::RightBracket)?;
+            }
+            while self.accept(Token::LeftBracket) {
+                self.assert(Token::RightBracket)?;
+                unsized_dimensions += 1;
+            }
+            ArrayCreationMode::Sized {
+                sized_dimensions,
+                unsized_dimensions,
+            }
+        };
+        Ok(Expression::ArrayCreation {
+            element_type,
+            array_creation_mode,
+        })
+    }
+
+    /// ```text
+    /// array_initializer:
+    ///     { [variable_initializer_list] [,] }
+    ///
+    /// variable_initializer_list:
+    ///     variable_initializer {, variable_initializer}
+    /// ```
+    fn array_initializer(&mut self) -> Result<VariableInitializerList, ParseError> {
+        self.assert(Token::LeftBrace)?;
+        let mut items = vec![];
+
+        // {,}
+        if self.accept(Token::Comma) {
+            self.assert(Token::RightBrace)?;
+            return Ok(items);
+        }
+
+        loop {
+            if self.next_is(Token::RightBrace) {
+                break;
+            }
+            items.push(self.variable_initializer()?);
+            if !self.accept(Token::Comma) {
+                break;
+            }
+        }
+        self.assert(Token::RightBrace)?;
+        Ok(items)
     }
 
     /// The general structure of the if statement is as follows:
