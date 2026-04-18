@@ -1,5 +1,3 @@
-use crate::lexer::{LexError, Token};
-use crate::lexer::{Tokens, lex_single_file};
 use crate::ast::{
     ArgumentList, ArrayCreationMode, ArrayType, AssignmentOp, BinOp, CatchClause,
     ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration, ClassTypePart, CompilationUnit,
@@ -10,6 +8,8 @@ use crate::ast::{
     Type, VariableDeclaration, VariableDeclarator, VariableDeclaratorId, VariableDeclaratorList,
     VariableInitializer, VariableInitializerList,
 };
+use crate::lexer::{LexError, Token};
+use crate::lexer::{Tokens, lex_single_file};
 use crate::parser::error::ParseError;
 
 use std::path::Path;

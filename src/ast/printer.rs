@@ -3,7 +3,7 @@ use crate::ast::{
     ClassDeclaration, ClassMemberDeclaration, ClassTypePart, CompilationUnit, ConstructorBody,
     ConstructorInvocation, Expression, ForInit, FormalParameter, InterfaceDeclaration,
     LeftHandSide, MemberAccess, MethodBody, MethodCall, MethodDeclaration, Modified, Modifier,
-    Modifiers, NormalClassDeclaration, NormalInterfaceDeclaration, Resource, Statement,
+    Modifiers, NormalClassDeclaration, NormalInterfaceDeclaration, Program, Resource, Statement,
     TopLevelClassOrInterfaceDeclaration, Type, VariableDeclaration, VariableDeclarator,
     VariableDeclaratorId, VariableInitializer,
 };
@@ -92,7 +92,7 @@ fn branch(prefix: &str, is_last: bool) -> (String, String) {
     }
 }
 
-impl AstNode for CompilationUnit {
+impl AstNode for Program {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(&prefix, is_last);
 
@@ -112,12 +112,8 @@ impl AstNode for CompilationUnit {
 impl AstNode for TopLevelClassOrInterfaceDeclaration {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         match self {
-            TopLevelClassOrInterfaceDeclaration::Class(c) => {
-                c.fmt_tree(f, prefix, is_last)
-            }
-            TopLevelClassOrInterfaceDeclaration::Interface(i) => {
-                i.fmt_tree(f, prefix, is_last)
-            }
+            TopLevelClassOrInterfaceDeclaration::Class(c) => c.fmt_tree(f, prefix, is_last),
+            TopLevelClassOrInterfaceDeclaration::Interface(i) => i.fmt_tree(f, prefix, is_last),
         }
     }
 }
