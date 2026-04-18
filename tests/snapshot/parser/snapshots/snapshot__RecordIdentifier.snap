@@ -1,0 +1,103 @@
+---
+source: tests/snapshot/snapshot_test.rs
+---
+└──Compilation Unit
+    └──Class RecordIdentifier []
+        ├──Field declaration []
+        │   ├──Type
+        │   │   └──int
+        │   └──record
+        ├──Field declaration []
+        │   ├──MemberAccess
+        │   │   ├──field: Type
+        │   │   └──target:
+        │   │       └──record
+        │   └──field1
+        ├──Field declaration []
+        │   ├──MemberAccess
+        │   │   ├──field: Type
+        │   │   └──target:
+        │   │       └──MemberAccess
+        │   │           ├──field: record
+        │   │           └──target:
+        │   │               └──com
+        │   └──field2
+        ├──Method record []
+        │   ├──Type
+        │   │   └──int
+        │   ├──Param record
+        │   │   └──Type
+        │   │       └──int
+        │   └──Block
+        │       └──ReturnStatement
+        │           └──record
+        ├──Method method1 []
+        │   ├──MemberAccess
+        │   │   ├──field: Type
+        │   │   └──target:
+        │   │       └──record
+        │   ├──Param record
+        │   │   └──Type
+        │   │       ├──record
+        │   │       └──Type
+        │   └──Block
+        │       └──ReturnStatement
+        │           └──null
+        └──Method method2 []
+            ├──MemberAccess
+            │   ├──field: Type
+            │   └──target:
+            │       └──MemberAccess
+            │           ├──field: record
+            │           └──target:
+            │               └──com
+            └──Block
+                ├──VariableDeclaration []
+                │   ├──Type
+                │   │   └──int
+                │   └──record
+                │       └──int 1
+                ├──Assignment =
+                │   ├──record
+                │   └── +
+                │       ├──record
+                │       └──int 1
+                ├──VariableDeclaration []
+                │   ├──MemberAccess
+                │   │   ├──field: Type
+                │   │   └──target:
+                │   │       └──record
+                │   └──a
+                ├──VariableDeclaration []
+                │   ├──MemberAccess
+                │   │   ├──field: Type
+                │   │   └──target:
+                │   │       └──MemberAccess
+                │   │           ├──field: record
+                │   │           └──target:
+                │   │               └──com
+                │   └──b
+                ├──VariableDeclaration []
+                │   ├──Type
+                │   │   └──int
+                │   └──c
+                │       └── +
+                │           ├──MemberAccess
+                │           │   ├──field: value
+                │           │   └──target:
+                │           │       └──MemberAccess
+                │           │           ├──field: Type
+                │           │           └──target:
+                │           │               └──record
+                │           └──MemberAccess
+                │               ├──field: value
+                │               └──target:
+                │                   └──MemberAccess
+                │                       ├──field: Type
+                │                       └──target:
+                │                           └──MemberAccess
+                │                               ├──field: record
+                │                               └──target:
+                │                                   └──com
+                └──ReturnStatement
+                    └──null
