@@ -55,25 +55,6 @@ pub enum Token {
     While,
     Underscore,
 
-    // contextual keywords
-    Exports,
-    Module,
-    NonSealed,
-    Open,
-    Opens,
-    Permits,
-    Provides,
-    Record,
-    Requires,
-    Sealed,
-    To,
-    Transitive,
-    Uses,
-    Var,
-    When,
-    With,
-    Yield,
-
     // Literals
     NullLiteral,
     IntegerLiteral(u64),

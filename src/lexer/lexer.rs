@@ -198,25 +198,6 @@ impl Tokens {
                 "volatile" => Token::Volatile,
                 "while" => Token::While,
 
-                // contextual keywords
-                "exports" => Token::Exports,
-                "module" => Token::Module,
-                "nonSealed" => Token::NonSealed,
-                "open" => Token::Open,
-                "opens" => Token::Opens,
-                "permits" => Token::Permits,
-                "provides" => Token::Provides,
-                "record" => Token::Record,
-                "requires" => Token::Requires,
-                "sealed" => Token::Sealed,
-                "to" => Token::To,
-                "transitive" => Token::Transitive,
-                "uses" => Token::Uses,
-                "var" => Token::Var,
-                "when" => Token::When,
-                "with" => Token::With,
-                "yield" => Token::Yield,
-
                 // literals
                 "null" => Token::NullLiteral,
                 "true" => Token::BooleanLiteral(true),
