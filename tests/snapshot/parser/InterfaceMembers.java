@@ -7,7 +7,7 @@ interface InterfaceMembers {
 
     public abstract int m2(int x);
 
-    int m3(int x, int y) {
+    default int m3(int x, int y) {
         return 0;
     }
 

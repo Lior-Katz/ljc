@@ -244,7 +244,8 @@ impl Parser {
             self.accept(Token::Protected).then_some(Modifier::Protected),
             self.accept(Token::Abstract).then_some(Modifier::Abstract),
             self.accept(Token::Static).then_some(Modifier::Static),
-            self.accept(Token::Final).then_some(Modifier::Final)
+            self.accept(Token::Final).then_some(Modifier::Final),
+            self.accept(Token::Default).then_some(Modifier::Default),
         )
     }
 

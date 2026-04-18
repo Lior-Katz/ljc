@@ -344,6 +344,7 @@ impl AstNode for Modifier {
             Modifier::Abstract => writeln!(f, "{line_prefix}abstract"),
             Modifier::Static => writeln!(f, "{line_prefix}static"),
             Modifier::Final => writeln!(f, "{line_prefix}final"),
+            Modifier::Default => writeln!(f, "{line_prefix}default"),
         }
     }
 }

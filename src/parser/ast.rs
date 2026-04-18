@@ -41,6 +41,7 @@ pub enum Modifier {
     Abstract,
     Static,
     Final,
+    Default,
 }
 
 pub trait Modifiable {
