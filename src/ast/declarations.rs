@@ -7,6 +7,8 @@ use crate::ast::types::Type;
 pub type FormalParameterList = Vec<Modified<FormalParameter>>;
 pub type VariableDeclaratorList = Vec<VariableDeclarator>;
 pub type MethodResult = Expression;
+pub type RecordComponentList = Vec<RecordComponent>;
+pub type RecordBodyDeclaration = ClassBodyDeclaration;
 
 #[derive(Debug)]
 pub enum TopLevelClassOrInterfaceDeclaration {
@@ -17,6 +19,7 @@ pub enum TopLevelClassOrInterfaceDeclaration {
 #[derive(Debug)]
 pub enum ClassDeclaration {
     NormalClass(NormalClassDeclaration),
+    Record(RecordDeclaration),
 }
 
 #[derive(Debug)]
@@ -55,6 +58,25 @@ pub enum InterfaceDeclaration {
 pub struct NormalInterfaceDeclaration {
     pub identifier: TypeIdentifier,
     pub body: Vec<Modified<ClassMemberDeclaration>>,
+}
+
+#[derive(Debug)]
+pub struct RecordDeclaration {
+    pub name: TypeIdentifier,
+    pub components: RecordComponentList,
+    pub body: Vec<RecordBodyDeclaration>,
+}
+
+#[derive(Debug)]
+pub enum RecordComponent {
+    Normal {
+        component_type: Type,
+        name: Identifier,
+    },
+    VariableArity {
+        component_type: Type,
+        name: Identifier,
+    },
 }
 
 #[derive(Debug)]

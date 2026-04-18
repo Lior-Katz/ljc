@@ -1,0 +1,58 @@
+---
+source: tests/snapshot/snapshot_test.rs
+---
+└──Compilation Unit
+    └──RecordDeclaration R0
+        ├──Components
+        │   ├──x
+        │   │   └──Type
+        │   │       └──int
+        │   └──y
+        │       └──Type
+        │           └──String
+        └──Body
+            ├──Field declaration [Static, Final]
+            │   ├──Type
+            │   │   └──int
+            │   └──CONST
+            │       └──int 10
+            ├──Constructor declaration [Public]
+            │   └──ConstructorBody
+            │       └──ConstructorInvocation
+            │           └──int 1
+            ├──Constructor declaration []
+            │   ├──Param x
+            │   │   └──Type
+            │   │       └──int
+            │   └──ConstructorBody
+            │       └──ConstructorInvocation
+            │           ├──x
+            │           └──String "default"
+            ├──Method value []
+            │   ├──Type
+            │   │   └──int
+            │   └──Block
+            │       └──ReturnStatement
+            │           └──x
+            ├──Method f [Static]
+            │   ├──Type
+            │   │   └──int
+            │   └──Block
+            │       └──ReturnStatement
+            │           └──int 1
+            ├──Class InnerClass []
+            ├──Interface InnerInterface
+            ├──RecordDeclaration InnerRecord1
+            │   ├──Modifiers
+            │   │   ├──public
+            │   │   └──static
+            │   ├──Components
+            │   └──Body
+            │       └──Constructor declaration [Public]
+            │           └──ConstructorBody
+            └──RecordDeclaration InnerRecord2
+                ├──Components
+                │   └──varargs xs
+                │       └──Type
+                │           └──int
+                └──Body

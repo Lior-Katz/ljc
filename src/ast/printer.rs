@@ -3,9 +3,10 @@ use crate::ast::{
     ClassDeclaration, ClassMemberDeclaration, ClassTypePart, CompilationUnit, ConstructorBody,
     ConstructorInvocation, Expression, ForInit, FormalParameter, InterfaceDeclaration,
     LeftHandSide, MemberAccess, MethodBody, MethodCall, MethodDeclaration, Modified, Modifier,
-    Modifiers, NormalClassDeclaration, NormalInterfaceDeclaration, Program, Resource, Statement,
-    TopLevelClassOrInterfaceDeclaration, Type, TypeIdentifier, VariableDeclaration,
-    VariableDeclarator, VariableDeclaratorId, VariableInitializer,
+    Modifiers, NormalClassDeclaration, NormalInterfaceDeclaration, Program, RecordComponent,
+    RecordDeclaration, Resource, Statement, TopLevelClassOrInterfaceDeclaration, Type,
+    TypeIdentifier, VariableDeclaration, VariableDeclarator, VariableDeclaratorId,
+    VariableInitializer,
 };
 use std::fmt;
 use std::fmt::{Display, Formatter};
@@ -134,6 +135,7 @@ impl AstNode<Modifiers> for ClassDeclaration {
             ClassDeclaration::NormalClass(c) => {
                 c.fmt_tree_with_context(f, prefix, is_last, modifiers)
             }
+            ClassDeclaration::Record(r) => r.fmt_tree_with_context(f, prefix, is_last, modifiers),
         }
     }
 }
@@ -887,6 +889,45 @@ impl AstNode for ArrayCreationMode {
                 let (line_prefix, new_prefix) = branch(prefix, is_last);
                 writeln!(f, "{line_prefix}Initialized")?;
                 v.fmt_tree(f, &new_prefix, true)
+            }
+        }
+    }
+}
+
+impl AstNode<Modifiers> for RecordDeclaration {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        self.fmt_tree_with_context(f, prefix, is_last, &vec![])
+    }
+
+    fn fmt_tree_with_context(
+        &self,
+        f: &mut Formatter<'_>,
+        prefix: &str,
+        is_last: bool,
+        modifiers: &Modifiers,
+    ) -> fmt::Result {
+        let (line_prefix, new_prefix) = branch(prefix, is_last);
+        writeln!(f, "{line_prefix}RecordDeclaration {}", self.name)?;
+        let modifiers = if modifiers.is_empty() { None } else { Some(modifiers) };
+        let children = Children::new()
+            .push_opt("Modifiers", &modifiers)
+            .push("Components", &self.components)
+            .push("Body", &self.body);
+        children.fmt_tree(f, &new_prefix, true)
+    }
+}
+
+impl AstNode for RecordComponent {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        let (line_prefix, new_prefix) = branch(prefix, is_last);
+        match self {
+            RecordComponent::Normal { component_type, name } => {
+                writeln!(f, "{line_prefix}{name}")?;
+                component_type.fmt_tree(f, &new_prefix, true)
+            }
+            RecordComponent::VariableArity { component_type, name } => {
+                writeln!(f, "{line_prefix}varargs {name}")?;
+                component_type.fmt_tree(f, &new_prefix, true)
             }
         }
     }

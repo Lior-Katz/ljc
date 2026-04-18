@@ -4,9 +4,10 @@ use crate::ast::{
     ConstructorBody, ConstructorInvocation, Expression, ForInit, ForUpdate, FormalParameter,
     FormalParameterList, Identifier, InterfaceDeclaration, LeftHandSide, MemberAccess, MethodBody,
     MethodCall, MethodDeclaration, Modifiable, Modified, Modifier, NormalClassDeclaration,
-    NormalInterfaceDeclaration, Program, Resource, Statement, TopLevelClassOrInterfaceDeclaration,
-    Type, VariableDeclaration, VariableDeclarator, VariableDeclaratorId, VariableDeclaratorList,
-    VariableInitializer, VariableInitializerList,
+    NormalInterfaceDeclaration, Program, RecordBodyDeclaration, RecordComponent, RecordDeclaration,
+    Resource, Statement, TopLevelClassOrInterfaceDeclaration, Type, VariableDeclaration,
+    VariableDeclarator, VariableDeclaratorId, VariableDeclaratorList, VariableInitializer,
+    VariableInitializerList,
 };
 use crate::lexer::{LexError, Token};
 use crate::lexer::{Tokens, lex_single_file};
@@ -37,6 +38,20 @@ macro_rules! accept_with_value {
         {
             Err(ParseError::NoProduction)
         }
+    }};
+}
+
+macro_rules! peek {
+    ($self:expr, $($n:expr => $pat:pat $(if $guard:expr)?),+ $(,)?) => {{
+        true $(
+            && match $self.peek_n($n) {
+                Ok(tok) => match tok {
+                    $pat $(if $guard)? => true,
+                    _ => false,
+                },
+                Err(_) => false,
+            }
+        )+
     }};
 }
 
@@ -93,15 +108,23 @@ impl Parser {
     }
 
     fn peek(&mut self) -> Result<&Token, LexError> {
-        if self.buffer.is_empty() {
+        self.peek_n(0)
+    }
+
+    fn peek_n(&mut self, skip: usize) -> Result<&Token, LexError> {
+        while self.buffer.len() <= skip {
             self.buffer.push_back(self.tokens.next()?)
         }
-        Ok(&self.buffer[0])
+        Ok(&self.buffer[skip])
     }
 
     fn next_is(&mut self, desired: Token) -> bool {
-        match self.peek() {
-            Ok(current) if *current == desired => true,
+        self.nth_is(0, desired)
+    }
+
+    fn nth_is(&mut self, n: usize, desired: Token) -> bool {
+        match self.peek_n(n) {
+            Ok(t) if *t == desired => true,
             _ => false,
         }
     }
@@ -224,16 +247,17 @@ impl Parser {
     }
 
     fn class_declaration(&mut self) -> Result<ClassDeclaration, ParseError> {
-        self.normal_class_declaration()
-            .map(NormalClassDeclaration::into)
+        one_of!(
+            self.normal_class_declaration()
+                .map(NormalClassDeclaration::into),
+            self.record_declaration().map(RecordDeclaration::into),
+        )
     }
 
     fn normal_class_declaration(&mut self) -> Result<NormalClassDeclaration, ParseError> {
         self.assert(Token::Class)?;
         let identifier = self.identifier()?.try_into()?;
-        self.assert(Token::LeftBrace)?;
         let body = self.class_body()?;
-        self.assert(Token::RightBrace)?;
         let class_decl = NormalClassDeclaration { identifier, body };
         Ok(class_decl)
     }
@@ -255,7 +279,10 @@ impl Parser {
     }
 
     fn class_body(&mut self) -> Result<Vec<ClassBodyDeclaration>, ParseError> {
-        Ok(self.zero_or_more(Self::class_body_declaration))
+        self.assert(Token::LeftBrace)?;
+        let declarations = self.zero_or_more(Self::class_body_declaration);
+        self.assert(Token::RightBrace)?;
+        Ok(declarations)
     }
 
     fn class_body_declaration(&mut self) -> Result<ClassBodyDeclaration, ParseError> {
@@ -295,6 +322,50 @@ impl Parser {
             self.method_or_field_declaration()
                 .map(|m| m.with_modifiers(modifiers))
         }
+    }
+
+    /// ```text
+    /// record_declaration:
+    ///     record type_identifier ( [record_component_list] ) record_body
+    ///
+    /// record_component_list:
+    ///     record_component {, record_component}
+    /// ```
+    fn record_declaration(&mut self) -> Result<RecordDeclaration, ParseError> {
+        if !peek!(
+            self,
+            0 => Token::Id(s) if s.as_str() == "record",
+            1 => Token::Id(_),
+        ) {
+            return Err(ParseError::NoProduction);
+        }
+        accept_with_value!(self, Token::Id)?;
+        let name = self.identifier()?.try_into()?;
+        self.assert(Token::LeftParen)?;
+        let components =
+            self.delimited_list(Self::record_component, |this| this.assert(Token::Comma))?;
+        self.assert(Token::RightParen)?;
+        let body = self.record_body()?;
+        Ok(RecordDeclaration { name, components, body })
+    }
+
+    /// ```text
+    /// record_component:
+    ///     type_term identifier
+    ///     type_term ... identifier
+    fn record_component(&mut self) -> Result<RecordComponent, ParseError> {
+        let component_type = self.type_term()?;
+        if self.accept(Token::Ellipsis) {
+            let name = self.identifier()?;
+            Ok(RecordComponent::VariableArity { component_type, name })
+        } else {
+            let name = self.identifier()?;
+            Ok(RecordComponent::Normal { component_type, name })
+        }
+    }
+
+    fn record_body(&mut self) -> Result<Vec<RecordBodyDeclaration>, ParseError> {
+        self.class_body()
     }
 
     fn interface_declaration(&mut self) -> Result<InterfaceDeclaration, ParseError> {
@@ -1586,9 +1657,16 @@ impl Into<TopLevelClassOrInterfaceDeclaration> for Modified<InterfaceDeclaration
         TopLevelClassOrInterfaceDeclaration::Interface(self)
     }
 }
+
 impl Into<ClassDeclaration> for NormalClassDeclaration {
     fn into(self) -> ClassDeclaration {
         ClassDeclaration::NormalClass(self)
+    }
+}
+
+impl Into<ClassDeclaration> for RecordDeclaration {
+    fn into(self) -> ClassDeclaration {
+        ClassDeclaration::Record(self)
     }
 }
 
