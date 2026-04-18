@@ -1,6 +1,6 @@
 use crate::lexer::{LexError, Token};
 use crate::lexer::{Tokens, lex_single_file};
-use crate::parser::ast::{
+use crate::ast::{
     ArgumentList, ArrayCreationMode, ArrayType, AssignmentOp, BinOp, CatchClause,
     ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration, ClassTypePart, CompilationUnit,
     ConstructorBody, ConstructorInvocation, Expression, ForInit, ForUpdate, FormalParameter,

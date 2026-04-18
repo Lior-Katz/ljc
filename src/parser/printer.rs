@@ -1,4 +1,4 @@
-use crate::parser::ast::{
+use crate::ast::{
     ArrayCreationMode, ArrayType, AssignmentOp, BinOp, CatchClause, ClassBodyDeclaration,
     ClassDeclaration, ClassMemberDeclaration, ClassTypePart, CompilationUnit, ConstructorBody,
     ConstructorInvocation, Expression, ForInit, FormalParameter, InterfaceDeclaration,
