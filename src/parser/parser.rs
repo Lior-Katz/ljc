@@ -229,7 +229,7 @@ impl Parser {
 
     fn normal_class_declaration(&mut self) -> Result<NormalClassDeclaration, ParseError> {
         self.assert(Token::Class)?;
-        let identifier = self.identifier()?;
+        let identifier = self.identifier()?.try_into()?;
         self.assert(Token::LeftBrace)?;
         let body = self.class_body()?;
         self.assert(Token::RightBrace)?;
@@ -303,7 +303,7 @@ impl Parser {
 
     fn normal_interface_declaration(&mut self) -> Result<NormalInterfaceDeclaration, ParseError> {
         self.assert(Token::Interface)?;
-        let identifier = self.identifier()?;
+        let identifier = self.identifier()?.try_into()?;
         let body = self.interface_body()?;
         Ok(NormalInterfaceDeclaration { identifier, body })
     }
@@ -336,6 +336,7 @@ impl Parser {
         let result = self.term()?;
         if self.accept(Token::LeftParen) {
             if let Expression::Name(name) = result {
+                let name = name.try_into()?;
                 let parameters = self.formal_parameters()?;
                 self.assert(Token::RightParen)?;
                 let body = self.constructor_body()?;

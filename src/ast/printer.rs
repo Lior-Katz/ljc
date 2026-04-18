@@ -4,8 +4,8 @@ use crate::ast::{
     ConstructorInvocation, Expression, ForInit, FormalParameter, InterfaceDeclaration,
     LeftHandSide, MemberAccess, MethodBody, MethodCall, MethodDeclaration, Modified, Modifier,
     Modifiers, NormalClassDeclaration, NormalInterfaceDeclaration, Program, Resource, Statement,
-    TopLevelClassOrInterfaceDeclaration, Type, VariableDeclaration, VariableDeclarator,
-    VariableDeclaratorId, VariableInitializer,
+    TopLevelClassOrInterfaceDeclaration, Type, TypeIdentifier, VariableDeclaration,
+    VariableDeclarator, VariableDeclaratorId, VariableInitializer,
 };
 use std::fmt;
 use std::fmt::{Display, Formatter};
@@ -159,6 +159,12 @@ impl AstNode<Modifiers> for NormalClassDeclaration {
             decl.fmt_tree(f, &new_prefix, i == total - 1)?;
         }
         Ok(())
+    }
+}
+
+impl Display for TypeIdentifier {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.identifier())
     }
 }
 

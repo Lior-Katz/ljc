@@ -40,7 +40,7 @@ pub enum ClassMemberDeclaration {
         declarations: VariableDeclaratorList,
     },
     Constructor {
-        name: Identifier, // this is just for validating that the name matches the class
+        name: TypeIdentifier, // this is just for validating that the name matches the class
         parameters: FormalParameterList,
         body: ConstructorBody,
     },
