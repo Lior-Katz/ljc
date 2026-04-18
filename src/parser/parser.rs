@@ -11,6 +11,7 @@ use crate::ast::{
 use crate::lexer::{LexError, Token};
 use crate::lexer::{Tokens, lex_single_file};
 use crate::parser::error::ParseError;
+use std::collections::VecDeque;
 
 use std::path::Path;
 
@@ -68,14 +69,14 @@ pub fn parse_single_file(path: &Path) -> Result<Program, ParseError> {
 
 pub struct Parser {
     tokens: Tokens,
-    buffer: Vec<Token>,
+    buffer: VecDeque<Token>,
 }
 
 impl Parser {
     pub fn new(path: &Path) -> Result<Self, std::io::Error> {
         Ok(Self {
             tokens: lex_single_file(path)?,
-            buffer: Vec::new(),
+            buffer: VecDeque::new(),
         })
     }
 
@@ -84,7 +85,7 @@ impl Parser {
     }
 
     fn next(&mut self) -> Result<Token, LexError> {
-        if let Some(tok) = self.buffer.pop() {
+        if let Some(tok) = self.buffer.pop_front() {
             return Ok(tok);
         }
 
@@ -93,7 +94,7 @@ impl Parser {
 
     fn peek(&mut self) -> Result<&Token, LexError> {
         if self.buffer.is_empty() {
-            self.buffer.push(self.tokens.next()?)
+            self.buffer.push_back(self.tokens.next()?)
         }
         Ok(&self.buffer[0])
     }
