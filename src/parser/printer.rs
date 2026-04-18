@@ -196,6 +196,9 @@ impl AstNode<Modifiers> for ClassMemberDeclaration {
             ClassMemberDeclaration::NestedClassDeclaration(c) => {
                 c.fmt_tree_with_context(f, prefix, is_last, modifiers)
             }
+            ClassMemberDeclaration::NestedInterface(i) => {
+                i.fmt_tree_with_context(f, prefix, is_last, modifiers)
+            }
             ClassMemberDeclaration::FieldDeclaration { variable_type, declarations } => {
                 writeln!(f, "{line_prefix}Field declaration {:?}", modifiers)?;
                 variable_type.fmt_tree(f, &new_prefix, false)?;

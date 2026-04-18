@@ -19,4 +19,10 @@ interface InterfaceMembers {
         void foo() {
         }
     }
+
+    interface InnerInterface {
+        int X = 10;
+
+        void innerMethod();
+    }
 }

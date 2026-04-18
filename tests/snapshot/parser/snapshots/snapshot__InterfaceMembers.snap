@@ -38,12 +38,22 @@ source: tests/snapshot/snapshot_test.rs
         │   └──Block
         │       └──ReturnStatement
         │           └──int 0
-        └──Class InnerClass []
+        ├──Class InnerClass []
+        │   ├──Field declaration []
+        │   │   ├──Type
+        │   │   │   └──int
+        │   │   └──x
+        │   └──Method foo []
+        │       ├──Type
+        │       │   └──void
+        │       └──Block
+        └──Interface InnerInterface
             ├──Field declaration []
             │   ├──Type
             │   │   └──int
-            │   └──x
-            └──Method foo []
+            │   └──X
+            │       └──int 10
+            └──Method innerMethod []
                 ├──Type
                 │   └──void
-                └──Block
+                └──;

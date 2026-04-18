@@ -289,6 +289,8 @@ impl Parser {
 
         if let Ok(class) = self.class_declaration() {
             Ok(ClassMemberDeclaration::NestedClassDeclaration(class).with_modifiers(modifiers))
+        } else if let Ok(interface) = self.interface_declaration() {
+            Ok(ClassMemberDeclaration::NestedInterface(interface).with_modifiers(modifiers))
         } else {
             self.method_or_field_declaration()
                 .map(|m| m.with_modifiers(modifiers))

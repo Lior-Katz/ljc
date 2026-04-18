@@ -40,4 +40,10 @@ class ClassMembers {
 
         void innerMethod() {}
     }
+
+    interface InnerInterface {
+        int X = 10;
+
+        void innerMethod();
+    }
 }

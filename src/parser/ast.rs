@@ -75,6 +75,7 @@ pub enum ClassBodyDeclaration {
 pub enum ClassMemberDeclaration {
     MethodDeclaration(MethodDeclaration),
     NestedClassDeclaration(ClassDeclaration),
+    NestedInterface(InterfaceDeclaration),
     FieldDeclaration {
         variable_type: Expression,
         declarations: VariableDeclaratorList,

@@ -95,12 +95,22 @@ source: tests/snapshot/snapshot_test.rs
         │   │       ├──lang
         │   │       └──String
         │   └──;
-        └──Class InnerClass [Public, Static]
+        ├──Class InnerClass [Public, Static]
+        │   ├──Field declaration []
+        │   │   ├──Type
+        │   │   │   └──int
+        │   │   └──x
+        │   └──Method innerMethod []
+        │       ├──Type
+        │       │   └──void
+        │       └──Block
+        └──Interface InnerInterface
             ├──Field declaration []
             │   ├──Type
             │   │   └──int
-            │   └──x
+            │   └──X
+            │       └──int 10
             └──Method innerMethod []
                 ├──Type
                 │   └──void
-                └──Block
+                └──;
