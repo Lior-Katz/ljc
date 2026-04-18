@@ -224,7 +224,7 @@ impl Parser {
 
     fn class_declaration(&mut self) -> Result<ClassDeclaration, ParseError> {
         self.normal_class_declaration()
-            .map(|class_decl| ClassDeclaration::NormalClassDeclaration(class_decl))
+            .map(NormalClassDeclaration::into)
     }
 
     fn normal_class_declaration(&mut self) -> Result<NormalClassDeclaration, ParseError> {
@@ -258,8 +258,7 @@ impl Parser {
     }
 
     fn class_body_declaration(&mut self) -> Result<ClassBodyDeclaration, ParseError> {
-        self.class_member_declaration()
-            .map(|m| ClassBodyDeclaration::ClassMemberDeclaration(m))
+        self.class_member_declaration().map(Modified::into)
     }
 
     /// class_member_declaration is defined as:
@@ -930,7 +929,7 @@ impl Parser {
     fn primary(&mut self) -> Result<Expression, ParseError> {
         one_of!(
             self.literal(),
-            self.primitive_type().map(|t| Expression::Type(t)),
+            self.primitive_type().map(Type::into),
             self.parenthesized_expression(),
             self.instance_creation_expression(),
             self.identifier_expression()
@@ -955,9 +954,8 @@ impl Parser {
                 .map(|v| Expression::BooleanLiteral(v)),
             self.char_literal().map(|v| Expression::CharLiteral(v)),
             self.string_literal().map(|v| Expression::StringLiteral(v)),
-            self.accept(Token::NullLiteral)
-                .then_some(Expression::NullLiteral)
-                .ok_or(ParseError::NoProduction)
+            self.assert(Token::NullLiteral)
+                .map(|_| Expression::NullLiteral)
         )
     }
 
@@ -1050,8 +1048,7 @@ impl Parser {
 
     fn variable_initializer(&mut self) -> Result<VariableInitializer, ParseError> {
         one_of!(
-            self.expression()
-                .map(|expr| VariableInitializer::Expression(expr)),
+            self.expression().map(Expression::into),
             self.array_initializer()
                 .map(|i| VariableInitializer::ArrayInitializer(i)),
         )
@@ -1582,12 +1579,6 @@ impl TryFrom<Expression> for Type {
     }
 }
 
-impl Into<InterfaceDeclaration> for NormalInterfaceDeclaration {
-    fn into(self) -> InterfaceDeclaration {
-        InterfaceDeclaration::NormalInterface(self)
-    }
-}
-
 impl Into<TopLevelClassOrInterfaceDeclaration> for Modified<ClassDeclaration> {
     fn into(self) -> TopLevelClassOrInterfaceDeclaration {
         TopLevelClassOrInterfaceDeclaration::ClassDeclaration(self)
@@ -1597,5 +1588,34 @@ impl Into<TopLevelClassOrInterfaceDeclaration> for Modified<ClassDeclaration> {
 impl Into<TopLevelClassOrInterfaceDeclaration> for Modified<InterfaceDeclaration> {
     fn into(self) -> TopLevelClassOrInterfaceDeclaration {
         TopLevelClassOrInterfaceDeclaration::InterfaceDeclaration(self)
+    }
+}
+impl Into<ClassDeclaration> for NormalClassDeclaration {
+    fn into(self) -> ClassDeclaration {
+        ClassDeclaration::NormalClassDeclaration(self)
+    }
+}
+
+impl Into<ClassBodyDeclaration> for Modified<ClassMemberDeclaration> {
+    fn into(self) -> ClassBodyDeclaration {
+        ClassBodyDeclaration::ClassMemberDeclaration(self)
+    }
+}
+
+impl Into<InterfaceDeclaration> for NormalInterfaceDeclaration {
+    fn into(self) -> InterfaceDeclaration {
+        InterfaceDeclaration::NormalInterface(self)
+    }
+}
+
+impl Into<Expression> for Type {
+    fn into(self) -> Expression {
+        Expression::Type(self)
+    }
+}
+
+impl Into<VariableInitializer> for Expression {
+    fn into(self) -> VariableInitializer {
+        VariableInitializer::Expression(self)
     }
 }
