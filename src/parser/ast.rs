@@ -23,8 +23,8 @@ pub enum CompilationUnit {
 
 #[derive(Debug)]
 pub enum TopLevelClassOrInterfaceDeclaration {
-    ClassDeclaration(Modified<ClassDeclaration>),
-    InterfaceDeclaration(Modified<InterfaceDeclaration>)
+    Class(Modified<ClassDeclaration>),
+    Interface(Modified<InterfaceDeclaration>)
 }
 
 #[derive(Debug)]
@@ -57,7 +57,7 @@ impl<T> Modifiable for T {}
 
 #[derive(Debug)]
 pub enum ClassDeclaration {
-    NormalClassDeclaration(NormalClassDeclaration),
+    NormalClass(NormalClassDeclaration),
 }
 
 #[derive(Debug)]
@@ -68,19 +68,19 @@ pub struct NormalClassDeclaration {
 
 #[derive(Debug)]
 pub enum ClassBodyDeclaration {
-    ClassMemberDeclaration(Modified<ClassMemberDeclaration>),
+    ClassMember(Modified<ClassMemberDeclaration>),
 }
 
 #[derive(Debug)]
 pub enum ClassMemberDeclaration {
-    MethodDeclaration(MethodDeclaration),
-    NestedClassDeclaration(ClassDeclaration),
+    Method(MethodDeclaration),
+    NestedClass(ClassDeclaration),
     NestedInterface(InterfaceDeclaration),
-    FieldDeclaration {
+    Field {
         variable_type: Expression,
         declarations: VariableDeclaratorList,
     },
-    ConstructorDeclaration {
+    Constructor {
         name: Identifier, // this is just for validating that the name matches the class
         parameters: FormalParameterList,
         body: ConstructorBody,
@@ -108,7 +108,7 @@ pub struct MethodDeclaration {
 
 #[derive(Debug)]
 pub enum FormalParameter {
-    NormalFormalParameter(Type, VariableDeclaratorId),
+    NormalParameter(Type, VariableDeclaratorId),
     VariableArityParameter(Type, Identifier),
 }
 
@@ -136,22 +136,22 @@ pub enum Statement {
     ExpressionStatement(Expression),
     Block(BlockStatements),
     VariableDeclaration(Modified<VariableDeclaration>),
-    IfStatement {
+    If {
         condition: Expression,
         if_true: Box<Statement>,
         if_false: Option<Box<Statement>>,
     },
-    WhileStatement {
+    While {
         condition: Expression,
         statement: Box<Statement>,
     },
-    ForStatement {
+    For {
         initializer: ForInit,
         condition: Option<Expression>,
         update: ForUpdate,
         statement: Box<Statement>,
     },
-    ForEachStatement {
+    ForEach {
         variable_declaration: Modified<VariableDeclaration>,
         iterable: Expression,
         statement: Box<Statement>,
@@ -340,8 +340,8 @@ pub enum Type {
     Void,
 
     // reference types
-    ClassType(ClassType),
-    ArrayType(ArrayType),
+    Class(ClassType),
+    Array(ArrayType),
 }
 
 #[derive(Debug)]

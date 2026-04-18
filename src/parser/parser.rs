@@ -287,7 +287,7 @@ impl Parser {
         let modifiers = self.zero_or_more(Self::modifier);
 
         if let Ok(class) = self.class_declaration() {
-            Ok(ClassMemberDeclaration::NestedClassDeclaration(class).with_modifiers(modifiers))
+            Ok(ClassMemberDeclaration::NestedClass(class).with_modifiers(modifiers))
         } else if let Ok(interface) = self.interface_declaration() {
             Ok(ClassMemberDeclaration::NestedInterface(interface).with_modifiers(modifiers))
         } else {
@@ -339,11 +339,7 @@ impl Parser {
                 let parameters = self.formal_parameters()?;
                 self.assert(Token::RightParen)?;
                 let body = self.constructor_body()?;
-                return Ok(ClassMemberDeclaration::ConstructorDeclaration {
-                    name,
-                    parameters,
-                    body,
-                });
+                return Ok(ClassMemberDeclaration::Constructor { name, parameters, body });
             }
         }
         let identifier = self.identifier()?;
@@ -351,12 +347,13 @@ impl Parser {
             let parameters = self.formal_parameters()?;
             self.assert(Token::RightParen)?;
             let body = self.method_body()?;
-            Ok(ClassMemberDeclaration::MethodDeclaration(MethodDeclaration {
+            Ok(MethodDeclaration {
                 result,
                 identifier,
                 parameters,
                 body,
-            }))
+            }
+            .into())
         } else {
             let mut field_declaration = vec![VariableDeclarator {
                 name: VariableDeclaratorId::Named(identifier),
@@ -368,7 +365,7 @@ impl Parser {
                 field_declaration.append(&mut self.variable_declarators_list()?);
             }
             self.assert(Token::Semicolon)?;
-            Ok(ClassMemberDeclaration::FieldDeclaration {
+            Ok(ClassMemberDeclaration::Field {
                 variable_type: result,
                 declarations: field_declaration,
             })
@@ -389,7 +386,7 @@ impl Parser {
                 .with_modifiers(modifiers))
         } else {
             let identifier = self.identifier()?;
-            Ok(FormalParameter::NormalFormalParameter(
+            Ok(FormalParameter::NormalParameter(
                 param_type,
                 VariableDeclaratorId::Named(identifier),
             )
@@ -1001,9 +998,10 @@ impl Parser {
                 }
             } else if self.accept(Token::LeftBracket) {
                 if self.accept(Token::RightBracket) {
-                    expr = Expression::Type(Type::ArrayType(ArrayType {
+                    expr = Type::from(ArrayType {
                         element_type: Box::new(Type::try_from(expr)?),
-                    }))
+                    })
+                    .into()
                 }
             } else {
                 break;
@@ -1145,12 +1143,12 @@ impl Parser {
         // FIXME: can be refactored with peek_n
         self.assert(Token::LeftBracket)?;
         let array_creation_mode = if self.accept(Token::RightBracket) {
-            element_type = Type::ArrayType(ArrayType {
+            element_type = Type::from(ArrayType {
                 element_type: Box::new(element_type),
             });
             while self.accept(Token::LeftBracket) {
                 self.assert(Token::RightBracket)?;
-                element_type = Type::ArrayType(ArrayType {
+                element_type = Type::from(ArrayType {
                     element_type: Box::new(element_type),
                 });
             }
@@ -1241,7 +1239,7 @@ impl Parser {
         } else {
             None
         };
-        Ok(Statement::IfStatement { condition, if_true, if_false })
+        Ok(Statement::If { condition, if_true, if_false })
     }
 
     fn while_statement(&mut self) -> Result<Statement, ParseError> {
@@ -1250,7 +1248,7 @@ impl Parser {
         let condition = self.expression()?;
         self.assert(Token::RightParen)?;
         let statement = Box::new(self.block_statement()?);
-        Ok(Statement::WhileStatement { condition, statement })
+        Ok(Statement::While { condition, statement })
     }
 
     /// ```text
@@ -1264,21 +1262,17 @@ impl Parser {
         self.assert(Token::RightParen)?;
         let statement = Box::new(self.block_statement()?);
         match header {
-            ForHeader::BasicForHeader { initializer, condition, update } => {
-                Ok(Statement::ForStatement {
-                    initializer,
-                    condition,
-                    update,
-                    statement,
-                })
-            }
-            ForHeader::ForEachHeader { variable_declaration, iterable } => {
-                Ok(Statement::ForEachStatement {
-                    variable_declaration,
-                    iterable,
-                    statement,
-                })
-            }
+            ForHeader::BasicForHeader { initializer, condition, update } => Ok(Statement::For {
+                initializer,
+                condition,
+                update,
+                statement,
+            }),
+            ForHeader::ForEachHeader { variable_declaration, iterable } => Ok(Statement::ForEach {
+                variable_declaration,
+                iterable,
+                statement,
+            }),
         }
     }
 
@@ -1501,7 +1495,7 @@ impl Parser {
         let mut type_term = one_of!(self.primitive_type(), self.reference_type())?;
         while self.accept(Token::LeftBracket) {
             self.assert(Token::RightBracket)?;
-            type_term = Type::ArrayType(ArrayType {
+            type_term = Type::from(ArrayType {
                 element_type: Box::new(type_term),
             })
         }
@@ -1515,7 +1509,7 @@ impl Parser {
     fn reference_type(&mut self) -> Result<Type, ParseError> {
         let type_parts =
             self.delimited_at_least_1(Self::type_part, |this| this.assert(Token::Dot))?;
-        Ok(Type::ClassType(type_parts))
+        Ok(Type::Class(type_parts))
     }
 
     /// ```text
@@ -1554,7 +1548,7 @@ impl From<LexError> for ParseError {
 
 impl From<Identifier> for Type {
     fn from(value: Identifier) -> Self {
-        Self::ClassType(vec![ClassTypePart { identifier: value }])
+        Self::Class(vec![ClassTypePart { identifier: value }])
     }
 }
 
@@ -1567,9 +1561,9 @@ impl TryFrom<Expression> for Type {
             Expression::Name(n) => Ok(Self::from(n)),
             Expression::MemberAccess(MemberAccess { target, name }) => {
                 match Self::try_from(*target)? {
-                    Type::ClassType(mut ct) => {
+                    Type::Class(mut ct) => {
                         ct.push(ClassTypePart { identifier: name });
-                        Ok(Type::ClassType(ct))
+                        Ok(Type::Class(ct))
                     }
                     _ => Err(ParseError::NoProduction),
                 }
@@ -1581,24 +1575,24 @@ impl TryFrom<Expression> for Type {
 
 impl Into<TopLevelClassOrInterfaceDeclaration> for Modified<ClassDeclaration> {
     fn into(self) -> TopLevelClassOrInterfaceDeclaration {
-        TopLevelClassOrInterfaceDeclaration::ClassDeclaration(self)
+        TopLevelClassOrInterfaceDeclaration::Class(self)
     }
 }
 
 impl Into<TopLevelClassOrInterfaceDeclaration> for Modified<InterfaceDeclaration> {
     fn into(self) -> TopLevelClassOrInterfaceDeclaration {
-        TopLevelClassOrInterfaceDeclaration::InterfaceDeclaration(self)
+        TopLevelClassOrInterfaceDeclaration::Interface(self)
     }
 }
 impl Into<ClassDeclaration> for NormalClassDeclaration {
     fn into(self) -> ClassDeclaration {
-        ClassDeclaration::NormalClassDeclaration(self)
+        ClassDeclaration::NormalClass(self)
     }
 }
 
 impl Into<ClassBodyDeclaration> for Modified<ClassMemberDeclaration> {
     fn into(self) -> ClassBodyDeclaration {
-        ClassBodyDeclaration::ClassMemberDeclaration(self)
+        ClassBodyDeclaration::ClassMember(self)
     }
 }
 
@@ -1608,9 +1602,21 @@ impl Into<InterfaceDeclaration> for NormalInterfaceDeclaration {
     }
 }
 
+impl Into<ClassMemberDeclaration> for MethodDeclaration {
+    fn into(self) -> ClassMemberDeclaration {
+        ClassMemberDeclaration::Method(self)
+    }
+}
+
 impl Into<Expression> for Type {
     fn into(self) -> Expression {
         Expression::Type(self)
+    }
+}
+
+impl From<ArrayType> for Type {
+    fn from(value: ArrayType) -> Self {
+        Type::Array(value)
     }
 }
 

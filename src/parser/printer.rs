@@ -112,10 +112,10 @@ impl AstNode for CompilationUnit {
 impl AstNode for TopLevelClassOrInterfaceDeclaration {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         match self {
-            TopLevelClassOrInterfaceDeclaration::ClassDeclaration(c) => {
+            TopLevelClassOrInterfaceDeclaration::Class(c) => {
                 c.fmt_tree(f, prefix, is_last)
             }
-            TopLevelClassOrInterfaceDeclaration::InterfaceDeclaration(i) => {
+            TopLevelClassOrInterfaceDeclaration::Interface(i) => {
                 i.fmt_tree(f, prefix, is_last)
             }
         }
@@ -135,7 +135,7 @@ impl AstNode<Modifiers> for ClassDeclaration {
         modifiers: &Modifiers,
     ) -> fmt::Result {
         match self {
-            ClassDeclaration::NormalClassDeclaration(c) => {
+            ClassDeclaration::NormalClass(c) => {
                 c.fmt_tree_with_context(f, prefix, is_last, modifiers)
             }
         }
@@ -169,7 +169,7 @@ impl AstNode<Modifiers> for NormalClassDeclaration {
 impl AstNode for ClassBodyDeclaration {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         match self {
-            ClassBodyDeclaration::ClassMemberDeclaration(m) => m.fmt_tree(f, prefix, is_last),
+            ClassBodyDeclaration::ClassMember(m) => m.fmt_tree(f, prefix, is_last),
         }
     }
 }
@@ -188,23 +188,23 @@ impl AstNode<Modifiers> for ClassMemberDeclaration {
         let (line_prefix, new_prefix) = branch(&prefix, is_last);
 
         match self {
-            ClassMemberDeclaration::MethodDeclaration(m) => {
+            ClassMemberDeclaration::Method(m) => {
                 writeln!(f, "{line_prefix}Method {} {:?}", m.identifier, modifiers)?;
                 m.result.fmt_tree(f, &new_prefix, false)?;
                 m.fmt_tree(f, &new_prefix, true)
             }
-            ClassMemberDeclaration::NestedClassDeclaration(c) => {
+            ClassMemberDeclaration::NestedClass(c) => {
                 c.fmt_tree_with_context(f, prefix, is_last, modifiers)
             }
             ClassMemberDeclaration::NestedInterface(i) => {
                 i.fmt_tree_with_context(f, prefix, is_last, modifiers)
             }
-            ClassMemberDeclaration::FieldDeclaration { variable_type, declarations } => {
+            ClassMemberDeclaration::Field { variable_type, declarations } => {
                 writeln!(f, "{line_prefix}Field declaration {:?}", modifiers)?;
                 variable_type.fmt_tree(f, &new_prefix, false)?;
                 declarations.fmt_tree(f, &new_prefix, true)
             }
-            ClassMemberDeclaration::ConstructorDeclaration { parameters, body, name: _ } => {
+            ClassMemberDeclaration::Constructor { parameters, body, name: _ } => {
                 writeln!(f, "{line_prefix}Constructor declaration {:?}", modifiers)?;
                 parameters.fmt_tree(f, &new_prefix, false)?;
                 body.fmt_tree(f, &new_prefix, true)
@@ -288,7 +288,7 @@ impl AstNode<Modifiers> for FormalParameter {
     ) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(&prefix, is_last);
         match self {
-            FormalParameter::NormalFormalParameter(t, id) => {
+            FormalParameter::NormalParameter(t, id) => {
                 writeln!(f, "{line_prefix}Param {}", id)?;
                 t.fmt_tree(f, &new_prefix, modifiers.is_empty())?;
             }
@@ -328,8 +328,8 @@ impl AstNode<Modifiers> for Type {
             Type::Double => writeln!(f, "{type_line_prefix}double"),
             Type::Boolean => writeln!(f, "{type_line_prefix}boolean"),
             Type::Void => writeln!(f, "{type_line_prefix}void"),
-            Type::ClassType(c) => c.fmt_tree(f, &new_prefix, true),
-            Type::ArrayType(ArrayType { element_type }) => {
+            Type::Class(c) => c.fmt_tree(f, &new_prefix, true),
+            Type::Array(ArrayType { element_type }) => {
                 writeln!(f, "{type_line_prefix}ArrayType")?;
                 element_type.fmt_tree(f, &type_prefix, true)
             }
@@ -389,7 +389,7 @@ impl AstNode for Statement {
                 statements.fmt_tree(f, &new_prefix, true)
             }
             Statement::VariableDeclaration(v) => v.fmt_tree(f, &prefix, is_last),
-            Statement::IfStatement { condition, if_true, if_false } => {
+            Statement::If { condition, if_true, if_false } => {
                 writeln!(f, "{line_prefix}IfStatement")?;
                 let children = Children::new()
                     .push("Condition", condition)
@@ -397,7 +397,7 @@ impl AstNode for Statement {
                     .push_opt("if_false", if_false);
                 children.fmt_tree(f, &new_prefix, true)
             }
-            Statement::WhileStatement { condition, statement } => {
+            Statement::While { condition, statement } => {
                 writeln!(f, "{line_prefix}WhileStatement")?;
                 let (condition_label_prefix, condition_prefix) = branch(&new_prefix, false);
                 let (statement_label_prefix, statement_prefix) = branch(&new_prefix, true);
@@ -408,7 +408,7 @@ impl AstNode for Statement {
                 writeln!(f, "{statement_label_prefix}Body")?;
                 statement.fmt_tree(f, &statement_prefix, true)
             }
-            Statement::ForStatement {
+            Statement::For {
                 initializer,
                 condition,
                 update,
@@ -434,7 +434,7 @@ impl AstNode for Statement {
                 writeln!(f, "{statement_label_prefix}Body")?;
                 statement.fmt_tree(f, &statement_prefix, true)
             }
-            Statement::ForEachStatement {
+            Statement::ForEach {
                 variable_declaration,
                 iterable,
                 statement,
