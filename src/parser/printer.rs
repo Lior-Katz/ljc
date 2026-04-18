@@ -1,10 +1,11 @@
 use crate::parser::ast::{
     ArrayCreationMode, ArrayType, AssignmentOp, BinOp, CatchClause, ClassBodyDeclaration,
     ClassDeclaration, ClassMemberDeclaration, ClassTypePart, CompilationUnit, ConstructorBody,
-    ConstructorInvocation, Expression, ForInit, FormalParameter, LeftHandSide, MemberAccess,
-    MethodBody, MethodCall, MethodDeclaration, Modified, Modifier, Modifiers,
-    NormalClassDeclaration, Resource, Statement, TopLevelClassOrInterfaceDeclaration, Type,
-    VariableDeclaration, VariableDeclarator, VariableDeclaratorId, VariableInitializer,
+    ConstructorInvocation, Expression, ForInit, FormalParameter, InterfaceDeclaration,
+    LeftHandSide, MemberAccess, MethodBody, MethodCall, MethodDeclaration, Modified, Modifier,
+    Modifiers, NormalClassDeclaration, NormalInterfaceDeclaration, Resource, Statement,
+    TopLevelClassOrInterfaceDeclaration, Type, VariableDeclaration, VariableDeclarator,
+    VariableDeclaratorId, VariableInitializer,
 };
 use std::fmt;
 use std::fmt::{Display, Formatter};
@@ -114,6 +115,9 @@ impl AstNode for TopLevelClassOrInterfaceDeclaration {
             TopLevelClassOrInterfaceDeclaration::ClassDeclaration(c) => {
                 c.fmt_tree(f, prefix, is_last)
             }
+            TopLevelClassOrInterfaceDeclaration::InterfaceDeclaration(i) => {
+                i.fmt_tree(f, prefix, is_last)
+            }
         }
     }
 }
@@ -203,6 +207,55 @@ impl AstNode<Modifiers> for ClassMemberDeclaration {
                 body.fmt_tree(f, &new_prefix, true)
             }
         }
+    }
+}
+
+impl AstNode<Modifiers> for InterfaceDeclaration {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        self.fmt_tree_with_context(f, prefix, is_last, &vec![])
+    }
+
+    fn fmt_tree_with_context(
+        &self,
+        f: &mut Formatter<'_>,
+        prefix: &str,
+        is_last: bool,
+        modifiers: &Modifiers,
+    ) -> fmt::Result {
+        match self {
+            InterfaceDeclaration::NormalInterface(i) => {
+                i.fmt_tree_with_context(f, prefix, is_last, modifiers)
+            }
+        }
+    }
+}
+
+impl AstNode<Modifiers> for NormalInterfaceDeclaration {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        self.fmt_tree_with_context(f, prefix, is_last, &vec![])
+    }
+
+    fn fmt_tree_with_context(
+        &self,
+        f: &mut Formatter<'_>,
+        prefix: &str,
+        is_last: bool,
+        modifiers: &Modifiers,
+    ) -> fmt::Result {
+        let (line_prefix, new_prefix) = branch(&prefix, is_last);
+        writeln!(f, "{line_prefix}Interface {}", self.identifier)?;
+
+        if !modifiers.is_empty() {
+            let (modifiers_label_prefix, modifiers_prefix) = branch(&new_prefix, false);
+            writeln!(f, "{modifiers_label_prefix}Modifiers")?;
+            modifiers.fmt_tree(f, &modifiers_prefix, true)?;
+        }
+
+        let total = self.body.len();
+        for (i, decl) in self.body.iter().enumerate() {
+            decl.fmt_tree(f, &new_prefix, i == total - 1)?;
+        }
+        Ok(())
     }
 }
 
@@ -654,7 +707,7 @@ impl AstNode for VariableInitializer {
                 let (line_prefix, new_prefix) = branch(&prefix, is_last);
                 writeln!(f, "{line_prefix}ArrayInitializer")?;
                 v.fmt_tree(f, &new_prefix, true)
-            },
+            }
         }
     }
 }

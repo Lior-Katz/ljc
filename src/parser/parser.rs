@@ -4,10 +4,11 @@ use crate::parser::ast::{
     ArgumentList, ArrayCreationMode, ArrayType, AssignmentOp, BinOp, CatchClause,
     ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration, ClassTypePart, CompilationUnit,
     ConstructorBody, ConstructorInvocation, Expression, ForInit, ForUpdate, FormalParameter,
-    FormalParameterList, Identifier, LeftHandSide, MemberAccess, MethodBody, MethodCall,
-    MethodDeclaration, Modifiable, Modified, Modifier, NormalClassDeclaration, Program, Resource,
-    Statement, TopLevelClassOrInterfaceDeclaration, Type, VariableDeclaration, VariableDeclarator,
-    VariableDeclaratorId, VariableDeclaratorList, VariableInitializer, VariableInitializerList,
+    FormalParameterList, Identifier, InterfaceDeclaration, LeftHandSide, MemberAccess, MethodBody,
+    MethodCall, MethodDeclaration, Modifiable, Modified, Modifier, NormalClassDeclaration,
+    NormalInterfaceDeclaration, Program, Resource, Statement, TopLevelClassOrInterfaceDeclaration,
+    Type, VariableDeclaration, VariableDeclarator, VariableDeclaratorId, VariableDeclaratorList,
+    VariableInitializer, VariableInitializerList,
 };
 use crate::parser::error::ParseError;
 
@@ -212,11 +213,13 @@ impl Parser {
         while self.accept(Token::Semicolon) {} // §7.6 (p. 231), ignore semicolons at class or interface declarations level
 
         let modifiers = self.zero_or_more(Self::modifier);
-        self.class_declaration().map(|class_decl| {
-            TopLevelClassOrInterfaceDeclaration::ClassDeclaration(
-                class_decl.with_modifiers(modifiers),
-            )
-        })
+        if let Ok(class_decl) = self.class_declaration() {
+            Ok(class_decl.with_modifiers(modifiers).into())
+        } else if let Ok(iface_decl) = self.interface_declaration() {
+            Ok(iface_decl.with_modifiers(modifiers).into())
+        } else {
+            Err(ParseError::NoProduction)
+        }
     }
 
     fn class_declaration(&mut self) -> Result<ClassDeclaration, ParseError> {
@@ -289,6 +292,25 @@ impl Parser {
             self.method_or_field_declaration()
                 .map(|m| m.with_modifiers(modifiers))
         }
+    }
+
+    fn interface_declaration(&mut self) -> Result<InterfaceDeclaration, ParseError> {
+        self.normal_interface_declaration()
+            .map(NormalInterfaceDeclaration::into)
+    }
+
+    fn normal_interface_declaration(&mut self) -> Result<NormalInterfaceDeclaration, ParseError> {
+        self.assert(Token::Interface)?;
+        let identifier = self.identifier()?;
+        let body = self.interface_body()?;
+        Ok(NormalInterfaceDeclaration { identifier, body })
+    }
+
+    fn interface_body(&mut self) -> Result<Vec<Modified<ClassMemberDeclaration>>, ParseError> {
+        self.assert(Token::LeftBrace)?;
+        let members = self.zero_or_more(Self::class_member_declaration);
+        self.assert(Token::RightBrace)?;
+        Ok(members)
     }
 
     /// modifiers were extracted at the [class member](Parser::class_member_declaration) level,
@@ -1554,5 +1576,23 @@ impl TryFrom<Expression> for Type {
             }
             _ => Err(ParseError::NoProduction),
         }
+    }
+}
+
+impl Into<InterfaceDeclaration> for NormalInterfaceDeclaration {
+    fn into(self) -> InterfaceDeclaration {
+        InterfaceDeclaration::NormalInterface(self)
+    }
+}
+
+impl Into<TopLevelClassOrInterfaceDeclaration> for Modified<ClassDeclaration> {
+    fn into(self) -> TopLevelClassOrInterfaceDeclaration {
+        TopLevelClassOrInterfaceDeclaration::ClassDeclaration(self)
+    }
+}
+
+impl Into<TopLevelClassOrInterfaceDeclaration> for Modified<InterfaceDeclaration> {
+    fn into(self) -> TopLevelClassOrInterfaceDeclaration {
+        TopLevelClassOrInterfaceDeclaration::InterfaceDeclaration(self)
     }
 }

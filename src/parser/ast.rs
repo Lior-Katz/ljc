@@ -24,6 +24,7 @@ pub enum CompilationUnit {
 #[derive(Debug)]
 pub enum TopLevelClassOrInterfaceDeclaration {
     ClassDeclaration(Modified<ClassDeclaration>),
+    InterfaceDeclaration(Modified<InterfaceDeclaration>)
 }
 
 #[derive(Debug)]
@@ -82,6 +83,17 @@ pub enum ClassMemberDeclaration {
         parameters: FormalParameterList,
         body: ConstructorBody,
     },
+}
+
+#[derive(Debug)]
+pub enum InterfaceDeclaration {
+    NormalInterface(NormalInterfaceDeclaration),
+}
+
+#[derive(Debug)]
+pub struct NormalInterfaceDeclaration {
+    pub identifier: TypeIdentifier,
+    pub body: Vec<Modified<ClassMemberDeclaration>>,
 }
 
 #[derive(Debug)]
