@@ -16,6 +16,12 @@ source: tests/snapshot/snapshot_test.rs
             │   │   └──int
             │   └──CONST
             │       └──int 10
+            ├──Compact Constructor declaration []
+            │   └──ConstructorBody
+            │       └──Epilogue
+            │           └──Assignment =
+            │               ├──x
+            │               └──int 0
             ├──Constructor declaration [Public]
             │   └──ConstructorBody
             │       └──ConstructorInvocation

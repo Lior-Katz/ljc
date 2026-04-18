@@ -1,6 +1,10 @@
 record R0(int x, String y) {
     static final int CONST = 10;
 
+    R0 {
+        x = 0;
+    }
+
     public R0() {
         this(1);
     }

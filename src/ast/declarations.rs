@@ -47,6 +47,10 @@ pub enum ClassMemberDeclaration {
         parameters: FormalParameterList,
         body: ConstructorBody,
     },
+    CompactConstructor {
+        name: TypeIdentifier,
+        body: ConstructorBody,
+    }
 }
 
 #[derive(Debug)]

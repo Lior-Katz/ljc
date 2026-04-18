@@ -393,6 +393,7 @@ impl Parser {
     /// method_or_field_declaration:
     ///     method_declaration
     ///     constructor_declaration
+    ///     compact_constructor_declaration
     ///     field_declaration
     ///
     /// method_declaration:
@@ -400,6 +401,9 @@ impl Parser {
     ///
     /// constructor_declaration:
     ///     identifier ( [formal_parameters] ) constructor_body
+    ///
+    /// compact_constructor_declaration:
+    ///     identifier constructor_body
     ///
     /// field_declaration:
     ///     term identifier [= variable_initializer] {, identifier [= variable_initializer]}
@@ -413,6 +417,13 @@ impl Parser {
                 self.assert(Token::RightParen)?;
                 let body = self.constructor_body()?;
                 return Ok(ClassMemberDeclaration::Constructor { name, parameters, body });
+            }
+        }
+        if self.next_is(Token::LeftBrace) {
+            if let Expression::Name(name) = result {
+                let name = name.try_into()?;
+                let body = self.constructor_body()?;
+                return Ok(ClassMemberDeclaration::CompactConstructor { name, body });
             }
         }
         let identifier = self.identifier()?;

@@ -213,6 +213,10 @@ impl AstNode<Modifiers> for ClassMemberDeclaration {
                 parameters.fmt_tree(f, &new_prefix, false)?;
                 body.fmt_tree(f, &new_prefix, true)
             }
+            ClassMemberDeclaration::CompactConstructor { body, name: _ } => {
+                writeln!(f, "{line_prefix}Compact Constructor declaration {:?}", modifiers)?;
+                body.fmt_tree(f, &new_prefix, true)
+            }
         }
     }
 }
