@@ -25,4 +25,8 @@ interface InterfaceMembers {
 
         void innerMethod();
     }
+
+    enum InnerEnum {
+        A, B
+    }
 }

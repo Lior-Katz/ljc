@@ -1,9 +1,10 @@
 use crate::ast::{
     ArgumentList, ArrayCreationMode, ArrayType, AssignmentOp, BinOp, CatchClause,
-    ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration, ClassTypePart, CompilationUnit,
-    ConstructorBody, ConstructorInvocation, Expression, ForInit, ForUpdate, FormalParameter,
-    FormalParameterList, Identifier, InterfaceDeclaration, LeftHandSide, MemberAccess, MethodBody,
-    MethodCall, MethodDeclaration, Modifiable, Modified, Modifier, NormalClassDeclaration,
+    ClassBodyDeclaration, ClassBodyDeclarations, ClassDeclaration, ClassMemberDeclaration,
+    ClassTypePart, CompilationUnit, ConstructorBody, ConstructorInvocation, EnumBody, EnumConstant,
+    EnumDeclaration, Expression, ForInit, ForUpdate, FormalParameter, FormalParameterList,
+    Identifier, InterfaceDeclaration, LeftHandSide, MemberAccess, MethodBody, MethodCall,
+    MethodDeclaration, Modifiable, Modified, Modifier, NormalClassDeclaration,
     NormalInterfaceDeclaration, Program, RecordBodyDeclaration, RecordComponent, RecordDeclaration,
     Resource, Statement, TopLevelClassOrInterfaceDeclaration, Type, VariableDeclaration,
     VariableDeclarator, VariableDeclaratorId, VariableDeclaratorList, VariableInitializer,
@@ -251,6 +252,7 @@ impl Parser {
             self.normal_class_declaration()
                 .map(NormalClassDeclaration::into),
             self.record_declaration().map(RecordDeclaration::into),
+            self.enum_declaration().map(EnumDeclaration::into),
         )
     }
 
@@ -278,7 +280,7 @@ impl Parser {
         accept_with_value!(self, Token::Id)
     }
 
-    fn class_body(&mut self) -> Result<Vec<ClassBodyDeclaration>, ParseError> {
+    fn class_body(&mut self) -> Result<ClassBodyDeclarations, ParseError> {
         self.assert(Token::LeftBrace)?;
         let declarations = self.zero_or_more(Self::class_body_declaration);
         self.assert(Token::RightBrace)?;
@@ -366,6 +368,76 @@ impl Parser {
 
     fn record_body(&mut self) -> Result<Vec<RecordBodyDeclaration>, ParseError> {
         self.class_body()
+    }
+
+    fn enum_declaration(&mut self) -> Result<EnumDeclaration, ParseError> {
+        self.assert(Token::Enum)?;
+        let name = self.identifier()?.try_into()?;
+        let body = self.enum_body()?;
+        Ok(EnumDeclaration { name, body })
+    }
+
+    /// ```text
+    /// enum_body:
+    ///     { enum_constant_list [enum_body_declarations] }
+    /// ```
+    fn enum_body(&mut self) -> Result<EnumBody, ParseError> {
+        self.assert(Token::LeftBrace)?;
+        let constants = self.enum_constant_list()?;
+        let body_declarations = if self.accept(Token::Semicolon) {
+            self.zero_or_more(Self::class_body_declaration)
+        } else {
+            vec![]
+        };
+        self.assert(Token::RightBrace)?;
+        Ok(EnumBody { constants, body_declarations })
+    }
+
+    /// ```text
+    /// enum_constant_list:
+    ///     [,]
+    ///     enum_constant {, enum_constant} [,]
+    /// ```
+    fn enum_constant_list(&mut self) -> Result<Vec<Modified<EnumConstant>>, ParseError> {
+        if self.accept(Token::Comma) {
+            // just a single comma
+            return Ok(vec![]);
+        }
+
+        let mut items = vec![];
+        loop {
+            // enum constants list ends either with the end of the enum (right brace) or the semicolon
+            // that starts the enum body declarations
+            if self.next_is(Token::RightBrace) || self.next_is(Token::Semicolon) {
+                break;
+            }
+            items.push(self.enum_constant()?);
+            if !self.accept(Token::Comma) {
+                break;
+            }
+        }
+        Ok(items)
+    }
+
+    /// ```text
+    /// enum_constant:
+    ///     identifier [( argument_list )] [class_body]
+    /// ```
+    fn enum_constant(&mut self) -> Result<Modified<EnumConstant>, ParseError> {
+        let name = self.identifier()?;
+        let args = if self.accept(Token::LeftParen) {
+            let args = self.argument_list()?;
+            self.assert(Token::RightParen)?;
+            Some(args)
+        } else {
+            None
+        };
+        let body = if self.next_is(Token::LeftBrace) {
+            Some(self.class_body()?)
+        } else {
+            None
+        };
+        Ok(EnumConstant { name, args, body }.into())
     }
 
     fn interface_declaration(&mut self) -> Result<InterfaceDeclaration, ParseError> {
@@ -1678,6 +1750,12 @@ impl Into<ClassDeclaration> for NormalClassDeclaration {
 impl Into<ClassDeclaration> for RecordDeclaration {
     fn into(self) -> ClassDeclaration {
         ClassDeclaration::Record(self)
+    }
+}
+
+impl Into<ClassDeclaration> for EnumDeclaration {
+    fn into(self) -> ClassDeclaration {
+        ClassDeclaration::Enum(self)
     }
 }
 

@@ -47,13 +47,18 @@ source: tests/snapshot/snapshot_test.rs
         │       ├──Type
         │       │   └──void
         │       └──Block
-        └──Interface InnerInterface
-            ├──Field declaration []
-            │   ├──Type
-            │   │   └──int
-            │   └──X
-            │       └──int 10
-            └──Method innerMethod []
-                ├──Type
-                │   └──void
-                └──;
+        ├──Interface InnerInterface
+        │   ├──Field declaration []
+        │   │   ├──Type
+        │   │   │   └──int
+        │   │   └──X
+        │   │       └──int 10
+        │   └──Method innerMethod []
+        │       ├──Type
+        │       │   └──void
+        │       └──;
+        └──Enum InnerEnum
+            ├──Constants
+            │   ├──A
+            │   └──B
+            └──Body

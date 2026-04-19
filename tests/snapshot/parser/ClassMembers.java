@@ -46,4 +46,8 @@ class ClassMembers {
 
         void innerMethod();
     }
+
+    enum InnerEnum {
+        A, B
+    }
 }

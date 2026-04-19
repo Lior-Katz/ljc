@@ -19,4 +19,30 @@ class RecordIdentifier {
         int c = record.Type.value + com.record.Type.value;
         return null;
     }
+
+    enum E1 {
+        record
+    }
+
+    enum E2 {
+        record(1);
+
+        E2(int x) {
+        }
+    }
+
+    enum E3 {
+        record {
+            int x = 1;
+        };
+    }
+
+    enum E4 {
+        record(2) {
+            int y = 2;
+        };
+
+        E4(int x) {
+        }
+    }
 }

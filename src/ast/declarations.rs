@@ -1,9 +1,10 @@
-use crate::ast::expressions::{Expression, VariableInitializer};
+use crate::ast::expressions::{ArgumentList, Expression, VariableInitializer};
 use crate::ast::identifiers::{Identifier, TypeIdentifier};
 use crate::ast::modifiers::Modified;
 use crate::ast::statements::{BlockStatements, ConstructorInvocation};
 use crate::ast::types::Type;
 
+pub type ClassBodyDeclarations = Vec<ClassBodyDeclaration>;
 pub type FormalParameterList = Vec<Modified<FormalParameter>>;
 pub type VariableDeclaratorList = Vec<VariableDeclarator>;
 pub type MethodResult = Expression;
@@ -20,12 +21,13 @@ pub enum TopLevelClassOrInterfaceDeclaration {
 pub enum ClassDeclaration {
     NormalClass(NormalClassDeclaration),
     Record(RecordDeclaration),
+    Enum(EnumDeclaration),
 }
 
 #[derive(Debug)]
 pub struct NormalClassDeclaration {
     pub identifier: TypeIdentifier,
-    pub body: Vec<ClassBodyDeclaration>,
+    pub body: ClassBodyDeclarations,
 }
 
 #[derive(Debug)]
@@ -50,7 +52,7 @@ pub enum ClassMemberDeclaration {
     CompactConstructor {
         name: TypeIdentifier,
         body: ConstructorBody,
-    }
+    },
 }
 
 #[derive(Debug)]
@@ -81,6 +83,25 @@ pub enum RecordComponent {
         component_type: Type,
         name: Identifier,
     },
+}
+
+#[derive(Debug)]
+pub struct EnumDeclaration {
+    pub name: TypeIdentifier,
+    pub body: EnumBody,
+}
+
+#[derive(Debug)]
+pub struct EnumBody {
+    pub constants: Vec<Modified<EnumConstant>>,
+    pub body_declarations: ClassBodyDeclarations,
+}
+
+#[derive(Debug)]
+pub struct EnumConstant {
+    pub name: Identifier,
+    pub args: Option<ArgumentList>,
+    pub body: Option<ClassBodyDeclarations>,
 }
 
 #[derive(Debug)]

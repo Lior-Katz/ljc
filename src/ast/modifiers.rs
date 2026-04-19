@@ -28,3 +28,9 @@ pub trait Modifiable {
 }
 
 impl<T> Modifiable for T {}
+
+impl<T> From<T> for Modified<T> {
+    fn from(value: T) -> Self {
+        value.with_modifiers(Modifiers::default())
+    }
+}
