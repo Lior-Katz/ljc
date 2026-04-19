@@ -58,12 +58,19 @@ pub enum ClassMemberDeclaration {
 #[derive(Debug)]
 pub enum InterfaceDeclaration {
     NormalInterface(NormalInterfaceDeclaration),
+    AnnotationInterface(AnnotationInterfaceDeclaration),
 }
 
 #[derive(Debug)]
 pub struct NormalInterfaceDeclaration {
     pub identifier: TypeIdentifier,
     pub body: Vec<Modified<ClassMemberDeclaration>>,
+}
+
+#[derive(Debug)]
+pub struct AnnotationInterfaceDeclaration {
+    pub name: TypeIdentifier,
+    pub body: Vec<Modified<ClassMemberDeclaration>>
 }
 
 #[derive(Debug)]

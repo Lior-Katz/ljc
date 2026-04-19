@@ -1,12 +1,12 @@
 use crate::ast::{
-    ArrayCreationMode, ArrayType, AssignmentOp, BinOp, CatchClause, ClassBodyDeclaration,
-    ClassDeclaration, ClassMemberDeclaration, ClassTypePart, CompilationUnit, ConstructorBody,
-    ConstructorInvocation, EnumConstant, EnumDeclaration, Expression, ForInit, FormalParameter,
-    InterfaceDeclaration, LeftHandSide, MemberAccess, MethodBody, MethodCall, MethodDeclaration,
-    Modified, Modifier, Modifiers, NormalClassDeclaration, NormalInterfaceDeclaration, Program,
-    RecordComponent, RecordDeclaration, Resource, Statement, TopLevelClassOrInterfaceDeclaration,
-    Type, TypeIdentifier, VariableDeclaration, VariableDeclarator, VariableDeclaratorId,
-    VariableInitializer,
+    AnnotationInterfaceDeclaration, ArrayCreationMode, ArrayType, AssignmentOp, BinOp, CatchClause,
+    ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration, ClassTypePart, CompilationUnit,
+    ConstructorBody, ConstructorInvocation, EnumConstant, EnumDeclaration, Expression, ForInit,
+    FormalParameter, InterfaceDeclaration, LeftHandSide, MemberAccess, MethodBody, MethodCall,
+    MethodDeclaration, Modified, Modifier, Modifiers, NormalClassDeclaration,
+    NormalInterfaceDeclaration, Program, RecordComponent, RecordDeclaration, Resource, Statement,
+    TopLevelClassOrInterfaceDeclaration, Type, TypeIdentifier, VariableDeclaration,
+    VariableDeclarator, VariableDeclaratorId, VariableInitializer,
 };
 use std::fmt;
 use std::fmt::{Display, Formatter};
@@ -238,6 +238,9 @@ impl AstNode<Modifiers> for InterfaceDeclaration {
             InterfaceDeclaration::NormalInterface(i) => {
                 i.fmt_tree_with_context(f, prefix, is_last, modifiers)
             }
+            InterfaceDeclaration::AnnotationInterface(i) => {
+                i.fmt_tree_with_context(f, prefix, is_last, modifiers)
+            }
         }
     }
 }
@@ -268,6 +271,28 @@ impl AstNode<Modifiers> for NormalInterfaceDeclaration {
             decl.fmt_tree(f, &new_prefix, i == total - 1)?;
         }
         Ok(())
+    }
+}
+
+impl AstNode<Modifiers> for AnnotationInterfaceDeclaration {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        self.fmt_tree_with_context(f, prefix, is_last, &vec![])
+    }
+
+    fn fmt_tree_with_context(
+        &self,
+        f: &mut Formatter<'_>,
+        prefix: &str,
+        is_last: bool,
+        modifiers: &Modifiers,
+    ) -> fmt::Result {
+        let (line_prefix, _new_prefix) = branch(&prefix, is_last);
+        writeln!(f, "{line_prefix}@interface {}", self.name)?;
+        let modifiers = if modifiers.is_empty() { None } else { Some(modifiers) };
+        let children = Children::new()
+            .push_opt("Modifiers", &modifiers)
+            .push("Body", &self.body);
+        children.fmt_tree(f, &_new_prefix, true)
     }
 }
 

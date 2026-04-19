@@ -1,10 +1,10 @@
 use crate::ast::{
-    ArgumentList, ArrayCreationMode, ArrayType, AssignmentOp, BinOp, CatchClause,
-    ClassBodyDeclaration, ClassBodyDeclarations, ClassDeclaration, ClassMemberDeclaration,
-    ClassTypePart, CompilationUnit, ConstructorBody, ConstructorInvocation, EnumBody, EnumConstant,
-    EnumDeclaration, Expression, ForInit, ForUpdate, FormalParameter, FormalParameterList,
-    Identifier, InterfaceDeclaration, LeftHandSide, MemberAccess, MethodBody, MethodCall,
-    MethodDeclaration, Modifiable, Modified, Modifier, NormalClassDeclaration,
+    AnnotationInterfaceDeclaration, ArgumentList, ArrayCreationMode, ArrayType, AssignmentOp,
+    BinOp, CatchClause, ClassBodyDeclaration, ClassBodyDeclarations, ClassDeclaration,
+    ClassMemberDeclaration, ClassTypePart, CompilationUnit, ConstructorBody, ConstructorInvocation,
+    EnumBody, EnumConstant, EnumDeclaration, Expression, ForInit, ForUpdate, FormalParameter,
+    FormalParameterList, Identifier, InterfaceDeclaration, LeftHandSide, MemberAccess, MethodBody,
+    MethodCall, MethodDeclaration, Modifiable, Modified, Modifier, NormalClassDeclaration,
     NormalInterfaceDeclaration, Program, RecordBodyDeclaration, RecordComponent, RecordDeclaration,
     Resource, Statement, TopLevelClassOrInterfaceDeclaration, Type, VariableDeclaration,
     VariableDeclarator, VariableDeclaratorId, VariableDeclaratorList, VariableInitializer,
@@ -441,8 +441,12 @@ impl Parser {
     }
 
     fn interface_declaration(&mut self) -> Result<InterfaceDeclaration, ParseError> {
-        self.normal_interface_declaration()
-            .map(NormalInterfaceDeclaration::into)
+        one_of!(
+            self.normal_interface_declaration()
+                .map(NormalInterfaceDeclaration::into),
+            self.annotation_interface_declaration()
+                .map(AnnotationInterfaceDeclaration::into),
+        )
     }
 
     fn normal_interface_declaration(&mut self) -> Result<NormalInterfaceDeclaration, ParseError> {
@@ -457,6 +461,21 @@ impl Parser {
         let members = self.zero_or_more(Self::class_member_declaration);
         self.assert(Token::RightBrace)?;
         Ok(members)
+    }
+
+    fn annotation_interface_declaration(
+        &mut self,
+    ) -> Result<AnnotationInterfaceDeclaration, ParseError> {
+        if !peek!(self, 0 => Token::At, 1 => Token::Interface) {
+            return Err(ParseError::NoProduction);
+        }
+        self.assert(Token::At)?;
+        self.assert(Token::Interface)?;
+        let name = self.identifier()?.try_into()?;
+        self.assert(Token::LeftBrace)?;
+        let body = self.zero_or_more(Self::class_member_declaration);
+        self.assert(Token::RightBrace)?;
+        Ok(AnnotationInterfaceDeclaration { name, body })
     }
 
     /// modifiers were extracted at the [class member](Parser::class_member_declaration) level,
@@ -1768,6 +1787,12 @@ impl Into<ClassBodyDeclaration> for Modified<ClassMemberDeclaration> {
 impl Into<InterfaceDeclaration> for NormalInterfaceDeclaration {
     fn into(self) -> InterfaceDeclaration {
         InterfaceDeclaration::NormalInterface(self)
+    }
+}
+
+impl Into<InterfaceDeclaration> for AnnotationInterfaceDeclaration {
+    fn into(self) -> InterfaceDeclaration {
+        InterfaceDeclaration::AnnotationInterface(self)
     }
 }
 
