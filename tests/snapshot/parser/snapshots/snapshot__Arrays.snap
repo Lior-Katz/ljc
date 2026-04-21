@@ -2,14 +2,14 @@
 source: tests/snapshot/snapshot_test.rs
 ---
 └──Compilation Unit
-    └──Class Arrays []
-        ├──Field declaration []
+    └──Class Arrays
+        ├──Field declaration
         │   ├──Type
         │   │   └──ArrayType
         │   │       └──Type
         │   │           └──int
         │   └──a
-        ├──Field declaration []
+        ├──Field declaration
         │   ├──Type
         │   │   └──ArrayType
         │   │       └──Type
@@ -17,7 +17,7 @@ source: tests/snapshot/snapshot_test.rs
         │   │               └──Type
         │   │                   └──int
         │   └──b
-        ├──Field declaration []
+        ├──Field declaration
         │   ├──Type
         │   │   └──ArrayType
         │   │       └──Type
@@ -29,14 +29,14 @@ source: tests/snapshot/snapshot_test.rs
         │   │                           ├──lang
         │   │                           └──String
         │   └──t
-        ├──Field declaration []
+        ├──Field declaration
         │   ├──Type
         │   │   └──ArrayType
         │   │       └──Type
         │   │           └──int
         │   ├──m
         │   └──n
-        └──Method arrayTypes []
+        └──Method arrayTypes
             ├──Type
             │   └──ArrayType
             │       └──Type
@@ -59,7 +59,7 @@ source: tests/snapshot/snapshot_test.rs
             │                   └──Type
             │                       └──String
             └──Block
-                ├──VariableDeclaration []
+                ├──VariableDeclaration
                 │   ├──Type
                 │   │   └──ArrayType
                 │   │       └──Type
@@ -70,7 +70,7 @@ source: tests/snapshot/snapshot_test.rs
                 │           │   └──int
                 │           └──SizedArray
                 │               └──int 10
-                ├──VariableDeclaration []
+                ├──VariableDeclaration
                 │   ├──Type
                 │   │   └──ArrayType
                 │   │       └──Type
@@ -84,7 +84,7 @@ source: tests/snapshot/snapshot_test.rs
                 │           └──SizedArray
                 │               ├──int 5
                 │               └──int 10
-                ├──VariableDeclaration []
+                ├──VariableDeclaration
                 │   ├──Type
                 │   │   └──ArrayType
                 │   │       └──Type
@@ -110,7 +110,7 @@ source: tests/snapshot/snapshot_test.rs
                 │                   │       └──Type
                 │                   │           └──int
                 │                   └──Initialized
-                ├──VariableDeclaration []
+                ├──VariableDeclaration
                 │   ├──Type
                 │   │   └──ArrayType
                 │   │       └──Type
@@ -124,7 +124,7 @@ source: tests/snapshot/snapshot_test.rs
                 │           ├──SizedArray
                 │           │   └──int 3
                 │           └──UnsizedDimensions: 1
-                ├──VariableDeclaration []
+                ├──VariableDeclaration
                 │   ├──Type
                 │   │   └──ArrayType
                 │   │       └──Type

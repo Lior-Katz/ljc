@@ -2,53 +2,85 @@
 source: tests/snapshot/snapshot_test.rs
 ---
 └──Compilation Unit
-    └──Class ModifierTest [Public, Abstract]
-        ├──Field declaration [Public]
+    └──Class ModifierTest
+        ├──Modifiers
+        │   ├──public
+        │   └──abstract
+        ├──Field declaration
+        │   ├──Modifiers
+        │   │   └──public
         │   ├──Type
         │   │   └──int
         │   └──a
-        ├──Field declaration [Protected, Static]
+        ├──Field declaration
+        │   ├──Modifiers
+        │   │   ├──protected
+        │   │   └──static
         │   ├──Type
         │   │   └──int
         │   └──b
-        ├──Field declaration [Private, Final]
+        ├──Field declaration
+        │   ├──Modifiers
+        │   │   ├──private
+        │   │   └──final
         │   ├──Type
         │   │   └──int
         │   └──c
         │       └──int 1
-        ├──Method abstractMethod [Public, Abstract]
+        ├──Method abstractMethod
+        │   ├──Modifiers
+        │   │   ├──public
+        │   │   └──abstract
         │   ├──Type
         │   │   └──void
         │   └──;
-        ├──Method staticMethod [Protected, Static]
+        ├──Method staticMethod
+        │   ├──Modifiers
+        │   │   ├──protected
+        │   │   └──static
         │   ├──Type
         │   │   └──void
         │   ├──Param x
         │   │   ├──Type
         │   │   │   └──int
-        │   │   └──final
+        │   │   └──Modifiers
+        │   │       └──final
         │   └──Block
-        │       └──VariableDeclaration [Final]
+        │       └──VariableDeclaration
+        │           ├──Modifiers
+        │           │   └──final
         │           ├──Type
         │           │   └──int
         │           └──y
         │               └── +
         │                   ├──x
         │                   └──int 1
-        └──Class Inner [Public, Static, Final]
-            ├──Field declaration [Private]
+        └──Class Inner
+            ├──Modifiers
+            │   ├──public
+            │   ├──static
+            │   └──final
+            ├──Field declaration
+            │   ├──Modifiers
+            │   │   └──private
             │   ├──Type
             │   │   └──int
             │   └──x
-            └──Method method [Public, Final]
+            └──Method method
+                ├──Modifiers
+                │   ├──public
+                │   └──final
                 ├──Type
                 │   └──void
                 ├──Param param
                 │   ├──Type
                 │   │   └──int
-                │   └──final
+                │   └──Modifiers
+                │       └──final
                 └──Block
-                    └──VariableDeclaration [Final]
+                    └──VariableDeclaration
+                        ├──Modifiers
+                        │   └──final
                         ├──Type
                         │   └──int
                         └──local

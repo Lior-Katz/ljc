@@ -2,8 +2,8 @@
 source: tests/snapshot/snapshot_test.rs
 ---
 └──Compilation Unit
-    └──Class ForStatements []
-        ├──Method basic_for []
+    └──Class ForStatements
+        ├──Method basic_for
         │   ├──Type
         │   │   └──void
         │   ├──Param a
@@ -15,7 +15,7 @@ source: tests/snapshot/snapshot_test.rs
         │   └──Block
         │       ├──ForStatement
         │       │   ├──Initializer
-        │       │   │   └──VariableDeclaration []
+        │       │   │   └──VariableDeclaration
         │       │   │       ├──Type
         │       │   │       │   └──int
         │       │   │       └──i
@@ -33,7 +33,7 @@ source: tests/snapshot/snapshot_test.rs
         │       │           └──i
         │       ├──ForStatement
         │       │   ├──Initializer
-        │       │   │   └──VariableDeclaration []
+        │       │   │   └──VariableDeclaration
         │       │   │       ├──Type
         │       │   │       │   └──int
         │       │   │       ├──i
@@ -81,7 +81,7 @@ source: tests/snapshot/snapshot_test.rs
         │       ├──LabeledStatement: loop
         │       │   └──ForStatement
         │       │       ├──Initializer
-        │       │       │   └──VariableDeclaration []
+        │       │       │   └──VariableDeclaration
         │       │       │       ├──Type
         │       │       │       │   └──int
         │       │       │       └──i
@@ -93,7 +93,7 @@ source: tests/snapshot/snapshot_test.rs
         │       │           └──BreakStatement loop
         │       ├──ForStatement
         │       │   ├──Initializer
-        │       │   │   └──VariableDeclaration []
+        │       │   │   └──VariableDeclaration
         │       │   │       ├──Type
         │       │   │       │   └──int
         │       │   │       └──i
@@ -112,7 +112,7 @@ source: tests/snapshot/snapshot_test.rs
         │       │   └──Body
         │       │       └──PostIncrement
         │       │           └──b
-        │       ├──VariableDeclaration []
+        │       ├──VariableDeclaration
         │       │   ├──Type
         │       │   │   └──int
         │       │   └──i
@@ -138,7 +138,7 @@ source: tests/snapshot/snapshot_test.rs
         │       │           └──i
         │       └──ForStatement
         │           ├──Initializer
-        │           │   └──VariableDeclaration []
+        │           │   └──VariableDeclaration
         │           │       ├──Type
         │           │       │   └──int
         │           │       └──x
@@ -153,7 +153,7 @@ source: tests/snapshot/snapshot_test.rs
         │           └──Body
         │               └──ForStatement
         │                   ├──Initializer
-        │                   │   └──VariableDeclaration []
+        │                   │   └──VariableDeclaration
         │                   │       ├──Type
         │                   │       │   └──int
         │                   │       └──y
@@ -171,7 +171,7 @@ source: tests/snapshot/snapshot_test.rs
         │                           └── *
         │                               ├──x
         │                               └──y
-        └──Method for_each []
+        └──Method for_each
             ├──Type
             │   └──void
             ├──Param arr
@@ -180,19 +180,19 @@ source: tests/snapshot/snapshot_test.rs
             │           └──Type
             │               └──int
             └──Block
-                ├──VariableDeclaration []
+                ├──VariableDeclaration
                 │   ├──Type
                 │   │   └──int
                 │   └──a
                 │       └──int 0
-                ├──VariableDeclaration []
+                ├──VariableDeclaration
                 │   ├──Type
                 │   │   └──int
                 │   └──b
                 │       └──int 0
                 ├──ForEachStatement
                 │   ├──Initializer
-                │   │   └──VariableDeclaration []
+                │   │   └──VariableDeclaration
                 │   │       ├──Type
                 │   │       │   └──int
                 │   │       └──x
@@ -204,7 +204,7 @@ source: tests/snapshot/snapshot_test.rs
                 │           └──x
                 ├──ForEachStatement
                 │   ├──Initializer
-                │   │   └──VariableDeclaration []
+                │   │   └──VariableDeclaration
                 │   │       ├──Type
                 │   │       │   └──int
                 │   │       └──x
@@ -219,7 +219,7 @@ source: tests/snapshot/snapshot_test.rs
                 │               └──b
                 └──ForEachStatement
                     ├──Initializer
-                    │   └──VariableDeclaration []
+                    │   └──VariableDeclaration
                     │       ├──String
                     │       └──s
                     ├──Iterable

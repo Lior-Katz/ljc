@@ -93,6 +93,21 @@ fn branch(prefix: &str, is_last: bool) -> (String, String) {
     }
 }
 
+fn fmt_modifiers(
+    f: &mut Formatter<'_>,
+    prefix: &str,
+    is_last: bool,
+    modifiers: &Modifiers,
+) -> fmt::Result {
+    if !modifiers.is_empty() {
+        let (modifiers_label_prefix, modifiers_prefix) = branch(prefix, is_last);
+        writeln!(f, "{modifiers_label_prefix}Modifiers")?;
+        modifiers.fmt_tree(f, &modifiers_prefix, true)
+    } else {
+        Ok(())
+    }
+}
+
 impl AstNode for Program {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(&prefix, is_last);
@@ -155,12 +170,9 @@ impl AstNode<Modifiers> for NormalClassDeclaration {
     ) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(&prefix, is_last);
 
-        writeln!(f, "{line_prefix}Class {} {:?}", self.identifier, modifiers)?;
-        let total = self.body.len();
-
-        for (i, decl) in self.body.iter().enumerate() {
-            decl.fmt_tree(f, &new_prefix, i == total - 1)?;
-        }
+        writeln!(f, "{line_prefix}Class {}", self.identifier)?;
+        fmt_modifiers(f, &new_prefix, self.body.is_empty(), modifiers)?;
+        self.body.fmt_tree(f, &new_prefix, true)?;
         Ok(())
     }
 }
@@ -194,7 +206,8 @@ impl AstNode<Modifiers> for ClassMemberDeclaration {
 
         match self {
             ClassMemberDeclaration::Method(m) => {
-                writeln!(f, "{line_prefix}Method {} {:?}", m.identifier, modifiers)?;
+                writeln!(f, "{line_prefix}Method {}", m.identifier)?;
+                fmt_modifiers(f, &new_prefix, false, modifiers)?;
                 m.result.fmt_tree(f, &new_prefix, false)?;
                 m.fmt_tree(f, &new_prefix, true)
             }
@@ -205,17 +218,20 @@ impl AstNode<Modifiers> for ClassMemberDeclaration {
                 i.fmt_tree_with_context(f, prefix, is_last, modifiers)
             }
             ClassMemberDeclaration::Field { variable_type, declarations } => {
-                writeln!(f, "{line_prefix}Field declaration {:?}", modifiers)?;
+                writeln!(f, "{line_prefix}Field declaration")?;
+                fmt_modifiers(f, &new_prefix, false, modifiers)?;
                 variable_type.fmt_tree(f, &new_prefix, false)?;
                 declarations.fmt_tree(f, &new_prefix, true)
             }
             ClassMemberDeclaration::Constructor { parameters, body, name: _ } => {
-                writeln!(f, "{line_prefix}Constructor declaration {:?}", modifiers)?;
+                writeln!(f, "{line_prefix}Constructor declaration")?;
+                fmt_modifiers(f, &new_prefix, false, modifiers)?;
                 parameters.fmt_tree(f, &new_prefix, false)?;
                 body.fmt_tree(f, &new_prefix, true)
             }
             ClassMemberDeclaration::CompactConstructor { body, name: _ } => {
-                writeln!(f, "{line_prefix}Compact Constructor declaration {:?}", modifiers)?;
+                writeln!(f, "{line_prefix}Compact Constructor declaration")?;
+                fmt_modifiers(f, &new_prefix, false, modifiers)?;
                 body.fmt_tree(f, &new_prefix, true)
             }
         }
@@ -260,17 +276,8 @@ impl AstNode<Modifiers> for NormalInterfaceDeclaration {
         let (line_prefix, new_prefix) = branch(&prefix, is_last);
         writeln!(f, "{line_prefix}Interface {}", self.identifier)?;
 
-        if !modifiers.is_empty() {
-            let (modifiers_label_prefix, modifiers_prefix) = branch(&new_prefix, false);
-            writeln!(f, "{modifiers_label_prefix}Modifiers")?;
-            modifiers.fmt_tree(f, &modifiers_prefix, true)?;
-        }
-
-        let total = self.body.len();
-        for (i, decl) in self.body.iter().enumerate() {
-            decl.fmt_tree(f, &new_prefix, i == total - 1)?;
-        }
-        Ok(())
+        fmt_modifiers(f, &new_prefix, self.body.is_empty(), modifiers)?;
+        self.body.fmt_tree(f, &new_prefix, true)
     }
 }
 
@@ -288,11 +295,8 @@ impl AstNode<Modifiers> for AnnotationInterfaceDeclaration {
     ) -> fmt::Result {
         let (line_prefix, _new_prefix) = branch(&prefix, is_last);
         writeln!(f, "{line_prefix}@interface {}", self.name)?;
-        let modifiers = if modifiers.is_empty() { None } else { Some(modifiers) };
-        let children = Children::new()
-            .push_opt("Modifiers", &modifiers)
-            .push("Body", &self.body);
-        children.fmt_tree(f, &_new_prefix, true)
+        fmt_modifiers(f, &_new_prefix, self.body.is_empty(), modifiers)?;
+        self.body.fmt_tree(f, &_new_prefix, true)
     }
 }
 
@@ -330,26 +334,15 @@ impl AstNode<Modifiers> for FormalParameter {
                 writeln!(f, "{line_prefix}VarArg {}", id)?;
             }
         };
-        modifiers.fmt_tree(f, &new_prefix, true)
+        fmt_modifiers(f, &new_prefix, true, modifiers)
     }
 }
 
-impl AstNode<Modifiers> for Type {
+impl AstNode for Type {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
-        self.fmt_tree_with_context(f, prefix, is_last, &vec![])
-    }
-
-    fn fmt_tree_with_context(
-        &self,
-        f: &mut Formatter<'_>,
-        prefix: &str,
-        is_last: bool,
-        modifiers: &Modifiers,
-    ) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(&prefix, is_last);
 
         writeln!(f, "{line_prefix}Type")?;
-        modifiers.fmt_tree(f, &new_prefix, false)?;
 
         let (type_line_prefix, type_prefix) = branch(&new_prefix, true);
         match self {
@@ -645,7 +638,8 @@ impl AstNode for Expression {
 impl AstNode for Modified<Expression> {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(&prefix, is_last);
-        writeln!(f, "{line_prefix}Modifiers {:?}", self.modifiers)?;
+        writeln!(f, "{line_prefix}Modifiers")?;
+        fmt_modifiers(f, &new_prefix, false, &self.modifiers)?;
         <Expression as AstNode<()>>::fmt_tree(&self.item, f, &new_prefix, true)
     }
 }
@@ -719,8 +713,8 @@ impl AstNode<Modifiers> for VariableDeclaration {
     ) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(&prefix, is_last);
 
-        writeln!(f, "{line_prefix}VariableDeclaration {:?}", modifiers)?;
-
+        writeln!(f, "{line_prefix}VariableDeclaration")?;
+        fmt_modifiers(f, &new_prefix, false, &modifiers)?;
         self.variable_type.fmt_tree(f, &new_prefix, false)?;
         self.declarators.fmt_tree(f, &new_prefix, true)
     }
@@ -938,9 +932,8 @@ impl AstNode<Modifiers> for RecordDeclaration {
     ) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(prefix, is_last);
         writeln!(f, "{line_prefix}RecordDeclaration {}", self.name)?;
-        let modifiers = if modifiers.is_empty() { None } else { Some(modifiers) };
+        fmt_modifiers(f, &new_prefix, false, modifiers)?;
         let children = Children::new()
-            .push_opt("Modifiers", &modifiers)
             .push("Components", &self.components)
             .push("Body", &self.body);
         children.fmt_tree(f, &new_prefix, true)
@@ -978,9 +971,8 @@ impl AstNode<Modifiers> for EnumDeclaration {
         let (line_prefix, new_prefix) = branch(prefix, is_last);
         writeln!(f, "{line_prefix}Enum {}", self.name)?;
 
-        let modifiers = if modifiers.is_empty() { None } else { Some(modifiers) };
+        fmt_modifiers(f, &new_prefix, false, modifiers)?;
         let children = Children::new()
-            .push_opt("Modifiers", &modifiers)
             .push("Constants", &self.body.constants)
             .push("Body", &self.body.body_declarations);
         children.fmt_tree(f, &new_prefix, true)
@@ -997,10 +989,11 @@ impl AstNode<Modifiers> for EnumConstant {
         f: &mut Formatter<'_>,
         prefix: &str,
         is_last: bool,
-        _context: &Modifiers,
+        modifiers: &Modifiers,
     ) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(prefix, is_last);
         writeln!(f, "{line_prefix}{}", self.name)?;
+        fmt_modifiers(f, &new_prefix, false, modifiers)?;
         let children = Children::new()
             .push_opt("Args", &self.args)
             .push_opt("Body", &self.body);

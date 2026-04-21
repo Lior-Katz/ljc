@@ -2,8 +2,8 @@
 source: tests/snapshot/snapshot_test.rs
 ---
 └──Compilation Unit
-    └──Class MemberAccess []
-        ├──Method member_access []
+    └──Class MemberAccess
+        ├──Method member_access
         │   ├──Type
         │   │   └──void
         │   └──Block
@@ -74,7 +74,7 @@ source: tests/snapshot/snapshot_test.rs
         │               ├──field: e
         │               └──target:
         │                   └──d
-        ├──Method method_invocation []
+        ├──Method method_invocation
         │   ├──Type
         │   │   └──void
         │   └──Block
@@ -121,7 +121,7 @@ source: tests/snapshot/snapshot_test.rs
         │       │           └──args:
         │       │               ├──int 0
         │       │               └──int 2
-        │       ├──VariableDeclaration []
+        │       ├──VariableDeclaration
         │       │   ├──Type
         │       │   │   └──int
         │       │   └──x
@@ -140,7 +140,7 @@ source: tests/snapshot/snapshot_test.rs
         │       │               └──args:
         │       │                   ├──int 1
         │       │                   └──int 2
-        │       └──VariableDeclaration []
+        │       └──VariableDeclaration
         │           ├──Type
         │           │   └──int
         │           └──y
@@ -156,7 +156,7 @@ source: tests/snapshot/snapshot_test.rs
         │                       └──args:
         │                           ├──int 2
         │                           └──int 3
-        └──Method array_access []
+        └──Method array_access
             ├──Type
             │   └──void
             └──Block

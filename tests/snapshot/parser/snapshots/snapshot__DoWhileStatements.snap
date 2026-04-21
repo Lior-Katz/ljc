@@ -2,8 +2,8 @@
 source: tests/snapshot/snapshot_test.rs
 ---
 └──Compilation Unit
-    └──Class DoWhileStatements []
-        └──Method test []
+    └──Class DoWhileStatements
+        └──Method test
             ├──Type
             │   └──void
             ├──Param a

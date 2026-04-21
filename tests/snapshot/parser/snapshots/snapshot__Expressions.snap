@@ -2,22 +2,24 @@
 source: tests/snapshot/snapshot_test.rs
 ---
 └──Compilation Unit
-    └──Class Expressions [Public]
-        ├──Method literal_expressions []
+    └──Class Expressions
+        ├──Modifiers
+        │   └──public
+        ├──Method literal_expressions
         │   ├──Type
         │   │   └──void
         │   └──Block
-        │       ├──VariableDeclaration []
+        │       ├──VariableDeclaration
         │       │   ├──Type
         │       │   │   └──int
         │       │   └──n
         │       │       └──int 5
-        │       ├──VariableDeclaration []
+        │       ├──VariableDeclaration
         │       │   ├──Type
         │       │   │   └──long
         │       │   └──l
         │       │       └──long 10
-        │       ├──VariableDeclaration []
+        │       ├──VariableDeclaration
         │       │   ├──Type
         │       │   │   └──boolean
         │       │   └──b
@@ -25,24 +27,24 @@ source: tests/snapshot/snapshot_test.rs
         │       ├──Assignment =
         │       │   ├──b
         │       │   └──boolean false
-        │       ├──VariableDeclaration []
+        │       ├──VariableDeclaration
         │       │   ├──Type
         │       │   │   └──char
         │       │   └──c
         │       │       └──char 'A'
-        │       ├──VariableDeclaration []
+        │       ├──VariableDeclaration
         │       │   ├──String
         │       │   └──s
         │       │       └──String "abc"
-        │       └──VariableDeclaration []
+        │       └──VariableDeclaration
         │           ├──Object
         │           └──o
         │               └──null
-        ├──Method unary_operators []
+        ├──Method unary_operators
         │   ├──Type
         │   │   └──void
         │   └──Block
-        │       ├──VariableDeclaration []
+        │       ├──VariableDeclaration
         │       │   ├──Type
         │       │   │   └──int
         │       │   └──x
@@ -67,7 +69,7 @@ source: tests/snapshot/snapshot_test.rs
         │       │   ├──x
         │       │   └──BitwiseComplement
         │       │       └──int 100
-        │       ├──VariableDeclaration []
+        │       ├──VariableDeclaration
         │       │   ├──Type
         │       │   │   └──boolean
         │       │   └──b
@@ -82,11 +84,11 @@ source: tests/snapshot/snapshot_test.rs
         │           ├──x
         │           └──UnaryMinus
         │               └──int 3
-        ├──Method binary_operators []
+        ├──Method binary_operators
         │   ├──Type
         │   │   └──void
         │   └──Block
-        │       ├──VariableDeclaration []
+        │       ├──VariableDeclaration
         │       │   ├──Type
         │       │   │   └──int
         │       │   └──x
@@ -167,7 +169,7 @@ source: tests/snapshot/snapshot_test.rs
         │       │       │   ├──int 16
         │       │       │   └──int 2
         │       │       └──int 1
-        │       ├──VariableDeclaration []
+        │       ├──VariableDeclaration
         │       │   ├──Type
         │       │   │   └──boolean
         │       │   └──b
@@ -441,11 +443,11 @@ source: tests/snapshot/snapshot_test.rs
         │               └── +
         │                   ├──int 3
         │                   └──int 1
-        └──Method conditional_expressions []
+        └──Method conditional_expressions
             ├──Type
             │   └──void
             └──Block
-                ├──VariableDeclaration []
+                ├──VariableDeclaration
                 │   ├──Type
                 │   │   └──int
                 │   └──x
@@ -453,7 +455,7 @@ source: tests/snapshot/snapshot_test.rs
                 │           ├──boolean true
                 │           ├──int 1
                 │           └──int 2
-                ├──VariableDeclaration []
+                ├──VariableDeclaration
                 │   ├──Type
                 │   │   └──int
                 │   └──a
@@ -461,7 +463,7 @@ source: tests/snapshot/snapshot_test.rs
                 │           ├──boolean false
                 │           ├──int 1
                 │           └──int 2
-                ├──VariableDeclaration []
+                ├──VariableDeclaration
                 │   ├──Type
                 │   │   └──int
                 │   └──b
@@ -472,7 +474,7 @@ source: tests/snapshot/snapshot_test.rs
                 │               ├──boolean false
                 │               ├──int 2
                 │               └──int 3
-                ├──VariableDeclaration []
+                ├──VariableDeclaration
                 │   ├──Type
                 │   │   └──int
                 │   └──c
@@ -483,7 +485,7 @@ source: tests/snapshot/snapshot_test.rs
                 │           │   ├──int 1
                 │           │   └──int 2
                 │           └──int 3
-                ├──VariableDeclaration []
+                ├──VariableDeclaration
                 │   ├──Type
                 │   │   └──int
                 │   └──d
@@ -493,7 +495,7 @@ source: tests/snapshot/snapshot_test.rs
                 │           │   └──int 2
                 │           ├──int 3
                 │           └──int 4
-                ├──VariableDeclaration []
+                ├──VariableDeclaration
                 │   ├──Type
                 │   │   └──int
                 │   └──e
@@ -503,7 +505,7 @@ source: tests/snapshot/snapshot_test.rs
                 │           │   └──boolean false
                 │           ├──int 1
                 │           └──int 2
-                ├──VariableDeclaration []
+                ├──VariableDeclaration
                 │   ├──Type
                 │   │   └──int
                 │   └──f
@@ -513,7 +515,7 @@ source: tests/snapshot/snapshot_test.rs
                 │           │   └──boolean false
                 │           ├──int 1
                 │           └──int 2
-                ├──VariableDeclaration []
+                ├──VariableDeclaration
                 │   ├──Type
                 │   │   └──int
                 │   └──g
@@ -569,7 +571,7 @@ source: tests/snapshot/snapshot_test.rs
                 │       └── <<
                 │           ├──d
                 │           └──e
-                ├──VariableDeclaration []
+                ├──VariableDeclaration
                 │   ├──Type
                 │   │   └──boolean
                 │   ├──b1

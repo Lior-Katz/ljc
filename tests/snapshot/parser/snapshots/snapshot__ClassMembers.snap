@@ -2,25 +2,34 @@
 source: tests/snapshot/snapshot_test.rs
 ---
 └──Compilation Unit
-    └──Class ClassMembers []
-        ├──Field declaration [Private]
+    └──Class ClassMembers
+        ├──Field declaration
+        │   ├──Modifiers
+        │   │   └──private
         │   ├──Type
         │   │   └──int
         │   └──a
-        ├──Field declaration [Protected, Static]
+        ├──Field declaration
+        │   ├──Modifiers
+        │   │   ├──protected
+        │   │   └──static
         │   ├──Type
         │   │   └──int
         │   ├──b
         │   │   └──int 1
         │   └──c
-        ├──Constructor declaration []
+        ├──Constructor declaration
         │   └──ConstructorBody
-        ├──Constructor declaration [Public]
+        ├──Constructor declaration
+        │   ├──Modifiers
+        │   │   └──public
         │   ├──Param x
         │   │   └──Type
         │   │       └──int
         │   └──ConstructorBody
-        ├──Constructor declaration [Protected]
+        ├──Constructor declaration
+        │   ├──Modifiers
+        │   │   └──protected
         │   ├──Param x
         │   │   └──Type
         │   │       └──int
@@ -29,14 +38,14 @@ source: tests/snapshot/snapshot_test.rs
         │   │       └──int
         │   └──ConstructorBody
         │       └──Epilogue
-        │           └──VariableDeclaration []
+        │           └──VariableDeclaration
         │               ├──Type
         │               │   └──int
         │               └──z
         │                   └── +
         │                       ├──x
         │                       └──y
-        ├──Constructor declaration []
+        ├──Constructor declaration
         │   ├──Param x
         │   │   └──Type
         │   │       └──int
@@ -44,7 +53,7 @@ source: tests/snapshot/snapshot_test.rs
         │       └──ConstructorInvocation
         │           ├──int 1
         │           └──int 2
-        ├──Constructor declaration []
+        ├──Constructor declaration
         │   ├──Param d
         │   │   └──Type
         │   │       └──double
@@ -52,18 +61,18 @@ source: tests/snapshot/snapshot_test.rs
         │       ├──ConstructorInvocation
         │       │   └──int 2
         │       └──Epilogue
-        │           └──VariableDeclaration []
+        │           └──VariableDeclaration
         │               ├──Type
         │               │   └──int
         │               └──x
         │                   └──int 0
-        ├──Constructor declaration []
+        ├──Constructor declaration
         │   ├──Param flag
         │   │   └──Type
         │   │       └──boolean
         │   └──ConstructorBody
         │       ├──Prologue
-        │       │   └──VariableDeclaration []
+        │       │   └──VariableDeclaration
         │       │       ├──Type
         │       │       │   └──int
         │       │       └──x
@@ -76,17 +85,24 @@ source: tests/snapshot/snapshot_test.rs
         │           └──Assignment =
         │               ├──x
         │               └──int 5
-        ├──Method foo [Public]
+        ├──Method foo
+        │   ├──Modifiers
+        │   │   └──public
         │   ├──ClassMembers
         │   └──Block
-        ├──Method bar [Protected, Static]
+        ├──Method bar
+        │   ├──Modifiers
+        │   │   ├──protected
+        │   │   └──static
         │   ├──Type
         │   │   └──int
         │   ├──Param x
         │   │   └──Type
         │   │       └──int
         │   └──Block
-        ├──Method referenceTypeParam [Abstract]
+        ├──Method referenceTypeParam
+        │   ├──Modifiers
+        │   │   └──abstract
         │   ├──Type
         │   │   └──void
         │   ├──Param s
@@ -95,22 +111,25 @@ source: tests/snapshot/snapshot_test.rs
         │   │       ├──lang
         │   │       └──String
         │   └──;
-        ├──Class InnerClass [Public, Static]
-        │   ├──Field declaration []
+        ├──Class InnerClass
+        │   ├──Modifiers
+        │   │   ├──public
+        │   │   └──static
+        │   ├──Field declaration
         │   │   ├──Type
         │   │   │   └──int
         │   │   └──x
-        │   └──Method innerMethod []
+        │   └──Method innerMethod
         │       ├──Type
         │       │   └──void
         │       └──Block
         ├──Interface InnerInterface
-        │   ├──Field declaration []
+        │   ├──Field declaration
         │   │   ├──Type
         │   │   │   └──int
         │   │   └──X
         │   │       └──int 10
-        │   └──Method innerMethod []
+        │   └──Method innerMethod
         │       ├──Type
         │       │   └──void
         │       └──;

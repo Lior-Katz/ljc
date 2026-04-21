@@ -3,30 +3,42 @@ source: tests/snapshot/snapshot_test.rs
 ---
 └──Compilation Unit
     └──Interface InterfaceMembers
-        ├──Field declaration []
+        ├──Field declaration
         │   ├──Type
         │   │   └──int
         │   ├──A
         │   │   └──int 1
         │   └──B
         │       └──int 2
-        ├──Field declaration [Public, Static, Final]
+        ├──Field declaration
+        │   ├──Modifiers
+        │   │   ├──public
+        │   │   ├──static
+        │   │   └──final
         │   ├──Type
         │   │   └──int
         │   └──C
         │       └──int 3
-        ├──Method m1 [Private, Static]
+        ├──Method m1
+        │   ├──Modifiers
+        │   │   ├──private
+        │   │   └──static
         │   ├──Type
         │   │   └──void
         │   └──Block
-        ├──Method m2 [Public, Abstract]
+        ├──Method m2
+        │   ├──Modifiers
+        │   │   ├──public
+        │   │   └──abstract
         │   ├──Type
         │   │   └──int
         │   ├──Param x
         │   │   └──Type
         │   │       └──int
         │   └──;
-        ├──Method m3 [Default]
+        ├──Method m3
+        │   ├──Modifiers
+        │   │   └──default
         │   ├──Type
         │   │   └──int
         │   ├──Param x
@@ -38,22 +50,22 @@ source: tests/snapshot/snapshot_test.rs
         │   └──Block
         │       └──ReturnStatement
         │           └──int 0
-        ├──Class InnerClass []
-        │   ├──Field declaration []
+        ├──Class InnerClass
+        │   ├──Field declaration
         │   │   ├──Type
         │   │   │   └──int
         │   │   └──x
-        │   └──Method foo []
+        │   └──Method foo
         │       ├──Type
         │       │   └──void
         │       └──Block
         ├──Interface InnerInterface
-        │   ├──Field declaration []
+        │   ├──Field declaration
         │   │   ├──Type
         │   │   │   └──int
         │   │   └──X
         │   │       └──int 10
-        │   └──Method innerMethod []
+        │   └──Method innerMethod
         │       ├──Type
         │       │   └──void
         │       └──;

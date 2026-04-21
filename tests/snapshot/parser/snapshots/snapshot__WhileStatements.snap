@@ -2,8 +2,8 @@
 source: tests/snapshot/snapshot_test.rs
 ---
 └──Compilation Unit
-    └──Class WhileStatements []
-        ├──Method test []
+    └──Class WhileStatements
+        ├──Method test
         │   ├──Type
         │   │   └──void
         │   ├──Param a
@@ -110,7 +110,7 @@ source: tests/snapshot/snapshot_test.rs
         │           │       └──int 0
         │           └──Body
         │               └──EmptyStatement
-        └──Method danglingElse []
+        └──Method danglingElse
             ├──Type
             │   └──void
             ├──Param a

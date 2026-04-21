@@ -3,42 +3,40 @@ source: tests/snapshot/snapshot_test.rs
 ---
 └──Compilation Unit
     └──@interface AnnotationInterfaces
-        └──Body
-            ├──Method x []
-            │   ├──Type
-            │   │   └──int
-            │   └──;
-            ├──Method y []
-            │   ├──String
-            │   └──;
-            ├──Method z []
-            │   ├──Type
-            │   │   └──ArrayType
-            │   │       └──Type
-            │   │           └──int
-            │   └──;
-            ├──Method c []
-            │   ├──Class
-            │   └──;
-            ├──Method nested []
-            │   ├──Other
-            │   └──;
-            ├──Method nestedArray []
-            │   ├──Type
-            │   │   └──ArrayType
-            │   │       └──Type
-            │   │           └──Other
-            │   └──;
-            ├──Field declaration []
-            │   ├──Type
-            │   │   └──int
-            │   └──CONST
-            │       └──int 5
-            ├──Class InnerClass []
-            ├──Interface InnerInterface
-            └──@interface Other
-                └──Body
-                    └──Method value []
-                        ├──Type
-                        │   └──int
-                        └──;
+        ├──Method x
+        │   ├──Type
+        │   │   └──int
+        │   └──;
+        ├──Method y
+        │   ├──String
+        │   └──;
+        ├──Method z
+        │   ├──Type
+        │   │   └──ArrayType
+        │   │       └──Type
+        │   │           └──int
+        │   └──;
+        ├──Method c
+        │   ├──Class
+        │   └──;
+        ├──Method nested
+        │   ├──Other
+        │   └──;
+        ├──Method nestedArray
+        │   ├──Type
+        │   │   └──ArrayType
+        │   │       └──Type
+        │   │           └──Other
+        │   └──;
+        ├──Field declaration
+        │   ├──Type
+        │   │   └──int
+        │   └──CONST
+        │       └──int 5
+        ├──Class InnerClass
+        ├──Interface InnerInterface
+        └──@interface Other
+            └──Method value
+                ├──Type
+                │   └──int
+                └──;

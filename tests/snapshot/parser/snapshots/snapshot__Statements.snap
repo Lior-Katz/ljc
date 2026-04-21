@@ -2,8 +2,8 @@
 source: tests/snapshot/snapshot_test.rs
 ---
 └──Compilation Unit
-    └──Class Statements []
-        ├──Method assignment_statements []
+    └──Class Statements
+        ├──Method assignment_statements
         │   ├──Type
         │   │   └──int
         │   ├──Param a
@@ -74,7 +74,7 @@ source: tests/snapshot/snapshot_test.rs
         │       │           ├──boolean true
         │       │           ├──c
         │       │           └──d
-        │       ├──VariableDeclaration []
+        │       ├──VariableDeclaration
         │       │   ├──Type
         │       │   │   └──boolean
         │       │   └──bool
@@ -166,7 +166,7 @@ source: tests/snapshot/snapshot_test.rs
         │       │       └──b
         │       └──ReturnStatement
         │           └──a
-        ├──Method prefix_operators []
+        ├──Method prefix_operators
         │   ├──Type
         │   │   └──boolean
         │   ├──Param a
@@ -188,7 +188,7 @@ source: tests/snapshot/snapshot_test.rs
         │           └── >
         │               ├──a
         │               └──b
-        ├──Method postfix_operators []
+        ├──Method postfix_operators
         │   ├──Type
         │   │   └──void
         │   ├──Param a
@@ -207,63 +207,63 @@ source: tests/snapshot/snapshot_test.rs
         │       ├──PostDecrement
         │       │   └──b
         │       └──ReturnStatement
-        ├──Method block_statements []
+        ├──Method block_statements
         │   ├──Type
         │   │   └──void
         │   └──Block
         │       ├──BlockStatement
         │       ├──BlockStatement
-        │       │   └──VariableDeclaration []
+        │       │   └──VariableDeclaration
         │       │       ├──Type
         │       │       │   └──int
         │       │       └──a
         │       │           └──int 1
         │       └──BlockStatement
-        │           ├──VariableDeclaration []
+        │           ├──VariableDeclaration
         │           │   ├──Type
         │           │   │   └──int
         │           │   └──a
         │           │       └──int 1
         │           ├──BlockStatement
         │           │   └──BlockStatement
-        │           │       └──VariableDeclaration []
+        │           │       └──VariableDeclaration
         │           │           ├──Type
         │           │           │   └──int
         │           │           └──b
         │           │               └──int 2
-        │           └──VariableDeclaration []
+        │           └──VariableDeclaration
         │               ├──Type
         │               │   └──int
         │               └──c
         │                   └──int 3
-        ├──Method variable_declarations []
+        ├──Method variable_declarations
         │   ├──Type
         │   │   └──void
         │   └──Block
-        │       ├──VariableDeclaration []
+        │       ├──VariableDeclaration
         │       │   ├──Type
         │       │   │   └──int
         │       │   └──a1
-        │       ├──VariableDeclaration []
+        │       ├──VariableDeclaration
         │       │   ├──Type
         │       │   │   └──boolean
         │       │   └──a2
-        │       ├──VariableDeclaration []
+        │       ├──VariableDeclaration
         │       │   ├──String
         │       │   └──a3
-        │       ├──VariableDeclaration []
+        │       ├──VariableDeclaration
         │       │   ├──Type
         │       │   │   └──int
         │       │   └──b1
         │       │       └──int 1
-        │       ├──VariableDeclaration []
+        │       ├──VariableDeclaration
         │       │   ├──Type
         │       │   │   └──int
         │       │   └──b2
         │       │       └── +
         │       │           ├──b1
         │       │           └──int 2
-        │       ├──VariableDeclaration []
+        │       ├──VariableDeclaration
         │       │   ├──Type
         │       │   │   └──int
         │       │   └──b3
@@ -272,7 +272,7 @@ source: tests/snapshot/snapshot_test.rs
         │       │           │   ├──b1
         │       │           │   └──b2
         │       │           └──int 2
-        │       ├──VariableDeclaration []
+        │       ├──VariableDeclaration
         │       │   ├──Type
         │       │   │   └──int
         │       │   └──b4
@@ -282,17 +282,17 @@ source: tests/snapshot/snapshot_test.rs
         │       │           │   └──b2
         │       │           ├──b1
         │       │           └──b2
-        │       ├──VariableDeclaration []
+        │       ├──VariableDeclaration
         │       │   ├──String
         │       │   └──b5
         │       │       └──String "hello"
-        │       ├──VariableDeclaration []
+        │       ├──VariableDeclaration
         │       │   ├──Type
         │       │   │   └──int
         │       │   ├──c1
         │       │   ├──c2
         │       │   └──c3
-        │       ├──VariableDeclaration []
+        │       ├──VariableDeclaration
         │       │   ├──Type
         │       │   │   └──int
         │       │   ├──c4
@@ -303,18 +303,18 @@ source: tests/snapshot/snapshot_test.rs
         │       │   │       ├──c5
         │       │   │       └──c4
         │       │   └──c7
-        │       ├──VariableDeclaration []
+        │       ├──VariableDeclaration
         │       │   ├──Type
         │       │   │   └──int
         │       │   ├──c8
         │       │   └──c9
         │       │       └──int 5
-        │       ├──VariableDeclaration []
+        │       ├──VariableDeclaration
         │       │   ├──Type
         │       │   │   └──int
         │       │   ├──d1
         │       │   └──d2
-        │       ├──VariableDeclaration []
+        │       ├──VariableDeclaration
         │       │   ├──Type
         │       │   │   └──int
         │       │   └──d3
@@ -323,20 +323,20 @@ source: tests/snapshot/snapshot_test.rs
         │       │           └──Assignment =
         │       │               ├──d1
         │       │               └──int 1
-        │       ├──VariableDeclaration []
+        │       ├──VariableDeclaration
         │       │   ├──Type
         │       │   │   └──int
         │       │   ├──unnamed
         │       │   │   └──int 2
         │       │   └──e1
-        │       ├──VariableDeclaration []
+        │       ├──VariableDeclaration
         │       │   ├──Type
         │       │   │   └──int
         │       │   └──unnamed
         │       │       └──Assignment =
         │       │           ├──e1
         │       │           └──int 5
-        │       └──VariableDeclaration []
+        │       └──VariableDeclaration
         │           ├──Type
         │           │   └──int
         │           ├──unnamed
@@ -345,7 +345,7 @@ source: tests/snapshot/snapshot_test.rs
         │           │   └──int 2
         │           └──e2
         │               └──int 3
-        └──Method assert_statements []
+        └──Method assert_statements
             ├──Type
             │   └──void
             ├──Param a

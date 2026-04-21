@@ -2,8 +2,8 @@
 source: tests/snapshot/snapshot_test.rs
 ---
 └──Compilation Unit
-    └──Class InstaceCreationExpression []
-        └──Method unqualified_class_instance_creation []
+    └──Class InstaceCreationExpression
+        └──Method unqualified_class_instance_creation
             ├──Type
             │   └──void
             └──Block
@@ -21,7 +21,7 @@ source: tests/snapshot/snapshot_test.rs
                 │       ├──Type
                 │       │   └──String
                 │       └──String "abc"
-                ├──VariableDeclaration []
+                ├──VariableDeclaration
                 │   ├──String
                 │   └──s
                 │       └── +

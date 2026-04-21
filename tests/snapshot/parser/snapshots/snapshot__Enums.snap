@@ -11,7 +11,7 @@ source: tests/snapshot/snapshot_test.rs
             │   │   │   ├──Args
             │   │   │   │   └──int 1
             │   │   │   └──Body
-            │   │   │       └──Field declaration []
+            │   │   │       └──Field declaration
             │   │   │           ├──Type
             │   │   │           │   └──int
             │   │   │           └──x
@@ -23,14 +23,14 @@ source: tests/snapshot/snapshot_test.rs
             │   │   └──D
             │   │       └──Body
             │   └──Body
-            │       ├──Constructor declaration []
+            │       ├──Constructor declaration
             │       │   ├──Param i
             │       │   │   └──Type
             │       │   │       └──int
             │       │   └──ConstructorBody
-            │       ├──Constructor declaration []
+            │       ├──Constructor declaration
             │       │   └──ConstructorBody
-            │       └──Method method []
+            │       └──Method method
             │           ├──Type
             │           │   └──void
             │           └──Block
@@ -43,7 +43,7 @@ source: tests/snapshot/snapshot_test.rs
             ├──Enum E8
             │   ├──Constants
             │   └──Body
-            │       └──Field declaration []
+            │       └──Field declaration
             │           ├──Type
             │           │   └──int
             │           └──field

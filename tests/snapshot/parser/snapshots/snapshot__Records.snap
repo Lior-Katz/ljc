@@ -11,22 +11,27 @@ source: tests/snapshot/snapshot_test.rs
         │       └──Type
         │           └──String
         └──Body
-            ├──Field declaration [Static, Final]
+            ├──Field declaration
+            │   ├──Modifiers
+            │   │   ├──static
+            │   │   └──final
             │   ├──Type
             │   │   └──int
             │   └──CONST
             │       └──int 10
-            ├──Compact Constructor declaration []
+            ├──Compact Constructor declaration
             │   └──ConstructorBody
             │       └──Epilogue
             │           └──Assignment =
             │               ├──x
             │               └──int 0
-            ├──Constructor declaration [Public]
+            ├──Constructor declaration
+            │   ├──Modifiers
+            │   │   └──public
             │   └──ConstructorBody
             │       └──ConstructorInvocation
             │           └──int 1
-            ├──Constructor declaration []
+            ├──Constructor declaration
             │   ├──Param x
             │   │   └──Type
             │   │       └──int
@@ -34,19 +39,21 @@ source: tests/snapshot/snapshot_test.rs
             │       └──ConstructorInvocation
             │           ├──x
             │           └──String "default"
-            ├──Method value []
+            ├──Method value
             │   ├──Type
             │   │   └──int
             │   └──Block
             │       └──ReturnStatement
             │           └──x
-            ├──Method f [Static]
+            ├──Method f
+            │   ├──Modifiers
+            │   │   └──static
             │   ├──Type
             │   │   └──int
             │   └──Block
             │       └──ReturnStatement
             │           └──int 1
-            ├──Class InnerClass []
+            ├──Class InnerClass
             ├──Interface InnerInterface
             ├──RecordDeclaration InnerRecord1
             │   ├──Modifiers
@@ -54,7 +61,9 @@ source: tests/snapshot/snapshot_test.rs
             │   │   └──static
             │   ├──Components
             │   └──Body
-            │       └──Constructor declaration [Public]
+            │       └──Constructor declaration
+            │           ├──Modifiers
+            │           │   └──public
             │           └──ConstructorBody
             └──RecordDeclaration InnerRecord2
                 ├──Components
