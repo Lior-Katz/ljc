@@ -1,12 +1,13 @@
 use crate::ast::{
-    AnnotationInterfaceDeclaration, ArrayCreationMode, ArrayType, AssignmentOp, BinOp, CatchClause,
-    ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration, ClassTypePart, CompilationUnit,
-    ConstructorBody, ConstructorInvocation, EnumConstant, EnumDeclaration, Expression, ForInit,
-    FormalParameter, InterfaceDeclaration, LeftHandSide, MemberAccess, MethodBody, MethodCall,
-    MethodDeclaration, Modified, Modifier, Modifiers, NormalClassDeclaration,
-    NormalInterfaceDeclaration, Program, RecordComponent, RecordDeclaration, Resource, Statement,
-    TopLevelClassOrInterfaceDeclaration, Type, TypeIdentifier, VariableDeclaration,
-    VariableDeclarator, VariableDeclaratorId, VariableInitializer,
+    Annotation, AnnotationInterfaceDeclaration, ArrayCreationMode, ArrayType, AssignmentOp, BinOp,
+    CatchClause, ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration, ClassTypePart,
+    CompilationUnit, ConstructorBody, ConstructorInvocation, ElementValue, ElementValuePair,
+    EnumConstant, EnumDeclaration, Expression, ForInit, FormalParameter, InterfaceDeclaration,
+    LeftHandSide, MemberAccess, MethodBody, MethodCall, MethodDeclaration, Modified, Modifier,
+    Modifiers, NormalClassDeclaration, NormalInterfaceDeclaration, Program, RecordComponent,
+    RecordDeclaration, Resource, Statement, TopLevelClassOrInterfaceDeclaration, Type,
+    TypeIdentifier, VariableDeclaration, VariableDeclarator, VariableDeclaratorId,
+    VariableInitializer,
 };
 use std::fmt;
 use std::fmt::{Display, Formatter};
@@ -376,6 +377,7 @@ impl AstNode for Modifier {
             Modifier::Static => writeln!(f, "{line_prefix}static"),
             Modifier::Final => writeln!(f, "{line_prefix}final"),
             Modifier::Default => writeln!(f, "{line_prefix}default"),
+            Modifier::Annotation(a) => a.fmt_tree(f, prefix, is_last),
         }
     }
 }
@@ -999,5 +1001,52 @@ impl AstNode<Modifiers> for EnumConstant {
             .push_opt("Args", &self.args)
             .push_opt("Body", &self.body);
         children.fmt_tree(f, &new_prefix, is_last)
+    }
+}
+
+impl AstNode for Annotation {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        let (line_prefix, new_prefix) = branch(prefix, is_last);
+        writeln!(f, "{line_prefix}Annotation")?;
+        let children = match self {
+            Annotation::Marker(name) => {
+                Children::new().push("Name", name)
+            }
+            Annotation::SingleElement {name, value } => {
+                Children::new().push("Name", name).push("Value", value)
+            }
+            Annotation::Normal { name, values } => {
+                Children::new().push("Name", name).push("Value", values)
+            }
+        };
+        children.fmt_tree(f, &new_prefix, true)
+    }
+}
+
+impl AstNode for ElementValue {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        match self {
+            ElementValue::ConditionalExpression(e) => e.fmt_tree(f, prefix, is_last),
+            ElementValue::ElementValueList(l) => l.fmt_tree(f, prefix, is_last),
+            ElementValue::Annotation(a) => a.fmt_tree(f, prefix, is_last),
+        }
+    }
+}
+
+impl AstNode for ElementValuePair {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        let (line_prefix, new_prefix) = branch(prefix, is_last);
+        writeln!(f, "{line_prefix}Pair")?;
+        let children = Children::new()
+            .push("Name", &self.name)
+            .push("Value", &self.value);
+        children.fmt_tree(f, &new_prefix, true)
+    }
+}
+
+impl AstNode for String {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        let (line_prefix, _) = branch(prefix, is_last);
+        writeln!(f, "{line_prefix}{self}")
     }
 }

@@ -1,20 +1,71 @@
+@ModifierTest.Marker
 public abstract class ModifierTest {
+
+    @Single(1)
     public int a;
     protected static int b;
     private final int c = 1;
 
+    @Single(5 + 10)
+    public ModifierTest(int a) {
+    }
+
+    @Normal(x = 2, y = @InnerAnno(a = {1, 2, 3}))
     public abstract void abstractMethod();
 
-    protected static void staticMethod(final int x) {
+    protected static void staticMethod(@Marker final int x) {
         final int y = x + 1;
     }
 
+    @Normal(x = 1, y = @InnerAnno(a = {1,}))
     public static final class Inner {
 
         private int x;
 
-        public final void method(final int param) {
-            final int local = param;
+        @Single(3)
+        public final void method(final int... param) {
+            @Normal(x = 4, y = @InnerAnno(a = {,}))
+            final int[] local = param;
+        }
+    }
+
+    static public @interface Marker {
+    }
+
+    @Marker
+    @interface Single {
+        int value();
+    }
+
+    @interface Normal {
+        int x();
+
+        @Marker abstract InnerAnno y();
+    }
+
+    @interface InnerAnno {
+        public int[] a();
+    }
+
+    @Marker
+    protected enum E {
+        A
+    }
+
+    @Marker
+    private static record R(int a, int... b) {
+        @Single(1)
+        R {
+        }
+    }
+
+    @Marker
+    protected interface I {
+        @Single(5)
+        static final int X = 10;
+
+        @Marker
+        default void foo() {
         }
     }
 }

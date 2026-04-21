@@ -1,8 +1,9 @@
 use crate::ast::{
-    AnnotationInterfaceDeclaration, ArgumentList, ArrayCreationMode, ArrayType, AssignmentOp,
-    BinOp, CatchClause, ClassBodyDeclaration, ClassBodyDeclarations, ClassDeclaration,
-    ClassMemberDeclaration, ClassTypePart, CompilationUnit, ConstructorBody, ConstructorInvocation,
-    EnumBody, EnumConstant, EnumDeclaration, Expression, ForInit, ForUpdate, FormalParameter,
+    Annotation, AnnotationInterfaceDeclaration, ArgumentList, ArrayCreationMode, ArrayType,
+    AssignmentOp, BinOp, CatchClause, ClassBodyDeclaration, ClassBodyDeclarations,
+    ClassDeclaration, ClassMemberDeclaration, ClassTypePart, CompilationUnit, ConstructorBody,
+    ConstructorInvocation, ElementValue, ElementValueList, ElementValuePair, EnumBody,
+    EnumConstant, EnumDeclaration, Expression, ForInit, ForUpdate, FormalParameter,
     FormalParameterList, Identifier, InterfaceDeclaration, LeftHandSide, MemberAccess, MethodBody,
     MethodCall, MethodDeclaration, Modifiable, Modified, Modifier, NormalClassDeclaration,
     NormalInterfaceDeclaration, Program, RecordBodyDeclaration, RecordComponent, RecordDeclaration,
@@ -274,6 +275,107 @@ impl Parser {
             self.accept(Token::Final).then_some(Modifier::Final),
             self.accept(Token::Default).then_some(Modifier::Default),
         )
+        .or_else(|_| self.annotation().map(Annotation::into))
+    }
+
+    /// ```text
+    /// annotation:
+    ///     @ type_name
+    ///     @ type_name ( element_value )
+    ///     @ type_name ( [element_value_pair_list] )
+    ///
+    /// element_value_pair_list:
+    ///     identifier = element_value {, identifier = element_value}
+    ///
+    /// element_v alue:
+    ///     { element_value_list }
+    ///     conditional_expression
+    ///     annotation
+    ///
+    /// element_value_list:
+    ///     [,]
+    ///     element_value {, element_value} [,]
+    /// ```
+    fn annotation(&mut self) -> Result<Annotation, ParseError> {
+        if !self.next_is(Token::At) || self.nth_is(1, Token::Interface) {
+            // to differentiate from annotation interface declaration
+            return Err(ParseError::NoProduction);
+        }
+        self.assert(Token::At)?;
+        let name = self.delimited_at_least_1(Self::identifier, |this| this.assert(Token::Dot))?;
+        if !self.accept(Token::LeftParen) {
+            return Ok(Annotation::Marker(name));
+        }
+        if self.accept(Token::RightParen) || peek!(self, 0 => Token::Id(_), 1 => Token::Assign) {
+            let values =
+                self.delimited_list(Self::element_value_pair, |this| this.assert(Token::Comma))?;
+            self.assert(Token::RightParen)?;
+            return Ok(Annotation::Normal { name, values });
+        }
+        let value = self.element_value()?;
+        self.assert(Token::RightParen)?;
+        Ok(Annotation::SingleElement { name, value })
+    }
+
+    /// ```text
+    /// element_value_pair:
+    ///     identifier = element_value
+    /// ```
+    fn element_value_pair(&mut self) -> Result<ElementValuePair, ParseError> {
+        let name = self.identifier()?;
+        self.assert(Token::Assign)?;
+        let value = self.element_value()?;
+        Ok(ElementValuePair { name, value })
+    }
+
+    /// ```text
+    /// element_value:
+    ///     conditional_expression
+    ///     element_value_array_initializer
+    ///     annotation
+    /// ```
+    fn element_value(&mut self) -> Result<ElementValue, ParseError> {
+        one_of!(
+            self.conditional_expression().map(Expression::into),
+            self.element_value_array_initializer()
+                .map(ElementValueList::into),
+            self.annotation().map(Annotation::into),
+        )
+    }
+
+    /// ```text
+    /// element_value_array_initializer:
+    ///     { element_value_list }
+    /// ```
+    fn element_value_array_initializer(&mut self) -> Result<ElementValueList, ParseError> {
+        self.assert(Token::LeftBrace)?;
+        let elements = self.element_value_list()?;
+        self.assert(Token::RightBrace)?;
+        Ok(elements)
+    }
+
+    /// ```text
+    /// element_value_list:
+    ///     [,]
+    ///     element_value {, element_value} [,]
+    /// ```
+    fn element_value_list(&mut self) -> Result<ElementValueList, ParseError> {
+        if self.accept(Token::Comma) {
+            // just a single comma
+            return Ok(vec![]);
+        }
+
+        let mut items = vec![];
+        loop {
+            if self.next_is(Token::RightBrace) {
+                break;
+            }
+            items.push(self.element_value()?);
+            if !self.accept(Token::Comma) {
+                break;
+            }
+        }
+        Ok(items)
     }
 
     fn identifier(&mut self) -> Result<Identifier, ParseError> {
@@ -1817,5 +1919,23 @@ impl From<ArrayType> for Type {
 impl Into<VariableInitializer> for Expression {
     fn into(self) -> VariableInitializer {
         VariableInitializer::Expression(self)
+    }
+}
+
+impl Into<ElementValue> for Expression {
+    fn into(self) -> ElementValue {
+        ElementValue::ConditionalExpression(self)
+    }
+}
+
+impl Into<ElementValue> for ElementValueList {
+    fn into(self) -> ElementValue {
+        ElementValue::ElementValueList(self)
+    }
+}
+
+impl Into<ElementValue> for Annotation {
+    fn into(self) -> ElementValue {
+        ElementValue::Annotation(Box::new(self))
     }
 }
