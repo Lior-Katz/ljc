@@ -111,6 +111,13 @@ source: tests/snapshot/snapshot_test.rs
         │   │       ├──lang
         │   │       └──String
         │   └──;
+        ├──Method varargs
+        │   ├──Type
+        │   │   └──void
+        │   ├──VarArg a
+        │   │   └──Type
+        │   │       └──int
+        │   └──Block
         ├──Class InnerClass
         │   ├──Modifiers
         │   │   ├──public

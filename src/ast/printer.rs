@@ -330,8 +330,9 @@ impl AstNode<Modifiers> for FormalParameter {
                 writeln!(f, "{line_prefix}Param {}", id)?;
                 t.fmt_tree(f, &new_prefix, modifiers.is_empty())?;
             }
-            FormalParameter::VariableArityParameter(_, id) => {
+            FormalParameter::VariableArityParameter(t, id) => {
                 writeln!(f, "{line_prefix}VarArg {}", id)?;
+                t.fmt_tree(f, &new_prefix, modifiers.is_empty())?;
             }
         };
         fmt_modifiers(f, &new_prefix, true, modifiers)
