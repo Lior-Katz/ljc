@@ -592,7 +592,7 @@ impl Parser {
     ///     field_declaration
     ///
     /// method_declaration:
-    ///     term identifier ( [formal_parameters] ) method_body
+    ///     term identifier ( [formal_parameters] ) [default_value] method_body
     ///
     /// constructor_declaration:
     ///     identifier ( [formal_parameters] ) constructor_body
@@ -625,11 +625,13 @@ impl Parser {
         if self.accept(Token::LeftParen) {
             let parameters = self.formal_parameters()?;
             self.assert(Token::RightParen)?;
+            let default = self.opt_default()?;
             let body = self.method_body()?;
             Ok(MethodDeclaration {
                 result,
                 identifier,
                 parameters,
+                default,
                 body,
             }
             .into())
@@ -694,6 +696,18 @@ impl Parser {
             Ok(Type::Void)
         } else {
             Err(ParseError::NoProduction)
+        }
+    }
+
+    /// ```text
+    /// default_value:
+    ///     default element_value
+    /// ```
+    fn opt_default(&mut self) -> Result<Option<ElementValue>, ParseError> {
+        if self.accept(Token::Default) {
+            Ok(Some(self.element_value()?))
+        } else {
+            Ok(None)
         }
     }
 

@@ -1,6 +1,6 @@
 use crate::ast::expressions::{ArgumentList, Expression, VariableInitializer};
 use crate::ast::identifiers::{Identifier, TypeIdentifier};
-use crate::ast::modifiers::Modified;
+use crate::ast::modifiers::{Modified, ElementValue};
 use crate::ast::statements::{BlockStatements, ConstructorInvocation};
 use crate::ast::types::Type;
 
@@ -70,7 +70,7 @@ pub struct NormalInterfaceDeclaration {
 #[derive(Debug)]
 pub struct AnnotationInterfaceDeclaration {
     pub name: TypeIdentifier,
-    pub body: Vec<Modified<ClassMemberDeclaration>>
+    pub body: Vec<Modified<ClassMemberDeclaration>>,
 }
 
 #[derive(Debug)]
@@ -117,6 +117,7 @@ pub struct MethodDeclaration {
     pub identifier: Identifier,
     pub parameters: FormalParameterList,
     pub body: MethodBody,
+    pub default: Option<ElementValue>,
 }
 
 #[derive(Debug)]

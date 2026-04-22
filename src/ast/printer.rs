@@ -209,7 +209,6 @@ impl AstNode<Modifiers> for ClassMemberDeclaration {
             ClassMemberDeclaration::Method(m) => {
                 writeln!(f, "{line_prefix}Method {}", m.identifier)?;
                 fmt_modifiers(f, &new_prefix, false, modifiers)?;
-                m.result.fmt_tree(f, &new_prefix, false)?;
                 m.fmt_tree(f, &new_prefix, true)
             }
             ClassMemberDeclaration::NestedClass(c) => {
@@ -303,12 +302,13 @@ impl AstNode<Modifiers> for AnnotationInterfaceDeclaration {
 
 impl AstNode for MethodDeclaration {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, _is_last: bool) -> fmt::Result {
-        let total = self.parameters.len() + 1;
-
-        for (i, param) in self.parameters.iter().enumerate() {
-            param.fmt_tree(f, &prefix, i == total - 1)?;
+        self.result.fmt_tree(f, &prefix, false)?;
+        self.parameters.fmt_tree(f, &prefix, false)?;
+        if let Some(default) = &self.default {
+            Children::new()
+                .push("Default", default)
+                .fmt_tree(f, &prefix, false)?;
         }
-
         self.body.fmt_tree(f, &prefix, true)
     }
 }

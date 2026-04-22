@@ -1,15 +1,15 @@
 @interface AnnotationInterfaces {
-    int x();
+    int x() default 5;
 
     String y();
 
-    int[] z();
+    int[] z() default {1, 2, };
 
     Class c();
 
     Other nested();
 
-    Other[] nestedArray();
+    Other[] nestedArray() default {@Other(3)};
 
     ;
 
