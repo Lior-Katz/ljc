@@ -996,7 +996,7 @@ impl AstNode<Modifiers> for EnumConstant {
     ) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(prefix, is_last);
         writeln!(f, "{line_prefix}{}", self.name)?;
-        fmt_modifiers(f, &new_prefix, false, modifiers)?;
+        fmt_modifiers(f, &new_prefix, self.args.is_none() && self.body.is_none(), modifiers)?;
         let children = Children::new()
             .push_opt("Args", &self.args)
             .push_opt("Body", &self.body);
@@ -1009,10 +1009,8 @@ impl AstNode for Annotation {
         let (line_prefix, new_prefix) = branch(prefix, is_last);
         writeln!(f, "{line_prefix}Annotation")?;
         let children = match self {
-            Annotation::Marker(name) => {
-                Children::new().push("Name", name)
-            }
-            Annotation::SingleElement {name, value } => {
+            Annotation::Marker(name) => Children::new().push("Name", name),
+            Annotation::SingleElement { name, value } => {
                 Children::new().push("Name", name).push("Value", value)
             }
             Annotation::Normal { name, values } => {

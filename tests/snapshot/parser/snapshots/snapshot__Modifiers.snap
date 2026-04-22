@@ -228,6 +228,12 @@ source: tests/snapshot/snapshot_test.rs
         │   │   └──protected
         │   ├──Constants
         │   │   └──A
+        │   │       └──Modifiers
+        │   │           └──Annotation
+        │   │               ├──Name
+        │   │               │   └──Single
+        │   │               └──Value
+        │   │                   └──int 1
         │   └──Body
         ├──RecordDeclaration R
         │   ├──Modifiers

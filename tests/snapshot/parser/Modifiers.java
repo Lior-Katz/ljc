@@ -49,7 +49,7 @@ public abstract class ModifierTest {
 
     @Marker
     protected enum E {
-        A
+        @Single(1) A
     }
 
     @Marker

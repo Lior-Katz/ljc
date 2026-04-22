@@ -523,9 +523,10 @@ impl Parser {
 
     /// ```text
     /// enum_constant:
-    ///     identifier [( argument_list )] [class_body]
+    ///     {annotation} identifier [( argument_list )] [class_body]
     /// ```
     fn enum_constant(&mut self) -> Result<Modified<EnumConstant>, ParseError> {
+        let annotations = self.zero_or_more(|this| this.annotation().map(Annotation::into));
         let name = self.identifier()?;
         let args = if self.accept(Token::LeftParen) {
             let args = self.argument_list()?;
@@ -539,7 +540,7 @@ impl Parser {
         } else {
             None
         };
-        Ok(EnumConstant { name, args, body }.into())
+        Ok(EnumConstant { name, args, body }.with_modifiers(annotations))
     }
 
     fn interface_declaration(&mut self) -> Result<InterfaceDeclaration, ParseError> {
