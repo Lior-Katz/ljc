@@ -1,0 +1,20 @@
+---
+source: tests/snapshot/snapshot_test.rs
+---
+└──Compilation Unit
+    ├──Class ClassHierarchy
+    │   ├──Extends
+    │   │   └──Base
+    │   └──Implements
+    │       ├──I1
+    │       └──I2
+    ├──Class Base
+    ├──Interface I1
+    ├──Interface I2
+    ├──Class OnlyExtends
+    │   └──Extends
+    │       └──Base
+    └──Class OnlyImplements
+        └──Implements
+            ├──I1
+            └──I2

@@ -1,8 +1,8 @@
 use crate::ast::expressions::{ArgumentList, VariableInitializer};
 use crate::ast::identifiers::{Identifier, TypeIdentifier};
-use crate::ast::modifiers::{Modified, ElementValue};
+use crate::ast::modifiers::{ElementValue, Modified};
 use crate::ast::statements::{BlockStatements, ConstructorInvocation};
-use crate::ast::types::Type;
+use crate::ast::types::{ClassType, ClassTypeList, Type};
 
 pub type ClassBodyDeclarations = Vec<ClassBodyDeclaration>;
 pub type FormalParameterList = Vec<Modified<FormalParameter>>;
@@ -27,6 +27,8 @@ pub enum ClassDeclaration {
 #[derive(Debug)]
 pub struct NormalClassDeclaration {
     pub identifier: TypeIdentifier,
+    pub extends: Option<ClassType>,
+    pub implements: Option<ClassTypeList>,
     pub body: ClassBodyDeclarations,
 }
 

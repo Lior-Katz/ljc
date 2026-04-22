@@ -172,7 +172,13 @@ impl AstNode<Modifiers> for NormalClassDeclaration {
         let (line_prefix, new_prefix) = branch(&prefix, is_last);
 
         writeln!(f, "{line_prefix}Class {}", self.identifier)?;
-        fmt_modifiers(f, &new_prefix, self.body.is_empty(), modifiers)?;
+        let modifiers_last =
+            self.body.is_empty() && self.extends.is_none() && self.implements.is_none();
+        fmt_modifiers(f, &new_prefix, modifiers_last, modifiers)?;
+        Children::new()
+            .push_opt("Extends", &self.extends)
+            .push_opt("Implements", &self.implements)
+            .fmt_tree(f, &new_prefix, self.body.is_empty())?;
         self.body.fmt_tree(f, &new_prefix, true)?;
         Ok(())
     }

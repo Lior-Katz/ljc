@@ -1,6 +1,7 @@
 use crate::ast::identifiers::Identifier;
 
 pub type ClassType = Vec<ClassTypePart>;
+pub type ClassTypeList = Vec<ClassType>;
 pub type TypeName = Vec<Identifier>;
 
 #[derive(Debug)]

@@ -1,15 +1,15 @@
 use crate::ast::{
     Annotation, AnnotationInterfaceDeclaration, ArgumentList, ArrayCreationMode, ArrayType,
     AssignmentOp, BinOp, CatchClause, ClassBodyDeclaration, ClassBodyDeclarations,
-    ClassDeclaration, ClassMemberDeclaration, ClassTypePart, CompilationUnit, ConstructorBody,
-    ConstructorInvocation, ElementValue, ElementValueList, ElementValuePair, EnumBody,
-    EnumConstant, EnumDeclaration, Expression, ForInit, ForUpdate, FormalParameter,
-    FormalParameterList, Identifier, InterfaceDeclaration, LeftHandSide, MemberAccess, MethodBody,
-    MethodCall, MethodDeclaration, Modifiable, Modified, Modifier, NormalClassDeclaration,
-    NormalInterfaceDeclaration, Program, RecordBodyDeclaration, RecordComponent, RecordDeclaration,
-    Resource, Statement, TopLevelClassOrInterfaceDeclaration, Type, VariableDeclaration,
-    VariableDeclarator, VariableDeclaratorId, VariableDeclaratorList, VariableInitializer,
-    VariableInitializerList,
+    ClassDeclaration, ClassMemberDeclaration, ClassType, ClassTypeList, ClassTypePart,
+    CompilationUnit, ConstructorBody, ConstructorInvocation, ElementValue, ElementValueList,
+    ElementValuePair, EnumBody, EnumConstant, EnumDeclaration, Expression, ForInit, ForUpdate,
+    FormalParameter, FormalParameterList, Identifier, InterfaceDeclaration, LeftHandSide,
+    MemberAccess, MethodBody, MethodCall, MethodDeclaration, Modifiable, Modified, Modifier,
+    NormalClassDeclaration, NormalInterfaceDeclaration, Program, RecordBodyDeclaration,
+    RecordComponent, RecordDeclaration, Resource, Statement, TopLevelClassOrInterfaceDeclaration,
+    Type, VariableDeclaration, VariableDeclarator, VariableDeclaratorId, VariableDeclaratorList,
+    VariableInitializer, VariableInitializerList,
 };
 use crate::lexer::{LexError, Token};
 use crate::lexer::{Tokens, lex_single_file};
@@ -167,6 +167,14 @@ impl Parser {
         }
     }
 
+    fn opt<T>(
+        &mut self,
+        cond: impl Fn(&mut Self) -> bool,
+        element: impl Fn(&mut Self) -> Result<T, ParseError>,
+    ) -> Result<Option<T>, ParseError> {
+        if cond(self) { Ok(Some(element(self)?)) } else { Ok(None) }
+    }
+
     fn zero_or_more<T>(&mut self, next: impl Fn(&mut Self) -> Result<T, ParseError>) -> Vec<T> {
         let mut v = Vec::new();
         loop {
@@ -260,9 +268,27 @@ impl Parser {
     fn normal_class_declaration(&mut self) -> Result<NormalClassDeclaration, ParseError> {
         self.assert(Token::Class)?;
         let identifier = self.identifier()?.try_into()?;
+        let extends = self.opt_class_extends()?;
+        let implements = self.opt_class_implements()?;
         let body = self.class_body()?;
-        let class_decl = NormalClassDeclaration { identifier, body };
+        let class_decl = NormalClassDeclaration {
+            identifier,
+            extends,
+            implements,
+            body,
+        };
         Ok(class_decl)
+    }
+
+    fn opt_class_extends(&mut self) -> Result<Option<ClassType>, ParseError> {
+        self.opt(|this| this.accept(Token::Extends), Self::class_type)
+    }
+
+    fn opt_class_implements(&mut self) -> Result<Option<ClassTypeList>, ParseError> {
+        self.opt(
+            |this| this.accept(Token::Implements),
+            |this| this.delimited_at_least_1(Self::class_type, |this| this.assert(Token::Comma)),
+        )
     }
 
     fn modifier(&mut self) -> Result<Modifier, ParseError> {
@@ -706,11 +732,7 @@ impl Parser {
     ///     default element_value
     /// ```
     fn opt_default(&mut self) -> Result<Option<ElementValue>, ParseError> {
-        if self.accept(Token::Default) {
-            Ok(Some(self.element_value()?))
-        } else {
-            Ok(None)
-        }
+        self.opt(|this| this.accept(Token::Default), Self::element_value)
     }
 
     fn method_body(&mut self) -> Result<MethodBody, ParseError> {
@@ -1822,6 +1844,14 @@ impl Parser {
     /// ```
     fn type_part(&mut self) -> Result<ClassTypePart, ParseError> {
         Ok(ClassTypePart { identifier: self.identifier()? })
+    }
+
+    fn class_type(&mut self) -> Result<ClassType, ParseError> {
+        match self.type_term() {
+            Ok(Type::Class(class_type)) => Ok(class_type),
+            Ok(_) => Err(ParseError::NoProduction),
+            Err(e) => Err(e),
+        }
     }
 
     fn throw_statement(&mut self) -> Result<Statement, ParseError> {
