@@ -7,7 +7,7 @@ use crate::ast::types::Type;
 pub type ClassBodyDeclarations = Vec<ClassBodyDeclaration>;
 pub type FormalParameterList = Vec<Modified<FormalParameter>>;
 pub type VariableDeclaratorList = Vec<VariableDeclarator>;
-pub type MethodResult = Expression;
+pub type MethodResult = Type;
 pub type RecordComponentList = Vec<Modified<RecordComponent>>;
 pub type RecordBodyDeclaration = ClassBodyDeclaration;
 

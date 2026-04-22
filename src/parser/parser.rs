@@ -623,6 +623,7 @@ impl Parser {
         }
         let identifier = self.identifier()?;
         if self.accept(Token::LeftParen) {
+            let result = result.try_into()?;
             let parameters = self.formal_parameters()?;
             self.assert(Token::RightParen)?;
             let default = self.opt_default()?;

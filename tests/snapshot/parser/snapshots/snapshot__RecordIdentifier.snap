@@ -32,10 +32,9 @@ source: tests/snapshot/snapshot_test.rs
         │       └──ReturnStatement
         │           └──record
         ├──Method method1
-        │   ├──MemberAccess
-        │   │   ├──field: Type
-        │   │   └──target:
-        │   │       └──record
+        │   ├──Type
+        │   │   ├──record
+        │   │   └──Type
         │   ├──Param record
         │   │   └──Type
         │   │       ├──record
@@ -44,13 +43,10 @@ source: tests/snapshot/snapshot_test.rs
         │       └──ReturnStatement
         │           └──null
         ├──Method method2
-        │   ├──MemberAccess
-        │   │   ├──field: Type
-        │   │   └──target:
-        │   │       └──MemberAccess
-        │   │           ├──field: record
-        │   │           └──target:
-        │   │               └──com
+        │   ├──Type
+        │   │   ├──com
+        │   │   ├──record
+        │   │   └──Type
         │   └──Block
         │       ├──VariableDeclaration
         │       │   ├──Type

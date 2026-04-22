@@ -88,7 +88,8 @@ source: tests/snapshot/snapshot_test.rs
         ├──Method foo
         │   ├──Modifiers
         │   │   └──public
-        │   ├──ClassMembers
+        │   ├──Type
+        │   │   └──ClassMembers
         │   └──Block
         ├──Method bar
         │   ├──Modifiers

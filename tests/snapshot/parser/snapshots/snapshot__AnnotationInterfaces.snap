@@ -10,7 +10,8 @@ source: tests/snapshot/snapshot_test.rs
         │       └──int 5
         │   └──;
         ├──Method y
-        │   ├──String
+        │   ├──Type
+        │   │   └──String
         │   └──;
         ├──Method z
         │   ├──Type
@@ -22,10 +23,12 @@ source: tests/snapshot/snapshot_test.rs
         │       └──int 2
         │   └──;
         ├──Method c
-        │   ├──Class
+        │   ├──Type
+        │   │   └──Class
         │   └──;
         ├──Method nested
-        │   ├──Other
+        │   ├──Type
+        │   │   └──Other
         │   └──;
         ├──Method nestedArray
         │   ├──Type
