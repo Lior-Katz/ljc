@@ -55,19 +55,15 @@ source: tests/snapshot/snapshot_test.rs
         │       │       ├──record
         │       │       └──int 1
         │       ├──VariableDeclaration
-        │       │   ├──MemberAccess
-        │       │   │   ├──field: Type
-        │       │   │   └──target:
-        │       │   │       └──record
+        │       │   ├──Type
+        │       │   │   ├──record
+        │       │   │   └──Type
         │       │   └──a
         │       ├──VariableDeclaration
-        │       │   ├──MemberAccess
-        │       │   │   ├──field: Type
-        │       │   │   └──target:
-        │       │   │       └──MemberAccess
-        │       │   │           ├──field: record
-        │       │   │           └──target:
-        │       │   │               └──com
+        │       │   ├──Type
+        │       │   │   ├──com
+        │       │   │   ├──record
+        │       │   │   └──Type
         │       │   └──b
         │       ├──VariableDeclaration
         │       │   ├──Type

@@ -22,7 +22,8 @@ source: tests/snapshot/snapshot_test.rs
                 │       │   └──String
                 │       └──String "abc"
                 ├──VariableDeclaration
-                │   ├──String
+                │   ├──Type
+                │   │   └──String
                 │   └──s
                 │       └── +
                 │           ├──NewInstance

@@ -1,4 +1,4 @@
-use crate::ast::expressions::{ArgumentList, Expression, VariableInitializer};
+use crate::ast::expressions::{ArgumentList, VariableInitializer};
 use crate::ast::identifiers::{Identifier, TypeIdentifier};
 use crate::ast::modifiers::{Modified, ElementValue};
 use crate::ast::statements::{BlockStatements, ConstructorInvocation};
@@ -141,7 +141,7 @@ pub struct ConstructorBody {
 
 #[derive(Debug)]
 pub struct VariableDeclaration {
-    pub variable_type: Expression,
+    pub variable_type: Type,
     pub declarators: VariableDeclaratorList,
 }
 

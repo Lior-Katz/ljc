@@ -220,7 +220,8 @@ source: tests/snapshot/snapshot_test.rs
                 └──ForEachStatement
                     ├──Initializer
                     │   └──VariableDeclaration
-                    │       ├──String
+                    │       ├──Type
+                    │       │   └──String
                     │       └──s
                     ├──Iterable
                     │   └──ArrayCreation

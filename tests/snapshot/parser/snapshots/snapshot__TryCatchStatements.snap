@@ -133,7 +133,8 @@ source: tests/snapshot/snapshot_test.rs
         │       └──TryStatement
         │           ├──Resources
         │           │   └──VariableDeclaration
-        │           │       ├──StringReader
+        │           │       ├──Type
+        │           │       │   └──StringReader
         │           │       └──in
         │           │           └──NewInstance
         │           │               ├──Type
@@ -161,14 +162,16 @@ source: tests/snapshot/snapshot_test.rs
         │       └──TryStatement
         │           ├──Resources
         │           │   ├──VariableDeclaration
-        │           │   │   ├──StringReader
+        │           │   │   ├──Type
+        │           │   │   │   └──StringReader
         │           │   │   └──in
         │           │   │       └──NewInstance
         │           │   │           ├──Type
         │           │   │           │   └──StringReader
         │           │   │           └──String "abc"
         │           │   └──VariableDeclaration
-        │           │       ├──StringWriter
+        │           │       ├──Type
+        │           │       │   └──StringWriter
         │           │       └──out
         │           │           └──NewInstance
         │           │               └──Type
@@ -200,7 +203,8 @@ source: tests/snapshot/snapshot_test.rs
         │       └──TryStatement
         │           ├──Resources
         │           │   └──VariableDeclaration
-        │           │       ├──StringReader
+        │           │       ├──Type
+        │           │       │   └──StringReader
         │           │       └──in
         │           │           └──NewInstance
         │           │               ├──Type
@@ -233,7 +237,8 @@ source: tests/snapshot/snapshot_test.rs
         │       └──TryStatement
         │           ├──Resources
         │           │   └──VariableDeclaration
-        │           │       ├──StringReader
+        │           │       ├──Type
+        │           │       │   └──StringReader
         │           │       └──in
         │           │           └──NewInstance
         │           │               ├──Type
@@ -250,7 +255,8 @@ source: tests/snapshot/snapshot_test.rs
         │   │   └──void
         │   └──Block
         │       ├──VariableDeclaration
-        │       │   ├──StringReader
+        │       │   ├──Type
+        │       │   │   └──StringReader
         │       │   └──in
         │       │       └──NewInstance
         │       │           ├──Type
@@ -292,7 +298,8 @@ source: tests/snapshot/snapshot_test.rs
         │   │       └──Holder
         │   └──Block
         │       ├──VariableDeclaration
-        │       │   ├──Scanner
+        │       │   ├──Type
+        │       │   │   └──Scanner
         │       │   └──in
         │       │       └──NewInstance
         │       │           ├──Type
@@ -306,7 +313,8 @@ source: tests/snapshot/snapshot_test.rs
         │           │   │   └──target:
         │           │   │       └──h
         │           │   └──VariableDeclaration
-        │           │       ├──StringWriter
+        │           │       ├──Type
+        │           │       │   └──StringWriter
         │           │       └──out
         │           │           └──NewInstance
         │           │               └──Type

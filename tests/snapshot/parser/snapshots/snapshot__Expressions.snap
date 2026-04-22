@@ -33,11 +33,13 @@ source: tests/snapshot/snapshot_test.rs
         │       │   └──c
         │       │       └──char 'A'
         │       ├──VariableDeclaration
-        │       │   ├──String
+        │       │   ├──Type
+        │       │   │   └──String
         │       │   └──s
         │       │       └──String "abc"
         │       └──VariableDeclaration
-        │           ├──Object
+        │           ├──Type
+        │           │   └──Object
         │           └──o
         │               └──null
         ├──Method unary_operators

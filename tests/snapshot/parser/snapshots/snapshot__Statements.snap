@@ -249,7 +249,8 @@ source: tests/snapshot/snapshot_test.rs
         │       │   │   └──boolean
         │       │   └──a2
         │       ├──VariableDeclaration
-        │       │   ├──String
+        │       │   ├──Type
+        │       │   │   └──String
         │       │   └──a3
         │       ├──VariableDeclaration
         │       │   ├──Type
@@ -283,7 +284,8 @@ source: tests/snapshot/snapshot_test.rs
         │       │           ├──b1
         │       │           └──b2
         │       ├──VariableDeclaration
-        │       │   ├──String
+        │       │   ├──Type
+        │       │   │   └──String
         │       │   └──b5
         │       │       └──String "hello"
         │       ├──VariableDeclaration

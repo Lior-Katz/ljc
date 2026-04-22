@@ -910,7 +910,7 @@ impl Parser {
             self.assert(Token::Semicolon)?;
             return Ok(Statement::VariableDeclaration(
                 VariableDeclaration {
-                    variable_type: expression,
+                    variable_type: expression.try_into()?,
                     declarators: var_declarations,
                 }
                 .with_modifiers(modifiers),
@@ -1615,7 +1615,7 @@ impl Parser {
         // either a basic for with local_variable_declaration init, or a for-each
         let var_declarators = self.variable_declarators_list()?;
         let var_declarations = VariableDeclaration {
-            variable_type: expression,
+            variable_type: expression.try_into()?,
             declarators: var_declarators,
         }
         .with_modifiers(modifiers);
@@ -1751,7 +1751,7 @@ impl Parser {
         if let Ok(var_declarations) = self.variable_declarators_list() {
             Ok(Resource::VariableDeclaration(
                 VariableDeclaration {
-                    variable_type: expression,
+                    variable_type: expression.try_into()?,
                     declarators: var_declarations,
                 }
                 .with_modifiers(modifiers),
