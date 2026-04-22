@@ -455,16 +455,17 @@ impl Parser {
 
     /// ```text
     /// record_component:
-    ///     type_term identifier
-    ///     type_term ... identifier
-    fn record_component(&mut self) -> Result<RecordComponent, ParseError> {
+    ///     {annotation} type_term identifier
+    ///     {annotation} type_term ... identifier
+    fn record_component(&mut self) -> Result<Modified<RecordComponent>, ParseError> {
+        let annotations = self.zero_or_more(|this| this.annotation().map(Annotation::into));
         let component_type = self.type_term()?;
         if self.accept(Token::Ellipsis) {
             let name = self.identifier()?;
-            Ok(RecordComponent::VariableArity { component_type, name })
+            Ok(RecordComponent::VariableArity { component_type, name }.with_modifiers(annotations))
         } else {
             let name = self.identifier()?;
-            Ok(RecordComponent::Normal { component_type, name })
+            Ok(RecordComponent::Normal { component_type, name }.with_modifiers(annotations))
         }
     }
 

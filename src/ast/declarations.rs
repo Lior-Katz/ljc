@@ -8,7 +8,7 @@ pub type ClassBodyDeclarations = Vec<ClassBodyDeclaration>;
 pub type FormalParameterList = Vec<Modified<FormalParameter>>;
 pub type VariableDeclaratorList = Vec<VariableDeclarator>;
 pub type MethodResult = Expression;
-pub type RecordComponentList = Vec<RecordComponent>;
+pub type RecordComponentList = Vec<Modified<RecordComponent>>;
 pub type RecordBodyDeclaration = ClassBodyDeclaration;
 
 #[derive(Debug)]

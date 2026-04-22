@@ -53,7 +53,7 @@ public abstract class ModifierTest {
     }
 
     @Marker
-    private static record R(int a, int... b) {
+    private static record R(@Marker int a, @Marker int... b) {
         @Single(1)
         R {
         }

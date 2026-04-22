@@ -943,19 +943,30 @@ impl AstNode<Modifiers> for RecordDeclaration {
     }
 }
 
-impl AstNode for RecordComponent {
+impl AstNode<Modifiers> for RecordComponent {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        self.fmt_tree_with_context(f, prefix, is_last, &vec![])
+    }
+
+    fn fmt_tree_with_context(
+        &self,
+        f: &mut Formatter<'_>,
+        prefix: &str,
+        is_last: bool,
+        modifiers: &Modifiers,
+    ) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(prefix, is_last);
         match self {
             RecordComponent::Normal { component_type, name } => {
                 writeln!(f, "{line_prefix}{name}")?;
-                component_type.fmt_tree(f, &new_prefix, true)
+                component_type.fmt_tree(f, &new_prefix, modifiers.is_empty())
             }
             RecordComponent::VariableArity { component_type, name } => {
                 writeln!(f, "{line_prefix}varargs {name}")?;
-                component_type.fmt_tree(f, &new_prefix, true)
+                component_type.fmt_tree(f, &new_prefix, modifiers.is_empty())
             }
-        }
+        }?;
+        fmt_modifiers(f, &new_prefix, true, modifiers)
     }
 }
 

@@ -244,11 +244,19 @@ source: tests/snapshot/snapshot_test.rs
         │   │   └──static
         │   ├──Components
         │   │   ├──a
-        │   │   │   └──Type
-        │   │   │       └──int
+        │   │   │   ├──Type
+        │   │   │   │   └──int
+        │   │   │   └──Modifiers
+        │   │   │       └──Annotation
+        │   │   │           └──Name
+        │   │   │               └──Marker
         │   │   └──varargs b
-        │   │       └──Type
-        │   │           └──int
+        │   │       ├──Type
+        │   │       │   └──int
+        │   │       └──Modifiers
+        │   │           └──Annotation
+        │   │               └──Name
+        │   │                   └──Marker
         │   └──Body
         │       └──Compact Constructor declaration
         │           ├──Modifiers
