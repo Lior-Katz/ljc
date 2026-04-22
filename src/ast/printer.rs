@@ -340,8 +340,18 @@ impl AstNode<Modifiers> for FormalParameter {
     }
 }
 
-impl AstNode for Type {
+impl AstNode<Modifiers> for Type {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        self.fmt_tree_with_context(f, prefix, is_last, &vec![])
+    }
+
+    fn fmt_tree_with_context(
+        &self,
+        f: &mut Formatter<'_>,
+        prefix: &str,
+        is_last: bool,
+        modifiers: &Modifiers,
+    ) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(&prefix, is_last);
 
         writeln!(f, "{line_prefix}Type")?;
@@ -360,9 +370,10 @@ impl AstNode for Type {
             Type::Class(c) => c.fmt_tree(f, &new_prefix, true),
             Type::Array(ArrayType { element_type }) => {
                 writeln!(f, "{type_line_prefix}ArrayType")?;
-                element_type.fmt_tree(f, &type_prefix, true)
+                element_type.fmt_tree(f, &type_prefix, modifiers.is_empty())
             }
-        }
+        }?;
+        fmt_modifiers(f, &type_prefix, true, modifiers)
     }
 }
 
@@ -849,11 +860,13 @@ impl AstNode for CatchClause {
         let (line_prefix, new_prefix) = branch(prefix, is_last);
         // let children = Children::new().push()
         writeln!(f, "{line_prefix}CatchClause")?;
-        let (catch_parameter_label_prefix, catch_parameter_prefix) = branch(&new_prefix, false);
+        let (catch_parameter_label_prefix, _) = branch(&new_prefix, false);
         writeln!(f, "{catch_parameter_label_prefix}{}", self.var_id)?;
 
-        writeln!(f, "{catch_parameter_label_prefix}CatchType")?;
-        self.catch_type.fmt_tree(f, &catch_parameter_prefix, true)?;
+        let (catch_type_label_prefix, catch_type_prefix) =
+            branch(&new_prefix, self.body.is_empty());
+        writeln!(f, "{catch_type_label_prefix}CatchType")?;
+        self.catch_type.fmt_tree(f, &catch_type_prefix, true)?;
         self.body.fmt_tree(f, &new_prefix, true)
     }
 }

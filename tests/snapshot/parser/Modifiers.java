@@ -1,5 +1,5 @@
-@ModifierTest.Marker
-public abstract class ModifierTest {
+@Modifiers.Marker
+public abstract class Modifiers {
 
     @Single(1)
     public int a;
@@ -7,7 +7,10 @@ public abstract class ModifierTest {
     private final int c = 1;
 
     @Single(5 + 10)
-    public ModifierTest(int a) {
+    public Modifiers(int a) {
+        try {
+        } catch (@Marker final Error | @Single(1) RuntimeException e) {
+        }
     }
 
     @Normal(x = 2, y = @InnerAnno(a = {1, 2, 3}))

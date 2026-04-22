@@ -7,7 +7,7 @@ use crate::ast::types::Type;
 pub type BlockStatements = Vec<Statement>;
 pub type ForUpdate = ExpressionList;
 pub type CatchClauseList = Vec<CatchClause>;
-pub type CatchType = Vec<Type>;
+pub type CatchType = Vec<Modified<Type>>;
 pub type Resources = Vec<Resource>;
 
 #[derive(Debug)]

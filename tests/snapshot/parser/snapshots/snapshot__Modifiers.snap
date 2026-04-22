@@ -2,11 +2,11 @@
 source: tests/snapshot/snapshot_test.rs
 ---
 └──Compilation Unit
-    └──Class ModifierTest
+    └──Class Modifiers
         ├──Modifiers
         │   ├──Annotation
         │   │   └──Name
-        │   │       ├──ModifierTest
+        │   │       ├──Modifiers
         │   │       └──Marker
         │   ├──public
         │   └──abstract
@@ -50,6 +50,28 @@ source: tests/snapshot/snapshot_test.rs
         │   │   └──Type
         │   │       └──int
         │   └──ConstructorBody
+        │       └──Epilogue
+        │           └──TryStatement
+        │               ├──TryBlock
+        │               └──ExceptionHandlers
+        │                   └──CatchClause
+        │                       ├──e
+        │                       └──CatchType
+        │                           ├──Type
+        │                           │   └──Error
+        │                           │       └──Modifiers
+        │                           │           ├──Annotation
+        │                           │           │   └──Name
+        │                           │           │       └──Marker
+        │                           │           └──final
+        │                           └──Type
+        │                               └──RuntimeException
+        │                                   └──Modifiers
+        │                                       └──Annotation
+        │                                           ├──Name
+        │                                           │   └──Single
+        │                                           └──Value
+        │                                               └──int 1
         ├──Method abstractMethod
         │   ├──Modifiers
         │   │   ├──Annotation

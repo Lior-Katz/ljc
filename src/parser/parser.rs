@@ -1747,13 +1747,22 @@ impl Parser {
 
     /// ```text
     /// catch_clause:
-    ///     catch ( {modifier} catch_type variable_declarator_id ) block
+    ///     catch ( catch_type variable_declarator_id ) block
+    ///
+    /// catch_type:
+    ///     catch_type_part {| catch_type_part}
+    ///
+    /// catch_type_part:
+    ///     {modifier} type_term
     /// ```
     fn catch_clause(&mut self) -> Result<CatchClause, ParseError> {
         self.assert(Token::Catch)?;
         self.assert(Token::LeftParen)?;
         let catch_type = self.delimited_at_least_1(
-            |this| Ok(this.type_term()?),
+            |this| {
+                let modifiers = this.zero_or_more(Self::modifier);
+                Ok(this.type_term()?.with_modifiers(modifiers))
+            },
             |this| this.assert(Token::BitwiseOr),
         )?;
         let var_id = self.variable_declarator_id()?;
