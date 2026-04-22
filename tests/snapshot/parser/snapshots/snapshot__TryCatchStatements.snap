@@ -370,7 +370,8 @@ source: tests/snapshot/snapshot_test.rs
             └──Field declaration
                 ├──Modifiers
                 │   └──final
-                ├──Scanner
+                ├──Type
+                │   └──Scanner
                 └──scanner
                     └──NewInstance
                         ├──Type

@@ -637,6 +637,7 @@ impl Parser {
             }
             .into())
         } else {
+            let result = result.try_into()?;
             let mut field_declaration = vec![VariableDeclarator {
                 name: VariableDeclaratorId::Named(identifier),
                 initializer: self

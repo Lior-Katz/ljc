@@ -8,19 +8,15 @@ source: tests/snapshot/snapshot_test.rs
         │   │   └──int
         │   └──record
         ├──Field declaration
-        │   ├──MemberAccess
-        │   │   ├──field: Type
-        │   │   └──target:
-        │   │       └──record
+        │   ├──Type
+        │   │   ├──record
+        │   │   └──Type
         │   └──field1
         ├──Field declaration
-        │   ├──MemberAccess
-        │   │   ├──field: Type
-        │   │   └──target:
-        │   │       └──MemberAccess
-        │   │           ├──field: record
-        │   │           └──target:
-        │   │               └──com
+        │   ├──Type
+        │   │   ├──com
+        │   │   ├──record
+        │   │   └──Type
         │   └──field2
         ├──Method record
         │   ├──Type

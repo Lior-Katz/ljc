@@ -41,7 +41,7 @@ pub enum ClassMemberDeclaration {
     NestedClass(ClassDeclaration),
     NestedInterface(InterfaceDeclaration),
     Field {
-        variable_type: Expression,
+        variable_type: Type,
         declarations: VariableDeclaratorList,
     },
     Constructor {
