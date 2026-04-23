@@ -3,18 +3,48 @@ source: tests/snapshot/snapshot_test.rs
 ---
 └──Compilation Unit
     ├──Class ClassHierarchy
+    │   ├──Modifiers
+    │   │   └──sealed
     │   ├──Extends
     │   │   └──Base
-    │   └──Implements
-    │       ├──I1
-    │       └──I2
+    │   ├──Implements
+    │   │   ├──I1
+    │   │   └──I2
+    │   └──Permits
+    │       ├──A
+    │       └──B
     ├──Class Base
     ├──Interface I1
     ├──Interface I2
+    ├──Class A
+    │   ├──Modifiers
+    │   │   └──final
+    │   └──Extends
+    │       └──ClassHierarchy
+    ├──Class B
+    │   ├──Modifiers
+    │   │   └──non-sealed
+    │   └──Extends
+    │       └──ClassHierarchy
     ├──Class OnlyExtends
     │   └──Extends
     │       └──Base
-    └──Class OnlyImplements
+    ├──Class OnlyImplements
+    │   └──Implements
+    │       ├──I1
+    │       └──I2
+    ├──Class OnlyPermits
+    │   ├──Modifiers
+    │   │   └──sealed
+    │   └──Permits
+    │       └──C
+    ├──Class C
+    │   ├──Modifiers
+    │   │   └──final
+    │   └──Extends
+    │       └──OnlyPermits
+    └──Class ExtendsImplements
+        ├──Extends
+        │   └──Base
         └──Implements
-            ├──I1
-            └──I2
+            └──I1

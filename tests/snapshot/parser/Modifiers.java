@@ -20,8 +20,9 @@ public abstract class Modifiers {
         final int y = x + 1;
     }
 
+    sealed
     @Normal(x = 1, y = @InnerAnno(a = {1,}))
-    public static final class Inner {
+    public static class Inner permits InnerChild {
 
         private int x;
 
@@ -30,6 +31,9 @@ public abstract class Modifiers {
             @Normal(x = 4, y = @InnerAnno(a = {,}))
             final int[] local = param;
         }
+    }
+
+    non-sealed static class InnerChild extends Inner {
     }
 
     static public @interface Marker {

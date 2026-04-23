@@ -270,11 +270,13 @@ impl Parser {
         let identifier = self.identifier()?.try_into()?;
         let extends = self.opt_class_extends()?;
         let implements = self.opt_class_implements()?;
+        let permits = self.opt_class_permits()?;
         let body = self.class_body()?;
         let class_decl = NormalClassDeclaration {
             identifier,
             extends,
             implements,
+            permits,
             body,
         };
         Ok(class_decl)
@@ -287,6 +289,19 @@ impl Parser {
     fn opt_class_implements(&mut self) -> Result<Option<ClassTypeList>, ParseError> {
         self.opt(
             |this| this.accept(Token::Implements),
+            |this| this.delimited_at_least_1(Self::class_type, |this| this.assert(Token::Comma)),
+        )
+    }
+
+    fn opt_class_permits(&mut self) -> Result<Option<ClassTypeList>, ParseError> {
+        self.opt(
+            |this| {
+                let permits = peek!(this, 0 => Token::Id(s) if s.as_str() == "permits");
+                if permits {
+                    this.next().unwrap();
+                }
+                permits
+            },
             |this| this.delimited_at_least_1(Self::class_type, |this| this.assert(Token::Comma)),
         )
     }

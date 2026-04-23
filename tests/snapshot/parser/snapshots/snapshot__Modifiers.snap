@@ -129,6 +129,7 @@ source: tests/snapshot/snapshot_test.rs
         │                   └──int 1
         ├──Class Inner
         │   ├──Modifiers
+        │   │   ├──sealed
         │   │   ├──Annotation
         │   │   │   ├──Name
         │   │   │   │   └──Normal
@@ -152,8 +153,9 @@ source: tests/snapshot/snapshot_test.rs
         │   │   │                           └──Value
         │   │   │                               └──int 1
         │   │   ├──public
-        │   │   ├──static
-        │   │   └──final
+        │   │   └──static
+        │   └──Permits
+        │       └──InnerChild
         │   ├──Field declaration
         │   │   ├──Modifiers
         │   │   │   └──private
@@ -207,6 +209,12 @@ source: tests/snapshot/snapshot_test.rs
         │               │           └──int
         │               └──local
         │                   └──param
+        ├──Class InnerChild
+        │   ├──Modifiers
+        │   │   ├──non-sealed
+        │   │   └──static
+        │   └──Extends
+        │       └──Inner
         ├──@interface Marker
         │   └──Modifiers
         │       ├──static

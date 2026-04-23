@@ -29,6 +29,7 @@ pub struct NormalClassDeclaration {
     pub identifier: TypeIdentifier,
     pub extends: Option<ClassType>,
     pub implements: Option<ClassTypeList>,
+    pub permits: Option<ClassTypeList>,
     pub body: ClassBodyDeclarations,
 }
 
