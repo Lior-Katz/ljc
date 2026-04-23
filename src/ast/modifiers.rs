@@ -20,7 +20,9 @@ pub enum Modifier {
     Static,
     Final,
     Default,
-    Annotation(Annotation)
+    Sealed,
+    NonSealed,
+    Annotation(Annotation),
 }
 
 #[derive(Debug)]

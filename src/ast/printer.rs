@@ -394,6 +394,8 @@ impl AstNode for Modifier {
             Modifier::Static => writeln!(f, "{line_prefix}static"),
             Modifier::Final => writeln!(f, "{line_prefix}final"),
             Modifier::Default => writeln!(f, "{line_prefix}default"),
+            Modifier::Sealed => writeln!(f, "{line_prefix}sealed"),
+            Modifier::NonSealed => writeln!(f, "{line_prefix}non-sealed"),
             Modifier::Annotation(a) => a.fmt_tree(f, prefix, is_last),
         }
     }

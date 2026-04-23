@@ -1,0 +1,113 @@
+---
+source: tests/snapshot/snapshot_test.rs
+---
+└──Compilation Unit
+    └──Class PermitsIdentifier
+        ├──Field declaration
+        │   ├──Type
+        │   │   ├──com
+        │   │   ├──sealed
+        │   │   └──Type
+        │   └──sealed
+        ├──Method sealed
+        │   ├──Type
+        │   │   ├──com
+        │   │   ├──sealed
+        │   │   └──Type
+        │   ├──Param sealed
+        │   │   └──Type
+        │   │       ├──com
+        │   │       ├──sealed
+        │   │       └──Type
+        │   └──Block
+        │       └──ReturnStatement
+        │           └──sealed
+        ├──Method method2
+        │   ├──Type
+        │   │   ├──com
+        │   │   ├──sealed
+        │   │   └──Type
+        │   └──Block
+        │       ├──VariableDeclaration
+        │       │   ├──Type
+        │       │   │   └──int
+        │       │   └──sealed
+        │       │       └──int 1
+        │       ├──Assignment =
+        │       │   ├──sealed
+        │       │   └── +
+        │       │       ├──sealed
+        │       │       └──int 1
+        │       ├──VariableDeclaration
+        │       │   ├──Type
+        │       │   │   ├──com
+        │       │   │   ├──sealed
+        │       │   │   └──Type
+        │       │   └──a
+        │       ├──VariableDeclaration
+        │       │   ├──Type
+        │       │   │   └──int
+        │       │   └──c
+        │       │       └── +
+        │       │           ├──MemberAccess
+        │       │           │   ├──field: value
+        │       │           │   └──target:
+        │       │           │       └──Type
+        │       │           └──MemberAccess
+        │       │               ├──field: value
+        │       │               └──target:
+        │       │                   └──MemberAccess
+        │       │                       ├──field: Type
+        │       │                       └──target:
+        │       │                           └──MemberAccess
+        │       │                               ├──field: sealed
+        │       │                               └──target:
+        │       │                                   └──com
+        │       └──ReturnStatement
+        │           └──NewInstance
+        │               └──Type
+        │                   ├──com
+        │                   ├──sealed
+        │                   └──Type
+        ├──Enum per
+        │   ├──Constants
+        │   │   └──sealed
+        │   └──Body
+        ├──Enum E2
+        │   ├──Constants
+        │   │   └──sealed
+        │   │       └──Args
+        │   │           └──int 1
+        │   └──Body
+        │       └──Constructor declaration
+        │           ├──Param sealed
+        │           │   └──Type
+        │           │       └──int
+        │           └──ConstructorBody
+        ├──Enum E3
+        │   ├──Constants
+        │   │   └──sealed
+        │   │       └──Body
+        │   │           └──Field declaration
+        │   │               ├──Type
+        │   │               │   └──int
+        │   │               └──sealed
+        │   │                   └──int 1
+        │   └──Body
+        └──Enum E4
+            ├──Constants
+            │   └──sealed
+            │       ├──Args
+            │       │   └──int 2
+            │       └──Body
+            │           └──Field declaration
+            │               ├──Type
+            │               │   └──int
+            │               └──sealed
+            │                   └──int 2
+            └──Body
+                └──Constructor declaration
+                    ├──Param sealed
+                    │   └──Type
+                    │       └──int
+                    └──ConstructorBody

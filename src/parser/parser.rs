@@ -300,9 +300,65 @@ impl Parser {
             self.accept(Token::Static).then_some(Modifier::Static),
             self.accept(Token::Final).then_some(Modifier::Final),
             self.accept(Token::Default).then_some(Modifier::Default),
+            self.is_sealed_class_start().then(|| {
+                self.next().unwrap();
+                Modifier::Sealed
+            }),
+            self.is_non_sealed_class_start().then(|| {
+                self.next().unwrap();
+                self.next().unwrap();
+                self.next().unwrap();
+                Modifier::NonSealed
+            })
         )
         .or_else(|_| self.annotation().map(Annotation::into))
     }
+
+    fn is_sealed_modifier(&mut self, start: usize) -> bool {
+        peek!(self, start => Token::Id(s) if s.as_str() == "sealed")
+    }
+
+    fn is_non_sealed_modifier(&mut self, start: usize) -> bool {
+        peek!(self,
+                start => Token::Id(s) if s.as_str() == "non",
+                start + 1 => Token::Minus,
+                start + 2 => Token::Id(s) if s.as_str() == "sealed")
+    }
+
+    fn is_sealed_class_start(&mut self) -> bool {
+        let sealed_modifier = self.is_sealed_modifier(0);
+        let next_token_start = 1;
+        sealed_modifier && self.is_after_sealed_or_non_sealed(next_token_start)
+    }
+
+    fn is_non_sealed_class_start(&mut self) -> bool {
+        let non_sealed_modifier = self.is_non_sealed_modifier(0);
+        let next_token_start = 3;
+        non_sealed_modifier && self.is_after_sealed_or_non_sealed(next_token_start)
+    }
+
+    fn is_after_sealed_or_non_sealed(&mut self, next_token_start: usize) -> bool {
+        let keyword_class_or_interface_modifier = peek!(self,
+            next_token_start => Token::Public
+            | Token::Protected
+            | Token::Private
+            | Token::Abstract
+            | Token::Static
+            | Token::Final
+            | Token::Strictfp
+            | Token::At);
+        let sealed_modifier = self.is_sealed_modifier(next_token_start);
+        let non_sealed_modifier = self.is_non_sealed_modifier(next_token_start);
+        let class_or_enum_or_record_or_interface = self.nth_is(next_token_start, Token::Class)
+            || self.nth_is(next_token_start, Token::Enum)
+            || peek!(self, next_token_start => Token::Id(s) if s.as_str() == "record")
+            || self.nth_is(next_token_start, Token::Interface);
+        keyword_class_or_interface_modifier
+            || sealed_modifier
+            || non_sealed_modifier
+            || class_or_enum_or_record_or_interface
+    }
+
 
     /// ```text
     /// annotation:
