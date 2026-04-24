@@ -2,6 +2,10 @@ class ClassMembers {
     private int a;
     protected static int b = 1, c;
 
+    {
+        a = 1;
+        b = 2;
+    }
 
     ClassMembers() {}
     public ClassMembers(int x) {

@@ -197,6 +197,11 @@ impl AstNode for ClassBodyDeclaration {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         match self {
             ClassBodyDeclaration::ClassMember(m) => m.fmt_tree(f, prefix, is_last),
+            ClassBodyDeclaration::InstanceInitializer(statements) => {
+                let (line_prefix, new_prefix) = branch(&prefix, is_last);
+                writeln!(f, "{line_prefix}Instance Initializer")?;
+                statements.fmt_tree(f, &new_prefix, true)
+            }
         }
     }
 }

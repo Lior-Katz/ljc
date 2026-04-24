@@ -18,6 +18,13 @@ source: tests/snapshot/snapshot_test.rs
         │   ├──b
         │   │   └──int 1
         │   └──c
+        ├──Instance Initializer
+        │   ├──Assignment =
+        │   │   ├──a
+        │   │   └──int 1
+        │   └──Assignment =
+        │       ├──b
+        │       └──int 2
         ├──Constructor declaration
         │   └──ConstructorBody
         ├──Constructor declaration

@@ -1,6 +1,6 @@
 use crate::ast::{
     Annotation, AnnotationInterfaceDeclaration, ArgumentList, ArrayCreationMode, ArrayType,
-    AssignmentOp, BinOp, CatchClause, ClassBodyDeclaration, ClassBodyDeclarations,
+    AssignmentOp, BinOp, BlockStatements, CatchClause, ClassBodyDeclaration, ClassBodyDeclarations,
     ClassDeclaration, ClassMemberDeclaration, ClassType, ClassTypeList, ClassTypePart,
     CompilationUnit, ConstructorBody, ConstructorInvocation, ElementValue, ElementValueList,
     ElementValuePair, EnumBody, EnumConstant, EnumDeclaration, Expression, ForInit, ForUpdate,
@@ -492,7 +492,15 @@ impl Parser {
     }
 
     fn class_body_declaration(&mut self) -> Result<ClassBodyDeclaration, ParseError> {
-        self.class_member_declaration().map(Modified::into)
+        one_of!(
+            self.class_member_declaration().map(Modified::into),
+            self.instance_initializer()
+                .map(|v| ClassBodyDeclaration::InstanceInitializer(v)),
+        )
+    }
+
+    fn instance_initializer(&mut self) -> Result<BlockStatements, ParseError> {
+        self.block()
     }
 
     /// class_member_declaration is defined as:
@@ -846,7 +854,7 @@ impl Parser {
     /// block_statements:
     ///     {block_statement}
     /// ```
-    fn block(&mut self) -> Result<Vec<Statement>, ParseError> {
+    fn block(&mut self) -> Result<BlockStatements, ParseError> {
         self.assert(Token::LeftBrace)?;
         let block_statements = self.zero_or_more(Self::block_statement);
         self.assert(Token::RightBrace)?;
