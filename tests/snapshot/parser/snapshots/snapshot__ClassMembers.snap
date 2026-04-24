@@ -25,6 +25,13 @@ source: tests/snapshot/snapshot_test.rs
         │   └──Assignment =
         │       ├──b
         │       └──int 2
+        ├──Static Initializer
+        │   ├──Assignment =
+        │   │   ├──b
+        │   │   └──int 3
+        │   └──Assignment =
+        │       ├──c
+        │       └──int 4
         ├──Constructor declaration
         │   └──ConstructorBody
         ├──Constructor declaration

@@ -202,6 +202,11 @@ impl AstNode for ClassBodyDeclaration {
                 writeln!(f, "{line_prefix}Instance Initializer")?;
                 statements.fmt_tree(f, &new_prefix, true)
             }
+            ClassBodyDeclaration::StaticInitializer(statements) => {
+                let (line_prefix, new_prefix) = branch(&prefix, is_last);
+                writeln!(f, "{line_prefix}Static Initializer")?;
+                statements.fmt_tree(f, &new_prefix, true)
+            }
         }
     }
 }

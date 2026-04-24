@@ -7,6 +7,11 @@ class ClassMembers {
         b = 2;
     }
 
+    static {
+        b = 3;
+        c = 4;
+    }
+
     ClassMembers() {}
     public ClassMembers(int x) {
     }

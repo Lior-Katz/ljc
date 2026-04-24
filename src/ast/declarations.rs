@@ -37,6 +37,7 @@ pub struct NormalClassDeclaration {
 pub enum ClassBodyDeclaration {
     ClassMember(Modified<ClassMemberDeclaration>),
     InstanceInitializer(BlockStatements),
+    StaticInitializer(BlockStatements),
 }
 
 #[derive(Debug)]

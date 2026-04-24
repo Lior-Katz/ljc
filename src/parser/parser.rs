@@ -312,7 +312,8 @@ impl Parser {
             self.accept(Token::Private).then_some(Modifier::Private),
             self.accept(Token::Protected).then_some(Modifier::Protected),
             self.accept(Token::Abstract).then_some(Modifier::Abstract),
-            self.accept(Token::Static).then_some(Modifier::Static),
+            (!self.nth_is(1, Token::LeftBrace) && self.accept(Token::Static))
+                .then_some(Modifier::Static),
             self.accept(Token::Final).then_some(Modifier::Final),
             self.accept(Token::Default).then_some(Modifier::Default),
             self.accept(Token::Strictfp).then_some(Modifier::Strictfp),
@@ -496,11 +497,26 @@ impl Parser {
             self.class_member_declaration().map(Modified::into),
             self.instance_initializer()
                 .map(|v| ClassBodyDeclaration::InstanceInitializer(v)),
+            self.static_initializer()
+                .map(|v| ClassBodyDeclaration::StaticInitializer(v)),
         )
     }
 
     fn instance_initializer(&mut self) -> Result<BlockStatements, ParseError> {
         self.block()
+    }
+
+    fn static_initializer(&mut self) -> Result<BlockStatements, ParseError> {
+        if !peek!(
+            self,
+            0 => Token::Static,
+            1 => Token::LeftBrace,
+        ) {
+            Err(ParseError::NoProduction)
+        } else {
+            self.assert(Token::Static)?;
+            self.block()
+        }
     }
 
     /// class_member_declaration is defined as:
