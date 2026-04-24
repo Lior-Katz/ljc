@@ -407,6 +407,7 @@ impl AstNode for Modifier {
             Modifier::Native => writeln!(f, "{line_prefix}native"),
             Modifier::Transient => writeln!(f, "{line_prefix}transient"),
             Modifier::Volatile => writeln!(f, "{line_prefix}volatile"),
+            Modifier::Synchronized => writeln!(f, "{line_prefix}synchronized"),
             Modifier::Annotation(a) => a.fmt_tree(f, prefix, is_last),
         }
     }

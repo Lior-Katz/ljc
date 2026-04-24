@@ -179,7 +179,8 @@ source: tests/snapshot/snapshot_test.rs
         │       │   │   └──Value
         │       │   │       └──int 3
         │       │   ├──public
-        │       │   └──final
+        │       │   ├──final
+        │       │   └──synchronized
         │       ├──Type
         │       │   └──void
         │       ├──VarArg param

@@ -29,7 +29,7 @@ public abstract class Modifiers {
         private int x;
 
         @Single(3)
-        public final void method(final int... param) {
+        public final synchronized void method(final int... param) {
             @Normal(x = 4, y = @InnerAnno(a = {,}))
             final int[] local = param;
         }

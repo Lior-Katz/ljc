@@ -26,6 +26,7 @@ pub enum Modifier {
     Native,
     Transient,
     Volatile,
+    Synchronized,
     Annotation(Annotation),
 }
 
