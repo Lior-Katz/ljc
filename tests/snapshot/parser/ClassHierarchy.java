@@ -30,3 +30,6 @@ final class C extends OnlyPermits {
 
 class ExtendsImplements extends Base implements I1 {
 }
+
+record R() implements I1, I2 {
+}

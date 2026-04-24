@@ -80,6 +80,7 @@ pub struct AnnotationInterfaceDeclaration {
 pub struct RecordDeclaration {
     pub name: TypeIdentifier,
     pub components: RecordComponentList,
+    pub implements: Option<ClassTypeList>,
     pub body: Vec<RecordBodyDeclaration>,
 }
 

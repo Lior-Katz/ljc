@@ -43,8 +43,14 @@ source: tests/snapshot/snapshot_test.rs
     │   │   └──final
     │   └──Extends
     │       └──OnlyPermits
-    └──Class ExtendsImplements
-        ├──Extends
-        │   └──Base
-        └──Implements
-            └──I1
+    ├──Class ExtendsImplements
+    │   ├──Extends
+    │   │   └──Base
+    │   └──Implements
+    │       └──I1
+    └──RecordDeclaration R
+        ├──Implements
+        │   ├──I1
+        │   └──I2
+        ├──Components
+        └──Body

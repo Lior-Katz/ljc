@@ -961,6 +961,7 @@ impl AstNode<Modifiers> for RecordDeclaration {
         writeln!(f, "{line_prefix}RecordDeclaration {}", self.name)?;
         fmt_modifiers(f, &new_prefix, false, modifiers)?;
         let children = Children::new()
+            .push_opt("Implements", &self.implements)
             .push("Components", &self.components)
             .push("Body", &self.body);
         children.fmt_tree(f, &new_prefix, true)

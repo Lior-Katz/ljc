@@ -374,7 +374,6 @@ impl Parser {
             || class_or_enum_or_record_or_interface
     }
 
-
     /// ```text
     /// annotation:
     ///     @ type_name
@@ -546,8 +545,14 @@ impl Parser {
         let components =
             self.delimited_list(Self::record_component, |this| this.assert(Token::Comma))?;
         self.assert(Token::RightParen)?;
+        let implements = self.opt_class_implements()?;
         let body = self.record_body()?;
-        Ok(RecordDeclaration { name, components, body })
+        Ok(RecordDeclaration {
+            name,
+            components,
+            implements,
+            body,
+        })
     }
 
     /// ```text
