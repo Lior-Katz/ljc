@@ -288,6 +288,7 @@ impl AstNode<Modifiers> for NormalInterfaceDeclaration {
         fmt_modifiers(f, &new_prefix, self.body.is_empty(), modifiers)?;
         Children::new()
             .push_opt("Extends", &self.extends)
+            .push_opt("Permits", &self.permits)
             .fmt_tree(f, &new_prefix, true)?;
         self.body.fmt_tree(f, &new_prefix, true)
     }

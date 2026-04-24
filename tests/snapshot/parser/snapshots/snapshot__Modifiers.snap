@@ -273,6 +273,8 @@ source: tests/snapshot/snapshot_test.rs
         │   │   │       └──Marker
         │   │   ├──private
         │   │   └──static
+        │   ├──Implements
+        │   │   └──I
         │   ├──Components
         │   │   ├──a
         │   │   │   ├──Type
@@ -302,7 +304,10 @@ source: tests/snapshot/snapshot_test.rs
             │   ├──Annotation
             │   │   └──Name
             │   │       └──Marker
-            │   └──protected
+            │   ├──protected
+            │   └──sealed
+            └──Permits
+                └──R
             ├──Field declaration
             │   ├──Modifiers
             │   │   ├──Annotation

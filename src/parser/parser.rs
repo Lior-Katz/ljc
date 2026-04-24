@@ -660,8 +660,14 @@ impl Parser {
         self.assert(Token::Interface)?;
         let identifier = self.identifier()?.try_into()?;
         let extends = self.opt_interface_extends()?;
+        let permits = self.opt_class_permits()?;
         let body = self.interface_body()?;
-        Ok(NormalInterfaceDeclaration { identifier, extends, body })
+        Ok(NormalInterfaceDeclaration {
+            identifier,
+            extends,
+            permits,
+            body,
+        })
     }
 
     fn opt_interface_extends(&mut self) -> Result<Option<ClassTypeList>, ParseError> {

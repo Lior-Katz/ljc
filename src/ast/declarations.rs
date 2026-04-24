@@ -68,6 +68,7 @@ pub enum InterfaceDeclaration {
 pub struct NormalInterfaceDeclaration {
     pub identifier: TypeIdentifier,
     pub extends: Option<ClassTypeList>,
+    pub permits: Option<ClassTypeList>,
     pub body: Vec<Modified<ClassMemberDeclaration>>,
 }
 

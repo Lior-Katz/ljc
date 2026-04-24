@@ -60,14 +60,14 @@ public abstract class Modifiers {
     }
 
     @Marker
-    private static record R(@Marker int a, @Marker int... b) {
+    private static record R(@Marker int a, @Marker int... b) implements I {
         @Single(1)
         R {
         }
     }
 
     @Marker
-    protected interface I {
+    protected sealed interface I permits R {
         @Single(5)
         static final int X = 10;
 
