@@ -16,6 +16,10 @@ source: tests/snapshot/snapshot_test.rs
     ├──Class Base
     ├──Interface I1
     ├──Interface I2
+    ├──Interface I3
+    │   └──Extends
+    │       ├──I1
+    │       └──I2
     ├──Class A
     │   ├──Modifiers
     │   │   └──final

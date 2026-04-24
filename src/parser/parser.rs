@@ -659,8 +659,16 @@ impl Parser {
     fn normal_interface_declaration(&mut self) -> Result<NormalInterfaceDeclaration, ParseError> {
         self.assert(Token::Interface)?;
         let identifier = self.identifier()?.try_into()?;
+        let extends = self.opt_interface_extends()?;
         let body = self.interface_body()?;
-        Ok(NormalInterfaceDeclaration { identifier, body })
+        Ok(NormalInterfaceDeclaration { identifier, extends, body })
+    }
+
+    fn opt_interface_extends(&mut self) -> Result<Option<ClassTypeList>, ParseError> {
+        self.opt(
+            |this| this.accept(Token::Extends),
+            |this| this.delimited_at_least_1(Self::class_type, |this| this.assert(Token::Comma)),
+        )
     }
 
     fn interface_body(&mut self) -> Result<Vec<Modified<ClassMemberDeclaration>>, ParseError> {

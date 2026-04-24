@@ -286,6 +286,9 @@ impl AstNode<Modifiers> for NormalInterfaceDeclaration {
         writeln!(f, "{line_prefix}Interface {}", self.identifier)?;
 
         fmt_modifiers(f, &new_prefix, self.body.is_empty(), modifiers)?;
+        Children::new()
+            .push_opt("Extends", &self.extends)
+            .fmt_tree(f, &new_prefix, true)?;
         self.body.fmt_tree(f, &new_prefix, true)
     }
 }
