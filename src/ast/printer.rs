@@ -1012,6 +1012,7 @@ impl AstNode<Modifiers> for EnumDeclaration {
 
         fmt_modifiers(f, &new_prefix, false, modifiers)?;
         let children = Children::new()
+            .push_opt("Implements", &self.implements)
             .push("Constants", &self.body.constants)
             .push("Body", &self.body.body_declarations);
         children.fmt_tree(f, &new_prefix, true)

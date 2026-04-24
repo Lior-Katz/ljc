@@ -48,9 +48,15 @@ source: tests/snapshot/snapshot_test.rs
     │   │   └──Base
     │   └──Implements
     │       └──I1
-    └──RecordDeclaration R
+    ├──RecordDeclaration R
+    │   ├──Implements
+    │   │   ├──I1
+    │   │   └──I2
+    │   ├──Components
+    │   └──Body
+    └──Enum E
         ├──Implements
         │   ├──I1
         │   └──I2
-        ├──Components
+        ├──Constants
         └──Body

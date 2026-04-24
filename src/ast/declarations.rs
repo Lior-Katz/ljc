@@ -99,6 +99,7 @@ pub enum RecordComponent {
 #[derive(Debug)]
 pub struct EnumDeclaration {
     pub name: TypeIdentifier,
+    pub implements: Option<ClassTypeList>,
     pub body: EnumBody,
 }
 

@@ -578,8 +578,9 @@ impl Parser {
     fn enum_declaration(&mut self) -> Result<EnumDeclaration, ParseError> {
         self.assert(Token::Enum)?;
         let name = self.identifier()?.try_into()?;
+        let implements = self.opt_class_implements()?;
         let body = self.enum_body()?;
-        Ok(EnumDeclaration { name, body })
+        Ok(EnumDeclaration { name, implements, body })
     }
 
     /// ```text

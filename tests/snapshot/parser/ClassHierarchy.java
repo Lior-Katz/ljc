@@ -33,3 +33,6 @@ class ExtendsImplements extends Base implements I1 {
 
 record R() implements I1, I2 {
 }
+
+enum E implements I1, I2 {
+}
