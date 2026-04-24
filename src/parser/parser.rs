@@ -315,6 +315,10 @@ impl Parser {
             self.accept(Token::Static).then_some(Modifier::Static),
             self.accept(Token::Final).then_some(Modifier::Final),
             self.accept(Token::Default).then_some(Modifier::Default),
+            self.accept(Token::Strictfp).then_some(Modifier::Strictfp),
+            self.accept(Token::Native).then_some(Modifier::Native),
+            self.accept(Token::Transient).then_some(Modifier::Transient),
+            self.accept(Token::Volatile).then_some(Modifier::Volatile),
             self.is_sealed_class_start().then(|| {
                 self.next().unwrap();
                 Modifier::Sealed

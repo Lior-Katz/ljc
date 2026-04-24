@@ -17,14 +17,16 @@ source: tests/snapshot/snapshot_test.rs
         │   │   │   │   └──Single
         │   │   │   └──Value
         │   │   │       └──int 1
-        │   │   └──public
+        │   │   ├──public
+        │   │   └──volatile
         │   ├──Type
         │   │   └──int
         │   └──a
         ├──Field declaration
         │   ├──Modifiers
         │   │   ├──protected
-        │   │   └──static
+        │   │   ├──static
+        │   │   └──transient
         │   ├──Type
         │   │   └──int
         │   └──b
@@ -106,7 +108,8 @@ source: tests/snapshot/snapshot_test.rs
         ├──Method staticMethod
         │   ├──Modifiers
         │   │   ├──protected
-        │   │   └──static
+        │   │   ├──static
+        │   │   └──strictfp
         │   ├──Type
         │   │   └──void
         │   ├──Param x
@@ -127,6 +130,12 @@ source: tests/snapshot/snapshot_test.rs
         │               └── +
         │                   ├──x
         │                   └──int 1
+        ├──Method nativeMethod
+        │   ├──Modifiers
+        │   │   └──native
+        │   ├──Type
+        │   │   └──void
+        │   └──;
         ├──Class Inner
         │   ├──Modifiers
         │   │   ├──sealed
@@ -212,7 +221,8 @@ source: tests/snapshot/snapshot_test.rs
         ├──Class InnerChild
         │   ├──Modifiers
         │   │   ├──non-sealed
-        │   │   └──static
+        │   │   ├──static
+        │   │   └──strictfp
         │   └──Extends
         │       └──Inner
         ├──@interface Marker
@@ -326,7 +336,8 @@ source: tests/snapshot/snapshot_test.rs
                 │   ├──Annotation
                 │   │   └──Name
                 │   │       └──Marker
-                │   └──default
+                │   ├──default
+                │   └──strictfp
                 ├──Type
                 │   └──void
                 └──Block

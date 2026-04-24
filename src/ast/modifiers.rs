@@ -22,6 +22,10 @@ pub enum Modifier {
     Default,
     Sealed,
     NonSealed,
+    Strictfp,
+    Native,
+    Transient,
+    Volatile,
     Annotation(Annotation),
 }
 

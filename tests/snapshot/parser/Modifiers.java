@@ -2,8 +2,8 @@
 public abstract class Modifiers {
 
     @Single(1)
-    public int a;
-    protected static int b;
+    public volatile int a;
+    protected static transient int b;
     private final int c = 1;
 
     @Single(5 + 10)
@@ -16,9 +16,11 @@ public abstract class Modifiers {
     @Normal(x = 2, y = @InnerAnno(a = {1, 2, 3}))
     public abstract void abstractMethod();
 
-    protected static void staticMethod(@Marker final int x) {
+    protected static strictfp void staticMethod(@Marker final int x) {
         final int y = x + 1;
     }
+
+    native void nativeMethod();
 
     sealed
     @Normal(x = 1, y = @InnerAnno(a = {1,}))
@@ -33,7 +35,7 @@ public abstract class Modifiers {
         }
     }
 
-    non-sealed static class InnerChild extends Inner {
+    non-sealed static strictfp class InnerChild extends Inner {
     }
 
     static public @interface Marker {
@@ -72,7 +74,7 @@ public abstract class Modifiers {
         static final int X = 10;
 
         @Marker
-        default void foo() {
+        default strictfp void foo() {
         }
     }
 }

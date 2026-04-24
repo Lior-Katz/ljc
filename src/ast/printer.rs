@@ -403,6 +403,10 @@ impl AstNode for Modifier {
             Modifier::Default => writeln!(f, "{line_prefix}default"),
             Modifier::Sealed => writeln!(f, "{line_prefix}sealed"),
             Modifier::NonSealed => writeln!(f, "{line_prefix}non-sealed"),
+            Modifier::Strictfp => writeln!(f, "{line_prefix}strictfp"),
+            Modifier::Native => writeln!(f, "{line_prefix}native"),
+            Modifier::Transient => writeln!(f, "{line_prefix}transient"),
+            Modifier::Volatile => writeln!(f, "{line_prefix}volatile"),
             Modifier::Annotation(a) => a.fmt_tree(f, prefix, is_last),
         }
     }
