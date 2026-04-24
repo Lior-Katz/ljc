@@ -347,43 +347,58 @@ source: tests/snapshot/snapshot_test.rs
         │           │   └──int 2
         │           └──e2
         │               └──int 3
-        └──Method assert_statements
+        ├──Method assert_statements
+        │   ├──Type
+        │   │   └──void
+        │   ├──Param a
+        │   │   └──Type
+        │   │       └──int
+        │   ├──Param b
+        │   │   └──Type
+        │   │       └──int
+        │   └──Block
+        │       ├──AssertStatement
+        │       │   └──Condition
+        │       │       └── >
+        │       │           ├──a
+        │       │           └──int 0
+        │       ├──AssertStatement
+        │       │   ├──Condition
+        │       │   │   └── >
+        │       │   │       ├──b
+        │       │   │       └──int 0
+        │       │   └──DetailMessage
+        │       │       └──String "b must be positive"
+        │       ├──AssertStatement
+        │       │   └──Condition
+        │       │       └── >
+        │       │           ├── +
+        │       │           │   ├──a
+        │       │           │   └──b
+        │       │           └──int 0
+        │       └──AssertStatement
+        │           ├──Condition
+        │           │   └── !=
+        │           │       ├──a
+        │           │       └──b
+        │           └──DetailMessage
+        │               └── +
+        │                   ├── +
+        │                   │   ├──a
+        │                   │   └──String " should not equal "
+        │                   └──b
+        └──Method synchronizedStatements
             ├──Type
             │   └──void
-            ├──Param a
-            │   └──Type
-            │       └──int
-            ├──Param b
-            │   └──Type
-            │       └──int
             └──Block
-                ├──AssertStatement
-                │   └──Condition
-                │       └── >
-                │           ├──a
-                │           └──int 0
-                ├──AssertStatement
-                │   ├──Condition
-                │   │   └── >
-                │   │       ├──b
-                │   │       └──int 0
-                │   └──DetailMessage
-                │       └──String "b must be positive"
-                ├──AssertStatement
-                │   └──Condition
-                │       └── >
-                │           ├── +
-                │           │   ├──a
-                │           │   └──b
-                │           └──int 0
-                └──AssertStatement
-                    ├──Condition
-                    │   └── !=
-                    │       ├──a
-                    │       └──b
-                    └──DetailMessage
-                        └── +
-                            ├── +
-                            │   ├──a
-                            │   └──String " should not equal "
-                            └──b
+                └──SynchronizedStatement
+                    ├──Lock
+                    │   └──NewInstance
+                    │       └──Type
+                    │           └──Object
+                    └──Body
+                        └──VariableDeclaration
+                            ├──Type
+                            │   └──int
+                            └──y
+                                └──int 2

@@ -595,6 +595,13 @@ impl AstNode for Statement {
                 writeln!(f, "{line_prefix}ThrowStatement")?;
                 e.fmt_tree(f, &new_prefix, true)
             }
+            Statement::Synchronized { lock, body } => {
+                writeln!(f, "{line_prefix}SynchronizedStatement")?;
+                Children::new()
+                    .push("Lock", lock)
+                    .push("Body", body)
+                    .fmt_tree(f, &new_prefix, true)
+            }
         }
     }
 }

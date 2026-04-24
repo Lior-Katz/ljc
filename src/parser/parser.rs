@@ -992,6 +992,7 @@ impl Parser {
             self.return_statement(),
             self.try_statement(),
             self.throw_statement(),
+            self.synchronized_statement(),
         )
     }
 
@@ -1980,6 +1981,28 @@ impl Parser {
         let expression = self.expression()?;
         self.assert(Token::Semicolon)?;
         Ok(Statement::Throw(expression))
+    }
+
+    /// ```text
+    /// synchronized_statement:
+    ///     synchronized ( expression ) block:
+    ///
+    /// ```
+    fn synchronized_statement(&mut self) -> Result<Statement, ParseError> {
+        if !peek!(
+            self,
+            0 => Token::Synchronized,
+            1 => Token::LeftParen,
+        ) {
+            Err(ParseError::NoProduction)
+        } else {
+            self.assert(Token::Synchronized)?;
+            self.assert(Token::LeftParen)?;
+            let lock = self.expression()?;
+            self.assert(Token::RightParen)?;
+            let body = self.block()?;
+            Ok(Statement::Synchronized { lock, body })
+        }
     }
 }
 

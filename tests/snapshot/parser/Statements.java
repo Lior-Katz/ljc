@@ -183,4 +183,10 @@ class Statements {
         assert (a + b) > 0;
         assert a != b : a + " should not equal " + b;
     }
+
+    void synchronizedStatements() {
+        synchronized (new Object()) {
+            int y = 2;
+        }
+    }
 }

@@ -58,6 +58,10 @@ pub enum Statement {
         finally_block: Option<BlockStatements>,
     },
     Throw(Expression),
+    Synchronized {
+        lock: Expression,
+        body: BlockStatements,
+    },
 }
 
 #[derive(Debug)]
