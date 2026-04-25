@@ -20,4 +20,8 @@ pub enum SwitchBlockMember {
 #[derive(Debug)]
 pub enum SwitchLabel {
     Constants(Multiple<CaseConstant>),
+    Null {
+        default: bool,
+    },
+    Default,
 }

@@ -2062,17 +2062,31 @@ impl Parser {
     /// ```text
     /// switch_label:
     ///     switch_case_label
+    ///     default
     /// ```
     fn switch_label(&mut self) -> Result<SwitchLabel, ParseError> {
-        one_of!(self.switch_case_label())
+        one_of!(
+            self.switch_case_label(),
+            self.assert(Token::Default).map(|_| SwitchLabel::Default),
+        )
     }
 
     /// ```text
     /// switch_case_label:
     ///     case conditional_expression {, conditional_expression}
+    ///     case null [, default]
     /// ```
     fn switch_case_label(&mut self) -> Result<SwitchLabel, ParseError> {
         self.assert(Token::Case)?;
+        if self.accept(Token::NullLiteral) {
+            let default = if self.accept(Token::Comma) {
+                self.assert(Token::Default)?;
+                true
+            } else {
+                false
+            };
+            return Ok(SwitchLabel::Null { default });
+        }
         let labels = self
             .delimited_at_least_1(Self::conditional_expression, |this| this.assert(Token::Comma))?;
         Ok(SwitchLabel::Constants(labels))

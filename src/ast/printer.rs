@@ -1150,6 +1150,10 @@ impl AstNode for SwitchLabel {
                 writeln!(f, "{line_prefix}Case Constant")?;
                 c.fmt_tree(f, &new_prefix, true)
             }
+            SwitchLabel::Null { default } => {
+                writeln!(f, "{line_prefix}Case null{}", if *default { ", default" } else { "" })
+            }
+            SwitchLabel::Default => writeln!(f, "{line_prefix}Default"),
         }
     }
 }

@@ -26,8 +26,6 @@ source: tests/snapshot/snapshot_test.rs
                             │       └──BreakStatement
                             └──Labeled Statement Group 
                                 ├──Cases
-                                │   ├──Case Constant
-                                │   │   └──int 6
-                                │   └──Case Constant
-                                │       └──int 7
+                                │   ├──Case null
+                                │   └──Default
                                 └──Statements

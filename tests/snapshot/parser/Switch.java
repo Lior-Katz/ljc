@@ -5,8 +5,8 @@ class SwitchExpressions {
                 x = 5;
                 break;
 
-            case 6:
-            case 7:
+            case null:
+            default:
         }
     }
 }
