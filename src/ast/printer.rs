@@ -5,9 +5,9 @@ use crate::ast::{
     EnumConstant, EnumDeclaration, Expression, ForInit, FormalParameter, InterfaceDeclaration,
     LeftHandSide, MemberAccess, MethodBody, MethodCall, MethodDeclaration, Modified, Modifier,
     Modifiers, NormalClassDeclaration, NormalInterfaceDeclaration, Program, RecordComponent,
-    RecordDeclaration, Resource, Statement, TopLevelClassOrInterfaceDeclaration, Type,
-    TypeIdentifier, VariableDeclaration, VariableDeclarator, VariableDeclaratorId,
-    VariableInitializer,
+    RecordDeclaration, Resource, Statement, Switch, SwitchBlockMember, SwitchLabel,
+    TopLevelClassOrInterfaceDeclaration, Type, TypeIdentifier, VariableDeclaration,
+    VariableDeclarator, VariableDeclaratorId, VariableInitializer,
 };
 use std::fmt;
 use std::fmt::{Display, Formatter};
@@ -602,6 +602,10 @@ impl AstNode for Statement {
                     .push("Body", body)
                     .fmt_tree(f, &new_prefix, true)
             }
+            Statement::Switch(s) => {
+                writeln!(f, "{line_prefix}Switch Statement")?;
+                s.fmt_tree(f, &new_prefix, true)
+            }
         }
     }
 }
@@ -1109,5 +1113,43 @@ impl AstNode for String {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         let (line_prefix, _) = branch(prefix, is_last);
         writeln!(f, "{line_prefix}{self}")
+    }
+}
+
+impl AstNode for Switch {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        let (line_prefix, new_prefix) = branch(prefix, is_last);
+        writeln!(f, "{line_prefix}Switch")?;
+        Children::new()
+            .push("Selector", &self.expression)
+            .push("Matchers", &self.block)
+            .fmt_tree(f, &new_prefix, true)
+    }
+}
+
+impl AstNode for SwitchBlockMember {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        let (line_prefix, new_prefix) = branch(prefix, is_last);
+        match self {
+            SwitchBlockMember::LabeledStatements { labels, statements } => {
+                writeln!(f, "{line_prefix}Labeled Statement Group ")?;
+                Children::new()
+                    .push("Cases", labels)
+                    .push("Statements", statements)
+                    .fmt_tree(f, &new_prefix, true)
+            }
+        }
+    }
+}
+
+impl AstNode for SwitchLabel {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        let (line_prefix, new_prefix) = branch(prefix, is_last);
+        match self {
+            SwitchLabel::Constants(c) => {
+                writeln!(f, "{line_prefix}Case Constant")?;
+                c.fmt_tree(f, &new_prefix, true)
+            }
+        }
     }
 }

@@ -12,5 +12,8 @@ mod types;
 pub use types::*;
 mod identifiers;
 pub use identifiers::*;
+pub mod switch;
+pub use switch::*;
 mod printer;
 pub type Program = CompilationUnit;
+pub type Multiple<T> = Vec<T>;

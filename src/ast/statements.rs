@@ -2,6 +2,7 @@ use crate::ast::declarations::{VariableDeclaration, VariableDeclaratorId};
 use crate::ast::expressions::{ArgumentList, Expression, ExpressionList};
 use crate::ast::identifiers::Identifier;
 use crate::ast::modifiers::Modified;
+use crate::ast::switch::Switch;
 use crate::ast::types::Type;
 
 pub type BlockStatements = Vec<Statement>;
@@ -62,6 +63,7 @@ pub enum Statement {
         lock: Expression,
         body: BlockStatements,
     },
+    Switch(Switch),
 }
 
 #[derive(Debug)]

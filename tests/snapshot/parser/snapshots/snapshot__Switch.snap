@@ -1,0 +1,33 @@
+---
+source: tests/snapshot/snapshot_test.rs
+---
+└──Compilation Unit
+    └──Class SwitchExpressions
+        └──Method switchStatements
+            ├──Type
+            │   └──void
+            ├──Param x
+            │   └──Type
+            │       └──Integer
+            └──Block
+                └──Switch Statement
+                    └──Switch
+                        ├──Selector
+                        │   └──x
+                        └──Matchers
+                            ├──Labeled Statement Group 
+                            │   ├──Cases
+                            │   │   └──Case Constant
+                            │   │       └──int 5
+                            │   └──Statements
+                            │       ├──Assignment =
+                            │       │   ├──x
+                            │       │   └──int 5
+                            │       └──BreakStatement
+                            └──Labeled Statement Group 
+                                ├──Cases
+                                │   ├──Case Constant
+                                │   │   └──int 6
+                                │   └──Case Constant
+                                │       └──int 7
+                                └──Statements

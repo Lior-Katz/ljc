@@ -7,8 +7,9 @@ use crate::ast::{
     FormalParameter, FormalParameterList, Identifier, InterfaceDeclaration, LeftHandSide,
     MemberAccess, MethodBody, MethodCall, MethodDeclaration, Modifiable, Modified, Modifier,
     NormalClassDeclaration, NormalInterfaceDeclaration, Program, RecordBodyDeclaration,
-    RecordComponent, RecordDeclaration, Resource, Statement, TopLevelClassOrInterfaceDeclaration,
-    Type, VariableDeclaration, VariableDeclarator, VariableDeclaratorId, VariableDeclaratorList,
+    RecordComponent, RecordDeclaration, Resource, Statement, Switch, SwitchBlockMember,
+    SwitchBlockMembers, SwitchLabel, TopLevelClassOrInterfaceDeclaration, Type,
+    VariableDeclaration, VariableDeclarator, VariableDeclaratorId, VariableDeclaratorList,
     VariableInitializer, VariableInitializerList,
 };
 use crate::lexer::{LexError, Token};
@@ -992,6 +993,7 @@ impl Parser {
             self.return_statement(),
             self.try_statement(),
             self.throw_statement(),
+            self.switch_statement(),
             self.synchronized_statement(),
         )
     }
@@ -2004,6 +2006,77 @@ impl Parser {
             Ok(Statement::Synchronized { lock, body })
         }
     }
+
+    fn switch_statement(&mut self) -> Result<Statement, ParseError> {
+        self.switch().map(Statement::from)
+    }
+
+    /// ```text
+    /// switch_expression:
+    ///     switch ( expression ) switch_block
+    /// ```
+    fn switch(&mut self) -> Result<Switch, ParseError> {
+        self.assert(Token::Switch)?;
+        self.assert(Token::LeftParen)?;
+        let expression = self.expression()?;
+        self.assert(Token::RightParen)?;
+        let block = self.switch_block()?;
+        Ok(Switch { expression, block })
+    }
+
+    /// ```text
+    /// switch_block:
+    ///     { {switch_block_member} }
+    /// ```
+    fn switch_block(&mut self) -> Result<SwitchBlockMembers, ParseError> {
+        self.assert(Token::LeftBrace)?;
+        let members = self.zero_or_more(Self::switch_block_member);
+        self.assert(Token::RightBrace)?;
+        Ok(members)
+    }
+
+    /// ```text
+    /// switch_block_member:
+    ///     switch_block_statement_group
+    ///
+    /// switch_block_statement_group:
+    ///     switch_label : {switch_label :} {block_statement}
+    /// ```
+    fn switch_block_member(&mut self) -> Result<SwitchBlockMember, ParseError> {
+        let label = self.switch_label()?;
+        if self.accept(Token::Colon) {
+            let mut labels = vec![label];
+            let mut additional_labels = self.zero_or_more(|this| {
+                let label = this.switch_label()?;
+                this.assert(Token::Colon)?;
+                Ok(label)
+            });
+            labels.append(&mut additional_labels);
+            let statements = self.zero_or_more(Self::block_statement);
+            Ok(SwitchBlockMember::LabeledStatements { labels, statements })
+        } else {
+            Err(ParseError::NoProduction)
+        }
+    }
+
+    /// ```text
+    /// switch_label:
+    ///     switch_case_label
+    /// ```
+    fn switch_label(&mut self) -> Result<SwitchLabel, ParseError> {
+        one_of!(self.switch_case_label())
+    }
+
+    /// ```text
+    /// switch_case_label:
+    ///     case conditional_expression {, conditional_expression}
+    /// ```
+    fn switch_case_label(&mut self) -> Result<SwitchLabel, ParseError> {
+        self.assert(Token::Case)?;
+        let labels = self
+            .delimited_at_least_1(Self::conditional_expression, |this| this.assert(Token::Comma))?;
+        Ok(SwitchLabel::Constants(labels))
+    }
 }
 
 enum ForHeader {
@@ -2138,5 +2211,11 @@ impl Into<ElementValue> for ElementValueList {
 impl Into<ElementValue> for Annotation {
     fn into(self) -> ElementValue {
         ElementValue::Annotation(Box::new(self))
+    }
+}
+
+impl From<Switch> for Statement {
+    fn from(value: Switch) -> Self {
+        Statement::Switch(value)
     }
 }
