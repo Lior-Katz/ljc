@@ -1,12 +1,12 @@
 use crate::ast::{
     Annotation, AnnotationInterfaceDeclaration, ArrayCreationMode, ArrayType, AssignmentOp, BinOp,
     CatchClause, ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration, ClassTypePart,
-    CompilationUnit, ConstructorBody, ConstructorInvocation, ElementValue, ElementValuePair,
-    EnumConstant, EnumDeclaration, Expression, ForInit, FormalParameter, InterfaceDeclaration,
-    LeftHandSide, MemberAccess, MethodBody, MethodCall, MethodDeclaration, Modified, Modifier,
-    Modifiers, NormalClassDeclaration, NormalInterfaceDeclaration, Program, RecordComponent,
-    RecordDeclaration, Resource, Statement, Switch, SwitchBlockMember, SwitchLabel,
-    TopLevelClassOrInterfaceDeclaration, Type, TypeIdentifier, VariableDeclaration,
+    CompilationUnit, ComponentPattern, ConstructorBody, ConstructorInvocation, ElementValue,
+    ElementValuePair, EnumConstant, EnumDeclaration, Expression, ForInit, FormalParameter,
+    InterfaceDeclaration, LeftHandSide, MemberAccess, MethodBody, MethodCall, MethodDeclaration,
+    Modified, Modifier, Modifiers, NormalClassDeclaration, NormalInterfaceDeclaration, Pattern,
+    Program, RecordComponent, RecordDeclaration, Resource, Statement, Switch, SwitchBlockMember,
+    SwitchLabel, TopLevelClassOrInterfaceDeclaration, Type, TypeIdentifier, VariableDeclaration,
     VariableDeclarator, VariableDeclaratorId, VariableInitializer,
 };
 use std::fmt;
@@ -1154,6 +1154,37 @@ impl AstNode for SwitchLabel {
                 writeln!(f, "{line_prefix}Case null{}", if *default { ", default" } else { "" })
             }
             SwitchLabel::Default => writeln!(f, "{line_prefix}Default"),
+            SwitchLabel::Pattern(p) => {
+                writeln!(f, "{line_prefix}Case pattern")?;
+                p.fmt_tree(f, &new_prefix, true)
+            }
+        }
+    }
+}
+
+impl AstNode for Pattern {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        let (line_prefix, new_prefix) = branch(prefix, is_last);
+        match self {
+            Pattern::Type(t) => {
+                writeln!(f, "{line_prefix}Type")?;
+                t.fmt_tree(f, &new_prefix, true)
+            }
+            Pattern::Record { reference_type, components } => {
+                writeln!(f, "{line_prefix}Record Deconstruction")?;
+                reference_type.fmt_tree(f, &new_prefix, components.is_empty())?;
+                Children::new().push("Components", components).fmt_tree(f, &new_prefix, true)
+            }
+        }
+    }
+}
+
+impl AstNode for ComponentPattern {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        let (line_prefix, _) = branch(prefix, is_last);
+        match self {
+            ComponentPattern::Pattern(p) => p.fmt_tree(f, prefix, is_last),
+            ComponentPattern::MatchAll => writeln!(f, "{line_prefix}Match All"),
         }
     }
 }

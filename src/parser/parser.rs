@@ -2,15 +2,16 @@ use crate::ast::{
     Annotation, AnnotationInterfaceDeclaration, ArgumentList, ArrayCreationMode, ArrayType,
     AssignmentOp, BinOp, BlockStatements, CatchClause, ClassBodyDeclaration, ClassBodyDeclarations,
     ClassDeclaration, ClassMemberDeclaration, ClassType, ClassTypeList, ClassTypePart,
-    CompilationUnit, ConstructorBody, ConstructorInvocation, ElementValue, ElementValueList,
-    ElementValuePair, EnumBody, EnumConstant, EnumDeclaration, Expression, ForInit, ForUpdate,
-    FormalParameter, FormalParameterList, Identifier, InterfaceDeclaration, LeftHandSide,
-    MemberAccess, MethodBody, MethodCall, MethodDeclaration, Modifiable, Modified, Modifier,
-    NormalClassDeclaration, NormalInterfaceDeclaration, Program, RecordBodyDeclaration,
-    RecordComponent, RecordDeclaration, Resource, Statement, Switch, SwitchBlockMember,
-    SwitchBlockMembers, SwitchLabel, TopLevelClassOrInterfaceDeclaration, Type,
-    VariableDeclaration, VariableDeclarator, VariableDeclaratorId, VariableDeclaratorList,
-    VariableInitializer, VariableInitializerList,
+    CompilationUnit, ComponentPattern, ComponentPatternList, ConstructorBody,
+    ConstructorInvocation, ElementValue, ElementValueList, ElementValuePair, EnumBody,
+    EnumConstant, EnumDeclaration, Expression, ForInit, ForUpdate, FormalParameter,
+    FormalParameterList, Identifier, InterfaceDeclaration, LeftHandSide, MemberAccess, MethodBody,
+    MethodCall, MethodDeclaration, Modifiable, Modified, Modifier, NormalClassDeclaration,
+    NormalInterfaceDeclaration, Pattern, Program, RecordBodyDeclaration, RecordComponent,
+    RecordDeclaration, Resource, Statement, Switch, SwitchBlockMember, SwitchBlockMembers,
+    SwitchLabel, TopLevelClassOrInterfaceDeclaration, Type, VariableDeclaration,
+    VariableDeclarator, VariableDeclaratorId, VariableDeclaratorList, VariableInitializer,
+    VariableInitializerList,
 };
 use crate::lexer::{LexError, Token};
 use crate::lexer::{Tokens, lex_single_file};
@@ -18,6 +19,7 @@ use crate::parser::error::ParseError;
 use std::collections::VecDeque;
 
 use std::path::Path;
+use std::vec;
 
 macro_rules! accept_with_value {
     ($self:expr, $variant:path) => {{
@@ -186,17 +188,32 @@ impl Parser {
         }
     }
 
+    /// ```text
+    /// [next {delim next}]
+    /// ```
     fn delimited_list<T, S>(
         &mut self,
         next: impl Fn(&mut Self) -> Result<T, ParseError>,
         delim: impl Fn(&mut Self) -> Result<S, ParseError>,
     ) -> Result<Vec<T>, ParseError> {
-        let mut list = Vec::new();
-        if let Ok(elem) = next(self) {
-            list.push(elem);
+        let mut list = if let Ok(elem) = next(self) {
+            vec![elem]
         } else {
-            return Ok(list);
-        }
+            return Ok(vec![]);
+        };
+        list.append(&mut self.delimited_list_tail(next, delim)?);
+        Ok(list)
+    }
+
+    /// ```text
+    /// {delim next}
+    /// ```
+    fn delimited_list_tail<T, S>(
+        &mut self,
+        next: impl Fn(&mut Self) -> Result<T, ParseError>,
+        delim: impl Fn(&mut Self) -> Result<S, ParseError>,
+    ) -> Result<Vec<T>, ParseError> {
+        let mut list = Vec::new();
         loop {
             if delim(self).is_err() {
                 break;
@@ -210,6 +227,9 @@ impl Parser {
         Ok(list)
     }
 
+    /// ```text
+    /// next {delim next}
+    /// ```
     fn delimited_at_least_1<T, S>(
         &mut self,
         next: impl Fn(&mut Self) -> Result<T, ParseError>,
@@ -2073,23 +2093,113 @@ impl Parser {
 
     /// ```text
     /// switch_case_label:
-    ///     case conditional_expression {, conditional_expression}
     ///     case null [, default]
+    ///     case conditional_expression {, conditional_expression}
+    ///     case pattern
+    ///
+    /// pattern:
+    ///     local_varaiable_declaration
+    ///     reference_type ( component_pattern_list )
     /// ```
     fn switch_case_label(&mut self) -> Result<SwitchLabel, ParseError> {
         self.assert(Token::Case)?;
         if self.accept(Token::NullLiteral) {
-            let default = if self.accept(Token::Comma) {
-                self.assert(Token::Default)?;
-                true
-            } else {
-                false
-            };
+            let default = self.accept(Token::Comma) && self.assert(Token::Default).map(|_| true)?;
             return Ok(SwitchLabel::Null { default });
         }
-        let labels = self
-            .delimited_at_least_1(Self::conditional_expression, |this| this.assert(Token::Comma))?;
-        Ok(SwitchLabel::Constants(labels))
+
+        let modifiers = self.zero_or_more(|this| this.modifier());
+        let expression = self.term()?;
+        self.switch_label_from_term(modifiers, expression)
+    }
+
+    fn switch_label_from_term(
+        &mut self,
+        modifiers: Vec<Modifier>,
+        expression: Expression,
+    ) -> Result<SwitchLabel, ParseError> {
+        if peek!(self, 0 => Token::LeftParen | Token::Id(_)) {
+            if let Ok(pattern) = self.pattern_from_term(modifiers, expression) {
+                let mut patterns = vec![pattern];
+                patterns.append(
+                    &mut self
+                        .delimited_list_tail(Self::pattern, |this| this.assert(Token::Comma))?,
+                );
+                Ok(SwitchLabel::Pattern(patterns))
+            } else {
+                unreachable!(
+                    "Checked ahead of time that label corresponds to a local variable declaration pattern or a record deconstruction pattern"
+                )
+            }
+        } else {
+            let mut labels = vec![expression];
+            labels.append(&mut self.delimited_list_tail(Self::conditional_expression, |this| {
+                this.assert(Token::Comma)
+            })?);
+            Ok(SwitchLabel::Constants(labels))
+        }
+    }
+
+    /// ```text
+    /// component_pattern_list:
+    ///     component_pattern {, component_pattern}
+    /// ```
+    fn record_component_pattern_list(&mut self) -> Result<ComponentPatternList, ParseError> {
+        self.delimited_at_least_1(Self::record_component_pattern, |this| this.assert(Token::Comma))
+    }
+
+    /// ```text
+    /// component_pattern:
+    ///     pattern
+    ///     _
+    /// ```
+    fn record_component_pattern(&mut self) -> Result<ComponentPattern, ParseError> {
+        if self.accept(Token::Underscore) {
+            Ok(ComponentPattern::MatchAll)
+        } else {
+            Ok(ComponentPattern::Pattern(self.pattern()?))
+        }
+    }
+
+    /// ```text
+    /// pattern:
+    ///     local_varaiable_declaration
+    ///     reference_type ( component_pattern_list )
+    /// ```
+    fn pattern(&mut self) -> Result<Pattern, ParseError> {
+        let modifiers = self.zero_or_more(|this| this.modifier());
+        let type_term = self.type_term()?;
+        self.pattern_from_term(modifiers, type_term)
+    }
+
+    fn pattern_from_term<T>(
+        &mut self,
+        modifiers: Vec<Modifier>,
+        term: T,
+    ) -> Result<Pattern, ParseError>
+    where
+        T: TryInto<Type>,
+    {
+        if self.accept(Token::LeftParen) {
+            let reference_type = term.try_into().map_err(|_| ParseError::NoProduction)?;
+            let components = self.record_component_pattern_list()?;
+            self.assert(Token::RightParen)?;
+            return Ok(Pattern::Record { reference_type, components });
+        }
+
+        if let Ok(var_id) = self.variable_declarator_id() {
+            let variable_type = term.try_into().map_err(|_| ParseError::NoProduction)?;
+            let declarators = vec![VariableDeclarator {
+                name: var_id,
+                initializer: None,
+            }];
+            let var_declaration =
+                VariableDeclaration { variable_type, declarators }.with_modifiers(modifiers);
+
+            return Ok(Pattern::Type(var_declaration));
+        }
+
+        Err(ParseError::NoProduction)
     }
 }
 

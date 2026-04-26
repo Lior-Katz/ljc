@@ -3,29 +3,152 @@ source: tests/snapshot/snapshot_test.rs
 ---
 └──Compilation Unit
     └──Class SwitchExpressions
-        └──Method switchStatements
-            ├──Type
-            │   └──void
-            ├──Param x
-            │   └──Type
-            │       └──Integer
-            └──Block
-                └──Switch Statement
-                    └──Switch
-                        ├──Selector
-                        │   └──x
-                        └──Matchers
-                            ├──Labeled Statement Group 
-                            │   ├──Cases
-                            │   │   └──Case Constant
-                            │   │       └──int 5
-                            │   └──Statements
-                            │       ├──Assignment =
-                            │       │   ├──x
-                            │       │   └──int 5
-                            │       └──BreakStatement
-                            └──Labeled Statement Group 
-                                ├──Cases
-                                │   ├──Case null
-                                │   └──Default
-                                └──Statements
+        ├──Method switchStatements
+        │   ├──Type
+        │   │   └──void
+        │   ├──Param x
+        │   │   └──Type
+        │   │       └──Integer
+        │   └──Block
+        │       └──Switch Statement
+        │           └──Switch
+        │               ├──Selector
+        │               │   └──x
+        │               └──Matchers
+        │                   ├──Labeled Statement Group 
+        │                   │   ├──Cases
+        │                   │   │   └──Case Constant
+        │                   │   │       └──int 5
+        │                   │   └──Statements
+        │                   │       ├──Assignment =
+        │                   │       │   ├──x
+        │                   │       │   └──int 5
+        │                   │       └──BreakStatement
+        │                   └──Labeled Statement Group 
+        │                       ├──Cases
+        │                       │   ├──Case null
+        │                       │   └──Default
+        │                       └──Statements
+        ├──Method patterns
+        │   ├──Type
+        │   │   └──void
+        │   ├──Param x
+        │   │   └──Type
+        │   │       └──Object
+        │   └──Block
+        │       └──Switch Statement
+        │           └──Switch
+        │               ├──Selector
+        │               │   └──x
+        │               └──Matchers
+        │                   ├──Labeled Statement Group 
+        │                   │   ├──Cases
+        │                   │   │   └──Case pattern
+        │                   │   │       └──Type
+        │                   │   │           └──VariableDeclaration
+        │                   │   │               ├──Type
+        │                   │   │               │   └──Integer
+        │                   │   │               └──i
+        │                   │   └──Statements
+        │                   │       ├──MethodInvocation
+        │                   │       │   ├──method: intValue
+        │                   │       │   └──target:
+        │                   │       │       └──i
+        │                   │       └──BreakStatement
+        │                   ├──Labeled Statement Group 
+        │                   │   ├──Cases
+        │                   │   │   └──Case pattern
+        │                   │   │       └──Record Deconstruction
+        │                   │   │           ├──Type
+        │                   │   │           │   └──Pair
+        │                   │   │           └──Components
+        │                   │   │               ├──Type
+        │                   │   │               │   └──VariableDeclaration
+        │                   │   │               │       ├──Type
+        │                   │   │               │       │   └──int
+        │                   │   │               │       └──a
+        │                   │   │               └──Type
+        │                   │   │                   └──VariableDeclaration
+        │                   │   │                       ├──Type
+        │                   │   │                       │   └──int
+        │                   │   │                       └──b
+        │                   │   └──Statements
+        │                   │       ├──VariableDeclaration
+        │                   │       │   ├──Type
+        │                   │       │   │   └──int
+        │                   │       │   └──sum
+        │                   │       │       └── +
+        │                   │       │           ├──a
+        │                   │       │           └──b
+        │                   │       └──BreakStatement
+        │                   ├──Labeled Statement Group 
+        │                   │   ├──Cases
+        │                   │   │   └──Case pattern
+        │                   │   │       └──Record Deconstruction
+        │                   │   │           ├──Type
+        │                   │   │           │   └──Box
+        │                   │   │           └──Components
+        │                   │   │               └──Record Deconstruction
+        │                   │   │                   ├──Type
+        │                   │   │                   │   └──Pair
+        │                   │   │                   └──Components
+        │                   │   │                       ├──Type
+        │                   │   │                       │   └──VariableDeclaration
+        │                   │   │                       │       ├──Type
+        │                   │   │                       │       │   └──int
+        │                   │   │                       │       └──a
+        │                   │   │                       └──Match All
+        │                   │   └──Statements
+        │                   │       ├──VariableDeclaration
+        │                   │       │   ├──Type
+        │                   │       │   │   └──int
+        │                   │       │   └──nested
+        │                   │       │       └──a
+        │                   │       └──BreakStatement
+        │                   └──Labeled Statement Group 
+        │                       ├──Cases
+        │                       │   ├──Case pattern
+        │                       │   │   ├──Record Deconstruction
+        │                       │   │   │   ├──Type
+        │                       │   │   │   │   └──A
+        │                       │   │   │   └──Components
+        │                       │   │   │       └──Match All
+        │                       │   │   └──Record Deconstruction
+        │                       │   │       ├──Type
+        │                       │   │       │   └──B
+        │                       │   │       └──Components
+        │                       │   │           └──Match All
+        │                       │   └──Default
+        │                       └──Statements
+        │                           └──VariableDeclaration
+        │                               ├──Type
+        │                               │   └──int
+        │                               └──a
+        │                                   └──int 5
+        ├──RecordDeclaration Pair
+        │   ├──Components
+        │   │   ├──a
+        │   │   │   └──Type
+        │   │   │       └──int
+        │   │   └──b
+        │   │       └──Type
+        │   │           └──int
+        │   └──Body
+        ├──RecordDeclaration Box
+        │   ├──Components
+        │   │   └──p
+        │   │       └──Type
+        │   │           └──Pair
+        │   └──Body
+        ├──RecordDeclaration A
+        │   ├──Components
+        │   │   └──n
+        │   │       └──Type
+        │   │           └──int
+        │   └──Body
+        └──RecordDeclaration B
+            ├──Components
+            │   └──b
+            │       └──Type
+            │           └──boolean
+            └──Body

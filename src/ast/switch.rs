@@ -1,4 +1,5 @@
 use crate::ast::{BlockStatements, Expression, Multiple};
+use crate::ast::patterns::Pattern;
 
 pub type SwitchBlockMembers = Vec<SwitchBlockMember>;
 pub type CaseConstant = Expression;
@@ -24,4 +25,5 @@ pub enum SwitchLabel {
         default: bool,
     },
     Default,
+    Pattern(Multiple<Pattern>),
 }
