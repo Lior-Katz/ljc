@@ -6,8 +6,8 @@ source: tests/snapshot/snapshot_test.rs
         ├──Method x
         │   ├──Type
         │   │   └──int
-        │   └──Default
-        │       └──int 5
+        │   ├──Default
+        │   │   └──int 5
         │   └──;
         ├──Method y
         │   ├──Type
@@ -18,9 +18,9 @@ source: tests/snapshot/snapshot_test.rs
         │   │   └──ArrayType
         │   │       └──Type
         │   │           └──int
-        │   └──Default
-        │       ├──int 1
-        │       └──int 2
+        │   ├──Default
+        │   │   ├──int 1
+        │   │   └──int 2
         │   └──;
         ├──Method c
         │   ├──Type
@@ -35,12 +35,12 @@ source: tests/snapshot/snapshot_test.rs
         │   │   └──ArrayType
         │   │       └──Type
         │   │           └──Other
-        │   └──Default
-        │       └──Annotation
-        │           ├──Name
-        │           │   └──Other
-        │           └──Value
-        │               └──int 3
+        │   ├──Default
+        │   │   └──Annotation
+        │   │       ├──Name
+        │   │       │   └──Other
+        │   │       └──Value
+        │   │           └──int 3
         │   └──;
         ├──Field declaration
         │   ├──Type

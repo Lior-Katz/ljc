@@ -163,8 +163,8 @@ source: tests/snapshot/snapshot_test.rs
         │   │   │                               └──int 1
         │   │   ├──public
         │   │   └──static
-        │   └──Permits
-        │       └──InnerChild
+        │   ├──Permits
+        │   │   └──InnerChild
         │   ├──Field declaration
         │   │   ├──Modifiers
         │   │   │   └──private

@@ -938,9 +938,9 @@ impl<'a> Children<'a> {
 }
 
 impl AstNode for Children<'_> {
-    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, _is_last: bool) -> fmt::Result {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         for (i, (label, node)) in self.inner.iter().enumerate() {
-            let is_last_child = i == self.inner.len() - 1;
+            let is_last_child = i == self.inner.len() - 1 && is_last;
             let (label_prefix, child_prefix) = branch(prefix, is_last_child);
 
             writeln!(f, "{label_prefix}{label}")?;
@@ -1067,7 +1067,7 @@ impl AstNode<Modifiers> for EnumConstant {
         let children = Children::new()
             .push_opt("Args", &self.args)
             .push_opt("Body", &self.body);
-        children.fmt_tree(f, &new_prefix, is_last)
+        children.fmt_tree(f, &new_prefix, true)
     }
 }
 
