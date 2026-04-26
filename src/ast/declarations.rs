@@ -1,6 +1,7 @@
 use crate::ast::expressions::{ArgumentList, VariableInitializer};
 use crate::ast::identifiers::{Identifier, TypeIdentifier};
 use crate::ast::modifiers::{ElementValue, Modified};
+use crate::ast::Multiple;
 use crate::ast::statements::{BlockStatements, ConstructorInvocation};
 use crate::ast::types::{ClassType, ClassTypeList, Type};
 
@@ -52,6 +53,7 @@ pub enum ClassMemberDeclaration {
     Constructor {
         name: TypeIdentifier, // this is just for validating that the name matches the class
         parameters: FormalParameterList,
+        throws: Multiple<Modified<Type>>,
         body: ConstructorBody,
     },
     CompactConstructor {

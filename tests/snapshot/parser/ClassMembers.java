@@ -13,11 +13,12 @@ class ClassMembers {
     }
 
     ClassMembers() {}
-    public ClassMembers(int x) {
+
+    public ClassMembers(int x) throws InvalidParameterException {
     }
 
     // epilogue only
-    protected ClassMembers(int x, int y) {
+    protected ClassMembers(int x, int y) throws InvalidParameterException, Exception {
         int z = x + y;
     }
 

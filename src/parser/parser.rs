@@ -6,12 +6,12 @@ use crate::ast::{
     ConstructorInvocation, ElementValue, ElementValueList, ElementValuePair, EnumBody,
     EnumConstant, EnumDeclaration, Expression, ForInit, ForUpdate, FormalParameter,
     FormalParameterList, Identifier, InterfaceDeclaration, LeftHandSide, MemberAccess, MethodBody,
-    MethodCall, MethodDeclaration, Modifiable, Modified, Modifier, NormalClassDeclaration,
-    NormalInterfaceDeclaration, Pattern, Program, RecordBodyDeclaration, RecordComponent,
-    RecordDeclaration, Resource, Statement, Switch, SwitchBlockMember, SwitchBlockMembers,
-    SwitchLabel, SwitchRule, TopLevelClassOrInterfaceDeclaration, Type, VariableDeclaration,
-    VariableDeclarator, VariableDeclaratorId, VariableDeclaratorList, VariableInitializer,
-    VariableInitializerList,
+    MethodCall, MethodDeclaration, Modifiable, Modified, Modifier, Multiple,
+    NormalClassDeclaration, NormalInterfaceDeclaration, Pattern, Program, RecordBodyDeclaration,
+    RecordComponent, RecordDeclaration, Resource, Statement, Switch, SwitchBlockMember,
+    SwitchBlockMembers, SwitchLabel, SwitchRule, TopLevelClassOrInterfaceDeclaration, Type,
+    VariableDeclaration, VariableDeclarator, VariableDeclaratorId, VariableDeclaratorList,
+    VariableInitializer, VariableInitializerList,
 };
 use crate::lexer::{LexError, Token};
 use crate::lexer::{Tokens, lex_single_file};
@@ -778,8 +778,9 @@ impl Parser {
                 let name = name.try_into()?;
                 let parameters = self.formal_parameters()?;
                 self.assert(Token::RightParen)?;
+                let throws = self.opt_throws()?;
                 let body = self.constructor_body()?;
-                return Ok(ClassMemberDeclaration::Constructor { name, parameters, body });
+                return Ok(ClassMemberDeclaration::Constructor { name, parameters, throws, body });
             }
         }
         if self.next_is(Token::LeftBrace) {
@@ -866,6 +867,20 @@ impl Parser {
             Ok(Type::Void)
         } else {
             Err(ParseError::NoProduction)
+        }
+    }
+
+    fn opt_throws(&mut self) -> Result<Multiple<Modified<Type>>, ParseError> {
+        if self.accept(Token::Throws) {
+            self.delimited_at_least_1(
+                |this| {
+                    let modifiers = this.zero_or_more(Self::modifier);
+                    Ok(this.reference_type()?.with_modifiers(modifiers))
+                },
+                |this| this.assert(Token::Comma),
+            )
+        } else {
+            Ok(vec![])
         }
     }
 

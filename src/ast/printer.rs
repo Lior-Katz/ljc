@@ -242,9 +242,19 @@ impl AstNode<Modifiers> for ClassMemberDeclaration {
                 variable_type.fmt_tree(f, &new_prefix, false)?;
                 declarations.fmt_tree(f, &new_prefix, true)
             }
-            ClassMemberDeclaration::Constructor { parameters, body, name: _ } => {
+            ClassMemberDeclaration::Constructor {
+                parameters,
+                body,
+                throws,
+                name: _,
+            } => {
                 writeln!(f, "{line_prefix}Constructor declaration")?;
                 fmt_modifiers(f, &new_prefix, false, modifiers)?;
+                if !throws.is_empty() {
+                    Children::new()
+                        .push("Throws", throws)
+                        .fmt_tree(f, &new_prefix, false)?;
+                }
                 parameters.fmt_tree(f, &new_prefix, false)?;
                 body.fmt_tree(f, &new_prefix, true)
             }

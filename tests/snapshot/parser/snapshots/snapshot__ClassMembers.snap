@@ -37,6 +37,9 @@ source: tests/snapshot/snapshot_test.rs
         ├──Constructor declaration
         │   ├──Modifiers
         │   │   └──public
+        │   ├──Throws
+        │   │   └──Type
+        │   │       └──InvalidParameterException
         │   ├──Param x
         │   │   └──Type
         │   │       └──int
@@ -44,6 +47,11 @@ source: tests/snapshot/snapshot_test.rs
         ├──Constructor declaration
         │   ├──Modifiers
         │   │   └──protected
+        │   ├──Throws
+        │   │   ├──Type
+        │   │   │   └──InvalidParameterException
+        │   │   └──Type
+        │   │       └──Exception
         │   ├──Param x
         │   │   └──Type
         │   │       └──int
