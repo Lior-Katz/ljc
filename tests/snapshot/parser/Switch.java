@@ -16,7 +16,7 @@ class SwitchExpressions {
                 i.intValue();
                 break;
 
-            case Pair(int a, int b):
+            case Pair(int a, int b) when a > 5:
                 int sum = a + b;
                 break;
 

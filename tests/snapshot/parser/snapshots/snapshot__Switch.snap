@@ -43,7 +43,7 @@ source: tests/snapshot/snapshot_test.rs
         │               └──Matchers
         │                   ├──Labeled Statement Group 
         │                   │   ├──Cases
-        │                   │   │   └──Case pattern
+        │                   │   │   └──Pattern
         │                   │   │       └──Type
         │                   │   │           └──VariableDeclaration
         │                   │   │               ├──Type
@@ -57,21 +57,25 @@ source: tests/snapshot/snapshot_test.rs
         │                   │       └──BreakStatement
         │                   ├──Labeled Statement Group 
         │                   │   ├──Cases
-        │                   │   │   └──Case pattern
-        │                   │   │       └──Record Deconstruction
-        │                   │   │           ├──Type
-        │                   │   │           │   └──Pair
-        │                   │   │           └──Components
-        │                   │   │               ├──Type
-        │                   │   │               │   └──VariableDeclaration
-        │                   │   │               │       ├──Type
-        │                   │   │               │       │   └──int
-        │                   │   │               │       └──a
-        │                   │   │               └──Type
-        │                   │   │                   └──VariableDeclaration
-        │                   │   │                       ├──Type
-        │                   │   │                       │   └──int
-        │                   │   │                       └──b
+        │                   │   │   ├──Pattern
+        │                   │   │   │   └──Record Deconstruction
+        │                   │   │   │       ├──Type
+        │                   │   │   │       │   └──Pair
+        │                   │   │   │       └──Components
+        │                   │   │   │           ├──Type
+        │                   │   │   │           │   └──VariableDeclaration
+        │                   │   │   │           │       ├──Type
+        │                   │   │   │           │       │   └──int
+        │                   │   │   │           │       └──a
+        │                   │   │   │           └──Type
+        │                   │   │   │               └──VariableDeclaration
+        │                   │   │   │                   ├──Type
+        │                   │   │   │                   │   └──int
+        │                   │   │   │                   └──b
+        │                   │   │   └──Guard
+        │                   │   │       └── >
+        │                   │   │           ├──a
+        │                   │   │           └──int 5
         │                   │   └──Statements
         │                   │       ├──VariableDeclaration
         │                   │       │   ├──Type
@@ -83,7 +87,7 @@ source: tests/snapshot/snapshot_test.rs
         │                   │       └──BreakStatement
         │                   ├──Labeled Statement Group 
         │                   │   ├──Cases
-        │                   │   │   └──Case pattern
+        │                   │   │   └──Pattern
         │                   │   │       └──Record Deconstruction
         │                   │   │           ├──Type
         │                   │   │           │   └──Box
@@ -107,7 +111,7 @@ source: tests/snapshot/snapshot_test.rs
         │                   │       └──BreakStatement
         │                   └──Labeled Statement Group 
         │                       ├──Cases
-        │                       │   ├──Case pattern
+        │                       │   ├──Pattern
         │                       │   │   ├──Record Deconstruction
         │                       │   │   │   ├──Type
         │                       │   │   │   │   └──A

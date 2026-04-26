@@ -25,5 +25,8 @@ pub enum SwitchLabel {
         default: bool,
     },
     Default,
-    Pattern(Multiple<Pattern>),
+    Pattern {
+        patterns: Multiple<Pattern>,
+        guard: Option<Expression>,
+    },
 }

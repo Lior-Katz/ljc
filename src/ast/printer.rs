@@ -1154,10 +1154,10 @@ impl AstNode for SwitchLabel {
                 writeln!(f, "{line_prefix}Case null{}", if *default { ", default" } else { "" })
             }
             SwitchLabel::Default => writeln!(f, "{line_prefix}Default"),
-            SwitchLabel::Pattern(p) => {
-                writeln!(f, "{line_prefix}Case pattern")?;
-                p.fmt_tree(f, &new_prefix, true)
-            }
+            SwitchLabel::Pattern { patterns, guard } => Children::new()
+                .push("Pattern", patterns)
+                .push_opt("Guard", guard)
+                .fmt_tree(f, &prefix, is_last),
         }
     }
 }
@@ -1173,7 +1173,9 @@ impl AstNode for Pattern {
             Pattern::Record { reference_type, components } => {
                 writeln!(f, "{line_prefix}Record Deconstruction")?;
                 reference_type.fmt_tree(f, &new_prefix, components.is_empty())?;
-                Children::new().push("Components", components).fmt_tree(f, &new_prefix, true)
+                Children::new()
+                    .push("Components", components)
+                    .fmt_tree(f, &new_prefix, true)
             }
         }
     }

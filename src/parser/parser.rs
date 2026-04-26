@@ -2125,7 +2125,13 @@ impl Parser {
                     &mut self
                         .delimited_list_tail(Self::pattern, |this| this.assert(Token::Comma))?,
                 );
-                Ok(SwitchLabel::Pattern(patterns))
+                let guard = if peek!(self, 0 => Token::Id(s) if s.as_str() == "when") {
+                    self.next()?;
+                    Some(self.expression()?)
+                } else {
+                    None
+                };
+                Ok(SwitchLabel::Pattern { patterns, guard })
             } else {
                 unreachable!(
                     "Checked ahead of time that label corresponds to a local variable declaration pattern or a record deconstruction pattern"
