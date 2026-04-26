@@ -9,7 +9,7 @@ use crate::ast::{
     MethodCall, MethodDeclaration, Modifiable, Modified, Modifier, NormalClassDeclaration,
     NormalInterfaceDeclaration, Pattern, Program, RecordBodyDeclaration, RecordComponent,
     RecordDeclaration, Resource, Statement, Switch, SwitchBlockMember, SwitchBlockMembers,
-    SwitchLabel, TopLevelClassOrInterfaceDeclaration, Type, VariableDeclaration,
+    SwitchLabel, SwitchRule, TopLevelClassOrInterfaceDeclaration, Type, VariableDeclaration,
     VariableDeclarator, VariableDeclaratorId, VariableDeclaratorList, VariableInitializer,
     VariableInitializerList,
 };
@@ -2074,9 +2074,22 @@ impl Parser {
             labels.append(&mut additional_labels);
             let statements = self.zero_or_more(Self::block_statement);
             Ok(SwitchBlockMember::LabeledStatements { labels, statements })
+        } else if self.accept(Token::Arrow) {
+            let rule = one_of!(
+                self.switch_rule_expression().map(SwitchRule::from),
+                self.block().map(SwitchRule::from),
+                self.throw_statement().map(SwitchRule::try_from).flatten(),
+            )?;
+            Ok(SwitchBlockMember::Rule { case: label, rule })
         } else {
             Err(ParseError::NoProduction)
         }
+    }
+
+    fn switch_rule_expression(&mut self) -> Result<Expression, ParseError> {
+        let expression = self.expression()?;
+        self.assert(Token::Semicolon)?;
+        Ok(expression)
     }
 
     /// ```text
@@ -2347,5 +2360,27 @@ impl Into<ElementValue> for Annotation {
 impl From<Switch> for Statement {
     fn from(value: Switch) -> Self {
         Statement::Switch(value)
+    }
+}
+
+impl From<Expression> for SwitchRule {
+    fn from(value: Expression) -> Self {
+        SwitchRule::Expression(value)
+    }
+}
+
+impl From<BlockStatements> for SwitchRule {
+    fn from(value: BlockStatements) -> Self {
+        SwitchRule::Block(value)
+    }
+}
+
+impl TryFrom<Statement> for SwitchRule {
+    type Error = ParseError;
+    fn try_from(value: Statement) -> Result<Self, Self::Error> {
+        match value {
+            Statement::Throw(_) => Ok(SwitchRule::Throw(value)),
+            _ => Err(ParseError::NoProduction),
+        }
     }
 }

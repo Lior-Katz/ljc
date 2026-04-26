@@ -1,6 +1,15 @@
 class SwitchExpressions {
     void switchStatements(Integer x) {
         switch (x) {
+            case 0 -> x = 1;
+            case 1, 2 -> {
+                int y = 1;
+                x = y;
+            }
+            case null, default -> throw new RuntimeException();
+        }
+
+        switch (x) {
             case 5:
                 x = 5;
                 break;

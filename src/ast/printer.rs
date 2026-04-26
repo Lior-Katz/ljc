@@ -6,8 +6,8 @@ use crate::ast::{
     InterfaceDeclaration, LeftHandSide, MemberAccess, MethodBody, MethodCall, MethodDeclaration,
     Modified, Modifier, Modifiers, NormalClassDeclaration, NormalInterfaceDeclaration, Pattern,
     Program, RecordComponent, RecordDeclaration, Resource, Statement, Switch, SwitchBlockMember,
-    SwitchLabel, TopLevelClassOrInterfaceDeclaration, Type, TypeIdentifier, VariableDeclaration,
-    VariableDeclarator, VariableDeclaratorId, VariableInitializer,
+    SwitchLabel, SwitchRule, TopLevelClassOrInterfaceDeclaration, Type, TypeIdentifier,
+    VariableDeclaration, VariableDeclarator, VariableDeclaratorId, VariableInitializer,
 };
 use std::fmt;
 use std::fmt::{Display, Formatter};
@@ -1132,10 +1132,17 @@ impl AstNode for SwitchBlockMember {
         let (line_prefix, new_prefix) = branch(prefix, is_last);
         match self {
             SwitchBlockMember::LabeledStatements { labels, statements } => {
-                writeln!(f, "{line_prefix}Labeled Statement Group ")?;
+                writeln!(f, "{line_prefix}Labeled Statement Group")?;
                 Children::new()
                     .push("Cases", labels)
                     .push("Statements", statements)
+                    .fmt_tree(f, &new_prefix, true)
+            }
+            SwitchBlockMember::Rule { case, rule } => {
+                writeln!(f, "{line_prefix}Rule")?;
+                Children::new()
+                    .push("Label", case)
+                    .push("Rule", rule)
                     .fmt_tree(f, &new_prefix, true)
             }
         }
@@ -1187,6 +1194,16 @@ impl AstNode for ComponentPattern {
         match self {
             ComponentPattern::Pattern(p) => p.fmt_tree(f, prefix, is_last),
             ComponentPattern::MatchAll => writeln!(f, "{line_prefix}Match All"),
+        }
+    }
+}
+
+impl AstNode for SwitchRule {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        match self {
+            SwitchRule::Expression(e) => e.fmt_tree(f, prefix, is_last),
+            SwitchRule::Block(s) => s.fmt_tree(f, prefix, is_last),
+            SwitchRule::Throw(s) => s.fmt_tree(f, prefix, is_last),
         }
     }
 }

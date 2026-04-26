@@ -10,12 +10,47 @@ source: tests/snapshot/snapshot_test.rs
         │   │   └──Type
         │   │       └──Integer
         │   └──Block
+        │       ├──Switch Statement
+        │       │   └──Switch
+        │       │       ├──Selector
+        │       │       │   └──x
+        │       │       └──Matchers
+        │       │           ├──Rule
+        │       │           │   ├──Label
+        │       │           │   │   └──Case Constant
+        │       │           │   │       └──int 0
+        │       │           │   └──Rule
+        │       │           │       └──Assignment =
+        │       │           │           ├──x
+        │       │           │           └──int 1
+        │       │           ├──Rule
+        │       │           │   ├──Label
+        │       │           │   │   └──Case Constant
+        │       │           │   │       ├──int 1
+        │       │           │   │       └──int 2
+        │       │           │   └──Rule
+        │       │           │       ├──VariableDeclaration
+        │       │           │       │   ├──Type
+        │       │           │       │   │   └──int
+        │       │           │       │   └──y
+        │       │           │       │       └──int 1
+        │       │           │       └──Assignment =
+        │       │           │           ├──x
+        │       │           │           └──y
+        │       │           └──Rule
+        │       │               ├──Label
+        │       │               │   └──Case null, default
+        │       │               └──Rule
+        │       │                   └──ThrowStatement
+        │       │                       └──NewInstance
+        │       │                           └──Type
+        │       │                               └──RuntimeException
         │       └──Switch Statement
         │           └──Switch
         │               ├──Selector
         │               │   └──x
         │               └──Matchers
-        │                   ├──Labeled Statement Group 
+        │                   ├──Labeled Statement Group
         │                   │   ├──Cases
         │                   │   │   └──Case Constant
         │                   │   │       └──int 5
@@ -24,7 +59,7 @@ source: tests/snapshot/snapshot_test.rs
         │                   │       │   ├──x
         │                   │       │   └──int 5
         │                   │       └──BreakStatement
-        │                   └──Labeled Statement Group 
+        │                   └──Labeled Statement Group
         │                       ├──Cases
         │                       │   ├──Case null
         │                       │   └──Default
@@ -41,7 +76,7 @@ source: tests/snapshot/snapshot_test.rs
         │               ├──Selector
         │               │   └──x
         │               └──Matchers
-        │                   ├──Labeled Statement Group 
+        │                   ├──Labeled Statement Group
         │                   │   ├──Cases
         │                   │   │   └──Pattern
         │                   │   │       └──Type
@@ -55,7 +90,7 @@ source: tests/snapshot/snapshot_test.rs
         │                   │       │   └──target:
         │                   │       │       └──i
         │                   │       └──BreakStatement
-        │                   ├──Labeled Statement Group 
+        │                   ├──Labeled Statement Group
         │                   │   ├──Cases
         │                   │   │   ├──Pattern
         │                   │   │   │   └──Record Deconstruction
@@ -85,7 +120,7 @@ source: tests/snapshot/snapshot_test.rs
         │                   │       │           ├──a
         │                   │       │           └──b
         │                   │       └──BreakStatement
-        │                   ├──Labeled Statement Group 
+        │                   ├──Labeled Statement Group
         │                   │   ├──Cases
         │                   │   │   └──Pattern
         │                   │   │       └──Record Deconstruction
@@ -109,7 +144,7 @@ source: tests/snapshot/snapshot_test.rs
         │                   │       │   └──nested
         │                   │       │       └──a
         │                   │       └──BreakStatement
-        │                   └──Labeled Statement Group 
+        │                   └──Labeled Statement Group
         │                       ├──Cases
         │                       │   ├──Pattern
         │                       │   │   ├──Record Deconstruction
