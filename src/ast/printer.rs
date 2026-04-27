@@ -337,11 +337,13 @@ impl AstNode for MethodDeclaration {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, _is_last: bool) -> fmt::Result {
         self.result.fmt_tree(f, &prefix, false)?;
         self.parameters.fmt_tree(f, &prefix, false)?;
-        if let Some(default) = &self.default {
-            Children::new()
-                .push("Default", default)
-                .fmt_tree(f, &prefix, false)?;
+        let mut children = Children::new();
+        if !self.throws.is_empty() {
+            children = children.push("Throws", &self.throws);
         }
+        children
+            .push_opt("Default", &self.default)
+            .fmt_tree(f, &prefix, false)?;
         self.body.fmt_tree(f, &prefix, true)
     }
 }

@@ -127,6 +127,7 @@ pub struct MethodDeclaration {
     pub result: MethodResult,
     pub identifier: Identifier,
     pub parameters: FormalParameterList,
+    pub throws: Multiple<Modified<Type>>,
     pub body: MethodBody,
     pub default: Option<ElementValue>,
 }

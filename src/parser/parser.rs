@@ -795,12 +795,14 @@ impl Parser {
             let result = result.try_into()?;
             let parameters = self.formal_parameters()?;
             self.assert(Token::RightParen)?;
+            let throws = self.opt_throws()?;
             let default = self.opt_default()?;
             let body = self.method_body()?;
             Ok(MethodDeclaration {
                 result,
                 identifier,
                 parameters,
+                throws,
                 default,
                 body,
             }

@@ -44,7 +44,7 @@ class ClassMembers {
     public ClassMembers foo() {}; // should not be confused with constructor
     protected static int bar(int x) {}
     abstract void referenceTypeParam(java.lang.String s);
-    void varargs(int... a) {}
+    void varargs(int... a) throws InvalidParameterException {}
 
     public static class InnerClass {
         int x;

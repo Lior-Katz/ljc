@@ -140,6 +140,9 @@ source: tests/snapshot/snapshot_test.rs
         │   ├──VarArg a
         │   │   └──Type
         │   │       └──int
+        │   ├──Throws
+        │   │   └──Type
+        │   │       └──InvalidParameterException
         │   └──Block
         ├──Class InnerClass
         │   ├──Modifiers
