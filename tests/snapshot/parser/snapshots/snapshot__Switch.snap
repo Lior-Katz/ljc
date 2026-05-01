@@ -64,6 +64,103 @@ source: tests/snapshot/snapshot_test.rs
         │                       │   ├──Case null
         │                       │   └──Default
         │                       └──Statements
+        ├──Method switchExpressions
+        │   ├──Type
+        │   │   └──void
+        │   ├──Param x
+        │   │   └──Type
+        │   │       └──Integer
+        │   └──Block
+        │       ├──VariableDeclaration
+        │       │   ├──Type
+        │       │   │   └──int
+        │       │   └──a
+        │       │       └──Switch
+        │       │           ├──Selector
+        │       │           │   └──x
+        │       │           └──Matchers
+        │       │               ├──Rule
+        │       │               │   ├──Label
+        │       │               │   │   └──Case Constant
+        │       │               │   │       └──int 0
+        │       │               │   └──Rule
+        │       │               │       └──int 1
+        │       │               ├──Rule
+        │       │               │   ├──Label
+        │       │               │   │   └──Case Constant
+        │       │               │   │       ├──int 1
+        │       │               │   │       └──int 2
+        │       │               │   └──Rule
+        │       │               │       ├──VariableDeclaration
+        │       │               │       │   ├──Type
+        │       │               │       │   │   └──int
+        │       │               │       │   └──y
+        │       │               │       │       └──int 1
+        │       │               │       └──Yield Statement
+        │       │               │           └──y
+        │       │               └──Rule
+        │       │                   ├──Label
+        │       │                   │   └──Case null, default
+        │       │                   └──Rule
+        │       │                       └──ThrowStatement
+        │       │                           └──NewInstance
+        │       │                               └──Type
+        │       │                                   └──RuntimeException
+        │       ├──VariableDeclaration
+        │       │   ├──Type
+        │       │   │   └──int
+        │       │   └──b
+        │       │       └──Switch
+        │       │           ├──Selector
+        │       │           │   └──x
+        │       │           └──Matchers
+        │       │               ├──Rule
+        │       │               │   ├──Label
+        │       │               │   │   └──Case Constant
+        │       │               │   │       └──int 0
+        │       │               │   └──Rule
+        │       │               │       └──int 1
+        │       │               ├──Rule
+        │       │               │   ├──Label
+        │       │               │   │   └──Case null
+        │       │               │   └──Rule
+        │       │               │       └──int 3
+        │       │               └──Rule
+        │       │                   ├──Label
+        │       │                   │   └──Default
+        │       │                   └──Rule
+        │       │                       └──Yield Statement
+        │       │                           └──int 0
+        │       └──VariableDeclaration
+        │           ├──Type
+        │           │   └──int
+        │           └──c
+        │               └──Switch
+        │                   ├──Selector
+        │                   │   └──x
+        │                   └──Matchers
+        │                       ├──Labeled Statement Group
+        │                       │   ├──Cases
+        │                       │   │   └──Case Constant
+        │                       │   │       └──int 5
+        │                       │   └──Statements
+        │                       │       └──Yield Statement
+        │                       │           └──int 10
+        │                       ├──Labeled Statement Group
+        │                       │   ├──Cases
+        │                       │   │   ├──Case Constant
+        │                       │   │   │   └──int 6
+        │                       │   │   └──Case Constant
+        │                       │   │       └──int 7
+        │                       │   └──Statements
+        │                       │       └──Yield Statement
+        │                       │           └──int 20
+        │                       └──Labeled Statement Group
+        │                           ├──Cases
+        │                           │   └──Default
+        │                           └──Statements
+        │                               └──Yield Statement
+        │                                   └──int 0
         ├──Method patterns
         │   ├──Type
         │   │   └──void

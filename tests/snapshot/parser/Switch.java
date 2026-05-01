@@ -19,6 +19,35 @@ class SwitchExpressions {
         }
     }
 
+    void switchExpressions(Integer x) {
+        int a = switch (x) {
+            case 0 -> 1;
+            case 1, 2 -> {
+                int y = 1;
+                yield y;
+            }
+            case null, default -> throw new RuntimeException();
+        };
+
+        int b = switch (x) {
+            case 0 -> 1;
+            case null -> 3;
+            default -> {
+                yield 0;
+            }
+        };
+
+        int c = switch (x) {
+            case 5:
+                yield 10;
+            case 6:
+            case 7:
+                yield 20;
+            default:
+                yield 0;
+        };
+    }
+
     void patterns(Object x) {
         switch (x) {
             case Integer i:

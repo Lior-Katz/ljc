@@ -1,4 +1,5 @@
 use crate::ast::identifiers::Identifier;
+use crate::ast::switch::Switch;
 use crate::ast::types::Type;
 
 pub type ExpressionList = Vec<Expression>;
@@ -48,6 +49,7 @@ pub enum Expression {
         element_type: Type,
         array_creation_mode: ArrayCreationMode,
     },
+    Switch(Box<Switch>),
 }
 
 #[derive(Debug)]

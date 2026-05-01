@@ -1364,6 +1364,7 @@ impl Parser {
 
     /// ```text
     /// unary_expression:
+    ///     switch
     ///     {prefix_oprerator} postfix_expression
     ///
     /// prefix_operator:
@@ -1371,6 +1372,9 @@ impl Parser {
     ///         ~  !  +  -  ++  --
     /// ```
     fn unary_expression(&mut self) -> Result<Expression, ParseError> {
+        if let Ok(switch) = self.switch() {
+            return Ok(switch.into());
+        }
         if self.accept(Token::Tilde) {
             Ok(Expression::BitwiseComplement(Box::new(self.unary_expression()?)))
         } else if self.accept(Token::ExclamationMark) {
@@ -2438,6 +2442,12 @@ impl Into<ElementValue> for Annotation {
 impl From<Switch> for Statement {
     fn from(value: Switch) -> Self {
         Statement::Switch(value)
+    }
+}
+
+impl From<Switch> for Expression {
+    fn from(value: Switch) -> Self {
+        Expression::Switch(Box::new(value))
     }
 }
 

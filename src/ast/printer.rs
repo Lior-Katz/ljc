@@ -702,6 +702,7 @@ impl AstNode for Expression {
                 element_type.fmt_tree(f, &new_prefix, false)?;
                 array_creation_mode.fmt_tree(f, &new_prefix, true)
             }
+            Expression::Switch(s) => s.fmt_tree(f, &prefix, is_last),
         }
     }
 }
