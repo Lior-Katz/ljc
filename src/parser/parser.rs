@@ -18,6 +18,7 @@ use crate::lexer::{Tokens, lex_single_file};
 use crate::parser::error::ParseError;
 use std::collections::VecDeque;
 
+use bitflags::bitflags;
 use std::path::Path;
 use std::vec;
 
@@ -267,7 +268,7 @@ impl Parser {
     ) -> Result<TopLevelClassOrInterfaceDeclaration, ParseError> {
         while self.accept(Token::Semicolon) {} // §7.6 (p. 231), ignore semicolons at class or interface declarations level
 
-        let modifiers = self.zero_or_more(Self::modifier);
+        let modifiers = self.modifiers(ModifierKind::CLASS | ModifierKind::INTERFACE);
         if let Ok(class_decl) = self.class_declaration() {
             Ok(class_decl.with_modifiers(modifiers).into())
         } else if let Ok(iface_decl) = self.interface_declaration() {
@@ -327,7 +328,7 @@ impl Parser {
         )
     }
 
-    fn modifier(&mut self) -> Result<Modifier, ParseError> {
+    fn modifier(&mut self, modifier_kind: ModifierKind) -> Result<Modifier, ParseError> {
         one_of_opt!(
             self.accept(Token::Public).then_some(Modifier::Public),
             self.accept(Token::Private).then_some(Modifier::Private),
@@ -336,7 +337,8 @@ impl Parser {
             (!self.nth_is(1, Token::LeftBrace) && self.accept(Token::Static))
                 .then_some(Modifier::Static),
             self.accept(Token::Final).then_some(Modifier::Final),
-            self.accept(Token::Default).then_some(Modifier::Default),
+            (modifier_kind.contains(ModifierKind::METHOD) && self.accept(Token::Default))
+                .then_some(Modifier::Default),
             self.accept(Token::Strictfp).then_some(Modifier::Strictfp),
             self.accept(Token::Native).then_some(Modifier::Native),
             self.accept(Token::Transient).then_some(Modifier::Transient),
@@ -355,6 +357,10 @@ impl Parser {
             })
         )
         .or_else(|_| self.annotation().map(Annotation::into))
+    }
+
+    fn modifiers(&mut self, modifier_kind: ModifierKind) -> Vec<Modifier> {
+        self.zero_or_more(|this| this.modifier(modifier_kind))
     }
 
     fn is_sealed_modifier(&mut self, start: usize) -> bool {
@@ -563,7 +569,7 @@ impl Parser {
     /// ```
     fn class_member_declaration(&mut self) -> Result<Modified<ClassMemberDeclaration>, ParseError> {
         while self.accept(Token::Semicolon) {} // ignore stray semicolons
-        let modifiers = self.zero_or_more(Self::modifier);
+        let modifiers = self.modifiers(ModifierKind::CLASS_MEMBER);
 
         if let Ok(class) = self.class_declaration() {
             Ok(ClassMemberDeclaration::NestedClass(class).with_modifiers(modifiers))
@@ -831,7 +837,7 @@ impl Parser {
     }
 
     fn formal_parameter(&mut self) -> Result<Modified<FormalParameter>, ParseError> {
-        let modifiers = self.zero_or_more(|this| this.modifier());
+        let modifiers = self.modifiers(ModifierKind::VARIABLE);
         let param_type = self.type_term()?;
         if self.accept(Token::Ellipsis) {
             // variable arity
@@ -876,7 +882,7 @@ impl Parser {
         if self.accept(Token::Throws) {
             self.delimited_at_least_1(
                 |this| {
-                    let modifiers = this.zero_or_more(Self::modifier);
+                    let modifiers = this.modifiers(ModifierKind::VARIABLE);
                     Ok(this.reference_type()?.with_modifiers(modifiers))
                 },
                 |this| this.assert(Token::Comma),
@@ -1087,7 +1093,7 @@ impl Parser {
     ///     _          [= variable_initializer]
     /// ```
     fn statement_starting_with_name(&mut self) -> Result<Statement, ParseError> {
-        let modifiers = self.zero_or_more(|this| this.modifier());
+        let modifiers = self.modifiers(ModifierKind::VARIABLE);
         let expression = self.term()?;
         if let Ok(var_declarations) = self.variable_declarators_list() {
             self.assert(Token::Semicolon)?;
@@ -1767,7 +1773,7 @@ impl Parser {
     ///     term {, term}
     /// ```
     fn for_header(&mut self) -> Result<ForHeader, ParseError> {
-        let modifiers = self.zero_or_more(|this| this.modifier());
+        let modifiers = self.modifiers(ModifierKind::VARIABLE);
 
         if self.accept(Token::Semicolon) {
             // basic for, empty init
@@ -1929,7 +1935,7 @@ impl Parser {
     ///     variable_access
     /// ```
     fn try_resource(&mut self) -> Result<Resource, ParseError> {
-        let modifiers = self.zero_or_more(|this| this.modifier());
+        let modifiers = self.modifiers(ModifierKind::VARIABLE);
         let expression = self.term()?;
         if let Ok(var_declarations) = self.variable_declarators_list() {
             Ok(Resource::VariableDeclaration(
@@ -1959,7 +1965,7 @@ impl Parser {
         self.assert(Token::LeftParen)?;
         let catch_type = self.delimited_at_least_1(
             |this| {
-                let modifiers = this.zero_or_more(Self::modifier);
+                let modifiers = this.modifiers(ModifierKind::VARIABLE);
                 Ok(this.type_term()?.with_modifiers(modifiers))
             },
             |this| this.assert(Token::BitwiseOr),
@@ -2138,7 +2144,7 @@ impl Parser {
             return Ok(SwitchLabel::Null { default });
         }
 
-        let modifiers = self.zero_or_more(|this| this.modifier());
+        let modifiers = self.modifiers(ModifierKind::VARIABLE);
         let expression = self.term()?;
         self.switch_label_from_term(modifiers, expression)
     }
@@ -2203,7 +2209,7 @@ impl Parser {
     ///     reference_type ( component_pattern_list )
     /// ```
     fn pattern(&mut self) -> Result<Pattern, ParseError> {
-        let modifiers = self.zero_or_more(|this| this.modifier());
+        let modifiers = self.modifiers(ModifierKind::VARIABLE);
         let type_term = self.type_term()?;
         self.pattern_from_term(modifiers, type_term)
     }
@@ -2249,6 +2255,27 @@ enum ForHeader {
         variable_declaration: Modified<VariableDeclaration>,
         iterable: Expression,
     },
+}
+
+macro_rules! bitflag_combination {
+    ($($n:ident),+ $(,)?) => {
+        0 $(
+            | Self::$n.bits()
+        )+
+    };
+}
+
+bitflags! {
+    #[derive(Copy, Clone)]
+    struct ModifierKind: u8 {
+        const CLASS         = 1 << 0;
+        const METHOD        = 1 << 1;
+        const FIELD         = 1 << 2;
+        const VARIABLE      = 1 << 3;
+        const INTERFACE     = 1 << 4;
+        const ANNOTATION    = 1 << 5;
+        const CLASS_MEMBER = bitflag_combination!(CLASS, INTERFACE, FIELD, METHOD);
+    }
 }
 
 impl From<LexError> for ParseError {
