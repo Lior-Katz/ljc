@@ -562,23 +562,23 @@ impl Parser {
     ///     {modifier} class_member_declaration_no_modifier:
     ///
     /// class_member_declaration_no_modifier:
-    ///     method_or_field_declaration
     ///     class_declaration
     ///     interface_declaration
+    ///     constructor_declaration
+    ///     method_or_field_declaration
     ///     ;
     /// ```
     fn class_member_declaration(&mut self) -> Result<Modified<ClassMemberDeclaration>, ParseError> {
         while self.accept(Token::Semicolon) {} // ignore stray semicolons
         let modifiers = self.modifiers(ModifierKind::CLASS_MEMBER);
 
-        if let Ok(class) = self.class_declaration() {
-            Ok(ClassMemberDeclaration::NestedClass(class).with_modifiers(modifiers))
-        } else if let Ok(interface) = self.interface_declaration() {
-            Ok(ClassMemberDeclaration::NestedInterface(interface).with_modifiers(modifiers))
-        } else {
+        one_of!(
+            self.class_declaration().map(ClassDeclaration::into),
+            self.interface_declaration().map(InterfaceDeclaration::into),
+            self.constructor_declaration(),
             self.method_or_field_declaration()
-                .map(|m| m.with_modifiers(modifiers))
-        }
+        )
+        .map(|d| d.with_modifiers(modifiers))
     }
 
     /// ```text
@@ -756,56 +756,57 @@ impl Parser {
         Ok(AnnotationInterfaceDeclaration { name, body })
     }
 
-    /// modifiers were extracted at the [class member](Parser::class_member_declaration) level,
-    /// so a method declaration is defined as:
     /// ```text
-    /// method_or_field_declaration:
-    ///     method_declaration
-    ///     constructor_declaration
-    ///     compact_constructor_declaration
-    ///     field_declaration
-    ///
-    /// method_declaration:
-    ///     term identifier ( [formal_parameters] ) [default_value] method_body
-    ///
     /// constructor_declaration:
+    ///     regular_constructor_declaration
+    ///     compact_constructor_declaration
+    ///
+    /// regular_constructor_declaration:
     ///     identifier ( [formal_parameters] ) constructor_body
     ///
     /// compact_constructor_declaration:
     ///     identifier constructor_body
-    ///
-    /// field_declaration:
-    ///     term identifier [= variable_initializer] {, identifier [= variable_initializer]}
     /// ```
-    fn method_or_field_declaration(&mut self) -> Result<ClassMemberDeclaration, ParseError> {
-        let result = self.term()?;
-        if self.accept(Token::LeftParen) {
-            if let Expression::Name(name) = result {
-                let name = name.try_into()?;
+    fn constructor_declaration(&mut self) -> Result<ClassMemberDeclaration, ParseError> {
+        if peek!(self, 0 => Token::Id(_) , 1 => Token::LeftParen | Token::LeftBrace) {
+            let name = self.identifier()?.try_into()?;
+            if self.accept(Token::LeftParen) {
                 let parameters = self.formal_parameters()?;
                 self.assert(Token::RightParen)?;
                 let throws = self.opt_throws()?;
                 let body = self.constructor_body()?;
-                return Ok(ClassMemberDeclaration::Constructor { name, parameters, throws, body });
-            }
-        }
-        if self.next_is(Token::LeftBrace) {
-            if let Expression::Name(name) = result {
-                let name = name.try_into()?;
+                Ok(ClassMemberDeclaration::Constructor { name, parameters, throws, body })
+            } else {
                 let body = self.constructor_body()?;
-                return Ok(ClassMemberDeclaration::CompactConstructor { name, body });
+                Ok(ClassMemberDeclaration::CompactConstructor { name, body })
             }
+        } else {
+            Err(ParseError::NoProduction)
         }
+    }
+
+    /// ```text
+    /// method_or_field_declaration:
+    ///     method_declaration
+    ///     field_declaration
+    ///
+    /// method_declaration:
+    ///     type_term identifier ( [formal_parameters] ) [default_value] method_body
+    ///
+    /// field_declaration:
+    ///     type_term identifier [= variable_initializer] {, identifier [= variable_initializer]}
+    /// ```
+    fn method_or_field_declaration(&mut self) -> Result<ClassMemberDeclaration, ParseError> {
+        let type_term = self.type_term()?;
         let identifier = self.identifier()?;
         if self.accept(Token::LeftParen) {
-            let result = result.try_into()?;
             let parameters = self.formal_parameters()?;
             self.assert(Token::RightParen)?;
             let throws = self.opt_throws()?;
             let default = self.opt_default()?;
             let body = self.method_body()?;
             Ok(MethodDeclaration {
-                result,
+                result: type_term,
                 identifier,
                 parameters,
                 throws,
@@ -814,7 +815,6 @@ impl Parser {
             }
             .into())
         } else {
-            let result = result.try_into()?;
             let mut field_declaration = vec![VariableDeclarator {
                 name: VariableDeclaratorId::Named(identifier),
                 initializer: self
@@ -826,7 +826,7 @@ impl Parser {
             }
             self.assert(Token::Semicolon)?;
             Ok(ClassMemberDeclaration::Field {
-                variable_type: result,
+                variable_type: type_term,
                 declarations: field_declaration,
             })
         }
@@ -2404,6 +2404,18 @@ impl Into<InterfaceDeclaration> for NormalInterfaceDeclaration {
 impl Into<InterfaceDeclaration> for AnnotationInterfaceDeclaration {
     fn into(self) -> InterfaceDeclaration {
         InterfaceDeclaration::AnnotationInterface(self)
+    }
+}
+
+impl Into<ClassMemberDeclaration> for ClassDeclaration {
+    fn into(self) -> ClassMemberDeclaration {
+        ClassMemberDeclaration::NestedClass(self)
+    }
+}
+
+impl Into<ClassMemberDeclaration> for InterfaceDeclaration {
+    fn into(self) -> ClassMemberDeclaration {
+        ClassMemberDeclaration::NestedInterface(self)
     }
 }
 
