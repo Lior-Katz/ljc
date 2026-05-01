@@ -53,7 +53,7 @@ pub enum Statement {
     },
     Return(Option<Expression>),
     Try {
-        resource: Resources,
+        resources: Resources,
         try_block: BlockStatements,
         exception_handlers: CatchClauseList,
         finally_block: Option<BlockStatements>,

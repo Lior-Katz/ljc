@@ -1927,7 +1927,7 @@ impl Parser {
             None
         };
         Ok(Statement::Try {
-            resource: resources,
+            resources,
             try_block: body,
             exception_handlers: catch_clauses,
             finally_block,

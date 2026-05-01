@@ -23,9 +23,10 @@ source: tests/snapshot/snapshot_test.rs
         │                   │   └──Type
         │                   │       └──ArithmeticException
         │                   └──MethodInvocation
-        │                       ├──method: getMessage
-        │                       └──target:
-        │                           └──e
+        │                       ├──Target
+        │                       │   └──e
+        │                       └──Name
+        │                           └──getMessage
         ├──Method multiple_catch
         │   ├──Type
         │   │   └──void
@@ -33,10 +34,11 @@ source: tests/snapshot/snapshot_test.rs
         │       └──TryStatement
         │           ├──TryBlock
         │           │   └──MethodInvocation
-        │           │       ├──method: parseInt
-        │           │       ├──target:
+        │           │       ├──Target
         │           │       │   └──Integer
-        │           │       └──args:
+        │           │       ├──Name
+        │           │       │   └──parseInt
+        │           │       └──Args
         │           │           └──String "abc"
         │           └──ExceptionHandlers
         │               ├──CatchClause
@@ -45,18 +47,20 @@ source: tests/snapshot/snapshot_test.rs
         │               │   │   └──Type
         │               │   │       └──NumberFormatException
         │               │   └──MethodInvocation
-        │               │       ├──method: getMessage
-        │               │       └──target:
-        │               │           └──e
+        │               │       ├──Target
+        │               │       │   └──e
+        │               │       └──Name
+        │               │           └──getMessage
         │               └──CatchClause
         │                   ├──e
         │                   ├──CatchType
         │                   │   └──Type
         │                   │       └──Exception
         │                   └──MethodInvocation
-        │                       ├──method: getMessage
-        │                       └──target:
-        │                           └──e
+        │                       ├──Target
+        │                       │   └──e
+        │                       └──Name
+        │                           └──getMessage
         ├──Method union_catch
         │   ├──Type
         │   │   └──void
@@ -64,10 +68,11 @@ source: tests/snapshot/snapshot_test.rs
         │       └──TryStatement
         │           ├──TryBlock
         │           │   └──MethodInvocation
-        │           │       ├──method: parseInt
-        │           │       ├──target:
+        │           │       ├──Target
         │           │       │   └──Integer
-        │           │       └──args:
+        │           │       ├──Name
+        │           │       │   └──parseInt
+        │           │       └──Args
         │           │           └──String "abc"
         │           └──ExceptionHandlers
         │               └──CatchClause
@@ -78,9 +83,10 @@ source: tests/snapshot/snapshot_test.rs
         │                   │   └──Type
         │                   │       └──NullPointerException
         │                   └──MethodInvocation
-        │                       ├──method: getMessage
-        │                       └──target:
-        │                           └──e
+        │                       ├──Target
+        │                       │   └──e
+        │                       └──Name
+        │                           └──getMessage
         ├──Method try_catch_finally
         │   ├──Type
         │   │   └──void
@@ -101,14 +107,16 @@ source: tests/snapshot/snapshot_test.rs
         │           │       │   └──Type
         │           │       │       └──Exception
         │           │       └──MethodInvocation
-        │           │           ├──method: getMessage
-        │           │           └──target:
-        │           │               └──e
+        │           │           ├──Target
+        │           │           │   └──e
+        │           │           └──Name
+        │           │               └──getMessage
         │           └──FinallyBlock
         │               └──MethodInvocation
-        │                   ├──method: gc
-        │                   └──target:
-        │                       └──System
+        │                   ├──Target
+        │                   │   └──System
+        │                   └──Name
+        │                       └──gc
         ├──Method try_finally
         │   ├──Type
         │   │   └──void
@@ -142,9 +150,10 @@ source: tests/snapshot/snapshot_test.rs
         │           │               └──String "abc"
         │           ├──TryBlock
         │           │   └──MethodInvocation
-        │           │       ├──method: read
-        │           │       └──target:
-        │           │           └──in
+        │           │       ├──Target
+        │           │       │   └──in
+        │           │       └──Name
+        │           │           └──read
         │           └──ExceptionHandlers
         │               └──CatchClause
         │                   ├──e
@@ -152,9 +161,10 @@ source: tests/snapshot/snapshot_test.rs
         │                   │   └──Type
         │                   │       └──IOException
         │                   └──MethodInvocation
-        │                       ├──method: getMessage
-        │                       └──target:
-        │                           └──e
+        │                       ├──Target
+        │                       │   └──e
+        │                       └──Name
+        │                           └──getMessage
         ├──Method multiple_resources
         │   ├──Type
         │   │   └──void
@@ -178,14 +188,16 @@ source: tests/snapshot/snapshot_test.rs
         │           │                   └──StringWriter
         │           ├──TryBlock
         │           │   └──MethodInvocation
-        │           │       ├──method: write
-        │           │       ├──target:
+        │           │       ├──Target
         │           │       │   └──out
-        │           │       └──args:
+        │           │       ├──Name
+        │           │       │   └──write
+        │           │       └──Args
         │           │           └──MethodInvocation
-        │           │               ├──method: read
-        │           │               └──target:
-        │           │                   └──in
+        │           │               ├──Target
+        │           │               │   └──in
+        │           │               └──Name
+        │           │                   └──read
         │           └──ExceptionHandlers
         │               └──CatchClause
         │                   ├──e
@@ -193,9 +205,10 @@ source: tests/snapshot/snapshot_test.rs
         │                   │   └──Type
         │                   │       └──IOException
         │                   └──MethodInvocation
-        │                       ├──method: getMessage
-        │                       └──target:
-        │                           └──e
+        │                       ├──Target
+        │                       │   └──e
+        │                       └──Name
+        │                           └──getMessage
         ├──Method try_with_resources_finally
         │   ├──Type
         │   │   └──void
@@ -212,9 +225,10 @@ source: tests/snapshot/snapshot_test.rs
         │           │               └──String "abc"
         │           ├──TryBlock
         │           │   └──MethodInvocation
-        │           │       ├──method: read
-        │           │       └──target:
-        │           │           └──in
+        │           │       ├──Target
+        │           │       │   └──in
+        │           │       └──Name
+        │           │           └──read
         │           ├──ExceptionHandlers
         │           │   └──CatchClause
         │           │       ├──e
@@ -222,14 +236,16 @@ source: tests/snapshot/snapshot_test.rs
         │           │       │   └──Type
         │           │       │       └──IOException
         │           │       └──MethodInvocation
-        │           │           ├──method: getMessage
-        │           │           └──target:
-        │           │               └──e
+        │           │           ├──Target
+        │           │           │   └──e
+        │           │           └──Name
+        │           │               └──getMessage
         │           └──FinallyBlock
         │               └──MethodInvocation
-        │                   ├──method: gc
-        │                   └──target:
-        │                       └──System
+        │                   ├──Target
+        │                   │   └──System
+        │                   └──Name
+        │                       └──gc
         ├──Method try_with_resources_only
         │   ├──Type
         │   │   └──void
@@ -321,10 +337,11 @@ source: tests/snapshot/snapshot_test.rs
         │           │                   └──StringWriter
         │           ├──TryBlock
         │           │   └──MethodInvocation
-        │           │       ├──method: write
-        │           │       ├──target:
+        │           │       ├──Target
         │           │       │   └──out
-        │           │       └──args:
+        │           │       ├──Name
+        │           │       │   └──write
+        │           │       └──Args
         │           │           └──int 1
         │           └──ExceptionHandlers
         │               └──CatchClause

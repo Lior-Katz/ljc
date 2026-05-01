@@ -100,13 +100,9 @@ fn fmt_modifiers(
     is_last: bool,
     modifiers: &Modifiers,
 ) -> fmt::Result {
-    if !modifiers.is_empty() {
-        let (modifiers_label_prefix, modifiers_prefix) = branch(prefix, is_last);
-        writeln!(f, "{modifiers_label_prefix}Modifiers")?;
-        modifiers.fmt_tree(f, &modifiers_prefix, true)
-    } else {
-        Ok(())
-    }
+    Children::new()
+        .push_if_non_empty("Modifiers", modifiers)
+        .fmt_tree(f, &prefix, is_last)
 }
 
 impl AstNode for Program {
@@ -172,12 +168,8 @@ impl AstNode<Modifiers> for NormalClassDeclaration {
         let (line_prefix, new_prefix) = branch(&prefix, is_last);
 
         writeln!(f, "{line_prefix}Class {}", self.identifier)?;
-        let modifiers_last = self.body.is_empty()
-            && self.extends.is_none()
-            && self.implements.is_none()
-            && self.permits.is_none();
-        fmt_modifiers(f, &new_prefix, modifiers_last, modifiers)?;
         Children::new()
+            .push_if_non_empty("Modifiers", modifiers)
             .push_opt("Extends", &self.extends)
             .push_opt("Implements", &self.implements)
             .push_opt("Permits", &self.permits)
@@ -249,12 +241,10 @@ impl AstNode<Modifiers> for ClassMemberDeclaration {
                 name: _,
             } => {
                 writeln!(f, "{line_prefix}Constructor declaration")?;
-                fmt_modifiers(f, &new_prefix, false, modifiers)?;
-                if !throws.is_empty() {
-                    Children::new()
-                        .push("Throws", throws)
-                        .fmt_tree(f, &new_prefix, false)?;
-                }
+                Children::new()
+                    .push_if_non_empty("Modifiers", modifiers)
+                    .push_if_non_empty("Throws", throws)
+                    .fmt_tree(f, &new_prefix, false)?;
                 parameters.fmt_tree(f, &new_prefix, false)?;
                 body.fmt_tree(f, &new_prefix, true)
             }
@@ -305,8 +295,8 @@ impl AstNode<Modifiers> for NormalInterfaceDeclaration {
         let (line_prefix, new_prefix) = branch(&prefix, is_last);
         writeln!(f, "{line_prefix}Interface {}", self.identifier)?;
 
-        fmt_modifiers(f, &new_prefix, self.body.is_empty(), modifiers)?;
         Children::new()
+            .push_if_non_empty("Modifiers", modifiers)
             .push_opt("Extends", &self.extends)
             .push_opt("Permits", &self.permits)
             .fmt_tree(f, &new_prefix, true)?;
@@ -326,10 +316,10 @@ impl AstNode<Modifiers> for AnnotationInterfaceDeclaration {
         is_last: bool,
         modifiers: &Modifiers,
     ) -> fmt::Result {
-        let (line_prefix, _new_prefix) = branch(&prefix, is_last);
+        let (line_prefix, new_prefix) = branch(&prefix, is_last);
         writeln!(f, "{line_prefix}@interface {}", self.name)?;
-        fmt_modifiers(f, &_new_prefix, self.body.is_empty(), modifiers)?;
-        self.body.fmt_tree(f, &_new_prefix, true)
+        fmt_modifiers(f, &new_prefix, self.body.is_empty(), modifiers)?;
+        self.body.fmt_tree(f, &new_prefix, true)
     }
 }
 
@@ -337,11 +327,8 @@ impl AstNode for MethodDeclaration {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, _is_last: bool) -> fmt::Result {
         self.result.fmt_tree(f, &prefix, false)?;
         self.parameters.fmt_tree(f, &prefix, false)?;
-        let mut children = Children::new();
-        if !self.throws.is_empty() {
-            children = children.push("Throws", &self.throws);
-        }
-        children
+        Children::new()
+            .push_if_non_empty("Throws", &self.throws)
             .push_opt("Default", &self.default)
             .fmt_tree(f, &prefix, false)?;
         self.body.fmt_tree(f, &prefix, true)
@@ -581,27 +568,19 @@ impl AstNode for Statement {
                 Ok(())
             }
             Statement::Try {
-                resource,
+                resources,
                 try_block,
                 exception_handlers,
                 finally_block,
             } => {
                 writeln!(f, "{line_prefix}TryStatement")?;
-                let resources = if resource.is_empty() { None } else { Some(resource) };
 
-                let exception_handlers = if exception_handlers.is_empty() {
-                    None
-                } else {
-                    Some(exception_handlers)
-                };
-
-                let children = Children::new()
-                    .push_opt("Resources", &resources)
+                Children::new()
+                    .push_if_non_empty("Resources", resources)
                     .push("TryBlock", try_block)
-                    .push_opt("ExceptionHandlers", &exception_handlers)
-                    .push_opt("FinallyBlock", finally_block);
-
-                children.fmt_tree(f, &new_prefix, true)
+                    .push_if_non_empty("ExceptionHandlers", exception_handlers)
+                    .push_opt("FinallyBlock", finally_block)
+                    .fmt_tree(f, &new_prefix, true)
             }
             Statement::Throw(e) => {
                 writeln!(f, "{line_prefix}ThrowStatement")?;
@@ -844,24 +823,14 @@ impl AstNode for MemberAccess {
 impl AstNode for MethodCall {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(prefix, is_last);
-        let has_args = self.arguments.is_empty();
 
         writeln!(f, "{line_prefix}MethodInvocation")?;
 
-        let (method_prefix, _) = branch(&new_prefix, false);
-        writeln!(f, "{method_prefix}method: {}", self.name)?;
-
-        let (target_prefix, target_new_prefix) = branch(&new_prefix, has_args);
-        writeln!(f, "{target_prefix}target:")?;
-        self.target.fmt_tree(f, &target_new_prefix, true)?;
-
-        if !has_args {
-            let (args_prefix, args_new_prefix) = branch(&new_prefix, true);
-            writeln!(f, "{args_prefix}args:")?;
-            self.arguments.fmt_tree(f, &args_new_prefix, true)?;
-        }
-
-        Ok(())
+        Children::new()
+            .push("Target", &self.target)
+            .push("Name", &self.name)
+            .push_if_non_empty("Args", &self.arguments)
+            .fmt_tree(f, &new_prefix, true)
     }
 }
 
@@ -870,16 +839,10 @@ impl AstNode for ConstructorBody {
         let (line_prefix, new_prefix) = branch(prefix, is_last);
         writeln!(f, "{line_prefix}ConstructorBody")?;
 
-        let epilogue = if self.epilogue.is_empty() {
-            None
-        } else {
-            Some(&self.epilogue)
-        };
-
         let children = Children::new()
             .push_opt("Prologue", &self.prologue)
             .push_opt("ConstructorInvocation", &self.constructor_invocation)
-            .push_opt("Epilogue", &epilogue);
+            .push_if_non_empty("Epilogue", &self.epilogue);
         children.fmt_tree(f, &new_prefix, true)
     }
 }
@@ -916,7 +879,6 @@ impl AstNode for Resource {
 impl AstNode for CatchClause {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(prefix, is_last);
-        // let children = Children::new().push()
         writeln!(f, "{line_prefix}CatchClause")?;
         let (catch_parameter_label_prefix, _) = branch(&new_prefix, false);
         writeln!(f, "{catch_parameter_label_prefix}{}", self.var_id)?;
@@ -950,6 +912,16 @@ impl<'a> Children<'a> {
         if let Some(n) = node {
             self.inner.push((label, n));
         }
+        self
+    }
+
+    fn push_if_non_empty<T>(mut self, label: &'a str, node: &'a Vec<T>) -> Self
+    where
+        T: AstNode,
+    {
+        if !node.is_empty() {
+            self = self.push(label, node);
+        };
         self
     }
 }

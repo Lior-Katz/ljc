@@ -237,6 +237,7 @@ source: tests/snapshot/snapshot_test.rs
                         └──Assignment +=
                             ├──b
                             └──MethodInvocation
-                                ├──method: length
-                                └──target:
-                                    └──s
+                                ├──Target
+                                │   └──s
+                                └──Name
+                                    └──length

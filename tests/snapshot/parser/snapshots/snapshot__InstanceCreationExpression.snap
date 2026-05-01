@@ -35,12 +35,13 @@ source: tests/snapshot/snapshot_test.rs
                 │               │   └──String
                 │               └──String "there"
                 └──MethodInvocation
-                    ├──method: compareTo
-                    ├──target:
+                    ├──Target
                     │   └──NewInstance
                     │       └──Type
                     │           └──String
-                    └──args:
+                    ├──Name
+                    │   └──compareTo
+                    └──Args
                         └──NewInstance
                             └──Type
                                 ├──java

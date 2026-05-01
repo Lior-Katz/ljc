@@ -79,65 +79,75 @@ source: tests/snapshot/snapshot_test.rs
         │   │   └──void
         │   └──Block
         │       ├──MethodInvocation
-        │       │   ├──method: println
-        │       │   ├──target:
+        │       │   ├──Target
         │       │   │   └──MemberAccess
         │       │   │       ├──field: out
         │       │   │       └──target:
         │       │   │           └──System
-        │       │   └──args:
+        │       │   ├──Name
+        │       │   │   └──println
+        │       │   └──Args
         │       │       └──String "Hello, world!"
         │       ├──MethodInvocation
-        │       │   ├──method: currentTimeMillis
-        │       │   └──target:
-        │       │       └──System
+        │       │   ├──Target
+        │       │   │   └──System
+        │       │   └──Name
+        │       │       └──currentTimeMillis
         │       ├──MethodInvocation
-        │       │   ├──method: max
-        │       │   ├──target:
+        │       │   ├──Target
         │       │   │   └──Math
-        │       │   └──args:
+        │       │   ├──Name
+        │       │   │   └──max
+        │       │   └──Args
         │       │       ├──int 1
         │       │       └──MethodInvocation
-        │       │           ├──method: abs
-        │       │           ├──target:
+        │       │           ├──Target
         │       │           │   └──Math
-        │       │           └──args:
+        │       │           ├──Name
+        │       │           │   └──abs
+        │       │           └──Args
         │       │               └──UnaryMinus
         │       │                   └──int 1
         │       ├──MethodInvocation
-        │       │   ├──method: trim
-        │       │   └──target:
-        │       │       └──MethodInvocation
-        │       │           ├──method: toUpperCase
-        │       │           └──target:
-        │       │               └──String "hello"
+        │       │   ├──Target
+        │       │   │   └──MethodInvocation
+        │       │   │       ├──Target
+        │       │   │       │   └──String "hello"
+        │       │   │       └──Name
+        │       │   │           └──toUpperCase
+        │       │   └──Name
+        │       │       └──trim
         │       ├──MethodInvocation
-        │       │   ├──method: toLowerCase
-        │       │   └──target:
-        │       │       └──MethodInvocation
-        │       │           ├──method: substring
-        │       │           ├──target:
-        │       │           │   └──String "test"
-        │       │           └──args:
-        │       │               ├──int 0
-        │       │               └──int 2
+        │       │   ├──Target
+        │       │   │   └──MethodInvocation
+        │       │   │       ├──Target
+        │       │   │       │   └──String "test"
+        │       │   │       ├──Name
+        │       │   │       │   └──substring
+        │       │   │       └──Args
+        │       │   │           ├──int 0
+        │       │   │           └──int 2
+        │       │   └──Name
+        │       │       └──toLowerCase
         │       ├──VariableDeclaration
         │       │   ├──Type
         │       │   │   └──int
         │       │   └──x
         │       │       └── +
         │       │           ├──MethodInvocation
-        │       │           │   ├──method: abs
-        │       │           │   ├──target:
+        │       │           │   ├──Target
         │       │           │   │   └──Math
-        │       │           │   └──args:
+        │       │           │   ├──Name
+        │       │           │   │   └──abs
+        │       │           │   └──Args
         │       │           │       └──UnaryMinus
         │       │           │           └──int 5
         │       │           └──MethodInvocation
-        │       │               ├──method: max
-        │       │               ├──target:
+        │       │               ├──Target
         │       │               │   └──Math
-        │       │               └──args:
+        │       │               ├──Name
+        │       │               │   └──max
+        │       │               └──Args
         │       │                   ├──int 1
         │       │                   └──int 2
         │       └──VariableDeclaration
@@ -146,14 +156,16 @@ source: tests/snapshot/snapshot_test.rs
         │           └──y
         │               └── *
         │                   ├──MethodInvocation
-        │                   │   ├──method: length
-        │                   │   └──target:
-        │                   │       └──String "abc"
+        │                   │   ├──Target
+        │                   │   │   └──String "abc"
+        │                   │   └──Name
+        │                   │       └──length
         │                   └──MethodInvocation
-        │                       ├──method: min
-        │                       ├──target:
+        │                       ├──Target
         │                       │   └──Math
-        │                       └──args:
+        │                       ├──Name
+        │                       │   └──min
+        │                       └──Args
         │                           ├──int 2
         │                           └──int 3
         └──Method array_access

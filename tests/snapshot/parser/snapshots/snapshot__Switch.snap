@@ -183,9 +183,10 @@ source: tests/snapshot/snapshot_test.rs
         │                   │   │               └──i
         │                   │   └──Statements
         │                   │       ├──MethodInvocation
-        │                   │       │   ├──method: intValue
-        │                   │       │   └──target:
-        │                   │       │       └──i
+        │                   │       │   ├──Target
+        │                   │       │   │   └──i
+        │                   │       │   └──Name
+        │                   │       │       └──intValue
         │                   │       └──BreakStatement
         │                   ├──Labeled Statement Group
         │                   │   ├──Cases
