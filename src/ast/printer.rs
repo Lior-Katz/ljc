@@ -618,6 +618,10 @@ impl AstNode for Statement {
                 writeln!(f, "{line_prefix}Switch Statement")?;
                 s.fmt_tree(f, &new_prefix, true)
             }
+            Statement::Yield(e) => {
+                writeln!(f, "{line_prefix}Yield Statement")?;
+                e.fmt_tree(f, &new_prefix, true)
+            }
         }
     }
 }

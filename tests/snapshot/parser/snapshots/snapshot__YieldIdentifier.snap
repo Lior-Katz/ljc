@@ -1,0 +1,140 @@
+---
+source: tests/snapshot/snapshot_test.rs
+---
+└──Compilation Unit
+    └──Class RecordIdentifier
+        ├──Field declaration
+        │   ├──Type
+        │   │   └──int
+        │   └──yield
+        ├──Field declaration
+        │   ├──Type
+        │   │   ├──yield
+        │   │   └──Type
+        │   └──field1
+        ├──Field declaration
+        │   ├──Type
+        │   │   ├──com
+        │   │   ├──yield
+        │   │   └──Type
+        │   └──field2
+        ├──Method yield
+        │   ├──Type
+        │   │   └──int
+        │   ├──Param yield
+        │   │   └──Type
+        │   │       └──int
+        │   └──Block
+        │       └──ReturnStatement
+        │           └──yield
+        ├──Method method1
+        │   ├──Type
+        │   │   ├──yield
+        │   │   └──Type
+        │   ├──Param yield
+        │   │   └──Type
+        │   │       ├──yield
+        │   │       └──Type
+        │   └──Block
+        │       └──ReturnStatement
+        │           └──null
+        ├──Method method2
+        │   ├──Type
+        │   │   ├──com
+        │   │   ├──yield
+        │   │   └──Type
+        │   └──Block
+        │       ├──VariableDeclaration
+        │       │   ├──Type
+        │       │   │   └──int
+        │       │   └──yield
+        │       │       └──int 1
+        │       ├──Assignment =
+        │       │   ├──yield
+        │       │   └── +
+        │       │       ├──yield
+        │       │       └──int 1
+        │       ├──VariableDeclaration
+        │       │   ├──Type
+        │       │   │   ├──yield
+        │       │   │   └──Type
+        │       │   └──a
+        │       ├──VariableDeclaration
+        │       │   ├──Type
+        │       │   │   ├──com
+        │       │   │   ├──yield
+        │       │   │   └──Type
+        │       │   └──b
+        │       ├──VariableDeclaration
+        │       │   ├──Type
+        │       │   │   └──int
+        │       │   └──c
+        │       │       └── +
+        │       │           ├──MemberAccess
+        │       │           │   ├──field: value
+        │       │           │   └──target:
+        │       │           │       └──MemberAccess
+        │       │           │           ├──field: Type
+        │       │           │           └──target:
+        │       │           │               └──yield
+        │       │           └──MemberAccess
+        │       │               ├──field: value
+        │       │               └──target:
+        │       │                   └──MemberAccess
+        │       │                       ├──field: Type
+        │       │                       └──target:
+        │       │                           └──MemberAccess
+        │       │                               ├──field: yield
+        │       │                               └──target:
+        │       │                                   └──com
+        │       ├──ReturnStatement
+        │       │   └──null
+        │       └──LabeledStatement: yield
+        │           └──WhileStatement
+        │               ├──Condition
+        │               │   └──boolean true
+        │               └──Body
+        │                   └──BlockStatement
+        │                       └──BreakStatement yield
+        ├──Enum E1
+        │   ├──Constants
+        │   │   └──yield
+        │   └──Body
+        ├──Enum E2
+        │   ├──Constants
+        │   │   └──yield
+        │   │       └──Args
+        │   │           └──int 1
+        │   └──Body
+        │       └──Constructor declaration
+        │           ├──Param x
+        │           │   └──Type
+        │           │       └──int
+        │           └──ConstructorBody
+        ├──Enum E3
+        │   ├──Constants
+        │   │   └──yield
+        │   │       └──Body
+        │   │           └──Field declaration
+        │   │               ├──Type
+        │   │               │   └──int
+        │   │               └──x
+        │   │                   └──int 1
+        │   └──Body
+        └──Enum E4
+            ├──Constants
+            │   └──yield
+            │       ├──Args
+            │       │   └──int 2
+            │       └──Body
+            │           └──Field declaration
+            │               ├──Type
+            │               │   └──int
+            │               └──y
+            │                   └──int 2
+            └──Body
+                └──Constructor declaration
+                    ├──Param x
+                    │   └──Type
+                    │       └──int
+                    └──ConstructorBody

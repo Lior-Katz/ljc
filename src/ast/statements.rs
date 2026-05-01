@@ -64,6 +64,7 @@ pub enum Statement {
         body: BlockStatements,
     },
     Switch(Switch),
+    Yield(Expression),
 }
 
 #[derive(Debug)]

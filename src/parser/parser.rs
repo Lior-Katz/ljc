@@ -1037,6 +1037,7 @@ impl Parser {
             self.try_statement(),
             self.throw_statement(),
             self.switch_statement(),
+            self.yield_statement(),
             self.synchronized_statement(),
         )
     }
@@ -2048,6 +2049,39 @@ impl Parser {
             let body = self.block()?;
             Ok(Statement::Synchronized { lock, body })
         }
+    }
+
+    fn yield_statement(&mut self) -> Result<Statement, ParseError> {
+        if !self.is_yield_statement() {
+            return Err(ParseError::NoProduction);
+        }
+        self.next()?;
+        let expression = self.expression()?;
+        self.assert(Token::Semicolon)?;
+        Ok(Statement::Yield(expression))
+    }
+
+    fn is_yield_statement(&mut self) -> bool {
+        let yield_token = peek!(self, 0 => Token::Id(s) if s.as_str() == "yield");
+        let mut expression_start = peek!(self, 1 =>
+            Token::Plus | Token::Minus | Token::StringLiteral(_) | Token::CharLiteral(_) |
+            Token::IntegerLiteral(_) | Token::LongLiteral(_) | Token::FloatingPointLiteral |
+            Token::NullLiteral | Token::Id(_) | Token::Underscore | Token::BooleanLiteral(_) |
+            Token::New | Token::Switch | Token::This | Token::Super |
+            Token::Byte | Token::Char | Token::Short | Token::Int | Token::Long | Token::Float
+            | Token::Double | Token::Void | Token::Boolean | Token::Tilde | Token::ExclamationMark);
+
+        expression_start |= peek!(self,1 => Token::Increment | Token::Decrement )
+            && !self.nth_is(2, Token::Semicolon);
+
+        /* TODO: at this point additional lookahead can yield better error diagnostics,
+        by checking if whatever comes after looks like a method call or like an expression */
+        expression_start |= self.nth_is(1, Token::LeftParen);
+
+        /* TODO: can be used for error recovery here, or for providing better error diagnostics */
+        expression_start |= self.nth_is(1, Token::Semicolon);
+
+        yield_token && expression_start
     }
 
     fn switch_statement(&mut self) -> Result<Statement, ParseError> {
