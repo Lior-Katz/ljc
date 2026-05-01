@@ -1,4 +1,6 @@
 public class Expressions {
+    int x;
+
     void literal_expressions() {
         int n = 5;
         long l = 10L;
@@ -171,5 +173,11 @@ public class Expressions {
 
         x = -1 > 0 ? -2 : -3;
         x = true ? -a : -b;
+    }
+
+    void thisExpressions() {
+        int a = this.x;
+        this.x = 1;
+        this.conditional_expressions();
     }
 }

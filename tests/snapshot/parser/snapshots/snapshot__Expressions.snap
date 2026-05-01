@@ -5,6 +5,10 @@ source: tests/snapshot/snapshot_test.rs
     └──Class Expressions
         ├──Modifiers
         │   └──public
+        ├──Field declaration
+        │   ├──Type
+        │   │   └──int
+        │   └──x
         ├──Method literal_expressions
         │   ├──Type
         │   │   └──void
@@ -445,183 +449,206 @@ source: tests/snapshot/snapshot_test.rs
         │               └── +
         │                   ├──int 3
         │                   └──int 1
-        └──Method conditional_expressions
+        ├──Method conditional_expressions
+        │   ├──Type
+        │   │   └──void
+        │   └──Block
+        │       ├──VariableDeclaration
+        │       │   ├──Type
+        │       │   │   └──int
+        │       │   └──x
+        │       │       └──ConditionalExpression
+        │       │           ├──boolean true
+        │       │           ├──int 1
+        │       │           └──int 2
+        │       ├──VariableDeclaration
+        │       │   ├──Type
+        │       │   │   └──int
+        │       │   └──a
+        │       │       └──ConditionalExpression
+        │       │           ├──boolean false
+        │       │           ├──int 1
+        │       │           └──int 2
+        │       ├──VariableDeclaration
+        │       │   ├──Type
+        │       │   │   └──int
+        │       │   └──b
+        │       │       └──ConditionalExpression
+        │       │           ├──boolean true
+        │       │           ├──int 1
+        │       │           └──ConditionalExpression
+        │       │               ├──boolean false
+        │       │               ├──int 2
+        │       │               └──int 3
+        │       ├──VariableDeclaration
+        │       │   ├──Type
+        │       │   │   └──int
+        │       │   └──c
+        │       │       └──ConditionalExpression
+        │       │           ├──boolean true
+        │       │           ├──ConditionalExpression
+        │       │           │   ├──boolean false
+        │       │           │   ├──int 1
+        │       │           │   └──int 2
+        │       │           └──int 3
+        │       ├──VariableDeclaration
+        │       │   ├──Type
+        │       │   │   └──int
+        │       │   └──d
+        │       │       └──ConditionalExpression
+        │       │           ├── <
+        │       │           │   ├──int 1
+        │       │           │   └──int 2
+        │       │           ├──int 3
+        │       │           └──int 4
+        │       ├──VariableDeclaration
+        │       │   ├──Type
+        │       │   │   └──int
+        │       │   └──e
+        │       │       └──ConditionalExpression
+        │       │           ├── &&
+        │       │           │   ├──boolean true
+        │       │           │   └──boolean false
+        │       │           ├──int 1
+        │       │           └──int 2
+        │       ├──VariableDeclaration
+        │       │   ├──Type
+        │       │   │   └──int
+        │       │   └──f
+        │       │       └──ConditionalExpression
+        │       │           ├── ||
+        │       │           │   ├──boolean true
+        │       │           │   └──boolean false
+        │       │           ├──int 1
+        │       │           └──int 2
+        │       ├──VariableDeclaration
+        │       │   ├──Type
+        │       │   │   └──int
+        │       │   └──g
+        │       │       └──ConditionalExpression
+        │       │           ├──boolean true
+        │       │           ├──int 2
+        │       │           └── +
+        │       │               ├──int 3
+        │       │               └──int 1
+        │       ├──Assignment =
+        │       │   ├──x
+        │       │   └──ConditionalExpression
+        │       │       ├── <
+        │       │       │   ├──a
+        │       │       │   └──b
+        │       │       ├──c
+        │       │       └── +
+        │       │           ├──d
+        │       │           └──e
+        │       ├──Assignment =
+        │       │   ├──x
+        │       │   └──ConditionalExpression
+        │       │       ├── <
+        │       │       │   ├──a
+        │       │       │   └──b
+        │       │       ├── +
+        │       │       │   ├──c
+        │       │       │   └──d
+        │       │       └──e
+        │       ├──Assignment =
+        │       │   ├──x
+        │       │   └──ConditionalExpression
+        │       │       ├── >
+        │       │       │   ├── +
+        │       │       │   │   ├──a
+        │       │       │   │   └──b
+        │       │       │   └──c
+        │       │       ├── *
+        │       │       │   ├──d
+        │       │       │   └──e
+        │       │       └── /
+        │       │           ├──f
+        │       │           └──g
+        │       ├──Assignment =
+        │       │   ├──x
+        │       │   └──ConditionalExpression
+        │       │       ├──boolean true
+        │       │       ├── +
+        │       │       │   ├──a
+        │       │       │   └── *
+        │       │       │       ├──b
+        │       │       │       └──c
+        │       │       └── <<
+        │       │           ├──d
+        │       │           └──e
+        │       ├──VariableDeclaration
+        │       │   ├──Type
+        │       │   │   └──boolean
+        │       │   ├──b1
+        │       │   │   └──boolean false
+        │       │   ├──b2
+        │       │   │   └──boolean false
+        │       │   └──b3
+        │       │       └──boolean false
+        │       ├──Assignment =
+        │       │   ├──x
+        │       │   └──ConditionalExpression
+        │       │       ├──b1
+        │       │       ├──b
+        │       │       └──ConditionalExpression
+        │       │           ├──b2
+        │       │           ├──d
+        │       │           └──ConditionalExpression
+        │       │               ├──b3
+        │       │               ├──f
+        │       │               └──g
+        │       ├──Assignment =
+        │       │   ├──x
+        │       │   └──ConditionalExpression
+        │       │       ├──b1
+        │       │       ├──ConditionalExpression
+        │       │       │   ├──b2
+        │       │       │   ├──c
+        │       │       │   └──d
+        │       │       └──ConditionalExpression
+        │       │           ├──b3
+        │       │           ├──f
+        │       │           └──g
+        │       ├──Assignment =
+        │       │   ├──x
+        │       │   └──ConditionalExpression
+        │       │       ├── >
+        │       │       │   ├──UnaryMinus
+        │       │       │   │   └──int 1
+        │       │       │   └──int 0
+        │       │       ├──UnaryMinus
+        │       │       │   └──int 2
+        │       │       └──UnaryMinus
+        │       │           └──int 3
+        │       └──Assignment =
+        │           ├──x
+        │           └──ConditionalExpression
+        │               ├──boolean true
+        │               ├──UnaryMinus
+        │               │   └──a
+        │               └──UnaryMinus
+        │                   └──b
+        └──Method thisExpressions
             ├──Type
             │   └──void
             └──Block
                 ├──VariableDeclaration
                 │   ├──Type
                 │   │   └──int
-                │   └──x
-                │       └──ConditionalExpression
-                │           ├──boolean true
-                │           ├──int 1
-                │           └──int 2
-                ├──VariableDeclaration
-                │   ├──Type
-                │   │   └──int
                 │   └──a
-                │       └──ConditionalExpression
-                │           ├──boolean false
-                │           ├──int 1
-                │           └──int 2
-                ├──VariableDeclaration
-                │   ├──Type
-                │   │   └──int
-                │   └──b
-                │       └──ConditionalExpression
-                │           ├──boolean true
-                │           ├──int 1
-                │           └──ConditionalExpression
-                │               ├──boolean false
-                │               ├──int 2
-                │               └──int 3
-                ├──VariableDeclaration
-                │   ├──Type
-                │   │   └──int
-                │   └──c
-                │       └──ConditionalExpression
-                │           ├──boolean true
-                │           ├──ConditionalExpression
-                │           │   ├──boolean false
-                │           │   ├──int 1
-                │           │   └──int 2
-                │           └──int 3
-                ├──VariableDeclaration
-                │   ├──Type
-                │   │   └──int
-                │   └──d
-                │       └──ConditionalExpression
-                │           ├── <
-                │           │   ├──int 1
-                │           │   └──int 2
-                │           ├──int 3
-                │           └──int 4
-                ├──VariableDeclaration
-                │   ├──Type
-                │   │   └──int
-                │   └──e
-                │       └──ConditionalExpression
-                │           ├── &&
-                │           │   ├──boolean true
-                │           │   └──boolean false
-                │           ├──int 1
-                │           └──int 2
-                ├──VariableDeclaration
-                │   ├──Type
-                │   │   └──int
-                │   └──f
-                │       └──ConditionalExpression
-                │           ├── ||
-                │           │   ├──boolean true
-                │           │   └──boolean false
-                │           ├──int 1
-                │           └──int 2
-                ├──VariableDeclaration
-                │   ├──Type
-                │   │   └──int
-                │   └──g
-                │       └──ConditionalExpression
-                │           ├──boolean true
-                │           ├──int 2
-                │           └── +
-                │               ├──int 3
-                │               └──int 1
+                │       └──MemberAccess
+                │           ├──field: x
+                │           └──target:
+                │               └──this
                 ├──Assignment =
-                │   ├──x
-                │   └──ConditionalExpression
-                │       ├── <
-                │       │   ├──a
-                │       │   └──b
-                │       ├──c
-                │       └── +
-                │           ├──d
-                │           └──e
-                ├──Assignment =
-                │   ├──x
-                │   └──ConditionalExpression
-                │       ├── <
-                │       │   ├──a
-                │       │   └──b
-                │       ├── +
-                │       │   ├──c
-                │       │   └──d
-                │       └──e
-                ├──Assignment =
-                │   ├──x
-                │   └──ConditionalExpression
-                │       ├── >
-                │       │   ├── +
-                │       │   │   ├──a
-                │       │   │   └──b
-                │       │   └──c
-                │       ├── *
-                │       │   ├──d
-                │       │   └──e
-                │       └── /
-                │           ├──f
-                │           └──g
-                ├──Assignment =
-                │   ├──x
-                │   └──ConditionalExpression
-                │       ├──boolean true
-                │       ├── +
-                │       │   ├──a
-                │       │   └── *
-                │       │       ├──b
-                │       │       └──c
-                │       └── <<
-                │           ├──d
-                │           └──e
-                ├──VariableDeclaration
-                │   ├──Type
-                │   │   └──boolean
-                │   ├──b1
-                │   │   └──boolean false
-                │   ├──b2
-                │   │   └──boolean false
-                │   └──b3
-                │       └──boolean false
-                ├──Assignment =
-                │   ├──x
-                │   └──ConditionalExpression
-                │       ├──b1
-                │       ├──b
-                │       └──ConditionalExpression
-                │           ├──b2
-                │           ├──d
-                │           └──ConditionalExpression
-                │               ├──b3
-                │               ├──f
-                │               └──g
-                ├──Assignment =
-                │   ├──x
-                │   └──ConditionalExpression
-                │       ├──b1
-                │       ├──ConditionalExpression
-                │       │   ├──b2
-                │       │   ├──c
-                │       │   └──d
-                │       └──ConditionalExpression
-                │           ├──b3
-                │           ├──f
-                │           └──g
-                ├──Assignment =
-                │   ├──x
-                │   └──ConditionalExpression
-                │       ├── >
-                │       │   ├──UnaryMinus
-                │       │   │   └──int 1
-                │       │   └──int 0
-                │       ├──UnaryMinus
-                │       │   └──int 2
-                │       └──UnaryMinus
-                │           └──int 3
-                └──Assignment =
-                    ├──x
-                    └──ConditionalExpression
-                        ├──boolean true
-                        ├──UnaryMinus
-                        │   └──a
-                        └──UnaryMinus
-                            └──b
+                │   ├──MemberAccess
+                │   │   ├──field: x
+                │   │   └──target:
+                │   │       └──this
+                │   └──int 1
+                └──MethodInvocation
+                    ├──Target
+                    │   └──this
+                    └──Name
+                        └──conditional_expressions

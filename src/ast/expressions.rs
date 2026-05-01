@@ -50,6 +50,7 @@ pub enum Expression {
         array_creation_mode: ArrayCreationMode,
     },
     Switch(Box<Switch>),
+    This,
 }
 
 #[derive(Debug)]

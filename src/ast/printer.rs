@@ -682,6 +682,7 @@ impl AstNode for Expression {
                 array_creation_mode.fmt_tree(f, &new_prefix, true)
             }
             Expression::Switch(s) => s.fmt_tree(f, &prefix, is_last),
+            Expression::This => writeln!(f, "{line_prefix}this"),
         }
     }
 }

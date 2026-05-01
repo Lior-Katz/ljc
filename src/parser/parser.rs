@@ -1418,7 +1418,8 @@ impl Parser {
             self.primitive_type().map(Type::into),
             self.parenthesized_expression(),
             self.instance_creation_expression(),
-            self.identifier_expression()
+            self.identifier_expression(),
+            self.this_access(),
         )
     }
 
@@ -1701,6 +1702,15 @@ impl Parser {
         }
         self.assert(Token::RightBrace)?;
         Ok(items)
+    }
+
+    fn this_access(&mut self) -> Result<Expression, ParseError> {
+        if self.next_is(Token::This) && !self.nth_is(1, Token::LeftParen) {
+            self.next()?;
+            Ok(Expression::This)
+        } else {
+            Err(ParseError::NoProduction)
+        }
     }
 
     /// The general structure of the if statement is as follows:
