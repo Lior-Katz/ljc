@@ -1455,6 +1455,8 @@ impl Parser {
                             name: id,
                         })
                     }
+                } else if self.accept(Token::Class) {
+                    expr = Expression::ClassLiteral(Type::try_from(expr)?)
                 }
             } else if self.accept(Token::LeftBracket) {
                 if self.accept(Token::RightBracket) {

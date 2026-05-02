@@ -185,4 +185,13 @@ public class Expressions {
         int a = hashCode();
         equals(hashCode());
     }
+
+    void classLiterals() {
+        Class c1 = int.class;
+        Class c2 = void.class;
+        Class c3 = String.class;
+        Class c4 = java.lang.String.class;
+        Class c5 = int[].class;
+        Class c6 = String[][].class;
+    }
 }

@@ -652,21 +652,75 @@ source: tests/snapshot/snapshot_test.rs
         │           │   └──this
         │           └──Name
         │               └──conditional_expressions
-        └──Method bareMethodCalls
+        ├──Method bareMethodCalls
+        │   ├──Type
+        │   │   └──void
+        │   └──Block
+        │       ├──VariableDeclaration
+        │       │   ├──Type
+        │       │   │   └──int
+        │       │   └──a
+        │       │       └──MethodInvocation
+        │       │           └──Name
+        │       │               └──hashCode
+        │       └──MethodInvocation
+        │           ├──Name
+        │           │   └──equals
+        │           └──Args
+        │               └──MethodInvocation
+        │                   └──Name
+        │                       └──hashCode
+        └──Method classLiterals
             ├──Type
             │   └──void
             └──Block
                 ├──VariableDeclaration
                 │   ├──Type
-                │   │   └──int
-                │   └──a
-                │       └──MethodInvocation
-                │           └──Name
-                │               └──hashCode
-                └──MethodInvocation
-                    ├──Name
-                    │   └──equals
-                    └──Args
-                        └──MethodInvocation
-                            └──Name
-                                └──hashCode
+                │   │   └──Class
+                │   └──c1
+                │       └──ClassLiteral
+                │           └──Type
+                │               └──int
+                ├──VariableDeclaration
+                │   ├──Type
+                │   │   └──Class
+                │   └──c2
+                │       └──ClassLiteral
+                │           └──Type
+                │               └──void
+                ├──VariableDeclaration
+                │   ├──Type
+                │   │   └──Class
+                │   └──c3
+                │       └──ClassLiteral
+                │           └──Type
+                │               └──String
+                ├──VariableDeclaration
+                │   ├──Type
+                │   │   └──Class
+                │   └──c4
+                │       └──ClassLiteral
+                │           └──Type
+                │               ├──java
+                │               ├──lang
+                │               └──String
+                ├──VariableDeclaration
+                │   ├──Type
+                │   │   └──Class
+                │   └──c5
+                │       └──ClassLiteral
+                │           └──Type
+                │               └──ArrayType
+                │                   └──Type
+                │                       └──int
+                └──VariableDeclaration
+                    ├──Type
+                    │   └──Class
+                    └──c6
+                        └──ClassLiteral
+                            └──Type
+                                └──ArrayType
+                                    └──Type
+                                        └──ArrayType
+                                            └──Type
+                                                └──String
