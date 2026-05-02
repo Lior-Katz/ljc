@@ -1,8 +1,8 @@
 use crate::ast::{
-    Annotation, AnnotationInterfaceDeclaration, ArgumentList, ArrayCreationMode, ArrayType,
-    AssignmentOp, BinOp, BlockStatements, CatchClause, ClassBodyDeclaration, ClassBodyDeclarations,
-    ClassDeclaration, ClassMemberDeclaration, ClassType, ClassTypeList, ClassTypePart,
-    CompilationUnit, ComponentPattern, ComponentPatternList, ConstructorBody,
+    Annotation, AnnotationInterfaceDeclaration, ArgumentList, ArrayAccess, ArrayCreationMode,
+    ArrayType, AssignmentOp, BinOp, BlockStatements, CatchClause, ClassBodyDeclaration,
+    ClassBodyDeclarations, ClassDeclaration, ClassMemberDeclaration, ClassType, ClassTypeList,
+    ClassTypePart, CompilationUnit, ComponentPattern, ComponentPatternList, ConstructorBody,
     ConstructorInvocation, ElementValue, ElementValueList, ElementValuePair, EnumBody,
     EnumConstant, EnumDeclaration, Expression, ForInit, ForUpdate, FormalParameter,
     FormalParameterList, Identifier, InterfaceDeclaration, LeftHandSide, MemberAccess, MethodBody,
@@ -1166,22 +1166,18 @@ impl Parser {
             Token::XorAssign => AssignmentOp::BitwiseXor,
             Token::OrAssign => AssignmentOp::BitwiseOr,
         ) {
-            let lhs = match expr {
-                Expression::Name(id) => LeftHandSide::ExpressionName(id),
-                Expression::MemberAccess(member_access) => {
-                    LeftHandSide::MemberAccess(member_access)
-                }
-                _ => return Err(ParseError::NoProduction),
-            };
+            let lhs = expr.try_into()?;
             let rhs = self.term()?;
-            // Compound assignments are not strictly equivalent to assigning the result of a binary op,
-            // as there can be some differences to how the subexpressions are evaluated.
-            // For example in the following expression:
-            //     foo().x += 5
-            // foo() is evaluated only once.
-            // Transforming this expression into
-            //     f().x = f().x + 5
-            // will evaluate f() twice.
+            /*
+            Compound assignments are not strictly equivalent to assigning the result of a binary op,
+            as there can be some differences to how the subexpressions are evaluated.
+            For example in the following expression:
+                f().x += 5
+                f() is evaluated only once.
+            Transforming this expression into
+                f().x = f().x + 5
+            will evaluate f() twice.
+            */
             Ok(Expression::Assignment { lhs, rhs: Box::new(rhs), op })
         } else {
             Ok(expr)
@@ -1466,6 +1462,14 @@ impl Parser {
                         element_type: Box::new(Type::try_from(expr)?),
                     })
                     .into()
+                } else {
+                    let index = self.expression()?;
+                    self.assert(Token::RightBracket)?;
+                    expr = ArrayAccess {
+                        target: Box::new(expr),
+                        index: Box::new(index),
+                    }
+                    .into();
                 }
             } else if self.accept(Token::LeftParen) {
                 let arg_list = self.argument_list()?;
@@ -2499,9 +2503,30 @@ impl Into<Expression> for Type {
     }
 }
 
+impl Into<Expression> for ArrayAccess {
+    fn into(self) -> Expression {
+        Expression::ArrayAccess(self)
+    }
+}
+
 impl From<ArrayType> for Type {
     fn from(value: ArrayType) -> Self {
         Type::Array(value)
+    }
+}
+
+impl TryFrom<Expression> for LeftHandSide {
+    type Error = ParseError;
+
+    fn try_from(value: Expression) -> Result<Self, Self::Error> {
+        match value {
+            Expression::Name(id) => Ok(LeftHandSide::ExpressionName(id)),
+            Expression::MemberAccess(member_access) => {
+                Ok(LeftHandSide::MemberAccess(member_access))
+            }
+            Expression::ArrayAccess(array_access) => Ok(LeftHandSide::ArrayAccess(array_access)),
+            _ => Err(ParseError::NoProduction),
+        }
     }
 }
 

@@ -49,6 +49,7 @@ pub enum Expression {
         element_type: Type,
         array_creation_mode: ArrayCreationMode,
     },
+    ArrayAccess(ArrayAccess),
     Switch(Box<Switch>),
     This,
 }
@@ -96,6 +97,7 @@ pub enum BinOp {
 pub enum LeftHandSide {
     ExpressionName(Identifier),
     MemberAccess(MemberAccess),
+    ArrayAccess(ArrayAccess),
 }
 
 #[derive(Debug)]
@@ -118,6 +120,12 @@ pub enum ArrayCreationMode {
         unsized_dimensions: usize,
     },
     Initialized(VariableInitializerList),
+}
+
+#[derive(Debug)]
+pub struct ArrayAccess {
+    pub target: Box<Expression>,
+    pub index: Box<Expression>,
 }
 
 #[derive(Debug)]

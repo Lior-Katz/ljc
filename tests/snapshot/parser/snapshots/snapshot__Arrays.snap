@@ -36,101 +36,158 @@ source: tests/snapshot/snapshot_test.rs
         │   │           └──int
         │   ├──m
         │   └──n
-        └──Method arrayTypes
+        ├──Method arrayTypes
+        │   ├──Type
+        │   │   └──ArrayType
+        │   │       └──Type
+        │   │           └──ArrayType
+        │   │               └──Type
+        │   │                   └──int
+        │   ├──Param x
+        │   │   └──Type
+        │   │       └──int
+        │   ├──Param y
+        │   │   └──Type
+        │   │       └──ArrayType
+        │   │           └──Type
+        │   │               └──int
+        │   ├──Param z
+        │   │   └──Type
+        │   │       └──ArrayType
+        │   │           └──Type
+        │   │               └──ArrayType
+        │   │                   └──Type
+        │   │                       └──String
+        │   └──Block
+        │       ├──VariableDeclaration
+        │       │   ├──Type
+        │       │   │   └──ArrayType
+        │       │   │       └──Type
+        │       │   │           └──int
+        │       │   └──a
+        │       │       └──ArrayCreation
+        │       │           ├──Type
+        │       │           │   └──int
+        │       │           └──SizedArray
+        │       │               └──int 10
+        │       ├──VariableDeclaration
+        │       │   ├──Type
+        │       │   │   └──ArrayType
+        │       │   │       └──Type
+        │       │   │           └──ArrayType
+        │       │   │               └──Type
+        │       │   │                   └──String
+        │       │   └──b
+        │       │       └──ArrayCreation
+        │       │           ├──Type
+        │       │           │   └──String
+        │       │           └──SizedArray
+        │       │               ├──int 5
+        │       │               └──int 10
+        │       ├──VariableDeclaration
+        │       │   ├──Type
+        │       │   │   └──ArrayType
+        │       │   │       └──Type
+        │       │   │           └──ArrayType
+        │       │   │               └──Type
+        │       │   │                   └──int
+        │       │   └──c
+        │       │       └──ArrayCreation
+        │       │           ├──Type
+        │       │           │   └──ArrayType
+        │       │           │       └──Type
+        │       │           │           └──ArrayType
+        │       │           │               └──Type
+        │       │           │                   └──int
+        │       │           └──Initialized
+        │       │               ├──ArrayInitializer
+        │       │               │   ├──int 1
+        │       │               │   └──int 2
+        │       │               ├──ArrayInitializer
+        │       │               └──ArrayCreation
+        │       │                   ├──Type
+        │       │                   │   └──ArrayType
+        │       │                   │       └──Type
+        │       │                   │           └──int
+        │       │                   └──Initialized
+        │       ├──VariableDeclaration
+        │       │   ├──Type
+        │       │   │   └──ArrayType
+        │       │   │       └──Type
+        │       │   │           └──ArrayType
+        │       │   │               └──Type
+        │       │   │                   └──int
+        │       │   └──d
+        │       │       └──ArrayCreation
+        │       │           ├──Type
+        │       │           │   └──int
+        │       │           ├──SizedArray
+        │       │           │   └──int 3
+        │       │           └──UnsizedDimensions: 1
+        │       ├──VariableDeclaration
+        │       │   ├──Type
+        │       │   │   └──ArrayType
+        │       │   │       └──Type
+        │       │   │           └──int
+        │       │   └──e
+        │       │       └──ArrayInitializer
+        │       │           └──int 1
+        │       └──ReturnStatement
+        │           └──null
+        └──Method arrayAccess
             ├──Type
-            │   └──ArrayType
-            │       └──Type
-            │           └──ArrayType
-            │               └──Type
-            │                   └──int
-            ├──Param x
+            │   └──void
+            ├──Param i
             │   └──Type
             │       └──int
-            ├──Param y
+            ├──Param j
             │   └──Type
-            │       └──ArrayType
-            │           └──Type
-            │               └──int
-            ├──Param z
-            │   └──Type
-            │       └──ArrayType
-            │           └──Type
-            │               └──ArrayType
-            │                   └──Type
-            │                       └──String
+            │       └──int
             └──Block
                 ├──VariableDeclaration
                 │   ├──Type
-                │   │   └──ArrayType
-                │   │       └──Type
-                │   │           └──int
-                │   └──a
-                │       └──ArrayCreation
-                │           ├──Type
-                │           │   └──int
-                │           └──SizedArray
-                │               └──int 10
-                ├──VariableDeclaration
-                │   ├──Type
-                │   │   └──ArrayType
-                │   │       └──Type
-                │   │           └──ArrayType
-                │   │               └──Type
-                │   │                   └──String
-                │   └──b
-                │       └──ArrayCreation
-                │           ├──Type
-                │           │   └──String
-                │           └──SizedArray
-                │               ├──int 5
-                │               └──int 10
-                ├──VariableDeclaration
-                │   ├──Type
-                │   │   └──ArrayType
-                │   │       └──Type
-                │   │           └──ArrayType
-                │   │               └──Type
-                │   │                   └──int
-                │   └──c
-                │       └──ArrayCreation
-                │           ├──Type
-                │           │   └──ArrayType
-                │           │       └──Type
-                │           │           └──ArrayType
-                │           │               └──Type
-                │           │                   └──int
-                │           └──Initialized
-                │               ├──ArrayInitializer
-                │               │   ├──int 1
-                │               │   └──int 2
-                │               ├──ArrayInitializer
-                │               └──ArrayCreation
-                │                   ├──Type
-                │                   │   └──ArrayType
-                │                   │       └──Type
-                │                   │           └──int
-                │                   └──Initialized
-                ├──VariableDeclaration
-                │   ├──Type
-                │   │   └──ArrayType
-                │   │       └──Type
-                │   │           └──ArrayType
-                │   │               └──Type
-                │   │                   └──int
-                │   └──d
-                │       └──ArrayCreation
-                │           ├──Type
-                │           │   └──int
-                │           ├──SizedArray
-                │           │   └──int 3
-                │           └──UnsizedDimensions: 1
-                ├──VariableDeclaration
-                │   ├──Type
-                │   │   └──ArrayType
-                │   │       └──Type
-                │   │           └──int
-                │   └──e
-                │       └──ArrayInitializer
-                │           └──int 1
-                └──ReturnStatement
-                    └──null
+                │   │   └──String
+                │   └──s
+                │       └──ArrayAccess
+                │           ├──Target
+                │           │   └──ArrayAccess
+                │           │       ├──Target
+                │           │       │   └──ArrayAccess
+                │           │       │       ├──Target
+                │           │       │       │   └──t
+                │           │       │       └──Index
+                │           │       │           └──i
+                │           │       └──Index
+                │           │           └──j
+                │           └──Index
+                │               └──int 0
+                ├──Assignment =
+                │   ├──ArrayAccess
+                │   │   ├──Target
+                │   │   │   └──a
+                │   │   └──Index
+                │   │       └──i
+                │   └──ArrayAccess
+                │       ├──Target
+                │       │   └──ArrayCreation
+                │       │       ├──Type
+                │       │       │   └──ArrayType
+                │       │       │       └──Type
+                │       │       │           └──int
+                │       │       └──Initialized
+                │       │           └──int 1
+                │       └──Index
+                │           └──int 0
+                └──VariableDeclaration
+                    ├──Type
+                    │   └──int
+                    └──w
+                        └──ArrayAccess
+                            ├──Target
+                            │   └──ArrayCreation
+                            │       ├──Type
+                            │       │   └──int
+                            │       └──SizedArray
+                            │           └──int 5
+                            └──Index
+                                └──i

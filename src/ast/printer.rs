@@ -1,13 +1,14 @@
 use crate::ast::{
-    Annotation, AnnotationInterfaceDeclaration, ArrayCreationMode, ArrayType, AssignmentOp, BinOp,
-    CatchClause, ClassBodyDeclaration, ClassDeclaration, ClassMemberDeclaration, ClassTypePart,
-    CompilationUnit, ComponentPattern, ConstructorBody, ConstructorInvocation, ElementValue,
-    ElementValuePair, EnumConstant, EnumDeclaration, Expression, ForInit, FormalParameter,
-    InterfaceDeclaration, LeftHandSide, MemberAccess, MethodBody, MethodCall, MethodDeclaration,
-    Modified, Modifier, Modifiers, NormalClassDeclaration, NormalInterfaceDeclaration, Pattern,
-    Program, RecordComponent, RecordDeclaration, Resource, Statement, Switch, SwitchBlockMember,
-    SwitchLabel, SwitchRule, TopLevelClassOrInterfaceDeclaration, Type, TypeIdentifier,
-    VariableDeclaration, VariableDeclarator, VariableDeclaratorId, VariableInitializer,
+    Annotation, AnnotationInterfaceDeclaration, ArrayAccess, ArrayCreationMode, ArrayType,
+    AssignmentOp, BinOp, CatchClause, ClassBodyDeclaration, ClassDeclaration,
+    ClassMemberDeclaration, ClassTypePart, CompilationUnit, ComponentPattern, ConstructorBody,
+    ConstructorInvocation, ElementValue, ElementValuePair, EnumConstant, EnumDeclaration,
+    Expression, ForInit, FormalParameter, InterfaceDeclaration, LeftHandSide, MemberAccess,
+    MethodBody, MethodCall, MethodDeclaration, Modified, Modifier, Modifiers,
+    NormalClassDeclaration, NormalInterfaceDeclaration, Pattern, Program, RecordComponent,
+    RecordDeclaration, Resource, Statement, Switch, SwitchBlockMember, SwitchLabel, SwitchRule,
+    TopLevelClassOrInterfaceDeclaration, Type, TypeIdentifier, VariableDeclaration,
+    VariableDeclarator, VariableDeclaratorId, VariableInitializer,
 };
 use std::fmt;
 use std::fmt::{Display, Formatter};
@@ -681,6 +682,7 @@ impl AstNode for Expression {
                 element_type.fmt_tree(f, &new_prefix, false)?;
                 array_creation_mode.fmt_tree(f, &new_prefix, true)
             }
+            Expression::ArrayAccess(a) => a.fmt_tree(f, &prefix, is_last),
             Expression::Switch(s) => s.fmt_tree(f, &prefix, is_last),
             Expression::This => writeln!(f, "{line_prefix}this"),
         }
@@ -721,6 +723,7 @@ impl LeftHandSide {
         match self {
             LeftHandSide::ExpressionName(v) => writeln!(f, "{line_prefix}{}", v),
             LeftHandSide::MemberAccess(v) => v.fmt_tree(f, prefix, is_last),
+            LeftHandSide::ArrayAccess(v) => v.fmt_tree(f, prefix, is_last),
         }
     }
 }
@@ -1103,6 +1106,17 @@ impl AstNode for String {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         let (line_prefix, _) = branch(prefix, is_last);
         writeln!(f, "{line_prefix}{self}")
+    }
+}
+
+impl AstNode for ArrayAccess {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        let (line_prefix, new_prefix) = branch(prefix, is_last);
+        writeln!(f, "{line_prefix}ArrayAccess")?;
+        Children::new()
+            .push("Target", &self.target)
+            .push("Index", &self.index)
+            .fmt_tree(f, &new_prefix, true)
     }
 }
 

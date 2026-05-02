@@ -13,4 +13,10 @@ class Arrays {
 
         return null;
     }
+
+    void arrayAccess(int i, int j) {
+        String s = t[i][j][0];
+        a[i] = new int[]{1}[0];
+        int w = (new int[5])[i];
+    }
 }
