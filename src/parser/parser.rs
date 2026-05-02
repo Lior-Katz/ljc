@@ -2179,11 +2179,7 @@ impl Parser {
     /// switch_case_label:
     ///     case null [, default]
     ///     case conditional_expression {, conditional_expression}
-    ///     case pattern
-    ///
-    /// pattern:
-    ///     local_varaiable_declaration
-    ///     reference_type ( component_pattern_list )
+    ///     case switch_case_pattern_label
     /// ```
     fn switch_case_label(&mut self) -> Result<SwitchLabel, ParseError> {
         self.assert(Token::Case)?;
@@ -2192,42 +2188,137 @@ impl Parser {
             return Ok(SwitchLabel::Null { default });
         }
 
-        let modifiers = self.modifiers(ModifierKind::VARIABLE);
-        let expression = self.term()?;
-        self.switch_label_from_term(modifiers, expression)
-    }
-
-    fn switch_label_from_term(
-        &mut self,
-        modifiers: Vec<Modifier>,
-        expression: Expression,
-    ) -> Result<SwitchLabel, ParseError> {
-        if peek!(self, 0 => Token::LeftParen | Token::Id(_)) {
-            if let Ok(pattern) = self.pattern_from_term(modifiers, expression) {
-                let mut patterns = vec![pattern];
-                patterns.append(
-                    &mut self
-                        .delimited_list_tail(Self::pattern, |this| this.assert(Token::Comma))?,
-                );
-                let guard = if peek!(self, 0 => Token::Id(s) if s.as_str() == "when") {
-                    self.next()?;
-                    Some(self.expression()?)
-                } else {
-                    None
-                };
-                Ok(SwitchLabel::Pattern { patterns, guard })
-            } else {
-                unreachable!(
-                    "Checked ahead of time that label corresponds to a local variable declaration pattern or a record deconstruction pattern"
-                )
-            }
+        if self.check_pattern() {
+            self.switch_case_pattern_label()
         } else {
-            let mut labels = vec![expression];
-            labels.append(&mut self.delimited_list_tail(Self::conditional_expression, |this| {
+            let labels = self.delimited_at_least_1(Self::conditional_expression, |this| {
                 this.assert(Token::Comma)
-            })?);
+            })?;
             Ok(SwitchLabel::Constants(labels))
         }
+    }
+
+    fn check_pattern(&mut self) -> bool {
+        let mut lookahead = 0;
+        let mut paren_depth = 0;
+        let mut temp_result = false;
+        loop {
+            let token = match self.peek_n(lookahead) {
+                Ok(token) => token,
+                Err(_) => {
+                    return false;
+                }
+            };
+            match token {
+                Token::Byte
+                | Token::Short
+                | Token::Int
+                | Token::Long
+                | Token::Float
+                | Token::Double
+                | Token::Boolean
+                | Token::Char
+                | Token::Void
+                | Token::Id(_) => match self.peek_n(lookahead + 1) {
+                    Ok(Token::Id(_)) | Ok(Token::Underscore) if paren_depth == 0 => return true,
+                    Ok(Token::Id(_)) | Ok(Token::Underscore) => temp_result = true,
+                    Ok(Token::Arrow) | Ok(Token::Comma) if paren_depth == 0 => return false,
+                    Err(_) => return false,
+                    _ => {}
+                },
+                Token::Underscore => match self.peek_n(lookahead + 1) {
+                    Ok(Token::RightParen) | Ok(Token::Comma) => return true,
+                    Ok(Token::Id(_)) | Ok(Token::Underscore) if paren_depth == 0 => return true,
+                    Ok(Token::Id(_)) | Ok(Token::Underscore) => temp_result = true,
+                    Err(_) => return false,
+                    _ => {}
+                },
+                Token::Dot | Token::QuestionMark | Token::Extends | Token::Super | Token::Comma => {
+                }
+                Token::LessThan
+                | Token::LeftShift
+                | Token::GreaterThan
+                | Token::SignedRightShift
+                | Token::UnsignedRightShift => return false,
+                Token::At => lookahead = self.skip_annotation(lookahead),
+                Token::LeftBracket => {
+                    if peek!(self, lookahead + 1 => Token::RightBracket, lookahead + 2 => Token::Id(_) | Token::Underscore)
+                    {
+                        return true;
+                    } else if self.nth_is(lookahead + 1, Token::RightBracket) {
+                        lookahead += 1;
+                    } else {
+                        return temp_result;
+                    }
+                }
+                Token::LeftParen => {
+                    if self.nth_is(lookahead + 1, Token::RightParen) {
+                        return paren_depth == 0 || !self.nth_is(lookahead + 2, Token::Arrow);
+                    }
+                    paren_depth += 1;
+                }
+                Token::RightParen => {
+                    paren_depth -= 1;
+                    if paren_depth == 0
+                        && peek!(self, lookahead + 1 => Token::Id(s) if s.as_str() == "when")
+                    {
+                        return true;
+                    }
+                }
+                Token::Arrow => return if paren_depth > 0 { false } else { temp_result },
+                Token::Final => {
+                    if paren_depth > 0 {
+                        return true;
+                    }
+                }
+                _ => return temp_result,
+            }
+            lookahead += 1;
+        }
+    }
+
+    fn skip_annotation(&mut self, mut lookahead: usize) -> usize {
+        if !self.nth_is(lookahead, Token::At) {
+            return lookahead;
+        }
+        lookahead += 2; // skip @ and identifier
+
+        // skip full name
+        while self.nth_is(lookahead, Token::Dot) {
+            lookahead += 2;
+        }
+        let mut nesting = 0;
+        loop {
+            match self.peek_n(lookahead) {
+                Ok(Token::EOF) => break,
+                Ok(Token::LeftParen) => nesting += 1,
+                Ok(Token::RightParen) => {
+                    nesting -= 1;
+                    if nesting == 0 {
+                        break;
+                    }
+                }
+                Err(_) => break,
+                _ => {}
+            }
+        }
+        lookahead
+    }
+
+    /// ```text
+    /// switch_case_pattern_label:
+    ///     pattern {, pattern} [guard]
+    /// ```
+    fn switch_case_pattern_label(&mut self) -> Result<SwitchLabel, ParseError> {
+        let patterns =
+            self.delimited_at_least_1(Self::pattern, |this| this.assert(Token::Comma))?;
+        let guard = if peek!(self, 0 => Token::Id(s) if s.as_str() == "when") {
+            self.next()?;
+            Some(self.expression()?)
+        } else {
+            None
+        };
+        Ok(SwitchLabel::Pattern { patterns, guard })
     }
 
     /// ```text
@@ -2259,26 +2350,15 @@ impl Parser {
     fn pattern(&mut self) -> Result<Pattern, ParseError> {
         let modifiers = self.modifiers(ModifierKind::VARIABLE);
         let type_term = self.type_term()?;
-        self.pattern_from_term(modifiers, type_term)
-    }
-
-    fn pattern_from_term<T>(
-        &mut self,
-        modifiers: Vec<Modifier>,
-        term: T,
-    ) -> Result<Pattern, ParseError>
-    where
-        T: TryInto<Type>,
-    {
         if self.accept(Token::LeftParen) {
-            let reference_type = term.try_into().map_err(|_| ParseError::NoProduction)?;
+            let reference_type = type_term.try_into().map_err(|_| ParseError::NoProduction)?;
             let components = self.record_component_pattern_list()?;
             self.assert(Token::RightParen)?;
             return Ok(Pattern::Record { reference_type, components });
         }
 
         if let Ok(var_id) = self.variable_declarator_id() {
-            let variable_type = term.try_into().map_err(|_| ParseError::NoProduction)?;
+            let variable_type = type_term.try_into().map_err(|_| ParseError::NoProduction)?;
             let declarators = vec![VariableDeclarator {
                 name: var_id,
                 initializer: None,
