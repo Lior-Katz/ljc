@@ -687,57 +687,132 @@ source: tests/snapshot/snapshot_test.rs
         │               └──MethodInvocation
         │                   └──Name
         │                       └──hashCode
-        └──Method classLiterals
+        ├──Method classLiterals
+        │   ├──Type
+        │   │   └──void
+        │   └──Block
+        │       ├──VariableDeclaration
+        │       │   ├──Type
+        │       │   │   └──Class
+        │       │   └──c1
+        │       │       └──ClassLiteral
+        │       │           └──Type
+        │       │               └──int
+        │       ├──VariableDeclaration
+        │       │   ├──Type
+        │       │   │   └──Class
+        │       │   └──c2
+        │       │       └──ClassLiteral
+        │       │           └──Type
+        │       │               └──void
+        │       ├──VariableDeclaration
+        │       │   ├──Type
+        │       │   │   └──Class
+        │       │   └──c3
+        │       │       └──ClassLiteral
+        │       │           └──Type
+        │       │               └──String
+        │       ├──VariableDeclaration
+        │       │   ├──Type
+        │       │   │   └──Class
+        │       │   └──c4
+        │       │       └──ClassLiteral
+        │       │           └──Type
+        │       │               ├──java
+        │       │               ├──lang
+        │       │               └──String
+        │       ├──VariableDeclaration
+        │       │   ├──Type
+        │       │   │   └──Class
+        │       │   └──c5
+        │       │       └──ClassLiteral
+        │       │           └──Type
+        │       │               └──ArrayType
+        │       │                   └──Type
+        │       │                       └──int
+        │       └──VariableDeclaration
+        │           ├──Type
+        │           │   └──Class
+        │           └──c6
+        │               └──ClassLiteral
+        │                   └──Type
+        │                       └──ArrayType
+        │                           └──Type
+        │                               └──ArrayType
+        │                                   └──Type
+        │                                       └──String
+        └──Method methodReferences
             ├──Type
             │   └──void
+            ├──Param x
+            │   └──Type
+            │       └──Object
             └──Block
                 ├──VariableDeclaration
                 │   ├──Type
-                │   │   └──Class
-                │   └──c1
-                │       └──ClassLiteral
-                │           └──Type
-                │               └──int
+                │   │   ├──java
+                │   │   ├──util
+                │   │   ├──function
+                │   │   └──Function
+                │   └──f1
+                │       └──Method Reference
+                │           ├──Target
+                │           │   └──x
+                │           └──Method
+                │               └──equals
                 ├──VariableDeclaration
                 │   ├──Type
-                │   │   └──Class
-                │   └──c2
-                │       └──ClassLiteral
-                │           └──Type
-                │               └──void
+                │   │   ├──java
+                │   │   ├──util
+                │   │   ├──function
+                │   │   └──Function
+                │   └──f2
+                │       └──Method Reference
+                │           ├──Target
+                │           │   └──Type
+                │           │       └──ArrayType
+                │           │           └──Type
+                │           │               ├──java
+                │           │               ├──lang
+                │           │               └──Object
+                │           └──Method
+                │               └──toString
                 ├──VariableDeclaration
                 │   ├──Type
-                │   │   └──Class
-                │   └──c3
-                │       └──ClassLiteral
-                │           └──Type
-                │               └──String
+                │   │   ├──java
+                │   │   ├──util
+                │   │   ├──function
+                │   │   └──Supplier
+                │   └──f3
+                │       └──Method Reference
+                │           ├──Target
+                │           │   └──String "abc"
+                │           └──Method
+                │               └──toString
                 ├──VariableDeclaration
                 │   ├──Type
-                │   │   └──Class
-                │   └──c4
-                │       └──ClassLiteral
-                │           └──Type
-                │               ├──java
-                │               ├──lang
-                │               └──String
-                ├──VariableDeclaration
-                │   ├──Type
-                │   │   └──Class
-                │   └──c5
-                │       └──ClassLiteral
-                │           └──Type
-                │               └──ArrayType
-                │                   └──Type
-                │                       └──int
+                │   │   ├──java
+                │   │   ├──util
+                │   │   ├──function
+                │   │   └──Supplier
+                │   └──f4
+                │       └──Method Reference
+                │           ├──Target
+                │           │   └──Object
+                │           └──Method
+                │               └──new
                 └──VariableDeclaration
                     ├──Type
-                    │   └──Class
-                    └──c6
-                        └──ClassLiteral
-                            └──Type
-                                └──ArrayType
-                                    └──Type
-                                        └──ArrayType
-                                            └──Type
-                                                └──String
+                    │   ├──java
+                    │   ├──util
+                    │   ├──function
+                    │   └──IntFunction
+                    └──f5
+                        └──Method Reference
+                            ├──Target
+                            │   └──Type
+                            │       └──ArrayType
+                            │           └──Type
+                            │               └──int
+                            └──Method
+                                └──new

@@ -54,6 +54,10 @@ pub enum Expression {
     This,
     QualifiedThis(Type),
     ClassLiteral(Type),
+    MethodReference{
+        target: Box<Expression>,
+        method: MethodReferenceType
+    },
 }
 
 #[derive(Debug)]
@@ -134,4 +138,10 @@ pub struct ArrayAccess {
 pub enum VariableInitializer {
     Expression(Expression),
     ArrayInitializer(VariableInitializerList),
+}
+
+#[derive(Debug)]
+pub enum MethodReferenceType {
+    Constructor,
+    Named(Identifier),
 }

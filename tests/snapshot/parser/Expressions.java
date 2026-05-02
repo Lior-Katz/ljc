@@ -196,4 +196,12 @@ public class Expressions {
         Class c5 = int[].class;
         Class c6 = String[][].class;
     }
+
+    void methodReferences(Object x) {
+        java.util.function.Function f1 = x::equals;
+        java.util.function.Function f2 = java.lang.Object[]::toString;
+        java.util.function.Supplier f3 = "abc"::toString;
+        java.util.function.Supplier f4 = Object::new;
+        java.util.function.IntFunction f5 = int[]::new;
+    }
 }

@@ -6,7 +6,7 @@ use crate::ast::{
     ConstructorInvocation, ElementValue, ElementValueList, ElementValuePair, EnumBody,
     EnumConstant, EnumDeclaration, Expression, ForInit, ForUpdate, FormalParameter,
     FormalParameterList, Identifier, InterfaceDeclaration, LeftHandSide, MemberAccess, MethodBody,
-    MethodCall, MethodDeclaration, Modifiable, Modified, Modifier, Multiple,
+    MethodCall, MethodDeclaration, MethodReferenceType, Modifiable, Modified, Modifier, Multiple,
     NormalClassDeclaration, NormalInterfaceDeclaration, Pattern, Program, RecordBodyDeclaration,
     RecordComponent, RecordDeclaration, Resource, Statement, Switch, SwitchBlockMember,
     SwitchBlockMembers, SwitchLabel, SwitchRule, TopLevelClassOrInterfaceDeclaration, Type,
@@ -1435,6 +1435,9 @@ impl Parser {
     ///     . identifier ( [arg_list] ) // method invocation
     ///     [ expression ] // array access
     ///     [ ] // array type
+    ///     ( [arg_list] ) // bare method invocation
+    ///     :: identifier // named method reference
+    ///     :: new // constructor method reference
     /// ```
     fn parse_selectors(&mut self, expr: Expression) -> Result<Expression, ParseError> {
         let mut expr = expr;
@@ -1483,6 +1486,15 @@ impl Parser {
                     name: expr.try_into()?,
                     arguments: arg_list,
                 })
+            } else if self.accept(Token::DoubleColon) {
+                let target = Box::new(expr);
+                let method = if self.accept(Token::New) {
+                    MethodReferenceType::Constructor
+                } else {
+                    let name = self.identifier()?;
+                    MethodReferenceType::Named(name)
+                };
+                expr = Expression::MethodReference { target, method };
             } else {
                 break;
             }

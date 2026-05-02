@@ -4,7 +4,7 @@ use crate::ast::{
     ClassMemberDeclaration, ClassTypePart, CompilationUnit, ComponentPattern, ConstructorBody,
     ConstructorInvocation, ElementValue, ElementValuePair, EnumConstant, EnumDeclaration,
     Expression, ForInit, FormalParameter, InterfaceDeclaration, LeftHandSide, MemberAccess,
-    MethodBody, MethodCall, MethodDeclaration, Modified, Modifier, Modifiers,
+    MethodBody, MethodCall, MethodDeclaration, MethodReferenceType, Modified, Modifier, Modifiers,
     NormalClassDeclaration, NormalInterfaceDeclaration, Pattern, Program, RecordComponent,
     RecordDeclaration, Resource, Statement, Switch, SwitchBlockMember, SwitchLabel, SwitchRule,
     TopLevelClassOrInterfaceDeclaration, Type, TypeIdentifier, VariableDeclaration,
@@ -693,6 +693,13 @@ impl AstNode for Expression {
                 writeln!(f, "{line_prefix}ClassLiteral")?;
                 t.fmt_tree(f, &new_prefix, true)
             }
+            Expression::MethodReference { target, method } => {
+                writeln!(f, "{line_prefix}Method Reference")?;
+                Children::new()
+                    .push("Target", target)
+                    .push("Method", method)
+                    .fmt_tree(f, &new_prefix, true)
+            }
         }
     }
 }
@@ -1216,6 +1223,16 @@ impl AstNode for SwitchRule {
             SwitchRule::Expression(e) => e.fmt_tree(f, prefix, is_last),
             SwitchRule::Block(s) => s.fmt_tree(f, prefix, is_last),
             SwitchRule::Throw(s) => s.fmt_tree(f, prefix, is_last),
+        }
+    }
+}
+
+impl AstNode for MethodReferenceType {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        let (line_prefix, _) = branch(prefix, is_last);
+        match self {
+            MethodReferenceType::Constructor => writeln!(f, "{line_prefix}new"),
+            MethodReferenceType::Named(name) => writeln!(f, "{line_prefix}{name}"),
         }
     }
 }
