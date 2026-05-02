@@ -14,6 +14,7 @@ class RecordIdentifier {
     com.record.Type method2() {
         int record = 1;
         record = record + 1;
+        record(record);
         record.Type a;
         com.record.Type b;
         int c = record.Type.value + com.record.Type.value;

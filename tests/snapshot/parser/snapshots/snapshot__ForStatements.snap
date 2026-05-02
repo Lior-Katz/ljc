@@ -136,6 +136,26 @@ source: tests/snapshot/snapshot_test.rs
         │       │       └──Assignment +=
         │       │           ├──a
         │       │           └──i
+        │       ├──ForStatement
+        │       │   ├──Initializer
+        │       │   │   └──Assignment =
+        │       │   │       ├──i
+        │       │   │       └──MethodInvocation
+        │       │   │           └──Name
+        │       │   │               └──init
+        │       │   ├──Condition
+        │       │   │   └──MethodInvocation
+        │       │   │       ├──Name
+        │       │   │       │   └──check
+        │       │   │       └──Args
+        │       │   │           └──a
+        │       │   ├──Update
+        │       │   │   └──MethodInvocation
+        │       │   │       └──Name
+        │       │   │           └──update
+        │       │   └──Body
+        │       │       └──PostIncrement
+        │       │           └──a
         │       └──ForStatement
         │           ├──Initializer
         │           │   └──VariableDeclaration
@@ -171,73 +191,126 @@ source: tests/snapshot/snapshot_test.rs
         │                           └── *
         │                               ├──x
         │                               └──y
-        └──Method for_each
+        ├──Method for_each
+        │   ├──Type
+        │   │   └──void
+        │   ├──Param arr
+        │   │   └──Type
+        │   │       └──ArrayType
+        │   │           └──Type
+        │   │               └──int
+        │   └──Block
+        │       ├──VariableDeclaration
+        │       │   ├──Type
+        │       │   │   └──int
+        │       │   └──a
+        │       │       └──int 0
+        │       ├──VariableDeclaration
+        │       │   ├──Type
+        │       │   │   └──int
+        │       │   └──b
+        │       │       └──int 0
+        │       ├──ForEachStatement
+        │       │   ├──Initializer
+        │       │   │   └──VariableDeclaration
+        │       │   │       ├──Type
+        │       │   │       │   └──int
+        │       │   │       └──x
+        │       │   ├──Iterable
+        │       │   │   └──arr
+        │       │   └──Body
+        │       │       └──Assignment +=
+        │       │           ├──a
+        │       │           └──x
+        │       ├──ForEachStatement
+        │       │   ├──Initializer
+        │       │   │   └──VariableDeclaration
+        │       │   │       ├──Type
+        │       │   │       │   └──int
+        │       │   │       └──x
+        │       │   ├──Iterable
+        │       │   │   └──arr
+        │       │   └──Body
+        │       │       └──BlockStatement
+        │       │           ├──Assignment +=
+        │       │           │   ├──a
+        │       │           │   └──x
+        │       │           └──PostIncrement
+        │       │               └──b
+        │       ├──ForEachStatement
+        │       │   ├──Initializer
+        │       │   │   └──VariableDeclaration
+        │       │   │       ├──Type
+        │       │   │       │   └──int
+        │       │   │       └──x
+        │       │   ├──Iterable
+        │       │   │   └──MethodInvocation
+        │       │   │       └──Name
+        │       │   │           └──getArray
+        │       │   └──Body
+        │       │       └──Assignment +=
+        │       │           ├──a
+        │       │           └──x
+        │       └──ForEachStatement
+        │           ├──Initializer
+        │           │   └──VariableDeclaration
+        │           │       ├──Type
+        │           │       │   └──String
+        │           │       └──s
+        │           ├──Iterable
+        │           │   └──ArrayCreation
+        │           │       ├──Type
+        │           │       │   └──ArrayType
+        │           │       │       └──Type
+        │           │       │           └──String
+        │           │       └──Initialized
+        │           │           ├──String "a"
+        │           │           ├──String "b"
+        │           │           └──String "c"
+        │           └──Body
+        │               └──Assignment +=
+        │                   ├──b
+        │                   └──MethodInvocation
+        │                       ├──Target
+        │                       │   └──s
+        │                       └──Name
+        │                           └──length
+        ├──Method init
+        │   ├──Type
+        │   │   └──int
+        │   └──Block
+        │       └──ReturnStatement
+        │           └──int 0
+        ├──Method check
+        │   ├──Type
+        │   │   └──boolean
+        │   ├──Param x
+        │   │   └──Type
+        │   │       └──int
+        │   └──Block
+        │       └──ReturnStatement
+        │           └── >
+        │               ├──x
+        │               └──int 0
+        ├──Method update
+        │   ├──Type
+        │   │   └──int
+        │   └──Block
+        │       └──ReturnStatement
+        │           └──int 0
+        └──Method getArray
             ├──Type
-            │   └──void
-            ├──Param arr
-            │   └──Type
-            │       └──ArrayType
-            │           └──Type
-            │               └──int
+            │   └──ArrayType
+            │       └──Type
+            │           └──int
             └──Block
-                ├──VariableDeclaration
-                │   ├──Type
-                │   │   └──int
-                │   └──a
-                │       └──int 0
-                ├──VariableDeclaration
-                │   ├──Type
-                │   │   └──int
-                │   └──b
-                │       └──int 0
-                ├──ForEachStatement
-                │   ├──Initializer
-                │   │   └──VariableDeclaration
-                │   │       ├──Type
-                │   │       │   └──int
-                │   │       └──x
-                │   ├──Iterable
-                │   │   └──arr
-                │   └──Body
-                │       └──Assignment +=
-                │           ├──a
-                │           └──x
-                ├──ForEachStatement
-                │   ├──Initializer
-                │   │   └──VariableDeclaration
-                │   │       ├──Type
-                │   │       │   └──int
-                │   │       └──x
-                │   ├──Iterable
-                │   │   └──arr
-                │   └──Body
-                │       └──BlockStatement
-                │           ├──Assignment +=
-                │           │   ├──a
-                │           │   └──x
-                │           └──PostIncrement
-                │               └──b
-                └──ForEachStatement
-                    ├──Initializer
-                    │   └──VariableDeclaration
-                    │       ├──Type
-                    │       │   └──String
-                    │       └──s
-                    ├──Iterable
-                    │   └──ArrayCreation
-                    │       ├──Type
-                    │       │   └──ArrayType
-                    │       │       └──Type
-                    │       │           └──String
-                    │       └──Initialized
-                    │           ├──String "a"
-                    │           ├──String "b"
-                    │           └──String "c"
-                    └──Body
-                        └──Assignment +=
-                            ├──b
-                            └──MethodInvocation
-                                ├──Target
-                                │   └──s
-                                └──Name
-                                    └──length
+                └──ReturnStatement
+                    └──ArrayCreation
+                        ├──Type
+                        │   └──ArrayType
+                        │       └──Type
+                        │           └──int
+                        └──Initialized
+                            ├──int 1
+                            ├──int 2
+                            └──int 3

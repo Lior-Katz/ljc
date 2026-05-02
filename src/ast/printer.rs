@@ -828,7 +828,7 @@ impl AstNode for MethodCall {
         writeln!(f, "{line_prefix}MethodInvocation")?;
 
         Children::new()
-            .push("Target", &self.target)
+            .push_opt("Target", &self.target)
             .push("Name", &self.name)
             .push_if_non_empty("Args", &self.arguments)
             .fmt_tree(f, &new_prefix, true)

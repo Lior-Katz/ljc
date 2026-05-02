@@ -106,7 +106,7 @@ pub struct MemberAccess {
 
 #[derive(Debug)]
 pub struct MethodCall {
-    pub target: Box<Expression>,
+    pub target: Option<Box<Expression>>,
     pub name: Identifier,
     pub arguments: ArgumentList,
 }

@@ -1475,7 +1475,7 @@ impl Parser {
                         let arg_list = self.argument_list()?;
                         self.assert(Token::RightParen)?;
                         expr = Expression::MethodCall(MethodCall {
-                            target: Box::new(expr),
+                            target: Some(Box::new(expr)),
                             name: id,
                             arguments: arg_list,
                         })
@@ -1493,6 +1493,14 @@ impl Parser {
                     })
                     .into()
                 }
+            } else if self.accept(Token::LeftParen) {
+                let arg_list = self.argument_list()?;
+                self.assert(Token::RightParen)?;
+                expr = Expression::MethodCall(MethodCall {
+                    target: None,
+                    name: expr.try_into()?,
+                    arguments: arg_list,
+                })
             } else {
                 break;
             }
@@ -2415,6 +2423,17 @@ impl From<LexError> for ParseError {
 impl From<Identifier> for Type {
     fn from(value: Identifier) -> Self {
         Self::Class(vec![ClassTypePart { identifier: value }])
+    }
+}
+
+impl TryFrom<Expression> for Identifier {
+    type Error = ParseError;
+
+    fn try_from(value: Expression) -> Result<Self, Self::Error> {
+        match value {
+            Expression::Name(id) => Ok(id),
+            _ => Err(ParseError::NoProduction),
+        }
     }
 }
 

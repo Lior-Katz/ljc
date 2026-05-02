@@ -54,6 +54,11 @@ source: tests/snapshot/snapshot_test.rs
         │       │   └── +
         │       │       ├──record
         │       │       └──int 1
+        │       ├──MethodInvocation
+        │       │   ├──Name
+        │       │   │   └──record
+        │       │   └──Args
+        │       │       └──record
         │       ├──VariableDeclaration
         │       │   ├──Type
         │       │   │   ├──record

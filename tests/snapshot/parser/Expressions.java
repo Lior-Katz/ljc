@@ -12,15 +12,15 @@ public class Expressions {
     }
 
     void unary_operators() {
-         int x = 0;
-         x = x++;
-         x = x--;
-         x = ++x;
-         x = --x;
-         x = ~100;
-         boolean b = !!false;
-         x = +3;
-         x = -3;
+        int x = 0;
+        x = x++;
+        x = x--;
+        x = ++x;
+        x = --x;
+        x = ~100;
+        boolean b = !!false;
+        x = +3;
+        x = -3;
     }
 
     void binary_operators() {
@@ -179,5 +179,10 @@ public class Expressions {
         int a = this.x;
         this.x = 1;
         this.conditional_expressions();
+    }
+
+    void bareMethodCalls() {
+        int a = hashCode();
+        equals(hashCode());
     }
 }

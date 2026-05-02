@@ -25,6 +25,9 @@ class ForStatements {
         for (i = 0, a = 1; i < 10; i++)
             a += i;
 
+        for (i = init(); check(a); update())
+            a++;
+
         for (int x = 0; x < 3; x++)
             for (int y = 0; y < 3; y++)
                 a += x * y;
@@ -42,7 +45,31 @@ class ForStatements {
            b++;
        }
 
+       for (int x : getArray())
+           a += x;
+
        for (String s : new String[]{"a", "b", "c"})
            b += s.length();
+   }
+
+
+    // =======================
+    // Helpers
+    // =======================
+
+    int init() {
+        return 0;
+    }
+
+    boolean check(int x) {
+        return x > 0;
+    }
+
+    int update() {
+        return 0;
+    }
+
+   int[] getArray() {
+       return new int[]{1, 2, 3};
    }
 }

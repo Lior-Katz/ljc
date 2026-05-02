@@ -629,7 +629,30 @@ source: tests/snapshot/snapshot_test.rs
         │               │   └──a
         │               └──UnaryMinus
         │                   └──b
-        └──Method thisExpressions
+        ├──Method thisExpressions
+        │   ├──Type
+        │   │   └──void
+        │   └──Block
+        │       ├──VariableDeclaration
+        │       │   ├──Type
+        │       │   │   └──int
+        │       │   └──a
+        │       │       └──MemberAccess
+        │       │           ├──field: x
+        │       │           └──target:
+        │       │               └──this
+        │       ├──Assignment =
+        │       │   ├──MemberAccess
+        │       │   │   ├──field: x
+        │       │   │   └──target:
+        │       │   │       └──this
+        │       │   └──int 1
+        │       └──MethodInvocation
+        │           ├──Target
+        │           │   └──this
+        │           └──Name
+        │               └──conditional_expressions
+        └──Method bareMethodCalls
             ├──Type
             │   └──void
             └──Block
@@ -637,18 +660,13 @@ source: tests/snapshot/snapshot_test.rs
                 │   ├──Type
                 │   │   └──int
                 │   └──a
-                │       └──MemberAccess
-                │           ├──field: x
-                │           └──target:
-                │               └──this
-                ├──Assignment =
-                │   ├──MemberAccess
-                │   │   ├──field: x
-                │   │   └──target:
-                │   │       └──this
-                │   └──int 1
+                │       └──MethodInvocation
+                │           └──Name
+                │               └──hashCode
                 └──MethodInvocation
-                    ├──Target
-                    │   └──this
-                    └──Name
-                        └──conditional_expressions
+                    ├──Name
+                    │   └──equals
+                    └──Args
+                        └──MethodInvocation
+                            └──Name
+                                └──hashCode
