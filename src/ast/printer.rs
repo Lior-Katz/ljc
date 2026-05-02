@@ -685,6 +685,10 @@ impl AstNode for Expression {
             Expression::ArrayAccess(a) => a.fmt_tree(f, &prefix, is_last),
             Expression::Switch(s) => s.fmt_tree(f, &prefix, is_last),
             Expression::This => writeln!(f, "{line_prefix}this"),
+            Expression::QualifiedThis(t) => {
+                writeln!(f, "{line_prefix}QualifiedThis")?;
+                t.fmt_tree(f, &new_prefix, true)
+            }
             Expression::ClassLiteral(t) => {
                 writeln!(f, "{line_prefix}ClassLiteral")?;
                 t.fmt_tree(f, &new_prefix, true)

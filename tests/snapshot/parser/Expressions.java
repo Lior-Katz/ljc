@@ -176,9 +176,11 @@ public class Expressions {
     }
 
     void thisExpressions() {
-        int a = this.x;
+        Expressions.this.x = this.x;
         this.x = 1;
         this.conditional_expressions();
+        Expressions.this.conditional_expressions();
+        Expressions e = Expressions.this;
     }
 
     void bareMethodCalls() {

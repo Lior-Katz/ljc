@@ -633,25 +633,42 @@ source: tests/snapshot/snapshot_test.rs
         │   ├──Type
         │   │   └──void
         │   └──Block
-        │       ├──VariableDeclaration
-        │       │   ├──Type
-        │       │   │   └──int
-        │       │   └──a
-        │       │       └──MemberAccess
-        │       │           ├──field: x
-        │       │           └──target:
-        │       │               └──this
+        │       ├──Assignment =
+        │       │   ├──MemberAccess
+        │       │   │   ├──field: x
+        │       │   │   └──target:
+        │       │   │       └──QualifiedThis
+        │       │   │           └──Type
+        │       │   │               └──Expressions
+        │       │   └──MemberAccess
+        │       │       ├──field: x
+        │       │       └──target:
+        │       │           └──this
         │       ├──Assignment =
         │       │   ├──MemberAccess
         │       │   │   ├──field: x
         │       │   │   └──target:
         │       │   │       └──this
         │       │   └──int 1
-        │       └──MethodInvocation
-        │           ├──Target
-        │           │   └──this
-        │           └──Name
-        │               └──conditional_expressions
+        │       ├──MethodInvocation
+        │       │   ├──Target
+        │       │   │   └──this
+        │       │   └──Name
+        │       │       └──conditional_expressions
+        │       ├──MethodInvocation
+        │       │   ├──Target
+        │       │   │   └──QualifiedThis
+        │       │   │       └──Type
+        │       │   │           └──Expressions
+        │       │   └──Name
+        │       │       └──conditional_expressions
+        │       └──VariableDeclaration
+        │           ├──Type
+        │           │   └──Expressions
+        │           └──e
+        │               └──QualifiedThis
+        │                   └──Type
+        │                       └──Expressions
         ├──Method bareMethodCalls
         │   ├──Type
         │   │   └──void

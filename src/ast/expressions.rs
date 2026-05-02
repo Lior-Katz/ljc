@@ -52,6 +52,7 @@ pub enum Expression {
     ArrayAccess(ArrayAccess),
     Switch(Box<Switch>),
     This,
+    QualifiedThis(Type),
     ClassLiteral(Type),
 }
 
