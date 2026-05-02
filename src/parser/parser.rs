@@ -202,19 +202,6 @@ impl Parser {
         } else {
             return Ok(vec![]);
         };
-        list.append(&mut self.delimited_list_tail(next, delim)?);
-        Ok(list)
-    }
-
-    /// ```text
-    /// {delim next}
-    /// ```
-    fn delimited_list_tail<T, S>(
-        &mut self,
-        next: impl Fn(&mut Self) -> Result<T, ParseError>,
-        delim: impl Fn(&mut Self) -> Result<S, ParseError>,
-    ) -> Result<Vec<T>, ParseError> {
-        let mut list = Vec::new();
         loop {
             if delim(self).is_err() {
                 break;
@@ -240,6 +227,22 @@ impl Parser {
             Ok(l) if !l.is_empty() => Ok(l),
             _ => Err(ParseError::NoProduction),
         }
+    }
+
+    fn dot(&mut self) -> Result<(), ParseError> {
+        self.assert(Token::Dot)
+    }
+
+    fn comma(&mut self) -> Result<(), ParseError> {
+        self.assert(Token::Comma)
+    }
+
+    fn semicolon(&mut self) -> Result<(), ParseError> {
+        self.assert(Token::Semicolon)
+    }
+
+    fn pipe(&mut self) -> Result<(), ParseError> {
+        self.assert(Token::BitwiseOr)
     }
 
     fn compilation_unit(&mut self) -> Result<CompilationUnit, ParseError> {
@@ -311,7 +314,7 @@ impl Parser {
     fn opt_class_implements(&mut self) -> Result<Option<ClassTypeList>, ParseError> {
         self.opt(
             |this| this.accept(Token::Implements),
-            |this| this.delimited_at_least_1(Self::class_type, |this| this.assert(Token::Comma)),
+            |this| this.delimited_at_least_1(Self::class_type, Self::comma),
         )
     }
 
@@ -324,7 +327,7 @@ impl Parser {
                 }
                 permits
             },
-            |this| this.delimited_at_least_1(Self::class_type, |this| this.assert(Token::Comma)),
+            |this| this.delimited_at_least_1(Self::class_type, Self::comma),
         )
     }
 
@@ -432,13 +435,12 @@ impl Parser {
             return Err(ParseError::NoProduction);
         }
         self.assert(Token::At)?;
-        let name = self.delimited_at_least_1(Self::identifier, |this| this.assert(Token::Dot))?;
+        let name = self.delimited_at_least_1(Self::identifier, Self::dot)?;
         if !self.accept(Token::LeftParen) {
             return Ok(Annotation::Marker(name));
         }
         if self.accept(Token::RightParen) || peek!(self, 0 => Token::Id(_), 1 => Token::Assign) {
-            let values =
-                self.delimited_list(Self::element_value_pair, |this| this.assert(Token::Comma))?;
+            let values = self.delimited_list(Self::element_value_pair, Self::comma)?;
             self.assert(Token::RightParen)?;
             return Ok(Annotation::Normal { name, values });
         }
@@ -599,8 +601,7 @@ impl Parser {
         accept_with_value!(self, Token::Id)?;
         let name = self.identifier()?.try_into()?;
         self.assert(Token::LeftParen)?;
-        let components =
-            self.delimited_list(Self::record_component, |this| this.assert(Token::Comma))?;
+        let components = self.delimited_list(Self::record_component, Self::comma)?;
         self.assert(Token::RightParen)?;
         let implements = self.opt_class_implements()?;
         let body = self.record_body()?;
@@ -730,7 +731,7 @@ impl Parser {
     fn opt_interface_extends(&mut self) -> Result<Option<ClassTypeList>, ParseError> {
         self.opt(
             |this| this.accept(Token::Extends),
-            |this| this.delimited_at_least_1(Self::class_type, |this| this.assert(Token::Comma)),
+            |this| this.delimited_at_least_1(Self::class_type, Self::comma),
         )
     }
 
@@ -833,7 +834,7 @@ impl Parser {
     }
 
     fn formal_parameters(&mut self) -> Result<FormalParameterList, ParseError> {
-        self.delimited_list(|this| this.formal_parameter(), |this| this.assert(Token::Comma))
+        self.delimited_list(Self::formal_parameter, Self::comma)
     }
 
     fn formal_parameter(&mut self) -> Result<Modified<FormalParameter>, ParseError> {
@@ -885,7 +886,7 @@ impl Parser {
                     let modifiers = this.modifiers(ModifierKind::VARIABLE);
                     Ok(this.reference_type()?.with_modifiers(modifiers))
                 },
-                |this| this.assert(Token::Comma),
+                Self::comma,
             )
         } else {
             Ok(vec![])
@@ -1233,70 +1234,52 @@ impl Parser {
     }
 
     fn conditional_or_expression(&mut self) -> Result<Expression, ParseError> {
-        self.left_associative_binary_operation(
-            |this| this.conditional_and_expression(),
-            |this| {
-                accept_with_value!(this,
-                    Token::LogicalOr => BinOp::LogicalOr
-                )
-            },
-        )
+        self.left_associative_binary_operation(Self::conditional_and_expression, |this| {
+            accept_with_value!(this,
+                Token::LogicalOr => BinOp::LogicalOr
+            )
+        })
     }
 
     fn conditional_and_expression(&mut self) -> Result<Expression, ParseError> {
-        self.left_associative_binary_operation(
-            |this| this.inclusive_or_expression(),
-            |this| {
-                accept_with_value!(this,
-                    Token::LogicalAnd => BinOp::LogicalAnd
-                )
-            },
-        )
+        self.left_associative_binary_operation(Self::inclusive_or_expression, |this| {
+            accept_with_value!(this,
+                Token::LogicalAnd => BinOp::LogicalAnd
+            )
+        })
     }
 
     fn inclusive_or_expression(&mut self) -> Result<Expression, ParseError> {
-        self.left_associative_binary_operation(
-            |this| this.exclusive_or_expression(),
-            |this| {
-                accept_with_value!(this,
-                    Token::BitwiseOr => BinOp::BitwiseOr
-                )
-            },
-        )
+        self.left_associative_binary_operation(Self::exclusive_or_expression, |this| {
+            accept_with_value!(this,
+                Token::BitwiseOr => BinOp::BitwiseOr
+            )
+        })
     }
 
     fn exclusive_or_expression(&mut self) -> Result<Expression, ParseError> {
-        self.left_associative_binary_operation(
-            |this| this.and_expression(),
-            |this| {
-                accept_with_value!(this,
-                    Token::BitwiseXor => BinOp::BitwiseXor
-                )
-            },
-        )
+        self.left_associative_binary_operation(Self::and_expression, |this| {
+            accept_with_value!(this,
+                Token::BitwiseXor => BinOp::BitwiseXor
+            )
+        })
     }
 
     fn and_expression(&mut self) -> Result<Expression, ParseError> {
-        self.left_associative_binary_operation(
-            |this| this.equality_expression(),
-            |this| {
-                accept_with_value!(this,
-                    Token::BitwiseAnd => BinOp::BitwiseAnd
-                )
-            },
-        )
+        self.left_associative_binary_operation(Self::equality_expression, |this| {
+            accept_with_value!(this,
+                Token::BitwiseAnd => BinOp::BitwiseAnd
+            )
+        })
     }
 
     fn equality_expression(&mut self) -> Result<Expression, ParseError> {
-        self.left_associative_binary_operation(
-            |this| this.relational_expression(),
-            |this| {
-                accept_with_value!(this,
-                    Token::Equals => BinOp::Equal,
-                    Token::NotEquals => BinOp::NotEqual,
-                )
-            },
-        )
+        self.left_associative_binary_operation(Self::relational_expression, |this| {
+            accept_with_value!(this,
+                Token::Equals => BinOp::Equal,
+                Token::NotEquals => BinOp::NotEqual,
+            )
+        })
     }
 
     fn relational_expression(&mut self) -> Result<Expression, ParseError> {
@@ -1325,41 +1308,32 @@ impl Parser {
     }
 
     fn shift_expression(&mut self) -> Result<Expression, ParseError> {
-        self.left_associative_binary_operation(
-            |this| this.additive_expression(),
-            |this| {
-                accept_with_value!(this,
-                    Token::LeftShift => BinOp::LeftShift,
-                    Token::SignedRightShift => BinOp::SignedRightShift,
-                    Token::UnsignedRightShift => BinOp::UnsignedRightShift,
-                )
-            },
-        )
+        self.left_associative_binary_operation(Self::additive_expression, |this| {
+            accept_with_value!(this,
+                Token::LeftShift => BinOp::LeftShift,
+                Token::SignedRightShift => BinOp::SignedRightShift,
+                Token::UnsignedRightShift => BinOp::UnsignedRightShift,
+            )
+        })
     }
 
     fn additive_expression(&mut self) -> Result<Expression, ParseError> {
-        self.left_associative_binary_operation(
-            |this| this.multiplicative_expression(),
-            |this| {
-                accept_with_value!(this,
-                    Token::Plus => BinOp::Add,
-                    Token::Minus => BinOp::Subtract,
-                )
-            },
-        )
+        self.left_associative_binary_operation(Self::multiplicative_expression, |this| {
+            accept_with_value!(this,
+                Token::Plus => BinOp::Add,
+                Token::Minus => BinOp::Subtract,
+            )
+        })
     }
 
     fn multiplicative_expression(&mut self) -> Result<Expression, ParseError> {
-        self.left_associative_binary_operation(
-            |this| this.unary_expression(),
-            |this| {
-                accept_with_value!(this,
-                    Token::Multiply => BinOp::Multiply,
-                    Token::Divide   => BinOp::Divide,
-                    Token::Modulo   => BinOp::Modulo,
-                )
-            },
-        )
+        self.left_associative_binary_operation(Self::unary_expression, |this| {
+            accept_with_value!(this,
+                Token::Multiply => BinOp::Multiply,
+                Token::Divide   => BinOp::Divide,
+                Token::Modulo   => BinOp::Modulo,
+            )
+        })
     }
 
     /// ```text
@@ -1523,7 +1497,7 @@ impl Parser {
                         .map_or(None, |i| Some(i)),
                 })
             },
-            |this| this.assert(Token::Comma),
+            Self::comma,
         )
     }
 
@@ -1551,7 +1525,7 @@ impl Parser {
     }
 
     fn argument_list(&mut self) -> Result<ArgumentList, ParseError> {
-        self.delimited_list(|this| this.expression(), |this| this.assert(Token::Comma))
+        self.delimited_list(Self::expression, Self::comma)
     }
 
     /// ```text
@@ -1866,7 +1840,7 @@ impl Parser {
     }
 
     fn statement_expression_list(&mut self) -> Result<Vec<Expression>, ParseError> {
-        self.delimited_list(|this| this.term(), |this| this.assert(Token::Comma))
+        self.delimited_list(Self::term, Self::comma)
     }
 
     fn do_statement(&mut self) -> Result<Statement, ParseError> {
@@ -1929,8 +1903,7 @@ impl Parser {
     fn try_statement(&mut self) -> Result<Statement, ParseError> {
         self.assert(Token::Try)?;
         let resources = if self.accept(Token::LeftParen) {
-            let resources = self
-                .delimited_at_least_1(Self::try_resource, |this| this.assert(Token::Semicolon))?;
+            let resources = self.delimited_at_least_1(Self::try_resource, Self::semicolon)?;
             self.accept(Token::Semicolon);
             self.assert(Token::RightParen)?;
             resources
@@ -1991,7 +1964,7 @@ impl Parser {
                 let modifiers = this.modifiers(ModifierKind::VARIABLE);
                 Ok(this.type_term()?.with_modifiers(modifiers))
             },
-            |this| this.assert(Token::BitwiseOr),
+            Self::pipe,
         )?;
         let var_id = self.variable_declarator_id()?;
         self.assert(Token::RightParen)?;
@@ -2023,8 +1996,7 @@ impl Parser {
     ///     type_part {. type_part}
     /// ```
     fn reference_type(&mut self) -> Result<Type, ParseError> {
-        let type_parts =
-            self.delimited_at_least_1(Self::type_part, |this| this.assert(Token::Dot))?;
+        let type_parts = self.delimited_at_least_1(Self::type_part, Self::dot)?;
         Ok(Type::Class(type_parts))
     }
 
@@ -2199,9 +2171,7 @@ impl Parser {
         if self.check_pattern() {
             self.switch_case_pattern_label()
         } else {
-            let labels = self.delimited_at_least_1(Self::conditional_expression, |this| {
-                this.assert(Token::Comma)
-            })?;
+            let labels = self.delimited_at_least_1(Self::conditional_expression, Self::comma)?;
             Ok(SwitchLabel::Constants(labels))
         }
     }
@@ -2318,8 +2288,7 @@ impl Parser {
     ///     pattern {, pattern} [guard]
     /// ```
     fn switch_case_pattern_label(&mut self) -> Result<SwitchLabel, ParseError> {
-        let patterns =
-            self.delimited_at_least_1(Self::pattern, |this| this.assert(Token::Comma))?;
+        let patterns = self.delimited_at_least_1(Self::pattern, Self::comma)?;
         let guard = if peek!(self, 0 => Token::Id(s) if s.as_str() == "when") {
             self.next()?;
             Some(self.expression()?)
@@ -2334,7 +2303,7 @@ impl Parser {
     ///     component_pattern {, component_pattern}
     /// ```
     fn record_component_pattern_list(&mut self) -> Result<ComponentPatternList, ParseError> {
-        self.delimited_at_least_1(Self::record_component_pattern, |this| this.assert(Token::Comma))
+        self.delimited_at_least_1(Self::record_component_pattern, Self::comma)
     }
 
     /// ```text
