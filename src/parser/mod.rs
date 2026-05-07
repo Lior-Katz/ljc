@@ -1,4 +1,4 @@
 mod parser;
-pub use parser::parse_single_file;
+pub use parser::Parser;
 mod error;
 pub use error::ParseError;

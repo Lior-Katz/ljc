@@ -1,18 +1,18 @@
-use ljc::lexer::Token;
-use ljc::lexer::lex_single_file;
-use ljc::parser::parse_single_file;
+use std::fs;
+use ljc::lexer::{Token, Tokens};
+use ljc::parser::Parser;
 use std::path::Path;
 
-fn lex_to_string(path: &Path) -> Result<String, String> {
-    let mut tokens = lex_single_file(path).map_err(|err| format!("{:?}", err))?;
-
+fn lex_to_string(path: &Path) -> datatest_stable::Result<String> {
+    let input = fs::read_to_string(path)?;
+    let mut tokens = Tokens::new(&input);
     let mut out = Vec::new();
 
     loop {
         match tokens.next() {
             Ok(Token::EOF) => break,
             Ok(token) => out.push(format!("{:?}", token)),
-            Err(e) => return Err(format!("{e}")),
+            Err(e) => return Err(e.into()),
         }
     }
 
@@ -35,7 +35,8 @@ fn lexer_snapshot_test(path: &Path) -> datatest_stable::Result<()> {
 }
 
 fn parser_snapshot_test(path: &Path) -> datatest_stable::Result<()> {
-    if let Ok(program) = parse_single_file(path) {
+    let input = fs::read_to_string(path)?;
+    if let Ok(program) = Parser::new(&input).parse() {
         let name = path.file_stem().unwrap().to_str().unwrap();
         insta::with_settings!({
             snapshot_path => "parser/snapshots",

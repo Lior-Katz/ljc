@@ -1,8 +1,6 @@
 use crate::lexer::error::{LexError, invalid_escape, invalid_sequence, numeric_literal_error};
 use crate::lexer::tokens::Token;
 use crate::lexer::util::{Radix, convert_to_int, is_whitespace};
-use std::path::Path;
-use std::{fs, io};
 
 macro_rules! get {
     ( $x:expr ) => {
@@ -13,20 +11,15 @@ macro_rules! get {
     };
 }
 
-pub fn lex_single_file(file_path: &Path) -> Result<Tokens, io::Error> {
-    let input = fs::read_to_string(file_path)?;
-    Ok(Tokens::new(input))
-}
-
-pub struct Tokens {
-    input: String,
+pub struct Tokens<'a> {
+    input: &'a str,
     pos: usize,
     line: usize,
     column: usize,
 }
 
-impl Tokens {
-    pub fn new(input: String) -> Self {
+impl<'a> Tokens<'a> {
+    pub fn new(input: &'a str) -> Self {
         Self {
             input,
             pos: 0,

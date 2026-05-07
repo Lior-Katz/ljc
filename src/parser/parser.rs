@@ -14,12 +14,11 @@ use crate::ast::{
     VariableInitializer, VariableInitializerList,
 };
 use crate::lexer::{LexError, Token};
-use crate::lexer::{Tokens, lex_single_file};
+use crate::lexer::Tokens;
 use crate::parser::error::ParseError;
 use std::collections::VecDeque;
 
 use bitflags::bitflags;
-use std::path::Path;
 use std::vec;
 
 macro_rules! accept_with_value {
@@ -83,22 +82,17 @@ macro_rules! one_of_opt {
     }};
 }
 
-pub fn parse_single_file(path: &Path) -> Result<Program, ParseError> {
-    let mut parser = Parser::new(path).unwrap();
-    parser.parse()
-}
-
-pub struct Parser {
-    tokens: Tokens,
+pub struct Parser<'a> {
+    tokens: Tokens<'a>,
     buffer: VecDeque<Token>,
 }
 
-impl Parser {
-    pub fn new(path: &Path) -> Result<Self, std::io::Error> {
-        Ok(Self {
-            tokens: lex_single_file(path)?,
+impl<'a> Parser<'a> {
+    pub fn new(input: &'a str) -> Self {
+        Self {
+            tokens: Tokens::new(input),
             buffer: VecDeque::new(),
-        })
+        }
     }
 
     pub fn parse(&mut self) -> Result<Program, ParseError> {
