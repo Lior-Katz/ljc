@@ -1,7 +1,21 @@
+use std::fmt::{Display, Formatter};
+
 #[derive(Debug, PartialEq)]
 pub enum Token {
+    Symbol(Symbol),
     Id(String),
+    IntegerLiteral(u64),
+    LongLiteral(u64),
+    FloatingPointLiteral,
+    BooleanLiteral(bool),
+    CharLiteral(char),
+    StringLiteral(String),
+    TextBlock(String),
+    EOF,
+}
 
+#[derive(Debug, PartialEq, Clone)]
+pub enum Symbol {
     // keywords
     Abstract,
     Assert,
@@ -57,13 +71,6 @@ pub enum Token {
 
     // Literals
     NullLiteral,
-    IntegerLiteral(u64),
-    LongLiteral(u64),
-    FloatingPointLiteral,
-    BooleanLiteral(bool),
-    CharLiteral(char),
-    StringLiteral(String),
-    TextBlock(String),
 
     // Separators
     LeftParen,
@@ -118,6 +125,125 @@ pub enum Token {
     LeftShiftAssign,
     SignedRightShiftAssign,
     UnsignedRightShiftAssign,
+}
 
-    EOF,
+macro_rules! symbol {
+    ($($sym:ident)|+ $(|)?) => {
+        Token::Symbol($(Symbol::$sym)|+)
+    };
+}
+
+impl From<Symbol> for Token {
+    fn from(value: Symbol) -> Self {
+        Token::Symbol(value)
+    }
+}
+
+impl Display for Symbol {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Symbol::Abstract => write!(f, "abstract"),
+            Symbol::Assert => write!(f, "assert"),
+            Symbol::Boolean => write!(f, "boolean"),
+            Symbol::Break => write!(f, "break"),
+            Symbol::Byte => write!(f, "byte"),
+            Symbol::Case => write!(f, "case"),
+            Symbol::Catch => write!(f, "catch"),
+            Symbol::Char => write!(f, "char"),
+            Symbol::Class => write!(f, "class"),
+            Symbol::Const => write!(f, "const"),
+            Symbol::Continue => write!(f, "continue"),
+            Symbol::Default => write!(f, "default"),
+            Symbol::Do => write!(f, "do"),
+            Symbol::Double => write!(f, "double"),
+            Symbol::Else => write!(f, "else"),
+            Symbol::Enum => write!(f, "enum"),
+            Symbol::Extends => write!(f, "extends"),
+            Symbol::Final => write!(f, "final"),
+            Symbol::Finally => write!(f, "finally"),
+            Symbol::Float => write!(f, "float"),
+            Symbol::For => write!(f, "for"),
+            Symbol::If => write!(f, "if"),
+            Symbol::Goto => write!(f, "goto"),
+            Symbol::Implements => write!(f, "implements"),
+            Symbol::Import => write!(f, "import"),
+            Symbol::Instanceof => write!(f, "instanceof"),
+            Symbol::Int => write!(f, "int"),
+            Symbol::Interface => write!(f, "interface"),
+            Symbol::Long => write!(f, "long"),
+            Symbol::Native => write!(f, "native"),
+            Symbol::New => write!(f, "new"),
+            Symbol::Package => write!(f, "package"),
+            Symbol::Private => write!(f, "private"),
+            Symbol::Protected => write!(f, "protected"),
+            Symbol::Public => write!(f, "public"),
+            Symbol::Return => write!(f, "return"),
+            Symbol::Short => write!(f, "short"),
+            Symbol::Static => write!(f, "static"),
+            Symbol::Strictfp => write!(f, "strictfp"),
+            Symbol::Super => write!(f, "super"),
+            Symbol::Switch => write!(f, "switch"),
+            Symbol::Synchronized => write!(f, "synchronized"),
+            Symbol::This => write!(f, "this"),
+            Symbol::Throw => write!(f, "throw"),
+            Symbol::Throws => write!(f, "throws"),
+            Symbol::Transient => write!(f, "transient"),
+            Symbol::Try => write!(f, "try"),
+            Symbol::Void => write!(f, "void"),
+            Symbol::Volatile => write!(f, "volatile"),
+            Symbol::While => write!(f, "while"),
+            Symbol::Underscore => write!(f, "underscore"),
+            Symbol::NullLiteral => write!(f, "nullLiteral"),
+            Symbol::LeftParen => write!(f, "'('"),
+            Symbol::RightParen => write!(f, "')'"),
+            Symbol::LeftBrace => write!(f, "'{{'"),
+            Symbol::RightBrace => write!(f, "'}}'"),
+            Symbol::LeftBracket => write!(f, "'['"),
+            Symbol::RightBracket => write!(f, "']'"),
+            Symbol::Semicolon => write!(f, "';'"),
+            Symbol::Comma => write!(f, "','"),
+            Symbol::Dot => write!(f, "'.'"),
+            Symbol::Ellipsis => write!(f, "'...'"),
+            Symbol::At => write!(f, "'@'"),
+            Symbol::DoubleColon => write!(f, "'::'"),
+            Symbol::Assign => write!(f, "'='"),
+            Symbol::GreaterThan => write!(f, "'>'"),
+            Symbol::LessThan => write!(f, "'<'"),
+            Symbol::ExclamationMark => write!(f, "'!'"),
+            Symbol::Tilde => write!(f, "'~'"),
+            Symbol::QuestionMark => write!(f, "'?'"),
+            Symbol::Colon => write!(f, "':'"),
+            Symbol::Arrow => write!(f, "'->'"),
+            Symbol::Equals => write!(f, "'=='"),
+            Symbol::GreaterThanOrEquals => write!(f, "'>='"),
+            Symbol::LessThanOrEquals => write!(f, "'<='"),
+            Symbol::NotEquals => write!(f, "'!='"),
+            Symbol::LogicalAnd => write!(f, "'&&'"),
+            Symbol::LogicalOr => write!(f, "'||'"),
+            Symbol::Increment => write!(f, "'++'"),
+            Symbol::Decrement => write!(f, "'--'"),
+            Symbol::Plus => write!(f, "'+'"),
+            Symbol::Minus => write!(f, "'-'"),
+            Symbol::Multiply => write!(f, "'*'"),
+            Symbol::Divide => write!(f, "'/'"),
+            Symbol::BitwiseAnd => write!(f, "'&'"),
+            Symbol::BitwiseOr => write!(f, "'|'"),
+            Symbol::BitwiseXor => write!(f, "'^'"),
+            Symbol::Modulo => write!(f, "'%'"),
+            Symbol::LeftShift => write!(f, "'<<'"),
+            Symbol::SignedRightShift => write!(f, "'>>'"),
+            Symbol::UnsignedRightShift => write!(f, "'>>>'"),
+            Symbol::AddAssign => write!(f, "'+='"),
+            Symbol::SubAssign => write!(f, "'-='"),
+            Symbol::MulAssign => write!(f, "'*='"),
+            Symbol::DivAssign => write!(f, "'/='"),
+            Symbol::AndAssign => write!(f, "'&='"),
+            Symbol::OrAssign => write!(f, "'|='"),
+            Symbol::XorAssign => write!(f, "'^='"),
+            Symbol::ModAssign => write!(f, "'%='"),
+            Symbol::LeftShiftAssign => write!(f, "'<<='"),
+            Symbol::SignedRightShiftAssign => write!(f, "'>>='"),
+            Symbol::UnsignedRightShiftAssign => write!(f, "'>>>='"),
+        }
+    }
 }
