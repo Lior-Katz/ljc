@@ -123,11 +123,15 @@ impl AstNode for Program {
     }
 }
 
-impl AstNode for TopLevelClassOrInterfaceDeclaration {
+impl AstNode<Modifiers> for TopLevelClassOrInterfaceDeclaration {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        self.fmt_tree_with_context(f, prefix, is_last, &vec![])
+    }
+
+    fn fmt_tree_with_context(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool, modifiers: &Modifiers) -> fmt::Result {
         match self {
-            TopLevelClassOrInterfaceDeclaration::Class(c) => c.fmt_tree(f, prefix, is_last),
-            TopLevelClassOrInterfaceDeclaration::Interface(i) => i.fmt_tree(f, prefix, is_last),
+            TopLevelClassOrInterfaceDeclaration::Class(c) => c.fmt_tree_with_context(f, prefix, is_last, modifiers),
+            TopLevelClassOrInterfaceDeclaration::Interface(i) => i.fmt_tree_with_context(f, prefix, is_last, modifiers),
         }
     }
 }

@@ -1,6 +1,7 @@
 use crate::ast::declarations::TopLevelClassOrInterfaceDeclaration;
+use crate::ast::Modified;
 
 #[derive(Debug)]
 pub enum CompilationUnit {
-    Ordinary(Vec<TopLevelClassOrInterfaceDeclaration>),
+    Ordinary(Vec<Modified<TopLevelClassOrInterfaceDeclaration>>),
 }

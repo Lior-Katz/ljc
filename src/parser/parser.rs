@@ -262,17 +262,15 @@ impl<'a> Parser<'a> {
     /// ```
     fn top_level_class_or_interface_declaration(
         &mut self,
-    ) -> Result<TopLevelClassOrInterfaceDeclaration, ParseError> {
+    ) -> Result<Modified<TopLevelClassOrInterfaceDeclaration>, ParseError> {
         while self.accept(Token::Semicolon) {} // §7.6 (p. 231), ignore semicolons at class or interface declarations level
 
         let modifiers = self.modifiers(ModifierKind::CLASS | ModifierKind::INTERFACE);
-        if let Ok(class_decl) = self.class_declaration() {
-            Ok(class_decl.with_modifiers(modifiers).into())
-        } else if let Ok(iface_decl) = self.interface_declaration() {
-            Ok(iface_decl.with_modifiers(modifiers).into())
-        } else {
-            Err(ParseError::NoProduction)
-        }
+        one_of!(
+            self.class_declaration().map(ClassDeclaration::into),
+            self.interface_declaration().map(InterfaceDeclaration::into)
+        )
+        .map(|d: TopLevelClassOrInterfaceDeclaration| d.with_modifiers(modifiers))
     }
 
     fn class_declaration(&mut self) -> Result<ClassDeclaration, ParseError> {
@@ -2441,13 +2439,13 @@ impl TryFrom<Expression> for Type {
     }
 }
 
-impl Into<TopLevelClassOrInterfaceDeclaration> for Modified<ClassDeclaration> {
+impl Into<TopLevelClassOrInterfaceDeclaration> for ClassDeclaration {
     fn into(self) -> TopLevelClassOrInterfaceDeclaration {
         TopLevelClassOrInterfaceDeclaration::Class(self)
     }
 }
 
-impl Into<TopLevelClassOrInterfaceDeclaration> for Modified<InterfaceDeclaration> {
+impl Into<TopLevelClassOrInterfaceDeclaration> for InterfaceDeclaration {
     fn into(self) -> TopLevelClassOrInterfaceDeclaration {
         TopLevelClassOrInterfaceDeclaration::Interface(self)
     }

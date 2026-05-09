@@ -14,8 +14,8 @@ pub type RecordBodyDeclaration = ClassBodyDeclaration;
 
 #[derive(Debug)]
 pub enum TopLevelClassOrInterfaceDeclaration {
-    Class(Modified<ClassDeclaration>),
-    Interface(Modified<InterfaceDeclaration>),
+    Class(ClassDeclaration),
+    Interface(InterfaceDeclaration),
 }
 
 #[derive(Debug)]
