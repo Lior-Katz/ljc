@@ -1,5 +1,5 @@
 use crate::lexer::Symbol;
-use crate::lexer::error::{LexError, invalid_escape, invalid_sequence, numeric_literal_error};
+use crate::lexer::error::{Error, invalid_escape, invalid_sequence, numeric_literal_error};
 use crate::lexer::tokens::Token;
 use crate::lexer::util::{Radix, convert_to_int, is_whitespace};
 
@@ -29,7 +29,7 @@ impl<'a> Tokens<'a> {
         }
     }
 
-    pub fn next(&mut self) -> Result<Token, LexError> {
+    pub fn next(&mut self) -> Result<Token, Error> {
         loop {
             if is_whitespace(&get!(self)) {
                 self.skip_whitespace();
@@ -207,7 +207,7 @@ impl<'a> Tokens<'a> {
         Ok(Token::EOF)
     }
 
-    fn scan_char_literal(&mut self) -> Result<char, LexError> {
+    fn scan_char_literal(&mut self) -> Result<char, Error> {
         if self.accept('\\') {
             if self.accept('b') {
                 return Ok('\u{0008}');
@@ -253,7 +253,7 @@ impl<'a> Tokens<'a> {
         }
     }
 
-    fn scan_string_literal(&mut self) -> Result<String, LexError> {
+    fn scan_string_literal(&mut self) -> Result<String, Error> {
         let mut s = String::new();
         // let start = self.pos;
         loop {
@@ -266,7 +266,7 @@ impl<'a> Tokens<'a> {
         Ok(s)
     }
 
-    fn scan_number(&mut self, radix: Radix) -> Result<Token, LexError> {
+    fn scan_number(&mut self, radix: Radix) -> Result<Token, Error> {
         let radix: u32 = radix.into();
         match self.peek() {
             Some('_') => {

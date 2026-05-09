@@ -1,28 +1,25 @@
-use std::error::Error;
 use std::fmt::{Display, Formatter};
 
 #[derive(Debug)]
-pub enum LexError {
-    IoError(String),
+pub enum Error {
     InvalidSequence(ErrorDescription),
     NumericLiteralError(ErrorDescription),
     InvalidEscape(ErrorDescription),
 }
 
-impl Display for LexError {
+impl Display for Error {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            LexError::IoError(e) => write!(f, "IO error: {}", e),
-            LexError::InvalidSequence(desc)
-            | LexError::NumericLiteralError(desc)
-            | LexError::InvalidEscape(desc) => {
+            Error::InvalidSequence(desc)
+            | Error::NumericLiteralError(desc)
+            | Error::InvalidEscape(desc) => {
                 write!(f, "{}:{}\t{}", desc.line, desc.column, desc.cause)
             }
         }
     }
 }
 
-impl Error for LexError {}
+impl std::error::Error for Error {}
 
 #[derive(Debug)]
 pub struct ErrorDescription {
@@ -37,24 +34,24 @@ impl ErrorDescription {
     }
 }
 
-pub fn invalid_sequence<_T>(line: usize, column: usize, cause: &str) -> Result<_T, LexError> {
-    Err(LexError::InvalidSequence(ErrorDescription::new(
+pub fn invalid_sequence<_T>(line: usize, column: usize, cause: &str) -> Result<_T, Error> {
+    Err(Error::InvalidSequence(ErrorDescription::new(
         line,
         column,
         String::from(cause),
     )))
 }
 
-pub fn numeric_literal_error<_T>(line: usize, column: usize, cause: &str) -> Result<_T, LexError> {
-    Err(LexError::NumericLiteralError(ErrorDescription::new(
+pub fn numeric_literal_error<_T>(line: usize, column: usize, cause: &str) -> Result<_T, Error> {
+    Err(Error::NumericLiteralError(ErrorDescription::new(
         line,
         column,
         String::from(cause),
     )))
 }
 
-pub fn invalid_escape<_T>(line: usize, column: usize) -> Result<_T, LexError> {
-    Err(LexError::InvalidEscape(ErrorDescription::new(
+pub fn invalid_escape<_T>(line: usize, column: usize) -> Result<_T, Error> {
+    Err(Error::InvalidEscape(ErrorDescription::new(
         line,
         column,
         String::from("Invalid escape character"),
