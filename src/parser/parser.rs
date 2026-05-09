@@ -10,8 +10,8 @@ use crate::ast::{
     NormalClassDeclaration, NormalInterfaceDeclaration, Pattern, Program, RecordBodyDeclaration,
     RecordComponent, RecordDeclaration, Resource, Statement, Switch, SwitchBlockMember,
     SwitchBlockMembers, SwitchLabel, SwitchRule, TopLevelClassOrInterfaceDeclaration, Type,
-    VariableDeclaration, VariableDeclarator, VariableDeclaratorId, VariableDeclaratorList,
-    VariableInitializer, VariableInitializerList,
+    TypeIdentifier, VariableDeclaration, VariableDeclarator, VariableDeclaratorId,
+    VariableDeclaratorList, VariableInitializer, VariableInitializerList,
 };
 use crate::lexer::{LexError, Symbol, Token};
 use crate::lexer::Tokens;
@@ -2599,6 +2599,18 @@ impl TryFrom<Statement> for SwitchRule {
         match value {
             Statement::Throw(_) => Ok(SwitchRule::Throw(value)),
             _ => Err(ParseError::NoProduction),
+        }
+    }
+}
+
+impl TryFrom<Identifier> for TypeIdentifier {
+    type Error = ParseError;
+    fn try_from(value: Identifier) -> Result<Self, Self::Error> {
+        let type_identifier_exclude = ["permits", "record", "sealed", "var", "yield"];
+        if type_identifier_exclude.contains(&value.as_str()) {
+            Err(ParseError::NoProduction)
+        } else {
+            Ok(TypeIdentifier::from(value))
         }
     }
 }
