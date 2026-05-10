@@ -11,6 +11,11 @@ name = "snapshot"
 path = "tests/snapshot/snapshot_test.rs"
 harness = false
 
+[[test]]
+name = "ui"
+path = "tests/ui/ui_tests.rs"
+harness = false
+
 [dependencies]
 bitflags = "2.11.1"
 thiserror = "2.0.18"
