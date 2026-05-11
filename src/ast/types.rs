@@ -1,9 +1,15 @@
-use crate::ast::identifiers::Identifier;
-use crate::collections::AtLeastOne;
+use crate::ast::identifiers::{Identifier, IdentifierKind, TypeIdentifier};
+use crate::collections::{AtLeastOne, Multiple};
 
-pub type ClassType = AtLeastOne<ClassTypePart>;
 pub type ClassTypeList = AtLeastOne<ClassType>;
 pub type TypeName = AtLeastOne<Identifier>;
+pub type ClassTypePartList = Multiple<ClassTypePart>;
+
+#[derive(Debug)]
+pub struct ClassType {
+    pub namespace: ClassTypePartList,
+    pub name: ClassTypePart<TypeIdentifier>,
+}
 
 #[derive(Debug)]
 pub enum Type {
@@ -24,8 +30,8 @@ pub enum Type {
 }
 
 #[derive(Debug)]
-pub struct ClassTypePart {
-    pub identifier: Identifier,
+pub struct ClassTypePart<T: IdentifierKind = Identifier> {
+    pub identifier: T,
 }
 
 #[derive(Debug)]

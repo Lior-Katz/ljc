@@ -1,14 +1,14 @@
 use crate::ast::{
     Annotation, AnnotationInterfaceDeclaration, ArrayAccess, ArrayCreationMode, ArrayType,
     AssignmentOp, BinOp, CatchClause, ClassBodyDeclaration, ClassDeclaration,
-    ClassMemberDeclaration, ClassTypePart, CompilationUnit, ComponentPattern, ConstructorBody,
-    ConstructorInvocation, ElementValue, ElementValuePair, EnumConstant, EnumDeclaration,
-    Expression, ForInit, FormalParameter, InterfaceDeclaration, LeftHandSide, MemberAccess,
-    MethodBody, MethodCall, MethodDeclaration, MethodReferenceType, Modified, Modifier, Modifiers,
-    NormalClassDeclaration, NormalInterfaceDeclaration, Pattern, Program, RecordComponent,
-    RecordDeclaration, Resource, Statement, Switch, SwitchBlockMember, SwitchLabel, SwitchRule,
-    TopLevelClassOrInterfaceDeclaration, Type, TypeIdentifier, VariableDeclaration,
-    VariableDeclarator, VariableDeclaratorId, VariableInitializer,
+    ClassMemberDeclaration, ClassType, ClassTypePart, CompilationUnit, ComponentPattern,
+    ConstructorBody, ConstructorInvocation, ElementValue, ElementValuePair, EnumConstant,
+    EnumDeclaration, Expression, ForInit, FormalParameter, IdentifierKind, InterfaceDeclaration,
+    LeftHandSide, MemberAccess, MethodBody, MethodCall, MethodDeclaration, MethodReferenceType,
+    Modified, Modifier, Modifiers, NormalClassDeclaration, NormalInterfaceDeclaration, Pattern,
+    Program, RecordComponent, RecordDeclaration, Resource, Statement, Switch, SwitchBlockMember,
+    SwitchLabel, SwitchRule, TopLevelClassOrInterfaceDeclaration, Type, TypeIdentifier,
+    VariableDeclaration, VariableDeclarator, VariableDeclaratorId, VariableInitializer,
 };
 use crate::collections::NonEmptyList;
 use std::fmt;
@@ -448,7 +448,7 @@ impl AstNode for Modifier {
     }
 }
 
-impl AstNode for ClassTypePart {
+impl<T: IdentifierKind + Display> AstNode for ClassTypePart<T> {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         let (line_prefix, _) = branch(&prefix, is_last);
         writeln!(f, "{line_prefix}{}", self.identifier)
@@ -1259,5 +1259,12 @@ impl AstNode for MethodReferenceType {
             MethodReferenceType::Constructor => writeln!(f, "{line_prefix}new"),
             MethodReferenceType::Named(name) => writeln!(f, "{line_prefix}{name}"),
         }
+    }
+}
+
+impl AstNode for ClassType {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        self.namespace.fmt_tree(f, prefix, false)?;
+        self.name.fmt_tree(f, prefix, is_last)
     }
 }

@@ -50,4 +50,6 @@ pub enum Error {
     SymbolExpected(Symbol),
     #[error("Invalid type name")]
     RestrictedTypeName,
+    #[error("Expected identifier")]
+    IdentifierExpected,
 }

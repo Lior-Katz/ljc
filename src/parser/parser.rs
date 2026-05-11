@@ -3,9 +3,9 @@ use crate::ast::{
     Annotation, AnnotationInterfaceDeclaration, ArgumentList, ArrayAccess, ArrayCreationMode,
     ArrayType, AssignmentOp, BinOp, BlockStatements, CatchClause, ClassBodyDeclaration,
     ClassBodyDeclarations, ClassDeclaration, ClassMemberDeclaration, ClassType, ClassTypeList,
-    ClassTypePart, CompilationUnit, ComponentPattern, ComponentPatternList, ConstructorBody,
-    ConstructorInvocation, ElementValue, ElementValueList, ElementValuePair, EnumBody,
-    EnumConstant, EnumDeclaration, Expression, ForInit, ForUpdate, FormalParameter,
+    ClassTypePart, ClassTypePartList, CompilationUnit, ComponentPattern, ComponentPatternList,
+    ConstructorBody, ConstructorInvocation, ElementValue, ElementValueList, ElementValuePair,
+    EnumBody, EnumConstant, EnumDeclaration, Expression, ForInit, ForUpdate, FormalParameter,
     FormalParameterList, Identifier, InterfaceDeclaration, LeftHandSide, MemberAccess, MethodBody,
     MethodCall, MethodDeclaration, MethodReferenceType, Modifiable, Modified, Modifier,
     NormalClassDeclaration, NormalInterfaceDeclaration, Pattern, Program, RecordBodyDeclaration,
@@ -2022,7 +2022,7 @@ impl<'a> Parser<'a> {
     /// ```
     fn reference_type(&mut self) -> ParseResult<Type> {
         let type_parts = self.delimited_at_least_1(Self::type_part, Self::dot)?;
-        Ok(Type::Class(type_parts))
+        Ok(Type::Class(type_parts.try_into()?))
     }
 
     /// ```text
@@ -2411,9 +2411,37 @@ bitflags! {
     }
 }
 
-impl From<Identifier> for Type {
-    fn from(value: Identifier) -> Self {
-        Self::Class(NonEmptyList::new(ClassTypePart { identifier: value }))
+impl From<TypeIdentifier> for Type {
+    fn from(value: TypeIdentifier) -> Self {
+        Self::Class(ClassType {
+            namespace: vec![],
+            name: ClassTypePart { identifier: value },
+        })
+    }
+}
+
+impl From<ClassType> for Type {
+    fn from(value: ClassType) -> Self {
+        Type::Class(value)
+    }
+}
+
+impl TryFrom<AtLeastOne<ClassTypePart>> for ClassType {
+    type Error = Error;
+
+    fn try_from(parts: AtLeastOne<ClassTypePart>) -> Result<Self, Self::Error> {
+        let (namespace, last) = parts.split_last();
+        let name = ClassTypePart::try_from(last)?;
+        Ok(Self { namespace, name })
+    }
+}
+
+impl TryFrom<ClassTypePart<Identifier>> for ClassTypePart<TypeIdentifier> {
+    type Error = Error;
+    fn try_from(value: ClassTypePart<Identifier>) -> Result<Self, Self::Error> {
+        Ok(ClassTypePart {
+            identifier: value.identifier.try_into()?,
+        })
     }
 }
 
@@ -2434,17 +2462,27 @@ impl TryFrom<Expression> for Type {
     fn try_from(value: Expression) -> ParseResult<Self> {
         match value {
             Expression::Type(t) => Ok(t),
-            Expression::Name(n) => Ok(Self::from(n)),
-            Expression::MemberAccess(MemberAccess { target, name }) => {
-                match Self::try_from(*target)? {
-                    Type::Class(mut ct) => {
-                        ct.push(ClassTypePart { identifier: name });
-                        Ok(Type::Class(ct))
-                    }
-                    _ => Err(Failure::NoProduction),
-                }
+            Expression::Name(n) => Ok(TypeIdentifier::try_from(n)?.into()),
+            Expression::MemberAccess(MemberAccess { target, name }) => Ok(ClassType {
+                name: ClassTypePart { identifier: name.try_into()? },
+                namespace: ClassTypePartList::try_from(*target)?,
             }
+            .into()),
             _ => Err(Failure::NoProduction),
+        }
+    }
+}
+
+impl TryFrom<Expression> for ClassTypePartList {
+    type Error = Error;
+    fn try_from(value: Expression) -> Result<Self, Self::Error> {
+        match value {
+            Expression::MemberAccess(MemberAccess { target, name }) => {
+                let mut parts = Self::try_from(*target)?;
+                parts.push(ClassTypePart { identifier: name });
+                Ok(parts)
+            }
+            _ => Err(Error::IdentifierExpected),
         }
     }
 }
@@ -2609,11 +2647,6 @@ impl TryFrom<Statement> for SwitchRule {
 impl TryFrom<Identifier> for TypeIdentifier {
     type Error = Error;
     fn try_from(value: Identifier) -> Result<Self, Self::Error> {
-        let type_identifier_exclude = ["permits", "record", "sealed", "var", "yield"];
-        if type_identifier_exclude.contains(&value.as_str()) {
-            Err(Error::RestrictedTypeName)
-        } else {
-            Ok(TypeIdentifier::from(value))
-        }
+        TypeIdentifier::from(value).map_err(|_| Error::RestrictedTypeName)
     }
 }
