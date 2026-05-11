@@ -19,4 +19,3 @@ pub mod patterns;
 pub use patterns::*;
 
 pub type Program = CompilationUnit;
-pub type Multiple<T> = Vec<T>;

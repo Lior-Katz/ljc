@@ -1,13 +1,13 @@
 use crate::ast::expressions::{ArgumentList, VariableInitializer};
 use crate::ast::identifiers::{Identifier, TypeIdentifier};
 use crate::ast::modifiers::{ElementValue, Modified};
-use crate::ast::Multiple;
 use crate::ast::statements::{BlockStatements, ConstructorInvocation};
 use crate::ast::types::{ClassType, ClassTypeList, Type};
+use crate::collections::{AtLeastOne, Multiple};
 
 pub type ClassBodyDeclarations = Vec<ClassBodyDeclaration>;
 pub type FormalParameterList = Vec<Modified<FormalParameter>>;
-pub type VariableDeclaratorList = Vec<VariableDeclarator>;
+pub type VariableDeclaratorList = AtLeastOne<VariableDeclarator>;
 pub type MethodResult = Type;
 pub type RecordComponentList = Vec<Modified<RecordComponent>>;
 pub type RecordBodyDeclaration = ClassBodyDeclaration;

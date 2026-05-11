@@ -10,6 +10,7 @@ use crate::ast::{
     TopLevelClassOrInterfaceDeclaration, Type, TypeIdentifier, VariableDeclaration,
     VariableDeclarator, VariableDeclaratorId, VariableInitializer,
 };
+use crate::collections::NonEmptyList;
 use std::fmt;
 use std::fmt::{Display, Formatter};
 use std::ops::Deref;
@@ -43,6 +44,16 @@ where
             stmt.fmt_tree(f, &prefix, i == self.len() - 1 && is_last)?;
         }
         Ok(())
+    }
+}
+
+impl<T, C> AstNode<C> for NonEmptyList<T>
+where
+    T: AstNode<C>,
+{
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        let vec: Vec<&T> = self.iter().collect();
+        vec.fmt_tree(f, prefix, is_last)
     }
 }
 
@@ -128,10 +139,20 @@ impl AstNode<Modifiers> for TopLevelClassOrInterfaceDeclaration {
         self.fmt_tree_with_context(f, prefix, is_last, &vec![])
     }
 
-    fn fmt_tree_with_context(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool, modifiers: &Modifiers) -> fmt::Result {
+    fn fmt_tree_with_context(
+        &self,
+        f: &mut Formatter<'_>,
+        prefix: &str,
+        is_last: bool,
+        modifiers: &Modifiers,
+    ) -> fmt::Result {
         match self {
-            TopLevelClassOrInterfaceDeclaration::Class(c) => c.fmt_tree_with_context(f, prefix, is_last, modifiers),
-            TopLevelClassOrInterfaceDeclaration::Interface(i) => i.fmt_tree_with_context(f, prefix, is_last, modifiers),
+            TopLevelClassOrInterfaceDeclaration::Class(c) => {
+                c.fmt_tree_with_context(f, prefix, is_last, modifiers)
+            }
+            TopLevelClassOrInterfaceDeclaration::Interface(i) => {
+                i.fmt_tree_with_context(f, prefix, is_last, modifiers)
+            }
         }
     }
 }
@@ -581,7 +602,7 @@ impl AstNode for Statement {
                 writeln!(f, "{line_prefix}TryStatement")?;
 
                 Children::new()
-                    .push_if_non_empty("Resources", resources)
+                    .push_opt("Resources", resources)
                     .push("TryBlock", try_block)
                     .push_if_non_empty("ExceptionHandlers", exception_handlers)
                     .push_opt("FinallyBlock", finally_block)

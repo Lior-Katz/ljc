@@ -4,12 +4,13 @@ use crate::ast::identifiers::Identifier;
 use crate::ast::modifiers::Modified;
 use crate::ast::switch::Switch;
 use crate::ast::types::Type;
+use crate::collections::{AtLeastOne, Multiple};
 
-pub type BlockStatements = Vec<Statement>;
+pub type BlockStatements = Multiple<Statement>;
 pub type ForUpdate = ExpressionList;
-pub type CatchClauseList = Vec<CatchClause>;
-pub type CatchType = Vec<Modified<Type>>;
-pub type Resources = Vec<Resource>;
+pub type CatchClauseList = Multiple<CatchClause>;
+pub type CatchType = AtLeastOne<Modified<Type>>;
+pub type Resources = AtLeastOne<Resource>;
 
 #[derive(Debug)]
 pub enum Statement {
@@ -53,7 +54,7 @@ pub enum Statement {
     },
     Return(Option<Expression>),
     Try {
-        resources: Resources,
+        resources: Option<Resources>,
         try_block: BlockStatements,
         exception_handlers: CatchClauseList,
         finally_block: Option<BlockStatements>,

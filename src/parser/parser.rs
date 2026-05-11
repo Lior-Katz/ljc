@@ -7,13 +7,14 @@ use crate::ast::{
     ConstructorInvocation, ElementValue, ElementValueList, ElementValuePair, EnumBody,
     EnumConstant, EnumDeclaration, Expression, ForInit, ForUpdate, FormalParameter,
     FormalParameterList, Identifier, InterfaceDeclaration, LeftHandSide, MemberAccess, MethodBody,
-    MethodCall, MethodDeclaration, MethodReferenceType, Modifiable, Modified, Modifier, Multiple,
+    MethodCall, MethodDeclaration, MethodReferenceType, Modifiable, Modified, Modifier,
     NormalClassDeclaration, NormalInterfaceDeclaration, Pattern, Program, RecordBodyDeclaration,
     RecordComponent, RecordDeclaration, Resource, Statement, Switch, SwitchBlockMember,
     SwitchBlockMembers, SwitchLabel, SwitchRule, TopLevelClassOrInterfaceDeclaration, Type,
     TypeIdentifier, VariableDeclaration, VariableDeclarator, VariableDeclaratorId,
     VariableDeclaratorList, VariableInitializer, VariableInitializerList,
 };
+use crate::collections::{AtLeastOne, Multiple, NonEmptyList};
 use crate::lexer::{Symbol, Token, Tokens};
 use crate::parser::error::{Error, Failure, ParseResult};
 
@@ -230,9 +231,9 @@ impl<'a> Parser<'a> {
         &mut self,
         next: impl Fn(&mut Self) -> ParseResult<T>,
         delim: impl Fn(&mut Self) -> ParseResult<S>,
-    ) -> ParseResult<Vec<T>> {
+    ) -> ParseResult<AtLeastOne<T>> {
         match self.delimited_list(next, delim) {
-            Ok(l) if !l.is_empty() => Ok(l),
+            Ok(l) => NonEmptyList::from_vec(l).map_err(|_| Failure::NoProduction),
             _ => Err(Failure::NoProduction),
         }
     }
@@ -824,14 +825,14 @@ impl<'a> Parser<'a> {
             }
             .into())
         } else {
-            let mut field_declaration = vec![VariableDeclarator {
+            let mut field_declaration = NonEmptyList::new(VariableDeclarator {
                 name: VariableDeclaratorId::Named(identifier),
                 initializer: self
                     .variable_declarator_initializer()
                     .map_or(None, |i| Some(i)),
-            }];
+            });
             if self.accept(Symbol::Comma) {
-                field_declaration.append(&mut self.variable_declarators_list()?);
+                field_declaration.append(self.variable_declarators_list()?);
             }
             self.assert(Symbol::Semicolon)?;
             Ok(ClassMemberDeclaration::Field {
@@ -896,6 +897,7 @@ impl<'a> Parser<'a> {
                 },
                 Self::comma,
             )
+            .map(|non_empty| non_empty.into())
         } else {
             Ok(vec![])
         }
@@ -1929,9 +1931,9 @@ impl<'a> Parser<'a> {
             let resources = self.delimited_at_least_1(Self::try_resource, Self::semicolon)?;
             self.accept(Symbol::Semicolon);
             self.assert(Symbol::RightParen)?;
-            resources
+            Some(resources)
         } else {
-            vec![]
+            None
         };
         let body = self.block()?;
         let catch_clauses = self.zero_or_more(Self::catch_clause)?;
@@ -2140,13 +2142,13 @@ impl<'a> Parser<'a> {
     fn switch_block_member(&mut self) -> ParseResult<SwitchBlockMember> {
         let label = self.switch_label()?;
         if self.accept(Symbol::Colon) {
-            let mut labels = vec![label];
-            let mut additional_labels = self.zero_or_more(|this| {
+            let mut labels = NonEmptyList::new(label);
+            let additional_labels = self.zero_or_more(|this| {
                 let label = this.switch_label()?;
                 this.assert(Symbol::Colon)?;
                 Ok(label)
             })?;
-            labels.append(&mut additional_labels);
+            labels.append_vec(additional_labels);
             let statements = self.zero_or_more(Self::block_statement)?;
             Ok(SwitchBlockMember::LabeledStatements { labels, statements })
         } else if self.accept(Symbol::Arrow) {
@@ -2329,7 +2331,7 @@ impl<'a> Parser<'a> {
     ///     component_pattern {, component_pattern}
     /// ```
     fn record_component_pattern_list(&mut self) -> ParseResult<ComponentPatternList> {
-        self.delimited_at_least_1(Self::record_component_pattern, Self::comma)
+        self.delimited_list(Self::record_component_pattern, Self::comma)
     }
 
     /// ```text
@@ -2348,7 +2350,7 @@ impl<'a> Parser<'a> {
     /// ```text
     /// pattern:
     ///     local_varaiable_declaration
-    ///     reference_type ( component_pattern_list )
+    ///     reference_type ( [component_pattern_list] )
     /// ```
     fn pattern(&mut self) -> ParseResult<Pattern> {
         let modifiers = self.modifiers(ModifierKind::VARIABLE)?;
@@ -2362,10 +2364,10 @@ impl<'a> Parser<'a> {
 
         if let Ok(var_id) = self.variable_declarator_id() {
             let variable_type = type_term.try_into().map_err(|_| Failure::NoProduction)?;
-            let declarators = vec![VariableDeclarator {
+            let declarators = NonEmptyList::new(VariableDeclarator {
                 name: var_id,
                 initializer: None,
-            }];
+            });
             let var_declaration =
                 VariableDeclaration { variable_type, declarators }.with_modifiers(modifiers);
 
@@ -2411,7 +2413,7 @@ bitflags! {
 
 impl From<Identifier> for Type {
     fn from(value: Identifier) -> Self {
-        Self::Class(vec![ClassTypePart { identifier: value }])
+        Self::Class(NonEmptyList::new(ClassTypePart { identifier: value }))
     }
 }
 

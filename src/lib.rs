@@ -3,3 +3,4 @@ mod ast;
 pub mod lexer;
 pub use lexer::Error as LexicalError;
 pub mod parser;
+mod collections;

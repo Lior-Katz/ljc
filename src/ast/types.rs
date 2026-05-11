@@ -1,8 +1,9 @@
 use crate::ast::identifiers::Identifier;
+use crate::collections::AtLeastOne;
 
-pub type ClassType = Vec<ClassTypePart>;
-pub type ClassTypeList = Vec<ClassType>;
-pub type TypeName = Vec<Identifier>;
+pub type ClassType = AtLeastOne<ClassTypePart>;
+pub type ClassTypeList = AtLeastOne<ClassType>;
+pub type TypeName = AtLeastOne<Identifier>;
 
 #[derive(Debug)]
 pub enum Type {

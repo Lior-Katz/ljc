@@ -1,7 +1,7 @@
-use crate::ast::Multiple;
 use crate::ast::declarations::VariableDeclaration;
 use crate::ast::modifiers::Modified;
 use crate::ast::types::Type;
+use crate::collections::Multiple;
 
 pub type ComponentPatternList = Multiple<ComponentPattern>;
 

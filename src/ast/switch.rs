@@ -1,7 +1,7 @@
-use crate::ast::Multiple;
 use crate::ast::expressions::Expression;
 use crate::ast::patterns::Pattern;
 use crate::ast::statements::{BlockStatements, Statement};
+use crate::collections::AtLeastOne;
 
 pub type SwitchBlockMembers = Vec<SwitchBlockMember>;
 pub type CaseConstant = Expression;
@@ -19,20 +19,20 @@ pub enum SwitchBlockMember {
         rule: SwitchRule,
     },
     LabeledStatements {
-        labels: Multiple<SwitchLabel>,
+        labels: AtLeastOne<SwitchLabel>,
         statements: BlockStatements,
     },
 }
 
 #[derive(Debug)]
 pub enum SwitchLabel {
-    Constants(Multiple<CaseConstant>),
+    Constants(AtLeastOne<CaseConstant>),
     Null {
         default: bool,
     },
     Default,
     Pattern {
-        patterns: Multiple<Pattern>,
+        patterns: AtLeastOne<Pattern>,
         guard: Option<Expression>,
     },
 }
