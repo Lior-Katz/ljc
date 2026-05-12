@@ -6,61 +6,81 @@ source: tests/snapshot/snapshot_test.rs
     │   ├──Modifiers
     │   │   └──sealed
     │   ├──Extends
-    │   │   └──Base
+    │   │   └──Type
+    │   │       └──Base
     │   ├──Implements
-    │   │   ├──I1
-    │   │   └──I2
+    │   │   ├──Type
+    │   │   │   └──I1
+    │   │   └──Type
+    │   │       └──I2
     │   └──Permits
-    │       ├──A
-    │       └──B
+    │       ├──Type
+    │       │   └──A
+    │       └──Type
+    │           └──B
     ├──Class Base
     ├──Interface I1
     ├──Interface I2
     ├──Interface I3
     │   └──Extends
-    │       ├──I1
-    │       └──I2
+    │       ├──Type
+    │       │   └──I1
+    │       └──Type
+    │           └──I2
     ├──Class A
     │   ├──Modifiers
     │   │   └──final
     │   └──Extends
-    │       └──ClassHierarchy
+    │       └──Type
+    │           └──ClassHierarchy
     ├──Class B
     │   ├──Modifiers
     │   │   └──non-sealed
     │   └──Extends
-    │       └──ClassHierarchy
+    │       └──Type
+    │           └──ClassHierarchy
     ├──Class OnlyExtends
     │   └──Extends
-    │       └──Base
+    │       └──Type
+    │           └──Base
     ├──Class OnlyImplements
     │   └──Implements
-    │       ├──I1
-    │       └──I2
+    │       ├──Type
+    │       │   └──I1
+    │       └──Type
+    │           └──I2
     ├──Class OnlyPermits
     │   ├──Modifiers
     │   │   └──sealed
     │   └──Permits
-    │       └──C
+    │       └──Type
+    │           └──C
     ├──Class C
     │   ├──Modifiers
     │   │   └──final
     │   └──Extends
-    │       └──OnlyPermits
+    │       └──Type
+    │           └──OnlyPermits
     ├──Class ExtendsImplements
     │   ├──Extends
-    │   │   └──Base
+    │   │   └──Type
+    │   │       └──Base
     │   └──Implements
-    │       └──I1
+    │       └──Type
+    │           └──I1
     ├──RecordDeclaration R
     │   ├──Implements
-    │   │   ├──I1
-    │   │   └──I2
+    │   │   ├──Type
+    │   │   │   └──I1
+    │   │   └──Type
+    │   │       └──I2
     │   ├──Components
     │   └──Body
     └──Enum E
         ├──Implements
-        │   ├──I1
-        │   └──I2
+        │   ├──Type
+        │   │   └──I1
+        │   └──Type
+        │       └──I2
         ├──Constants
         └──Body

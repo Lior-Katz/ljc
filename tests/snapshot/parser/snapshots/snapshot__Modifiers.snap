@@ -164,7 +164,8 @@ source: tests/snapshot/snapshot_test.rs
         │   │   ├──public
         │   │   └──static
         │   ├──Permits
-        │   │   └──InnerChild
+        │   │   └──Type
+        │   │       └──InnerChild
         │   ├──Field declaration
         │   │   ├──Modifiers
         │   │   │   └──private
@@ -225,7 +226,8 @@ source: tests/snapshot/snapshot_test.rs
         │   │   ├──static
         │   │   └──strictfp
         │   └──Extends
-        │       └──Inner
+        │       └──Type
+        │           └──Inner
         ├──@interface Marker
         │   └──Modifiers
         │       ├──static
@@ -285,7 +287,8 @@ source: tests/snapshot/snapshot_test.rs
         │   │   ├──private
         │   │   └──static
         │   ├──Implements
-        │   │   └──I
+        │   │   └──Type
+        │   │       └──I
         │   ├──Components
         │   │   ├──a
         │   │   │   ├──Type
@@ -318,7 +321,8 @@ source: tests/snapshot/snapshot_test.rs
             │   ├──protected
             │   └──sealed
             └──Permits
-                └──R
+                └──Type
+                    └──R
             ├──Field declaration
             │   ├──Modifiers
             │   │   ├──Annotation

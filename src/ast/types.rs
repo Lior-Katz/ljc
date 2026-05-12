@@ -1,7 +1,7 @@
 use crate::ast::identifiers::{Identifier, IdentifierKind, TypeIdentifier};
 use crate::collections::{AtLeastOne, Multiple};
 
-pub type ClassTypeList = AtLeastOne<ClassType>;
+pub type TypeList = AtLeastOne<Type>;
 pub type TypeName = AtLeastOne<Identifier>;
 pub type ClassTypePartList = Multiple<ClassTypePart>;
 

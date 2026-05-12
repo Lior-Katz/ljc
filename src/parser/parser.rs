@@ -2,7 +2,7 @@ use crate::LexicalError;
 use crate::ast::{
     Annotation, AnnotationInterfaceDeclaration, ArgumentList, ArrayAccess, ArrayCreationMode,
     ArrayType, AssignmentOp, BinOp, BlockStatements, CatchClause, ClassBodyDeclaration,
-    ClassBodyDeclarations, ClassDeclaration, ClassMemberDeclaration, ClassType, ClassTypeList,
+    ClassBodyDeclarations, ClassDeclaration, ClassMemberDeclaration, ClassType, TypeList,
     ClassTypePart, ClassTypePartList, CompilationUnit, ComponentPattern, ComponentPatternList,
     ConstructorBody, ConstructorInvocation, ElementValue, ElementValueList, ElementValuePair,
     EnumBody, EnumConstant, EnumDeclaration, Expression, ForInit, ForUpdate, FormalParameter,
@@ -298,18 +298,18 @@ impl<'a> Parser<'a> {
         Ok(class_decl)
     }
 
-    fn opt_class_extends(&mut self) -> ParseResult<Option<ClassType>> {
-        self.opt(|this| this.accept(Symbol::Extends), Self::class_type)
+    fn opt_class_extends(&mut self) -> ParseResult<Option<Type>> {
+        self.opt(|this| this.accept(Symbol::Extends), Self::type_term)
     }
 
-    fn opt_class_implements(&mut self) -> ParseResult<Option<ClassTypeList>> {
+    fn opt_class_implements(&mut self) -> ParseResult<Option<TypeList>> {
         self.opt(
             |this| this.accept(Symbol::Implements),
-            |this| this.delimited_at_least_1(Self::class_type, Symbol::Comma),
+            |this| this.delimited_at_least_1(Self::type_term, Symbol::Comma),
         )
     }
 
-    fn opt_class_permits(&mut self) -> ParseResult<Option<ClassTypeList>> {
+    fn opt_class_permits(&mut self) -> ParseResult<Option<TypeList>> {
         self.opt(
             |this| {
                 let permits = peek!(this, 0 => Token::Id(s) if s.as_str() == "permits");
@@ -318,7 +318,7 @@ impl<'a> Parser<'a> {
                 }
                 permits
             },
-            |this| this.delimited_at_least_1(Self::class_type, Symbol::Comma),
+            |this| this.delimited_at_least_1(Self::type_term, Symbol::Comma),
         )
     }
 
@@ -725,10 +725,10 @@ impl<'a> Parser<'a> {
         })
     }
 
-    fn opt_interface_extends(&mut self) -> ParseResult<Option<ClassTypeList>> {
+    fn opt_interface_extends(&mut self) -> ParseResult<Option<TypeList>> {
         self.opt(
             |this| this.accept(Symbol::Extends),
-            |this| this.delimited_at_least_1(Self::class_type, Symbol::Comma),
+            |this| this.delimited_at_least_1(Self::type_term, Symbol::Comma),
         )
     }
 
@@ -2046,14 +2046,6 @@ impl<'a> Parser<'a> {
     /// ```
     fn type_part(&mut self) -> ParseResult<ClassTypePart> {
         Ok(ClassTypePart { identifier: self.identifier()? })
-    }
-
-    fn class_type(&mut self) -> ParseResult<ClassType> {
-        match self.type_term() {
-            Ok(Type::Class(class_type)) => Ok(class_type),
-            Ok(_) => Err(Failure::NoProduction),
-            Err(e) => Err(e),
-        }
     }
 
     fn throw_statement(&mut self) -> ParseResult<Statement> {

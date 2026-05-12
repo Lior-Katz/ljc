@@ -2,7 +2,7 @@ use crate::ast::expressions::{ArgumentList, VariableInitializer};
 use crate::ast::identifiers::{Identifier, TypeIdentifier};
 use crate::ast::modifiers::{ElementValue, Modified};
 use crate::ast::statements::{BlockStatements, ConstructorInvocation};
-use crate::ast::types::{ClassType, ClassTypeList, Type};
+use crate::ast::types::{TypeList, Type};
 use crate::collections::{AtLeastOne, Multiple};
 
 pub type ClassBodyDeclarations = Vec<ClassBodyDeclaration>;
@@ -28,9 +28,9 @@ pub enum ClassDeclaration {
 #[derive(Debug)]
 pub struct NormalClassDeclaration {
     pub identifier: TypeIdentifier,
-    pub extends: Option<ClassType>,
-    pub implements: Option<ClassTypeList>,
-    pub permits: Option<ClassTypeList>,
+    pub extends: Option<Type>,
+    pub implements: Option<TypeList>,
+    pub permits: Option<TypeList>,
     pub body: ClassBodyDeclarations,
 }
 
@@ -71,8 +71,8 @@ pub enum InterfaceDeclaration {
 #[derive(Debug)]
 pub struct NormalInterfaceDeclaration {
     pub identifier: TypeIdentifier,
-    pub extends: Option<ClassTypeList>,
-    pub permits: Option<ClassTypeList>,
+    pub extends: Option<TypeList>,
+    pub permits: Option<TypeList>,
     pub body: Vec<Modified<ClassMemberDeclaration>>,
 }
 
@@ -86,7 +86,7 @@ pub struct AnnotationInterfaceDeclaration {
 pub struct RecordDeclaration {
     pub name: TypeIdentifier,
     pub components: RecordComponentList,
-    pub implements: Option<ClassTypeList>,
+    pub implements: Option<TypeList>,
     pub body: Vec<RecordBodyDeclaration>,
 }
 
@@ -105,7 +105,7 @@ pub enum RecordComponent {
 #[derive(Debug)]
 pub struct EnumDeclaration {
     pub name: TypeIdentifier,
-    pub implements: Option<ClassTypeList>,
+    pub implements: Option<TypeList>,
     pub body: EnumBody,
 }
 
