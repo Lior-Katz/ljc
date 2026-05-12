@@ -62,12 +62,14 @@ pub enum Error {
 #[derive(Debug)]
 pub enum SyntaxKind {
     Expression,
+    Statement,
 }
 
 impl Display for SyntaxKind {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             SyntaxKind::Expression => write!(f, "expression"),
+            SyntaxKind::Statement => write!(f, "statement"),
         }
     }
 }

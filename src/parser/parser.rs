@@ -1756,7 +1756,10 @@ impl<'a> Parser<'a> {
             .expression()
             .assert(Error::SyntaxExpectedAfter(SyntaxKind::Expression, Symbol::LeftParen))?;
         self.assert(Symbol::RightParen)?;
-        let if_true = Box::new(self.block_statement()?);
+        let if_true = Box::new(
+            self.block_statement()
+                .assert(Error::SyntaxExpectedAfter(SyntaxKind::Statement, Symbol::If))?,
+        );
         let if_false = if self.accept(Symbol::Else) {
             Some(Box::new(self.block_statement()?))
         } else {
