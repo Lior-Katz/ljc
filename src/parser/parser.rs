@@ -1845,22 +1845,22 @@ impl<'a> Parser<'a> {
             declarators: var_declarators,
         }
         .with_modifiers(modifiers);
-        if self.accept(Symbol::Semicolon) {
-            // basic for init is a local_variable_declaration
-            let (condition, update) = self.basic_for_condition_and_update()?;
-            return Ok(ForHeader::BasicForHeader {
-                initializer: ForInit::LocalVarDeclaration(var_declarations),
-                condition,
-                update,
+        if self.accept(Symbol::Colon) {
+            // for each
+            let iterable = self.expression()?;
+            return Ok(ForHeader::ForEachHeader {
+                variable_declaration: var_declarations,
+                iterable,
             });
         }
 
-        // for each
-        self.assert(Symbol::Colon)?;
-        let iterable = self.expression()?;
-        Ok(ForHeader::ForEachHeader {
-            variable_declaration: var_declarations,
-            iterable,
+        // basic for init is a local_variable_declaration
+        self.assert(Symbol::Semicolon)?;
+        let (condition, update) = self.basic_for_condition_and_update()?;
+        Ok(ForHeader::BasicForHeader {
+            initializer: ForInit::LocalVarDeclaration(var_declarations),
+            condition,
+            update,
         })
     }
 
