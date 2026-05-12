@@ -742,7 +742,10 @@ impl<'a> Parser<'a> {
         }
         self.expect(Symbol::At)?;
         self.expect(Symbol::Interface)?;
-        let name = self.identifier()?.try_into()?;
+        let name = self
+            .identifier()
+            .assert(Error::IdentifierExpected)?
+            .try_into()?;
         self.assert(Symbol::LeftBrace)?;
         let body = self.zero_or_more(Self::class_member_declaration)?;
         self.assert(Symbol::RightBrace)?;
