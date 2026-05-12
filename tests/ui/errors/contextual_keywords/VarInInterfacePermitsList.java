@@ -1,0 +1,1 @@
+interface Test permits var {}
