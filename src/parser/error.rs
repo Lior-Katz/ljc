@@ -52,4 +52,6 @@ pub enum Error {
     RestrictedTypeName,
     #[error("Expected identifier")]
     IdentifierExpected,
+    #[error("Expected block after 'try'\nnote: a block must start with '{{'")]
+    MissingTryBlock,
 }

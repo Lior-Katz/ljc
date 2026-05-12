@@ -16,7 +16,7 @@ use crate::ast::{
 };
 use crate::collections::{AtLeastOne, Multiple, NonEmptyList};
 use crate::lexer::{Symbol, Token, Tokens};
-use crate::parser::error::{Error, Failure, ParseResult};
+use crate::parser::error::{Error, Failure, ParseResult, ResultExtension};
 
 use bitflags::bitflags;
 use std::collections::VecDeque;
@@ -1935,7 +1935,7 @@ impl<'a> Parser<'a> {
         } else {
             None
         };
-        let body = self.block()?;
+        let body = self.block().assert(Error::MissingTryBlock)?;
         let catch_clauses = self.zero_or_more(Self::catch_clause)?;
         let finally_block = if self.accept(Symbol::Finally) {
             Some(self.block()?)
