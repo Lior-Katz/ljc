@@ -1761,7 +1761,10 @@ impl<'a> Parser<'a> {
                 .assert(Error::SyntaxExpectedAfter(SyntaxKind::Statement, Symbol::If))?,
         );
         let if_false = if self.accept(Symbol::Else) {
-            Some(Box::new(self.block_statement()?))
+            Some(Box::new(
+                self.block_statement()
+                    .assert(Error::SyntaxExpectedAfter(SyntaxKind::Statement, Symbol::Else))?,
+            ))
         } else {
             None
         };
