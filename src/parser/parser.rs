@@ -427,7 +427,9 @@ impl<'a> Parser<'a> {
             return Err(Failure::NoProduction);
         }
         self.expect(Symbol::At)?;
-        let name = self.delimited_at_least_1(Self::identifier, Symbol::Dot)?;
+        let name = self
+            .delimited_at_least_1(Self::identifier, Symbol::Dot)
+            .assert(Error::IdentifierExpected)?;
         if !self.accept(Symbol::LeftParen) {
             return Ok(Annotation::Marker(name));
         }
