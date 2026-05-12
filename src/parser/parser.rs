@@ -1103,16 +1103,6 @@ impl<'a> Parser<'a> {
     fn statement_starting_with_name(&mut self) -> ParseResult<Statement> {
         let modifiers = self.modifiers(ModifierKind::VARIABLE)?;
         let expression = self.term()?;
-        if let Ok(var_declarations) = self.variable_declarators_list() {
-            self.assert(Symbol::Semicolon)?;
-            return Ok(Statement::VariableDeclaration(
-                VariableDeclaration {
-                    variable_type: expression.try_into()?,
-                    declarators: var_declarations,
-                }
-                .with_modifiers(modifiers),
-            ));
-        }
 
         if self.accept(Symbol::Colon) {
             return match expression {
@@ -1128,7 +1118,15 @@ impl<'a> Parser<'a> {
             return Ok(Statement::ExpressionStatement(expression));
         }
 
-        Err(Failure::NoProduction)
+        let var_declarations = self.variable_declarators_list()?;
+        self.assert(Symbol::Semicolon)?;
+        Ok(Statement::VariableDeclaration(
+            VariableDeclaration {
+                variable_type: expression.try_into()?,
+                declarators: var_declarations,
+            }
+            .with_modifiers(modifiers),
+        ))
     }
 
     /// `term` defines the maximal construct we can parse at this point without yet knowing
