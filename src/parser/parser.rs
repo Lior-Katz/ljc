@@ -201,25 +201,22 @@ impl<'a> Parser<'a> {
     /// ```text
     /// [next {delim next}]
     /// ```
-    fn delimited_list<T, S>(
+    fn delimited_list<T>(
         &mut self,
         next: impl Fn(&mut Self) -> ParseResult<T>,
-        delim: impl Fn(&mut Self) -> ParseResult<S>,
+        delim: Symbol,
     ) -> ParseResult<Vec<T>> {
-        let mut list = if let Ok(elem) = next(self) {
-            vec![elem]
-        } else {
-            return Ok(vec![]);
+        let mut list = match next(self) {
+            Ok(elem) => vec![elem],
+            Err(Failure::NoProduction) => return Ok(Vec::new()),
+            Err(Failure::Error(err)) => return Err(err.into()),
         };
         loop {
-            if delim(self).is_err() {
+            if !self.accept(delim) {
                 break;
             }
-            if let Ok(elem) = next(self) {
-                list.push(elem);
-            } else {
-                return Err(Failure::NoProduction);
-            }
+            let elem = next(self).assert(Error::MissingElementAfterDelimiter(delim))?;
+            list.push(elem);
         }
         Ok(list)
     }
@@ -227,31 +224,15 @@ impl<'a> Parser<'a> {
     /// ```text
     /// next {delim next}
     /// ```
-    fn delimited_at_least_1<T, S>(
+    fn delimited_at_least_1<T>(
         &mut self,
         next: impl Fn(&mut Self) -> ParseResult<T>,
-        delim: impl Fn(&mut Self) -> ParseResult<S>,
+        delim: Symbol,
     ) -> ParseResult<AtLeastOne<T>> {
         match self.delimited_list(next, delim) {
             Ok(l) => NonEmptyList::from_vec(l).map_err(|_| Failure::NoProduction),
             _ => Err(Failure::NoProduction),
         }
-    }
-
-    fn dot(&mut self) -> ParseResult<()> {
-        self.expect(Symbol::Dot)
-    }
-
-    fn comma(&mut self) -> ParseResult<()> {
-        self.expect(Symbol::Comma)
-    }
-
-    fn semicolon(&mut self) -> ParseResult<()> {
-        self.expect(Symbol::Semicolon)
-    }
-
-    fn pipe(&mut self) -> ParseResult<()> {
-        self.expect(Symbol::BitwiseOr)
     }
 
     fn compilation_unit(&mut self) -> Result<CompilationUnit, Error> {
@@ -321,7 +302,7 @@ impl<'a> Parser<'a> {
     fn opt_class_implements(&mut self) -> ParseResult<Option<ClassTypeList>> {
         self.opt(
             |this| this.accept(Symbol::Implements),
-            |this| this.delimited_at_least_1(Self::class_type, Self::comma),
+            |this| this.delimited_at_least_1(Self::class_type, Symbol::Comma),
         )
     }
 
@@ -334,7 +315,7 @@ impl<'a> Parser<'a> {
                 }
                 permits
             },
-            |this| this.delimited_at_least_1(Self::class_type, Self::comma),
+            |this| this.delimited_at_least_1(Self::class_type, Symbol::Comma),
         )
     }
 
@@ -446,12 +427,12 @@ impl<'a> Parser<'a> {
             return Err(Failure::NoProduction);
         }
         self.expect(Symbol::At)?;
-        let name = self.delimited_at_least_1(Self::identifier, Self::dot)?;
+        let name = self.delimited_at_least_1(Self::identifier, Symbol::Dot)?;
         if !self.accept(Symbol::LeftParen) {
             return Ok(Annotation::Marker(name));
         }
         if self.accept(Symbol::RightParen) || peek!(self, 0 => Token::Id(_), 1 => symbol!(Assign)) {
-            let values = self.delimited_list(Self::element_value_pair, Self::comma)?;
+            let values = self.delimited_list(Self::element_value_pair, Symbol::Comma)?;
             self.assert(Symbol::RightParen)?;
             return Ok(Annotation::Normal { name, values });
         }
@@ -612,7 +593,7 @@ impl<'a> Parser<'a> {
         accept_with_value!(self, Token::Id)?;
         let name = self.identifier()?.try_into()?;
         self.assert(Symbol::LeftParen)?;
-        let components = self.delimited_list(Self::record_component, Self::comma)?;
+        let components = self.delimited_list(Self::record_component, Symbol::Comma)?;
         self.assert(Symbol::RightParen)?;
         let implements = self.opt_class_implements()?;
         let body = self.record_body()?;
@@ -742,7 +723,7 @@ impl<'a> Parser<'a> {
     fn opt_interface_extends(&mut self) -> ParseResult<Option<ClassTypeList>> {
         self.opt(
             |this| this.accept(Symbol::Extends),
-            |this| this.delimited_at_least_1(Self::class_type, Self::comma),
+            |this| this.delimited_at_least_1(Self::class_type, Symbol::Comma),
         )
     }
 
@@ -847,7 +828,7 @@ impl<'a> Parser<'a> {
     }
 
     fn formal_parameters(&mut self) -> ParseResult<FormalParameterList> {
-        self.delimited_list(Self::formal_parameter, Self::comma)
+        self.delimited_list(Self::formal_parameter, Symbol::Comma)
     }
 
     fn formal_parameter(&mut self) -> ParseResult<Modified<FormalParameter>> {
@@ -899,7 +880,7 @@ impl<'a> Parser<'a> {
                     let modifiers = this.modifiers(ModifierKind::VARIABLE)?;
                     Ok(this.reference_type()?.with_modifiers(modifiers))
                 },
-                Self::comma,
+                Symbol::Comma,
             )
             .map(|non_empty| non_empty.into())
         } else {
@@ -1539,7 +1520,7 @@ impl<'a> Parser<'a> {
                         })?,
                 })
             },
-            Self::comma,
+            Symbol::Comma,
         )
     }
 
@@ -1568,7 +1549,7 @@ impl<'a> Parser<'a> {
     }
 
     fn argument_list(&mut self) -> ParseResult<ArgumentList> {
-        self.delimited_list(Self::expression, Self::comma)
+        self.delimited_list(Self::expression, Symbol::Comma)
     }
 
     /// ```text
@@ -1886,7 +1867,7 @@ impl<'a> Parser<'a> {
     }
 
     fn statement_expression_list(&mut self) -> ParseResult<Vec<Expression>> {
-        self.delimited_list(Self::term, Self::comma)
+        self.delimited_list(Self::term, Symbol::Comma)
     }
 
     fn do_statement(&mut self) -> ParseResult<Statement> {
@@ -1949,7 +1930,7 @@ impl<'a> Parser<'a> {
     fn try_statement(&mut self) -> ParseResult<Statement> {
         self.expect(Symbol::Try)?;
         let resources = if self.accept(Symbol::LeftParen) {
-            let resources = self.delimited_at_least_1(Self::try_resource, Self::semicolon)?;
+            let resources = self.delimited_at_least_1(Self::try_resource, Symbol::Semicolon)?;
             self.accept(Symbol::Semicolon);
             self.assert(Symbol::RightParen)?;
             Some(resources)
@@ -2010,7 +1991,7 @@ impl<'a> Parser<'a> {
                 let modifiers = this.modifiers(ModifierKind::VARIABLE)?;
                 Ok(this.type_term()?.with_modifiers(modifiers))
             },
-            Self::pipe,
+            Symbol::BitwiseOr,
         )?;
         let var_id = self.variable_declarator_id()?;
         self.assert(Symbol::RightParen)?;
@@ -2042,7 +2023,7 @@ impl<'a> Parser<'a> {
     ///     type_part {. type_part}
     /// ```
     fn reference_type(&mut self) -> ParseResult<Type> {
-        let type_parts = self.delimited_at_least_1(Self::type_part, Self::dot)?;
+        let type_parts = self.delimited_at_least_1(Self::type_part, Symbol::Dot)?;
         Ok(Type::Class(type_parts.try_into()?))
     }
 
@@ -2219,7 +2200,7 @@ impl<'a> Parser<'a> {
         if self.check_pattern() {
             self.switch_case_pattern_label()
         } else {
-            let labels = self.delimited_at_least_1(Self::conditional_expression, Self::comma)?;
+            let labels = self.delimited_at_least_1(Self::conditional_expression, Symbol::Comma)?;
             Ok(SwitchLabel::Constants(labels))
         }
     }
@@ -2337,7 +2318,7 @@ impl<'a> Parser<'a> {
     ///     pattern {, pattern} [guard]
     /// ```
     fn switch_case_pattern_label(&mut self) -> ParseResult<SwitchLabel> {
-        let patterns = self.delimited_at_least_1(Self::pattern, Self::comma)?;
+        let patterns = self.delimited_at_least_1(Self::pattern, Symbol::Comma)?;
         let guard = if peek!(self, 0 => Token::Id(s) if s.as_str() == "when") {
             self.next()?;
             Some(self.expression()?)
@@ -2352,7 +2333,7 @@ impl<'a> Parser<'a> {
     ///     component_pattern {, component_pattern}
     /// ```
     fn record_component_pattern_list(&mut self) -> ParseResult<ComponentPatternList> {
-        self.delimited_list(Self::record_component_pattern, Self::comma)
+        self.delimited_list(Self::record_component_pattern, Symbol::Comma)
     }
 
     /// ```text

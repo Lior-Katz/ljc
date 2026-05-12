@@ -47,6 +47,8 @@ impl<T> ResultExtension for ParseResult<T> {
 pub enum Error {
     #[error(transparent)]
     Lexical(LexicalError),
+    #[error("Missing element after {0}")]
+    MissingElementAfterDelimiter(Symbol),
     #[error("Symbol expected: {0}")]
     SymbolExpected(Symbol),
     #[error("Expected {0} after {1}")]

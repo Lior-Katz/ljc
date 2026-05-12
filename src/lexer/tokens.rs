@@ -14,7 +14,7 @@ pub enum Token {
     EOF,
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub enum Symbol {
     // keywords
     Abstract,
