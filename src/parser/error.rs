@@ -61,6 +61,8 @@ pub enum Error {
     IdentifierExpected,
     #[error("Expected block after 'try'\nnote: a block must start with '{{'")]
     MissingTryBlock,
+    #[error("Missing class body\nhint: expected '{{'")]
+    MissingClassBody,
 }
 
 #[derive(Debug)]

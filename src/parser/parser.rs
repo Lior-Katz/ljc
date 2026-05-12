@@ -287,7 +287,7 @@ impl<'a> Parser<'a> {
         let extends = self.opt_class_extends()?;
         let implements = self.opt_class_implements()?;
         let permits = self.opt_class_permits()?;
-        let body = self.class_body()?;
+        let body = self.class_body().assert(Error::MissingClassBody)?;
         let class_decl = NormalClassDeclaration {
             identifier,
             extends,
