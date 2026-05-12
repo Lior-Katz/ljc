@@ -2145,9 +2145,15 @@ impl<'a> Parser<'a> {
     /// ```text
     /// switch_block_member:
     ///     switch_block_statement_group
+    ///     switch_rule
     ///
     /// switch_block_statement_group:
     ///     switch_label : {switch_label :} {block_statement}
+    ///
+    /// switch_rule:
+    ///     switch_label -> expression ;
+    ///     switch_label -> block
+    ///     switch_label -> throw_statement
     /// ```
     fn switch_block_member(&mut self) -> ParseResult<SwitchBlockMember> {
         let label = self.switch_label()?;
@@ -2169,7 +2175,7 @@ impl<'a> Parser<'a> {
             )?;
             Ok(SwitchBlockMember::Rule { case: label, rule })
         } else {
-            Err(Failure::NoProduction)
+            Err(Error::SymbolExpected2(Symbol::Colon, Symbol::Arrow).into())
         }
     }
 

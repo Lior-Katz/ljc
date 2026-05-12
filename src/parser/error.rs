@@ -51,6 +51,8 @@ pub enum Error {
     MissingElementAfterDelimiter(Symbol),
     #[error("Symbol expected: {0}")]
     SymbolExpected(Symbol),
+    #[error("Symbol expected: {0} or {1}")]
+    SymbolExpected2(Symbol, Symbol),
     #[error("Expected {0} after {1}")]
     SyntaxExpectedAfter(SyntaxKind, Symbol),
     #[error("Invalid type name")]

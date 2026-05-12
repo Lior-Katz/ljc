@@ -1,0 +1,4 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Symbol expected: ':' or '->'
