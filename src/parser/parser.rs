@@ -836,11 +836,11 @@ impl<'a> Parser<'a> {
         let param_type = self.type_term()?;
         if self.accept(Symbol::Ellipsis) {
             // variable arity
-            let identifier = self.identifier()?;
+            let identifier = self.identifier().assert(Error::IdentifierExpected)?;
             Ok(FormalParameter::VariableArityParameter(param_type, identifier)
                 .with_modifiers(modifiers))
         } else {
-            let identifier = self.identifier()?;
+            let identifier = self.identifier().assert(Error::IdentifierExpected)?;
             Ok(FormalParameter::NormalParameter(
                 param_type,
                 VariableDeclaratorId::Named(identifier),
