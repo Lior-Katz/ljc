@@ -1173,7 +1173,9 @@ impl<'a> Parser<'a> {
             Symbol::OrAssign => AssignmentOp::BitwiseOr,
         ) {
             let lhs = expr.try_into()?;
-            let rhs = self.term()?;
+            let rhs = self
+                .term()
+                .assert(Error::SyntaxExpectedAfter(SyntaxKind::Expression, Symbol::Assign))?;
             /*
             Compound assignments are not strictly equivalent to assigning the result of a binary op,
             as there can be some differences to how the subexpressions are evaluated.
