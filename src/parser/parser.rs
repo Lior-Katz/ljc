@@ -1213,7 +1213,9 @@ impl<'a> Parser<'a> {
                 .expression()
                 .assert(Error::SyntaxExpectedAfter(SyntaxKind::Expression, Symbol::QuestionMark))?;
             self.assert(Symbol::Colon)?;
-            let if_false = self.conditional_expression()?;
+            let if_false = self
+                .conditional_expression()
+                .assert(Error::SyntaxExpectedAfter(SyntaxKind::Expression, Symbol::Colon))?;
             Ok(Expression::ConditionalExpression {
                 condition: Box::new(condition),
                 if_true: Box::new(if_true),
