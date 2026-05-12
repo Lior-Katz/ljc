@@ -231,7 +231,7 @@ impl<'a> Parser<'a> {
     ) -> ParseResult<AtLeastOne<T>> {
         match self.delimited_list(next, delim) {
             Ok(l) => NonEmptyList::from_vec(l).map_err(|_| Failure::NoProduction),
-            _ => Err(Failure::NoProduction),
+            Err(e) => Err(e),
         }
     }
 
