@@ -16,7 +16,7 @@ use crate::ast::{
 };
 use crate::collections::{AtLeastOne, Multiple, NonEmptyList};
 use crate::lexer::{Symbol, Token, Tokens};
-use crate::parser::error::{Error, Failure, ParseResult, ResultExtension};
+use crate::parser::error::{Error, Failure, ParseResult, ResultExtension, SyntaxKind};
 
 use bitflags::bitflags;
 use std::collections::VecDeque;
@@ -829,7 +829,11 @@ impl<'a> Parser<'a> {
                 name: VariableDeclaratorId::Named(identifier),
                 initializer: self
                     .variable_declarator_initializer()
-                    .map_or(None, |i| Some(i)),
+                    .map(|i| Some(i))
+                    .or_else(|e| match e {
+                        Failure::NoProduction => Ok(None),
+                        Failure::Error(e) => Err(e),
+                    })?,
             });
             if self.accept(Symbol::Comma) {
                 field_declaration.append(self.variable_declarators_list()?);
@@ -1524,7 +1528,11 @@ impl<'a> Parser<'a> {
                     name: this.variable_declarator_id()?,
                     initializer: this
                         .variable_declarator_initializer()
-                        .map_or(None, |i| Some(i)),
+                        .map(|i| Some(i))
+                        .or_else(|e| match e {
+                            Failure::NoProduction => Ok(None),
+                            Failure::Error(e) => Err(e),
+                        })?,
                 })
             },
             Self::comma,
@@ -1544,6 +1552,7 @@ impl<'a> Parser<'a> {
     fn variable_declarator_initializer(&mut self) -> ParseResult<VariableInitializer> {
         self.expect(Symbol::Assign)?;
         self.variable_initializer()
+            .assert(Error::SyntaxExpectedAfter(SyntaxKind::Expression, Symbol::Assign))
     }
 
     fn variable_initializer(&mut self) -> ParseResult<VariableInitializer> {

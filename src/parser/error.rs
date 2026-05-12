@@ -1,6 +1,7 @@
-use crate::lexer::{Symbol};
-use thiserror::Error;
 use crate::LexicalError;
+use crate::lexer::Symbol;
+use std::fmt::{Debug, Display, Formatter};
+use thiserror::Error;
 
 pub type ParseResult<T> = Result<T, Failure>;
 
@@ -48,10 +49,25 @@ pub enum Error {
     Lexical(LexicalError),
     #[error("Symbol expected: {0}")]
     SymbolExpected(Symbol),
+    #[error("Expected {0} after {1}")]
+    SyntaxExpectedAfter(SyntaxKind, Symbol),
     #[error("Invalid type name")]
     RestrictedTypeName,
     #[error("Expected identifier")]
     IdentifierExpected,
     #[error("Expected block after 'try'\nnote: a block must start with '{{'")]
     MissingTryBlock,
+}
+
+#[derive(Debug)]
+pub enum SyntaxKind {
+    Expression,
+}
+
+impl Display for SyntaxKind {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            SyntaxKind::Expression => write!(f, "expression"),
+        }
+    }
 }
