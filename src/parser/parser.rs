@@ -1472,6 +1472,8 @@ impl<'a> Parser<'a> {
                     expr = Expression::ClassLiteral(Type::try_from(expr)?)
                 } else if self.accept(Symbol::This) {
                     expr = Expression::QualifiedThis(Type::try_from(expr)?)
+                } else {
+                    return Err(Error::IdentifierExpected.into())
                 }
             } else if self.accept(Symbol::LeftBracket) {
                 if self.accept(Symbol::RightBracket) {
