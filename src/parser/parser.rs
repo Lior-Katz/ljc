@@ -808,7 +808,7 @@ impl<'a> Parser<'a> {
     /// ```
     fn method_or_field_declaration(&mut self) -> ParseResult<ClassMemberDeclaration> {
         let type_term = self.type_term()?;
-        let identifier = self.identifier()?;
+        let identifier = self.identifier().assert(Error::IdentifierExpected)?;
         if self.accept(Symbol::LeftParen) {
             let parameters = self.formal_parameters()?;
             self.assert(Symbol::RightParen)?;
