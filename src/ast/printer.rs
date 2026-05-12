@@ -15,29 +15,33 @@ use std::fmt;
 use std::fmt::{Display, Formatter};
 use std::ops::Deref;
 
-pub trait AstNode<Context = ()> {
+pub trait TreeDisplay {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result;
+}
+
+pub trait TreeDisplayWithContext<Context> {
     fn fmt_tree_with_context(
         &self,
         f: &mut Formatter<'_>,
         prefix: &str,
         is_last: bool,
         _context: &Context,
-    ) -> fmt::Result {
-        self.fmt_tree(f, prefix, is_last)
-    }
+    ) -> fmt::Result;
 }
 
-impl<T: AstNode<Modifiers>> AstNode for Modified<T> {
+impl<T> TreeDisplay for Modified<T>
+where
+    T: TreeDisplayWithContext<Modifiers>,
+{
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         self.item
             .fmt_tree_with_context(f, prefix, is_last, &self.modifiers)
     }
 }
 
-impl<T, C> AstNode<C> for Vec<T>
+impl<T> TreeDisplay for Vec<T>
 where
-    T: AstNode<C>,
+    T: TreeDisplay,
 {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         for (i, stmt) in self.iter().enumerate() {
@@ -47,9 +51,9 @@ where
     }
 }
 
-impl<T, C> AstNode<C> for NonEmptyList<T>
+impl<T> TreeDisplay for NonEmptyList<T>
 where
-    T: AstNode<C>,
+    T: TreeDisplay,
 {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         let vec: Vec<&T> = self.iter().collect();
@@ -57,25 +61,25 @@ where
     }
 }
 
-impl<T, C> AstNode<C> for Box<T>
+impl<T> TreeDisplay for Box<T>
 where
-    T: AstNode<C>,
+    T: TreeDisplay,
 {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         self.deref().fmt_tree(f, prefix, is_last)
     }
 }
 
-impl<T, C> AstNode<C> for &T
+impl<T> TreeDisplay for &T
 where
-    T: AstNode<C>,
+    T: TreeDisplay,
 {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
-        <T as AstNode<C>>::fmt_tree(self, f, prefix, is_last)
+        <T as TreeDisplay>::fmt_tree(self, f, prefix, is_last)
     }
 }
 
-impl Display for dyn AstNode {
+impl Display for dyn TreeDisplay {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         self.fmt_tree(f, "", false)
     }
@@ -117,7 +121,7 @@ fn fmt_modifiers(
         .fmt_tree(f, &prefix, is_last)
 }
 
-impl AstNode for Program {
+impl TreeDisplay for Program {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(&prefix, is_last);
 
@@ -134,11 +138,7 @@ impl AstNode for Program {
     }
 }
 
-impl AstNode<Modifiers> for TopLevelClassOrInterfaceDeclaration {
-    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
-        self.fmt_tree_with_context(f, prefix, is_last, &vec![])
-    }
-
+impl TreeDisplayWithContext<Modifiers> for TopLevelClassOrInterfaceDeclaration {
     fn fmt_tree_with_context(
         &self,
         f: &mut Formatter<'_>,
@@ -157,11 +157,7 @@ impl AstNode<Modifiers> for TopLevelClassOrInterfaceDeclaration {
     }
 }
 
-impl AstNode<Modifiers> for ClassDeclaration {
-    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
-        self.fmt_tree_with_context(f, prefix, is_last, &vec![])
-    }
-
+impl TreeDisplayWithContext<Modifiers> for ClassDeclaration {
     fn fmt_tree_with_context(
         &self,
         f: &mut Formatter<'_>,
@@ -179,11 +175,7 @@ impl AstNode<Modifiers> for ClassDeclaration {
     }
 }
 
-impl AstNode<Modifiers> for NormalClassDeclaration {
-    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
-        self.fmt_tree_with_context(f, prefix, is_last, &vec![])
-    }
-
+impl TreeDisplayWithContext<Modifiers> for NormalClassDeclaration {
     fn fmt_tree_with_context(
         &self,
         f: &mut Formatter<'_>,
@@ -211,7 +203,7 @@ impl Display for TypeIdentifier {
     }
 }
 
-impl AstNode for ClassBodyDeclaration {
+impl TreeDisplay for ClassBodyDeclaration {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         match self {
             ClassBodyDeclaration::ClassMember(m) => m.fmt_tree(f, prefix, is_last),
@@ -229,10 +221,7 @@ impl AstNode for ClassBodyDeclaration {
     }
 }
 
-impl AstNode<Modifiers> for ClassMemberDeclaration {
-    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
-        self.fmt_tree_with_context(f, prefix, is_last, &vec![])
-    }
+impl TreeDisplayWithContext<Modifiers> for ClassMemberDeclaration {
     fn fmt_tree_with_context(
         &self,
         f: &mut Formatter<'_>,
@@ -283,11 +272,7 @@ impl AstNode<Modifiers> for ClassMemberDeclaration {
     }
 }
 
-impl AstNode<Modifiers> for InterfaceDeclaration {
-    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
-        self.fmt_tree_with_context(f, prefix, is_last, &vec![])
-    }
-
+impl TreeDisplayWithContext<Modifiers> for InterfaceDeclaration {
     fn fmt_tree_with_context(
         &self,
         f: &mut Formatter<'_>,
@@ -306,11 +291,7 @@ impl AstNode<Modifiers> for InterfaceDeclaration {
     }
 }
 
-impl AstNode<Modifiers> for NormalInterfaceDeclaration {
-    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
-        self.fmt_tree_with_context(f, prefix, is_last, &vec![])
-    }
-
+impl TreeDisplayWithContext<Modifiers> for NormalInterfaceDeclaration {
     fn fmt_tree_with_context(
         &self,
         f: &mut Formatter<'_>,
@@ -330,11 +311,7 @@ impl AstNode<Modifiers> for NormalInterfaceDeclaration {
     }
 }
 
-impl AstNode<Modifiers> for AnnotationInterfaceDeclaration {
-    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
-        self.fmt_tree_with_context(f, prefix, is_last, &vec![])
-    }
-
+impl TreeDisplayWithContext<Modifiers> for AnnotationInterfaceDeclaration {
     fn fmt_tree_with_context(
         &self,
         f: &mut Formatter<'_>,
@@ -349,7 +326,7 @@ impl AstNode<Modifiers> for AnnotationInterfaceDeclaration {
     }
 }
 
-impl AstNode for MethodDeclaration {
+impl TreeDisplay for MethodDeclaration {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, _is_last: bool) -> fmt::Result {
         self.result.fmt_tree(f, &prefix, false)?;
         self.parameters.fmt_tree(f, &prefix, false)?;
@@ -361,11 +338,7 @@ impl AstNode for MethodDeclaration {
     }
 }
 
-impl AstNode<Modifiers> for FormalParameter {
-    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
-        self.fmt_tree_with_context(f, prefix, is_last, &vec![])
-    }
-
+impl TreeDisplayWithContext<Modifiers> for FormalParameter {
     fn fmt_tree_with_context(
         &self,
         f: &mut Formatter<'_>,
@@ -388,11 +361,13 @@ impl AstNode<Modifiers> for FormalParameter {
     }
 }
 
-impl AstNode<Modifiers> for Type {
+impl TreeDisplay for Type {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         self.fmt_tree_with_context(f, prefix, is_last, &vec![])
     }
+}
 
+impl TreeDisplayWithContext<Modifiers> for Type {
     fn fmt_tree_with_context(
         &self,
         f: &mut Formatter<'_>,
@@ -425,7 +400,7 @@ impl AstNode<Modifiers> for Type {
     }
 }
 
-impl AstNode for Modifier {
+impl TreeDisplay for Modifier {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         let (line_prefix, _) = branch(&prefix, is_last);
         match self {
@@ -448,14 +423,14 @@ impl AstNode for Modifier {
     }
 }
 
-impl<T: IdentifierKind + Display> AstNode for ClassTypePart<T> {
+impl<T: IdentifierKind + Display> TreeDisplay for ClassTypePart<T> {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         let (line_prefix, _) = branch(&prefix, is_last);
         writeln!(f, "{line_prefix}{}", self.identifier)
     }
 }
 
-impl AstNode for MethodBody {
+impl TreeDisplay for MethodBody {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(&prefix, is_last);
 
@@ -471,7 +446,7 @@ impl AstNode for MethodBody {
     }
 }
 
-impl AstNode for Statement {
+impl TreeDisplay for Statement {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(&prefix, is_last);
 
@@ -631,7 +606,7 @@ impl AstNode for Statement {
     }
 }
 
-impl AstNode for Expression {
+impl TreeDisplay for Expression {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(&prefix, is_last);
 
@@ -729,12 +704,12 @@ impl AstNode for Expression {
     }
 }
 
-impl AstNode for Modified<Expression> {
+impl TreeDisplay for Modified<Expression> {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(&prefix, is_last);
         writeln!(f, "{line_prefix}Modifiers")?;
         fmt_modifiers(f, &new_prefix, false, &self.modifiers)?;
-        <Expression as AstNode<()>>::fmt_tree(&self.item, f, &new_prefix, true)
+        self.item.fmt_tree(f, &new_prefix, true)
     }
 }
 
@@ -768,7 +743,7 @@ impl LeftHandSide {
     }
 }
 
-impl AstNode for BinOp {
+impl TreeDisplay for BinOp {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, _is_last: bool) -> fmt::Result {
         match self {
             BinOp::Add => writeln!(f, "{prefix} +"),
@@ -794,11 +769,7 @@ impl AstNode for BinOp {
     }
 }
 
-impl AstNode<Modifiers> for VariableDeclaration {
-    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
-        self.fmt_tree_with_context(f, prefix, is_last, &vec![])
-    }
-
+impl TreeDisplayWithContext<Modifiers> for VariableDeclaration {
     fn fmt_tree_with_context(
         &self,
         f: &mut Formatter<'_>,
@@ -815,7 +786,7 @@ impl AstNode<Modifiers> for VariableDeclaration {
     }
 }
 
-impl AstNode for VariableDeclarator {
+impl TreeDisplay for VariableDeclarator {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(&prefix, is_last);
         writeln!(f, "{line_prefix}{}", self.name)?;
@@ -826,7 +797,7 @@ impl AstNode for VariableDeclarator {
     }
 }
 
-impl AstNode for VariableInitializer {
+impl TreeDisplay for VariableInitializer {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         match self {
             VariableInitializer::Expression(e) => e.fmt_tree(f, prefix, is_last),
@@ -849,7 +820,7 @@ impl Display for VariableDeclaratorId {
     }
 }
 
-impl AstNode for MemberAccess {
+impl TreeDisplay for MemberAccess {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(prefix, is_last);
 
@@ -864,7 +835,7 @@ impl AstNode for MemberAccess {
     }
 }
 
-impl AstNode for MethodCall {
+impl TreeDisplay for MethodCall {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(prefix, is_last);
 
@@ -878,7 +849,7 @@ impl AstNode for MethodCall {
     }
 }
 
-impl AstNode for ConstructorBody {
+impl TreeDisplay for ConstructorBody {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(prefix, is_last);
         writeln!(f, "{line_prefix}ConstructorBody")?;
@@ -891,7 +862,7 @@ impl AstNode for ConstructorBody {
     }
 }
 
-impl AstNode for ConstructorInvocation {
+impl TreeDisplay for ConstructorInvocation {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         // let (line_prefix, _) = branch(prefix, is_last);
         match self {
@@ -902,7 +873,7 @@ impl AstNode for ConstructorInvocation {
     }
 }
 
-impl AstNode for ForInit {
+impl TreeDisplay for ForInit {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         match self {
             ForInit::LocalVarDeclaration(v) => v.fmt_tree(f, prefix, is_last),
@@ -911,7 +882,7 @@ impl AstNode for ForInit {
     }
 }
 
-impl AstNode for Resource {
+impl TreeDisplay for Resource {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         match self {
             Resource::VariableDeclaration(v) => v.fmt_tree(f, prefix, is_last),
@@ -920,7 +891,7 @@ impl AstNode for Resource {
     }
 }
 
-impl AstNode for CatchClause {
+impl TreeDisplay for CatchClause {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(prefix, is_last);
         writeln!(f, "{line_prefix}CatchClause")?;
@@ -936,7 +907,7 @@ impl AstNode for CatchClause {
 }
 
 struct Children<'a> {
-    inner: Vec<(&'a str, &'a dyn AstNode)>,
+    inner: Vec<(&'a str, &'a dyn TreeDisplay)>,
 }
 
 impl<'a> Children<'a> {
@@ -944,14 +915,14 @@ impl<'a> Children<'a> {
         Self { inner: Vec::new() }
     }
 
-    fn push(mut self, label: &'a str, node: &'a dyn AstNode) -> Self {
+    fn push(mut self, label: &'a str, node: &'a dyn TreeDisplay) -> Self {
         self.inner.push((label, node));
         self
     }
 
     fn push_opt<T>(mut self, label: &'a str, node: &'a Option<T>) -> Self
     where
-        T: AstNode,
+        T: TreeDisplay,
     {
         if let Some(n) = node {
             self.inner.push((label, n));
@@ -961,7 +932,7 @@ impl<'a> Children<'a> {
 
     fn push_if_non_empty<T>(mut self, label: &'a str, node: &'a Vec<T>) -> Self
     where
-        T: AstNode,
+        T: TreeDisplay,
     {
         if !node.is_empty() {
             self = self.push(label, node);
@@ -970,7 +941,7 @@ impl<'a> Children<'a> {
     }
 }
 
-impl AstNode for Children<'_> {
+impl TreeDisplay for Children<'_> {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         for (i, (label, node)) in self.inner.iter().enumerate() {
             let is_last_child = i == self.inner.len() - 1 && is_last;
@@ -983,7 +954,7 @@ impl AstNode for Children<'_> {
     }
 }
 
-impl AstNode for ArrayCreationMode {
+impl TreeDisplay for ArrayCreationMode {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         match self {
             ArrayCreationMode::Sized {
@@ -1008,11 +979,7 @@ impl AstNode for ArrayCreationMode {
     }
 }
 
-impl AstNode<Modifiers> for RecordDeclaration {
-    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
-        self.fmt_tree_with_context(f, prefix, is_last, &vec![])
-    }
-
+impl TreeDisplayWithContext<Modifiers> for RecordDeclaration {
     fn fmt_tree_with_context(
         &self,
         f: &mut Formatter<'_>,
@@ -1031,11 +998,7 @@ impl AstNode<Modifiers> for RecordDeclaration {
     }
 }
 
-impl AstNode<Modifiers> for RecordComponent {
-    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
-        self.fmt_tree_with_context(f, prefix, is_last, &vec![])
-    }
-
+impl TreeDisplayWithContext<Modifiers> for RecordComponent {
     fn fmt_tree_with_context(
         &self,
         f: &mut Formatter<'_>,
@@ -1058,11 +1021,7 @@ impl AstNode<Modifiers> for RecordComponent {
     }
 }
 
-impl AstNode<Modifiers> for EnumDeclaration {
-    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
-        self.fmt_tree_with_context(f, prefix, is_last, &vec![])
-    }
-
+impl TreeDisplayWithContext<Modifiers> for EnumDeclaration {
     fn fmt_tree_with_context(
         &self,
         f: &mut Formatter<'_>,
@@ -1082,11 +1041,7 @@ impl AstNode<Modifiers> for EnumDeclaration {
     }
 }
 
-impl AstNode<Modifiers> for EnumConstant {
-    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
-        self.fmt_tree_with_context(f, prefix, is_last, &vec![])
-    }
-
+impl TreeDisplayWithContext<Modifiers> for EnumConstant {
     fn fmt_tree_with_context(
         &self,
         f: &mut Formatter<'_>,
@@ -1104,7 +1059,7 @@ impl AstNode<Modifiers> for EnumConstant {
     }
 }
 
-impl AstNode for Annotation {
+impl TreeDisplay for Annotation {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(prefix, is_last);
         writeln!(f, "{line_prefix}Annotation")?;
@@ -1121,7 +1076,7 @@ impl AstNode for Annotation {
     }
 }
 
-impl AstNode for ElementValue {
+impl TreeDisplay for ElementValue {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         match self {
             ElementValue::ConditionalExpression(e) => e.fmt_tree(f, prefix, is_last),
@@ -1131,7 +1086,7 @@ impl AstNode for ElementValue {
     }
 }
 
-impl AstNode for ElementValuePair {
+impl TreeDisplay for ElementValuePair {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(prefix, is_last);
         writeln!(f, "{line_prefix}Pair")?;
@@ -1142,14 +1097,14 @@ impl AstNode for ElementValuePair {
     }
 }
 
-impl AstNode for String {
+impl TreeDisplay for String {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         let (line_prefix, _) = branch(prefix, is_last);
         writeln!(f, "{line_prefix}{self}")
     }
 }
 
-impl AstNode for ArrayAccess {
+impl TreeDisplay for ArrayAccess {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(prefix, is_last);
         writeln!(f, "{line_prefix}ArrayAccess")?;
@@ -1160,7 +1115,7 @@ impl AstNode for ArrayAccess {
     }
 }
 
-impl AstNode for Switch {
+impl TreeDisplay for Switch {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(prefix, is_last);
         writeln!(f, "{line_prefix}Switch")?;
@@ -1171,7 +1126,7 @@ impl AstNode for Switch {
     }
 }
 
-impl AstNode for SwitchBlockMember {
+impl TreeDisplay for SwitchBlockMember {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(prefix, is_last);
         match self {
@@ -1193,7 +1148,7 @@ impl AstNode for SwitchBlockMember {
     }
 }
 
-impl AstNode for SwitchLabel {
+impl TreeDisplay for SwitchLabel {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(prefix, is_last);
         match self {
@@ -1213,7 +1168,7 @@ impl AstNode for SwitchLabel {
     }
 }
 
-impl AstNode for Pattern {
+impl TreeDisplay for Pattern {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(prefix, is_last);
         match self {
@@ -1232,7 +1187,7 @@ impl AstNode for Pattern {
     }
 }
 
-impl AstNode for ComponentPattern {
+impl TreeDisplay for ComponentPattern {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         let (line_prefix, _) = branch(prefix, is_last);
         match self {
@@ -1242,7 +1197,7 @@ impl AstNode for ComponentPattern {
     }
 }
 
-impl AstNode for SwitchRule {
+impl TreeDisplay for SwitchRule {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         match self {
             SwitchRule::Expression(e) => e.fmt_tree(f, prefix, is_last),
@@ -1252,7 +1207,7 @@ impl AstNode for SwitchRule {
     }
 }
 
-impl AstNode for MethodReferenceType {
+impl TreeDisplay for MethodReferenceType {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         let (line_prefix, _) = branch(prefix, is_last);
         match self {
@@ -1262,7 +1217,7 @@ impl AstNode for MethodReferenceType {
     }
 }
 
-impl AstNode for ClassType {
+impl TreeDisplay for ClassType {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         self.namespace.fmt_tree(f, prefix, false)?;
         self.name.fmt_tree(f, prefix, is_last)
