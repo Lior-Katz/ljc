@@ -1209,7 +1209,9 @@ impl<'a> Parser<'a> {
     fn conditional_expression(&mut self) -> ParseResult<Expression> {
         let condition = self.conditional_or_expression()?;
         if self.accept(Symbol::QuestionMark) {
-            let if_true = self.expression()?;
+            let if_true = self
+                .expression()
+                .assert(Error::SyntaxExpectedAfter(SyntaxKind::Expression, Symbol::QuestionMark))?;
             self.assert(Symbol::Colon)?;
             let if_false = self.conditional_expression()?;
             Ok(Expression::ConditionalExpression {
