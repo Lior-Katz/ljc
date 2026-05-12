@@ -908,7 +908,10 @@ impl<'a> Parser<'a> {
         if self.accept(Symbol::Semicolon) {
             return Ok(MethodBody::Semicolon);
         }
-        Ok(MethodBody::Block(self.block()?))
+        let statements = self
+            .block()
+            .assert(Error::SymbolExpected2(Symbol::Semicolon, Symbol::LeftBrace))?;
+        Ok(MethodBody::Block(statements))
     }
 
     /// ```text
