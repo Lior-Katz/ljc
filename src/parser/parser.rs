@@ -1752,7 +1752,9 @@ impl<'a> Parser<'a> {
     fn if_statement(&mut self) -> ParseResult<Statement> {
         self.expect(Symbol::If)?;
         self.assert(Symbol::LeftParen)?;
-        let condition = self.expression()?;
+        let condition = self
+            .expression()
+            .assert(Error::SyntaxExpectedAfter(SyntaxKind::Expression, Symbol::LeftParen))?;
         self.assert(Symbol::RightParen)?;
         let if_true = Box::new(self.block_statement()?);
         let if_false = if self.accept(Symbol::Else) {
