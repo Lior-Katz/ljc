@@ -280,7 +280,10 @@ impl<'a> Parser<'a> {
 
     fn normal_class_declaration(&mut self) -> ParseResult<NormalClassDeclaration> {
         self.expect(Symbol::Class)?;
-        let identifier = self.identifier()?.try_into()?;
+        let identifier = self
+            .identifier()
+            .assert(Error::IdentifierExpected)?
+            .try_into()?;
         let extends = self.opt_class_extends()?;
         let implements = self.opt_class_implements()?;
         let permits = self.opt_class_permits()?;
