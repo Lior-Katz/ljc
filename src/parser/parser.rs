@@ -1473,7 +1473,7 @@ impl<'a> Parser<'a> {
                 } else if self.accept(Symbol::This) {
                     expr = Expression::QualifiedThis(Type::try_from(expr)?)
                 } else {
-                    return Err(Error::IdentifierExpected.into())
+                    return Err(Error::IdentifierExpected.into());
                 }
             } else if self.accept(Symbol::LeftBracket) {
                 if self.accept(Symbol::RightBracket) {
@@ -1623,7 +1623,7 @@ impl<'a> Parser<'a> {
         } else if self.next_is(Symbol::LeftBracket) {
             self.array_creation(type_to_instantiate)
         } else {
-            Err(Failure::NoProduction)
+            Err(Error::SymbolExpected2(Symbol::LeftParen, Symbol::LeftBracket).into())
         }
     }
 
