@@ -2246,17 +2246,7 @@ impl<'a> Parser<'a> {
                 }
             };
             match token {
-                Token::Symbol(
-                    Symbol::Byte
-                    | Symbol::Short
-                    | Symbol::Int
-                    | Symbol::Long
-                    | Symbol::Float
-                    | Symbol::Double
-                    | Symbol::Boolean
-                    | Symbol::Char
-                    | Symbol::Void,
-                )
+                symbol!(Byte | Short | Int | Long | Float | Double | Boolean | Char | Void)
                 | Token::Id(_) => match self.peek_n(lookahead + 1) {
                     Ok(Token::Id(_)) | Ok(symbol!(Underscore)) if paren_depth == 0 => break true,
                     Ok(Token::Id(_)) | Ok(symbol!(Underscore)) => temp_result = true,
