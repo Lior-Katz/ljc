@@ -2,16 +2,16 @@ use crate::LexicalError;
 use crate::ast::{
     Annotation, AnnotationInterfaceDeclaration, ArgumentList, ArrayAccess, ArrayCreationMode,
     ArrayType, AssignmentOp, BinOp, BlockStatements, CatchClause, ClassBodyDeclaration,
-    ClassBodyDeclarations, ClassDeclaration, ClassMemberDeclaration, ClassType, TypeList,
-    ClassTypePart, ClassTypePartList, CompilationUnit, ComponentPattern, ComponentPatternList,
-    ConstructorBody, ConstructorInvocation, ElementValue, ElementValueList, ElementValuePair,
-    EnumBody, EnumConstant, EnumDeclaration, Expression, ForInit, ForUpdate, FormalParameter,
+    ClassBodyDeclarations, ClassDeclaration, ClassMemberDeclaration, ClassType, ClassTypePart,
+    ClassTypePartList, CompilationUnit, ComponentPattern, ComponentPatternList, ConstructorBody,
+    ConstructorInvocation, ElementValue, ElementValueList, ElementValuePair, EnumBody,
+    EnumConstant, EnumDeclaration, Expression, ForInit, ForUpdate, FormalParameter,
     FormalParameterList, Identifier, InterfaceDeclaration, LeftHandSide, MemberAccess, MethodBody,
     MethodCall, MethodDeclaration, MethodReferenceType, Modifiable, Modified, Modifier,
     NormalClassDeclaration, NormalInterfaceDeclaration, Pattern, Program, RecordBodyDeclaration,
     RecordComponent, RecordDeclaration, Resource, Statement, Switch, SwitchBlockMember,
     SwitchBlockMembers, SwitchLabel, SwitchRule, TopLevelClassOrInterfaceDeclaration, Type,
-    TypeIdentifier, VariableDeclaration, VariableDeclarator, VariableDeclaratorId,
+    TypeIdentifier, TypeList, VariableDeclaration, VariableDeclarator, VariableDeclaratorId,
     VariableDeclaratorList, VariableInitializer, VariableInitializerList,
 };
 use crate::collections::{AtLeastOne, Multiple, NonEmptyList};
@@ -37,28 +37,32 @@ macro_rules! accept_with_value {
     }};
 
     ($self:expr, $($token:expr => $result:expr),+ $(,)?) => {{
+        Err(Failure::NoProduction)
         $(
-            if $self.accept($token) {
-                Ok($result)
-            } else
+            .or_else(|_| {
+                $self.accept($token)
+                    .map_err(Into::into)
+                    .and_then(|accepted| {
+                        accepted
+                            .then_some($result)
+                            .ok_or(Failure::NoProduction)
+                    })
+            })
         )+
-        {
-            Err(Failure::NoProduction)
-        }
     }};
 }
 
 macro_rules! peek {
     ($self:expr, $($n:expr => $pat:pat $(if $guard:expr)?),+ $(,)?) => {{
-        true $(
-            && match $self.peek_n($n) {
-                Ok(tok) => match tok {
-                    $pat $(if $guard)? => true,
-                    _ => false,
-                },
-                Err(_) => false,
-            }
+        Ok(true)
+        $(
+            .and_then(|b| $self.peek_n($n).map(|tok| match tok {
+                $pat $(if $guard)? => b,
+                _ => false,
+            })
+            )
         )+
+            .map_err(Error::from)
     }};
 }
 
@@ -121,23 +125,23 @@ impl<'a> Parser<'a> {
         Ok(&self.buffer[skip])
     }
 
-    fn next_is(&mut self, desired: Symbol) -> bool {
+    fn next_is(&mut self, desired: Symbol) -> Result<bool, LexicalError> {
         self.nth_is(0, desired)
     }
 
-    fn nth_is(&mut self, n: usize, desired: Symbol) -> bool {
-        match self.peek_n(n) {
-            Ok(Token::Symbol(s)) if *s == desired => true,
-            _ => false,
+    fn nth_is(&mut self, n: usize, desired: Symbol) -> Result<bool, LexicalError> {
+        match self.peek_n(n)? {
+            Token::Symbol(s) if *s == desired => Ok(true),
+            _ => Ok(false),
         }
     }
 
-    fn accept(&mut self, desired: Symbol) -> bool {
-        let matches = self.next_is(desired);
+    fn accept(&mut self, desired: Symbol) -> Result<bool, LexicalError> {
+        let matches = self.next_is(desired)?;
         if matches {
             self.next().unwrap();
         }
-        matches
+        Ok(matches)
     }
 
     fn integer_literal(&mut self) -> ParseResult<u64> {
@@ -161,7 +165,7 @@ impl<'a> Parser<'a> {
     }
 
     fn expect(&mut self, desired: Symbol) -> ParseResult<()> {
-        if self.accept(desired) {
+        if self.accept(desired)? {
             Ok(())
         } else {
             Err(Failure::NoProduction)
@@ -169,19 +173,26 @@ impl<'a> Parser<'a> {
     }
 
     fn assert(&mut self, desired: Symbol) -> ParseResult<()> {
-        if self.accept(desired.clone()) {
+        if self.accept(desired.clone())? {
             Ok(())
         } else {
             Err(Error::SymbolExpected(desired).into())
         }
     }
 
-    fn opt<T>(
+    fn opt<T, E>(
         &mut self,
-        cond: impl Fn(&mut Self) -> bool,
+        cond: impl Fn(&mut Self) -> Result<bool, E>,
         element: impl Fn(&mut Self) -> ParseResult<T>,
-    ) -> ParseResult<Option<T>> {
-        if cond(self) { Ok(Some(element(self)?)) } else { Ok(None) }
+    ) -> ParseResult<Option<T>>
+    where
+        Failure: From<E>,
+    {
+        if cond(self)? {
+            Ok(Some(element(self)?))
+        } else {
+            Ok(None)
+        }
     }
 
     fn zero_or_more<T>(
@@ -212,7 +223,7 @@ impl<'a> Parser<'a> {
             Err(Failure::Error(err)) => return Err(err.into()),
         };
         loop {
-            if !self.accept(delim) {
+            if !self.accept(delim)? {
                 break;
             }
             let elem = next(self).assert(Error::MissingElementAfterDelimiter(delim))?;
@@ -259,7 +270,7 @@ impl<'a> Parser<'a> {
     fn top_level_class_or_interface_declaration(
         &mut self,
     ) -> ParseResult<Modified<TopLevelClassOrInterfaceDeclaration>> {
-        while self.accept(Symbol::Semicolon) {} // §7.6 (p. 231), ignore semicolons at class or interface declarations level
+        while self.accept(Symbol::Semicolon)? {} // §7.6 (p. 231), ignore semicolons at class or interface declarations level
 
         let modifiers = self.modifiers(ModifierKind::CLASS | ModifierKind::INTERFACE)?;
         one_of!(
@@ -312,11 +323,11 @@ impl<'a> Parser<'a> {
     fn opt_class_permits(&mut self) -> ParseResult<Option<TypeList>> {
         self.opt(
             |this| {
-                let permits = peek!(this, 0 => Token::Id(s) if s.as_str() == "permits");
+                let permits = peek!(this, 0 => Token::Id(s) if s.as_str() == "permits")?;
                 if permits {
-                    this.next().unwrap();
+                    this.next()?;
                 }
-                permits
+                Ok::<bool, Error>(permits)
             },
             |this| this.delimited_at_least_1(Self::type_term, Symbol::Comma),
         )
@@ -324,28 +335,28 @@ impl<'a> Parser<'a> {
 
     fn modifier(&mut self, modifier_kind: ModifierKind) -> ParseResult<Modifier> {
         one_of_opt!(
-            self.accept(Symbol::Public).then_some(Modifier::Public),
-            self.accept(Symbol::Private).then_some(Modifier::Private),
-            self.accept(Symbol::Protected)
+            self.accept(Symbol::Public)?.then_some(Modifier::Public),
+            self.accept(Symbol::Private)?.then_some(Modifier::Private),
+            self.accept(Symbol::Protected)?
                 .then_some(Modifier::Protected),
-            self.accept(Symbol::Abstract).then_some(Modifier::Abstract),
-            (!self.nth_is(1, Symbol::LeftBrace) && self.accept(Symbol::Static))
+            self.accept(Symbol::Abstract)?.then_some(Modifier::Abstract),
+            (!self.nth_is(1, Symbol::LeftBrace)? && self.accept(Symbol::Static)?)
                 .then_some(Modifier::Static),
-            self.accept(Symbol::Final).then_some(Modifier::Final),
-            (modifier_kind.contains(ModifierKind::METHOD) && self.accept(Symbol::Default))
+            self.accept(Symbol::Final)?.then_some(Modifier::Final),
+            (modifier_kind.contains(ModifierKind::METHOD) && self.accept(Symbol::Default)?)
                 .then_some(Modifier::Default),
-            self.accept(Symbol::Strictfp).then_some(Modifier::Strictfp),
-            self.accept(Symbol::Native).then_some(Modifier::Native),
-            self.accept(Symbol::Transient)
+            self.accept(Symbol::Strictfp)?.then_some(Modifier::Strictfp),
+            self.accept(Symbol::Native)?.then_some(Modifier::Native),
+            self.accept(Symbol::Transient)?
                 .then_some(Modifier::Transient),
-            self.accept(Symbol::Volatile).then_some(Modifier::Volatile),
-            (!self.nth_is(1, Symbol::LeftParen) && self.accept(Symbol::Synchronized))
+            self.accept(Symbol::Volatile)?.then_some(Modifier::Volatile),
+            (!self.nth_is(1, Symbol::LeftParen)? && self.accept(Symbol::Synchronized)?)
                 .then_some(Modifier::Synchronized),
-            self.is_sealed_class_start().then(|| {
+            self.is_sealed_class_start()?.then(|| {
                 self.next().unwrap();
                 Modifier::Sealed
             }),
-            self.is_non_sealed_class_start().then(|| {
+            self.is_non_sealed_class_start()?.then(|| {
                 self.next().unwrap();
                 self.next().unwrap();
                 self.next().unwrap();
@@ -359,30 +370,35 @@ impl<'a> Parser<'a> {
         self.zero_or_more(|this| this.modifier(modifier_kind))
     }
 
-    fn is_sealed_modifier(&mut self, start: usize) -> bool {
-        peek!(self, start => Token::Id(s) if s.as_str() == "sealed")
+    fn is_sealed_modifier(&mut self, start: usize) -> ParseResult<bool> {
+        peek!(self, start => Token::Id(s) if s.as_str() == "sealed").map_err(Into::into)
     }
 
-    fn is_non_sealed_modifier(&mut self, start: usize) -> bool {
+    fn is_non_sealed_modifier(&mut self, start: usize) -> ParseResult<bool> {
         peek!(self,
                 start => Token::Id(s) if s.as_str() == "non",
                 start + 1 => symbol!(Minus),
                 start + 2 => Token::Id(s) if s.as_str() == "sealed")
+        .map_err(Into::into)
     }
 
-    fn is_sealed_class_start(&mut self) -> bool {
-        let sealed_modifier = self.is_sealed_modifier(0);
+    fn is_sealed_class_start(&mut self) -> ParseResult<bool> {
+        let sealed_modifier = self.is_sealed_modifier(0)?;
         let next_token_start = 1;
-        sealed_modifier && self.is_after_sealed_or_non_sealed(next_token_start)
+        let is_sealed_class_start =
+            sealed_modifier && self.is_after_sealed_or_non_sealed(next_token_start)?;
+        Ok(is_sealed_class_start)
     }
 
-    fn is_non_sealed_class_start(&mut self) -> bool {
-        let non_sealed_modifier = self.is_non_sealed_modifier(0);
+    fn is_non_sealed_class_start(&mut self) -> ParseResult<bool> {
+        let non_sealed_modifier = self.is_non_sealed_modifier(0)?;
         let next_token_start = 3;
-        non_sealed_modifier && self.is_after_sealed_or_non_sealed(next_token_start)
+        let is_non_sealed_class_start =
+            non_sealed_modifier && self.is_after_sealed_or_non_sealed(next_token_start)?;
+        Ok(is_non_sealed_class_start)
     }
 
-    fn is_after_sealed_or_non_sealed(&mut self, next_token_start: usize) -> bool {
+    fn is_after_sealed_or_non_sealed(&mut self, next_token_start: usize) -> ParseResult<bool> {
         let keyword_class_or_interface_modifier = peek!(self,
             next_token_start => Token::Symbol(
                 Symbol::Public
@@ -393,17 +409,17 @@ impl<'a> Parser<'a> {
                 | Symbol::Final
                 | Symbol::Strictfp
                 | Symbol::At)
-        );
-        let sealed_modifier = self.is_sealed_modifier(next_token_start);
-        let non_sealed_modifier = self.is_non_sealed_modifier(next_token_start);
-        let class_or_enum_or_record_or_interface = self.nth_is(next_token_start, Symbol::Class)
-            || self.nth_is(next_token_start, Symbol::Enum)
-            || peek!(self, next_token_start => Token::Id(s) if s.as_str() == "record")
-            || self.nth_is(next_token_start, Symbol::Interface);
-        keyword_class_or_interface_modifier
+        )?;
+        let sealed_modifier = self.is_sealed_modifier(next_token_start)?;
+        let non_sealed_modifier = self.is_non_sealed_modifier(next_token_start)?;
+        let class_or_enum_or_record_or_interface = self.nth_is(next_token_start, Symbol::Class)?
+            || self.nth_is(next_token_start, Symbol::Enum)?
+            || peek!(self, next_token_start => Token::Id(s) if s.as_str() == "record")?
+            || self.nth_is(next_token_start, Symbol::Interface)?;
+        Ok(keyword_class_or_interface_modifier
             || sealed_modifier
             || non_sealed_modifier
-            || class_or_enum_or_record_or_interface
+            || class_or_enum_or_record_or_interface)
     }
 
     /// ```text
@@ -425,7 +441,7 @@ impl<'a> Parser<'a> {
     ///     element_value {, element_value} [,]
     /// ```
     fn annotation(&mut self) -> ParseResult<Annotation> {
-        if !self.next_is(Symbol::At) || self.nth_is(1, Symbol::Interface) {
+        if !self.next_is(Symbol::At)? || self.nth_is(1, Symbol::Interface)? {
             // to differentiate from annotation interface declaration
             return Err(Failure::NoProduction);
         }
@@ -433,10 +449,11 @@ impl<'a> Parser<'a> {
         let name = self
             .delimited_at_least_1(Self::identifier, Symbol::Dot)
             .assert(Error::IdentifierExpected)?;
-        if !self.accept(Symbol::LeftParen) {
+        if !self.accept(Symbol::LeftParen)? {
             return Ok(Annotation::Marker(name));
         }
-        if self.accept(Symbol::RightParen) || peek!(self, 0 => Token::Id(_), 1 => symbol!(Assign)) {
+        if self.accept(Symbol::RightParen)? || peek!(self, 0 => Token::Id(_), 1 => symbol!(Assign))?
+        {
             let values = self.delimited_list(Self::element_value_pair, Symbol::Comma)?;
             self.assert(Symbol::RightParen)?;
             return Ok(Annotation::Normal { name, values });
@@ -489,18 +506,18 @@ impl<'a> Parser<'a> {
     ///     element_value {, element_value} [,]
     /// ```
     fn element_value_list(&mut self) -> ParseResult<ElementValueList> {
-        if self.accept(Symbol::Comma) {
+        if self.accept(Symbol::Comma)? {
             // just a single comma
             return Ok(vec![]);
         }
 
         let mut items = vec![];
         loop {
-            if self.next_is(Symbol::RightBrace) {
+            if self.next_is(Symbol::RightBrace)? {
                 break;
             }
             items.push(self.element_value()?);
-            if !self.accept(Symbol::Comma) {
+            if !self.accept(Symbol::Comma)? {
                 break;
             }
         }
@@ -537,7 +554,7 @@ impl<'a> Parser<'a> {
             self,
             0 => symbol!(Static),
             1 => symbol!(LeftBrace),
-        ) {
+        )? {
             Err(Failure::NoProduction)
         } else {
             self.assert(Symbol::Static)?;
@@ -568,7 +585,7 @@ impl<'a> Parser<'a> {
     ///     ;
     /// ```
     fn class_member_declaration(&mut self) -> ParseResult<Modified<ClassMemberDeclaration>> {
-        while self.accept(Symbol::Semicolon) {} // ignore stray semicolons
+        while self.accept(Symbol::Semicolon)? {} // ignore stray semicolons
         let modifiers = self.modifiers(ModifierKind::CLASS_MEMBER)?;
 
         one_of!(
@@ -592,7 +609,7 @@ impl<'a> Parser<'a> {
             self,
             0 => Token::Id(s) if s.as_str() == "record",
             1 => Token::Id(_),
-        ) {
+        )? {
             return Err(Failure::NoProduction);
         }
         accept_with_value!(self, Token::Id)?;
@@ -617,7 +634,7 @@ impl<'a> Parser<'a> {
     fn record_component(&mut self) -> ParseResult<Modified<RecordComponent>> {
         let annotations = self.zero_or_more(|this| this.annotation().map(Annotation::into))?;
         let component_type = self.type_term()?;
-        if self.accept(Symbol::Ellipsis) {
+        if self.accept(Symbol::Ellipsis)? {
             let name = self.identifier()?;
             Ok(RecordComponent::VariableArity { component_type, name }.with_modifiers(annotations))
         } else {
@@ -645,7 +662,7 @@ impl<'a> Parser<'a> {
     fn enum_body(&mut self) -> ParseResult<EnumBody> {
         self.expect(Symbol::LeftBrace)?;
         let constants = self.enum_constant_list()?;
-        let body_declarations = if self.accept(Symbol::Semicolon) {
+        let body_declarations = if self.accept(Symbol::Semicolon)? {
             self.zero_or_more(Self::class_body_declaration)?
         } else {
             vec![]
@@ -660,7 +677,7 @@ impl<'a> Parser<'a> {
     ///     enum_constant {, enum_constant} [,]
     /// ```
     fn enum_constant_list(&mut self) -> ParseResult<Vec<Modified<EnumConstant>>> {
-        if self.accept(Symbol::Comma) {
+        if self.accept(Symbol::Comma)? {
             // just a single comma
             return Ok(vec![]);
         }
@@ -669,11 +686,11 @@ impl<'a> Parser<'a> {
         loop {
             // enum constants list ends either with the end of the enum (right brace) or the semicolon
             // that starts the enum body declarations
-            if self.next_is(Symbol::RightBrace) || self.next_is(Symbol::Semicolon) {
+            if self.next_is(Symbol::RightBrace)? || self.next_is(Symbol::Semicolon)? {
                 break;
             }
             items.push(self.enum_constant()?);
-            if !self.accept(Symbol::Comma) {
+            if !self.accept(Symbol::Comma)? {
                 break;
             }
         }
@@ -687,14 +704,14 @@ impl<'a> Parser<'a> {
     fn enum_constant(&mut self) -> ParseResult<Modified<EnumConstant>> {
         let annotations = self.zero_or_more(|this| this.annotation().map(Annotation::into))?;
         let name = self.identifier()?;
-        let args = if self.accept(Symbol::LeftParen) {
+        let args = if self.accept(Symbol::LeftParen)? {
             let args = self.argument_list()?;
             self.assert(Symbol::RightParen)?;
             Some(args)
         } else {
             None
         };
-        let body = if self.next_is(Symbol::LeftBrace) {
+        let body = if self.next_is(Symbol::LeftBrace)? {
             Some(self.class_body()?)
         } else {
             None
@@ -740,7 +757,7 @@ impl<'a> Parser<'a> {
     }
 
     fn annotation_interface_declaration(&mut self) -> ParseResult<AnnotationInterfaceDeclaration> {
-        if !peek!(self, 0 => symbol!(At), 1 => symbol!(Interface)) {
+        if !peek!(self, 0 => symbol!(At), 1 => symbol!(Interface))? {
             return Err(Failure::NoProduction);
         }
         self.expect(Symbol::At)?;
@@ -767,9 +784,9 @@ impl<'a> Parser<'a> {
     ///     identifier constructor_body
     /// ```
     fn constructor_declaration(&mut self) -> ParseResult<ClassMemberDeclaration> {
-        if peek!(self, 0 => Token::Id(_) , 1 => symbol!(LeftParen | LeftBrace)) {
+        if peek!(self, 0 => Token::Id(_) , 1 => symbol!(LeftParen | LeftBrace))? {
             let name = self.identifier()?.try_into()?;
-            if self.accept(Symbol::LeftParen) {
+            if self.accept(Symbol::LeftParen)? {
                 let parameters = self.formal_parameters()?;
                 self.assert(Symbol::RightParen)?;
                 let throws = self.opt_throws()?;
@@ -798,7 +815,7 @@ impl<'a> Parser<'a> {
     fn method_or_field_declaration(&mut self) -> ParseResult<ClassMemberDeclaration> {
         let type_term = self.type_term()?;
         let identifier = self.identifier().assert(Error::IdentifierExpected)?;
-        if self.accept(Symbol::LeftParen) {
+        if self.accept(Symbol::LeftParen)? {
             let parameters = self.formal_parameters()?;
             self.assert(Symbol::RightParen)?;
             let throws = self.opt_throws()?;
@@ -824,7 +841,7 @@ impl<'a> Parser<'a> {
                         Failure::Error(e) => Err(e),
                     })?,
             });
-            if self.accept(Symbol::Comma) {
+            if self.accept(Symbol::Comma)? {
                 field_declaration.append(self.variable_declarators_list()?);
             }
             self.assert(Symbol::Semicolon)?;
@@ -842,7 +859,7 @@ impl<'a> Parser<'a> {
     fn formal_parameter(&mut self) -> ParseResult<Modified<FormalParameter>> {
         let modifiers = self.modifiers(ModifierKind::VARIABLE)?;
         let param_type = self.type_term()?;
-        if self.accept(Symbol::Ellipsis) {
+        if self.accept(Symbol::Ellipsis)? {
             // variable arity
             let identifier = self.identifier().assert(Error::IdentifierExpected)?;
             Ok(FormalParameter::VariableArityParameter(param_type, identifier)
@@ -858,23 +875,23 @@ impl<'a> Parser<'a> {
     }
 
     fn primitive_type(&mut self) -> ParseResult<Type> {
-        if self.accept(Symbol::Byte) {
+        if self.accept(Symbol::Byte)? {
             Ok(Type::Byte)
-        } else if self.accept(Symbol::Short) {
+        } else if self.accept(Symbol::Short)? {
             Ok(Type::Short)
-        } else if self.accept(Symbol::Int) {
+        } else if self.accept(Symbol::Int)? {
             Ok(Type::Int)
-        } else if self.accept(Symbol::Long) {
+        } else if self.accept(Symbol::Long)? {
             Ok(Type::Long)
-        } else if self.accept(Symbol::Char) {
+        } else if self.accept(Symbol::Char)? {
             Ok(Type::Char)
-        } else if self.accept(Symbol::Float) {
+        } else if self.accept(Symbol::Float)? {
             Ok(Type::Float)
-        } else if self.accept(Symbol::Double) {
+        } else if self.accept(Symbol::Double)? {
             Ok(Type::Double)
-        } else if self.accept(Symbol::Boolean) {
+        } else if self.accept(Symbol::Boolean)? {
             Ok(Type::Boolean)
-        } else if self.accept(Symbol::Void) {
+        } else if self.accept(Symbol::Void)? {
             Ok(Type::Void)
         } else {
             Err(Failure::NoProduction)
@@ -882,7 +899,7 @@ impl<'a> Parser<'a> {
     }
 
     fn opt_throws(&mut self) -> ParseResult<Multiple<Modified<Type>>> {
-        if self.accept(Symbol::Throws) {
+        if self.accept(Symbol::Throws)? {
             self.delimited_at_least_1(
                 |this| {
                     let modifiers = this.modifiers(ModifierKind::VARIABLE)?;
@@ -905,7 +922,7 @@ impl<'a> Parser<'a> {
     }
 
     fn method_body(&mut self) -> ParseResult<MethodBody> {
-        if self.accept(Symbol::Semicolon) {
+        if self.accept(Symbol::Semicolon)? {
             return Ok(MethodBody::Semicolon);
         }
         let statements = self
@@ -1104,7 +1121,7 @@ impl<'a> Parser<'a> {
         let modifiers = self.modifiers(ModifierKind::VARIABLE)?;
         let expression = self.term()?;
 
-        if self.accept(Symbol::Colon) {
+        if self.accept(Symbol::Colon)? {
             return match expression {
                 Expression::Name(id) => {
                     let body = Box::new(self.block_statement()?);
@@ -1114,7 +1131,7 @@ impl<'a> Parser<'a> {
             };
         }
 
-        if self.accept(Symbol::Semicolon) {
+        if self.accept(Symbol::Semicolon)? {
             return Ok(Statement::ExpressionStatement(expression));
         }
 
@@ -1200,7 +1217,7 @@ impl<'a> Parser<'a> {
     /// ```
     fn conditional_expression(&mut self) -> ParseResult<Expression> {
         let condition = self.conditional_or_expression()?;
-        if self.accept(Symbol::QuestionMark) {
+        if self.accept(Symbol::QuestionMark)? {
             let if_true = self
                 .expression()
                 .assert(Error::SyntaxExpectedAfter(SyntaxKind::Expression, Symbol::QuestionMark))?;
@@ -1218,14 +1235,15 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn left_associative_binary_operation<F, G>(
+    fn left_associative_binary_operation<F, G, E>(
         &mut self,
         subexpression: F,
         operation: G,
     ) -> ParseResult<Expression>
     where
         F: Fn(&mut Self) -> ParseResult<Expression>,
-        G: Fn(&mut Self) -> ParseResult<BinOp>,
+        G: Fn(&mut Self) -> Result<BinOp, E>,
+        Failure: From<E>,
     {
         let mut expr = subexpression(self)?;
 
@@ -1355,17 +1373,17 @@ impl<'a> Parser<'a> {
         if let Ok(switch) = self.switch() {
             return Ok(switch.into());
         }
-        if self.accept(Symbol::Tilde) {
+        if self.accept(Symbol::Tilde)? {
             Ok(Expression::BitwiseComplement(Box::new(self.unary_expression()?)))
-        } else if self.accept(Symbol::ExclamationMark) {
+        } else if self.accept(Symbol::ExclamationMark)? {
             Ok(Expression::LogicalNot(Box::new(self.unary_expression()?)))
-        } else if self.accept(Symbol::Plus) {
+        } else if self.accept(Symbol::Plus)? {
             Ok(Expression::UnaryPlus(Box::new(self.unary_expression()?)))
-        } else if self.accept(Symbol::Minus) {
+        } else if self.accept(Symbol::Minus)? {
             Ok(Expression::UnaryMinus(Box::new(self.unary_expression()?)))
-        } else if self.accept(Symbol::Increment) {
+        } else if self.accept(Symbol::Increment)? {
             Ok(Expression::PreIncrement(Box::new(self.unary_expression()?)))
-        } else if self.accept(Symbol::Decrement) {
+        } else if self.accept(Symbol::Decrement)? {
             Ok(Expression::PreDecrement(Box::new(self.unary_expression()?)))
         } else {
             self.postfix_expression()
@@ -1383,9 +1401,9 @@ impl<'a> Parser<'a> {
     fn postfix_expression(&mut self) -> ParseResult<Expression> {
         let mut expr = self.primary()?;
         expr = self.parse_selectors(expr)?;
-        if self.accept(Symbol::Increment) {
+        if self.accept(Symbol::Increment)? {
             expr = Expression::PostIncrement(Box::new(expr));
-        } else if self.accept(Symbol::Decrement) {
+        } else if self.accept(Symbol::Decrement)? {
             expr = Expression::PostDecrement(Box::new(expr));
         }
 
@@ -1427,7 +1445,7 @@ impl<'a> Parser<'a> {
     }
 
     fn parenthesized_expression(&mut self) -> ParseResult<Expression> {
-        if self.accept(Symbol::LeftParen) {
+        if self.accept(Symbol::LeftParen)? {
             let expr = self.expression()?; // assuming you have this
             self.assert(Symbol::RightParen)?;
             Ok(expr)
@@ -1452,9 +1470,9 @@ impl<'a> Parser<'a> {
     fn parse_selectors(&mut self, expr: Expression) -> ParseResult<Expression> {
         let mut expr = expr;
         loop {
-            if self.accept(Symbol::Dot) {
+            if self.accept(Symbol::Dot)? {
                 if let Ok(id) = accept_with_value!(self, Token::Id) {
-                    if self.accept(Symbol::LeftParen) {
+                    if self.accept(Symbol::LeftParen)? {
                         let arg_list = self.argument_list()?;
                         self.assert(Symbol::RightParen)?;
                         expr = Expression::MethodCall(MethodCall {
@@ -1468,15 +1486,15 @@ impl<'a> Parser<'a> {
                             name: id,
                         })
                     }
-                } else if self.accept(Symbol::Class) {
+                } else if self.accept(Symbol::Class)? {
                     expr = Expression::ClassLiteral(Type::try_from(expr)?)
-                } else if self.accept(Symbol::This) {
+                } else if self.accept(Symbol::This)? {
                     expr = Expression::QualifiedThis(Type::try_from(expr)?)
                 } else {
                     return Err(Error::IdentifierExpected.into());
                 }
-            } else if self.accept(Symbol::LeftBracket) {
-                if self.accept(Symbol::RightBracket) {
+            } else if self.accept(Symbol::LeftBracket)? {
+                if self.accept(Symbol::RightBracket)? {
                     expr = Type::from(ArrayType {
                         element_type: Box::new(Type::try_from(expr)?),
                     })
@@ -1490,7 +1508,7 @@ impl<'a> Parser<'a> {
                     }
                     .into();
                 }
-            } else if self.accept(Symbol::LeftParen) {
+            } else if self.accept(Symbol::LeftParen)? {
                 let arg_list = self.argument_list()?;
                 self.assert(Symbol::RightParen)?;
                 expr = Expression::MethodCall(MethodCall {
@@ -1498,9 +1516,9 @@ impl<'a> Parser<'a> {
                     name: expr.try_into()?,
                     arguments: arg_list,
                 })
-            } else if self.accept(Symbol::DoubleColon) {
+            } else if self.accept(Symbol::DoubleColon)? {
                 let target = Box::new(expr);
-                let method = if self.accept(Symbol::New) {
+                let method = if self.accept(Symbol::New)? {
                     MethodReferenceType::Constructor
                 } else {
                     let name = self.identifier()?;
@@ -1540,7 +1558,7 @@ impl<'a> Parser<'a> {
     fn variable_declarator_id(&mut self) -> ParseResult<VariableDeclaratorId> {
         if let Ok(name) = accept_with_value!(self, Token::Id) {
             Ok(VariableDeclaratorId::Named(name))
-        } else if self.accept(Symbol::Underscore) {
+        } else if self.accept(Symbol::Underscore)? {
             Ok(VariableDeclaratorId::Unnamed)
         } else {
             Err(Failure::NoProduction)
@@ -1575,7 +1593,7 @@ impl<'a> Parser<'a> {
     fn constructor_body(&mut self) -> ParseResult<ConstructorBody> {
         self.expect(Symbol::LeftBrace)?;
         let first_part = self.zero_or_more(Self::block_statement)?;
-        let constructor_invocation = if self.accept(Symbol::This) {
+        let constructor_invocation = if self.accept(Symbol::This)? {
             self.assert(Symbol::LeftParen)?;
             let arguments = self.argument_list()?;
             self.assert(Symbol::RightParen)?;
@@ -1618,9 +1636,9 @@ impl<'a> Parser<'a> {
         self.expect(Symbol::New)?;
         // not using type_term here because we want to get the base type only, without possible brackets
         let type_to_instantiate = one_of!(self.primitive_type(), self.reference_type())?;
-        if self.next_is(Symbol::LeftParen) {
+        if self.next_is(Symbol::LeftParen)? {
             self.class_instance_creation(type_to_instantiate)
-        } else if self.next_is(Symbol::LeftBracket) {
+        } else if self.next_is(Symbol::LeftBracket)? {
             self.array_creation(type_to_instantiate)
         } else {
             Err(Error::SymbolExpected2(Symbol::LeftParen, Symbol::LeftBracket).into())
@@ -1648,11 +1666,11 @@ impl<'a> Parser<'a> {
     fn array_creation(&mut self, mut element_type: Type) -> ParseResult<Expression> {
         // FIXME: can be refactored with peek_n
         self.expect(Symbol::LeftBracket)?;
-        let array_creation_mode = if self.accept(Symbol::RightBracket) {
+        let array_creation_mode = if self.accept(Symbol::RightBracket)? {
             element_type = Type::from(ArrayType {
                 element_type: Box::new(element_type),
             });
-            while self.accept(Symbol::LeftBracket) {
+            while self.accept(Symbol::LeftBracket)? {
                 self.assert(Symbol::RightBracket)?;
                 element_type = Type::from(ArrayType {
                     element_type: Box::new(element_type),
@@ -1665,17 +1683,17 @@ impl<'a> Parser<'a> {
             let mut unsized_dimensions = 0;
             self.assert(Symbol::RightBracket)?;
             loop {
-                if !self.accept(Symbol::LeftBracket) {
+                if !self.accept(Symbol::LeftBracket)? {
                     break;
                 }
-                if self.accept(Symbol::RightBracket) {
+                if self.accept(Symbol::RightBracket)? {
                     unsized_dimensions += 1;
                     break;
                 }
                 sized_dimensions.push(self.expression()?);
                 self.assert(Symbol::RightBracket)?;
             }
-            while self.accept(Symbol::LeftBracket) {
+            while self.accept(Symbol::LeftBracket)? {
                 self.assert(Symbol::RightBracket)?;
                 unsized_dimensions += 1;
             }
@@ -1702,17 +1720,17 @@ impl<'a> Parser<'a> {
         let mut items = vec![];
 
         // {,}
-        if self.accept(Symbol::Comma) {
+        if self.accept(Symbol::Comma)? {
             self.assert(Symbol::RightBrace)?;
             return Ok(items);
         }
 
         loop {
-            if self.next_is(Symbol::RightBrace) {
+            if self.next_is(Symbol::RightBrace)? {
                 break;
             }
             items.push(self.variable_initializer()?);
-            if !self.accept(Symbol::Comma) {
+            if !self.accept(Symbol::Comma)? {
                 break;
             }
         }
@@ -1721,7 +1739,7 @@ impl<'a> Parser<'a> {
     }
 
     fn this_access(&mut self) -> ParseResult<Expression> {
-        if self.next_is(Symbol::This) && !self.nth_is(1, Symbol::LeftParen) {
+        if self.next_is(Symbol::This)? && !self.nth_is(1, Symbol::LeftParen)? {
             self.next()?;
             Ok(Expression::This)
         } else {
@@ -1754,7 +1772,7 @@ impl<'a> Parser<'a> {
             self.block_statement()
                 .assert(Error::SyntaxExpectedAfter(SyntaxKind::Statement, Symbol::If))?,
         );
-        let if_false = if self.accept(Symbol::Else) {
+        let if_false = if self.accept(Symbol::Else)? {
             Some(Box::new(
                 self.block_statement()
                     .assert(Error::SyntaxExpectedAfter(SyntaxKind::Statement, Symbol::Else))?,
@@ -1814,7 +1832,7 @@ impl<'a> Parser<'a> {
     fn for_header(&mut self) -> ParseResult<ForHeader> {
         let modifiers = self.modifiers(ModifierKind::VARIABLE)?;
 
-        if self.accept(Symbol::Semicolon) {
+        if self.accept(Symbol::Semicolon)? {
             // basic for, empty init
             let initializer = ForInit::Expressions(vec![]);
             let (condition, update) = self.basic_for_condition_and_update()?;
@@ -1823,7 +1841,7 @@ impl<'a> Parser<'a> {
 
         let expression = self.term()?;
 
-        if self.accept(Symbol::Comma) {
+        if self.accept(Symbol::Comma)? {
             // basic for, init is a statement_expression_list
             let mut init_expressions = vec![expression];
             init_expressions.extend(self.statement_expression_list()?);
@@ -1833,7 +1851,7 @@ impl<'a> Parser<'a> {
             return Ok(ForHeader::BasicForHeader { initializer, condition, update });
         }
 
-        if self.accept(Symbol::Semicolon) {
+        if self.accept(Symbol::Semicolon)? {
             // basic for, single expression init
             let initializer = ForInit::Expressions(vec![expression]);
             let (condition, update) = self.basic_for_condition_and_update()?;
@@ -1847,7 +1865,7 @@ impl<'a> Parser<'a> {
             declarators: var_declarators,
         }
         .with_modifiers(modifiers);
-        if self.accept(Symbol::Colon) {
+        if self.accept(Symbol::Colon)? {
             // for each
             let iterable = self.expression()?;
             return Ok(ForHeader::ForEachHeader {
@@ -1868,7 +1886,7 @@ impl<'a> Parser<'a> {
 
     //noinspection DuplicatedCode
     fn basic_for_condition_and_update(&mut self) -> ParseResult<(Option<Expression>, ForUpdate)> {
-        let condition = if self.accept(Symbol::Semicolon) {
+        let condition = if self.accept(Symbol::Semicolon)? {
             None
         } else {
             let expression = self.expression()?;
@@ -1911,7 +1929,7 @@ impl<'a> Parser<'a> {
     fn assert_statement(&mut self) -> ParseResult<Statement> {
         self.expect(Symbol::Assert)?;
         let condition = self.expression()?;
-        let detail_message = if self.accept(Symbol::Colon) {
+        let detail_message = if self.accept(Symbol::Colon)? {
             Some(self.expression()?)
         } else {
             None
@@ -1923,7 +1941,7 @@ impl<'a> Parser<'a> {
     //noinspection DuplicatedCode
     fn return_statement(&mut self) -> ParseResult<Statement> {
         self.expect(Symbol::Return)?;
-        let expression = if self.accept(Symbol::Semicolon) {
+        let expression = if self.accept(Symbol::Semicolon)? {
             None
         } else {
             let expression = self.expression()?;
@@ -1942,9 +1960,9 @@ impl<'a> Parser<'a> {
     /// ```
     fn try_statement(&mut self) -> ParseResult<Statement> {
         self.expect(Symbol::Try)?;
-        let resources = if self.accept(Symbol::LeftParen) {
+        let resources = if self.accept(Symbol::LeftParen)? {
             let resources = self.delimited_at_least_1(Self::try_resource, Symbol::Semicolon)?;
-            self.accept(Symbol::Semicolon);
+            self.accept(Symbol::Semicolon)?;
             self.assert(Symbol::RightParen)?;
             Some(resources)
         } else {
@@ -1952,7 +1970,7 @@ impl<'a> Parser<'a> {
         };
         let body = self.block().assert(Error::MissingTryBlock)?;
         let catch_clauses = self.zero_or_more(Self::catch_clause)?;
-        let finally_block = if self.accept(Symbol::Finally) {
+        let finally_block = if self.accept(Symbol::Finally)? {
             Some(self.block()?)
         } else {
             None
@@ -2022,7 +2040,7 @@ impl<'a> Parser<'a> {
     /// ```
     fn type_term(&mut self) -> ParseResult<Type> {
         let mut type_term = one_of!(self.primitive_type(), self.reference_type())?;
-        while self.accept(Symbol::LeftBracket) {
+        while self.accept(Symbol::LeftBracket)? {
             self.assert(Symbol::RightBracket)?;
             type_term = Type::from(ArrayType {
                 element_type: Box::new(type_term),
@@ -2065,7 +2083,7 @@ impl<'a> Parser<'a> {
             self,
             0 => symbol!(Synchronized),
             1 => symbol!(LeftParen),
-        ) {
+        )? {
             Err(Failure::NoProduction)
         } else {
             self.assert(Symbol::Synchronized)?;
@@ -2078,7 +2096,7 @@ impl<'a> Parser<'a> {
     }
 
     fn yield_statement(&mut self) -> ParseResult<Statement> {
-        if !self.is_yield_statement() {
+        if !self.is_yield_statement()? {
             return Err(Failure::NoProduction);
         }
         self.next()?;
@@ -2087,8 +2105,8 @@ impl<'a> Parser<'a> {
         Ok(Statement::Yield(expression))
     }
 
-    fn is_yield_statement(&mut self) -> bool {
-        let yield_token = peek!(self, 0 => Token::Id(s) if s.as_str() == "yield");
+    fn is_yield_statement(&mut self) -> ParseResult<bool> {
+        let yield_token = peek!(self, 0 => Token::Id(s) if s.as_str() == "yield")?;
         let mut expression_start = peek!(self, 1 =>
             symbol!(Plus | Minus | NullLiteral | Underscore | New | Switch | This | Super | Byte
                 | Char | Short | Int | Long | Float | Double | Void | Boolean | Tilde
@@ -2096,19 +2114,19 @@ impl<'a> Parser<'a> {
             | Token::Id(_) | Token::BooleanLiteral(_) | Token::StringLiteral(_)
             | Token::CharLiteral(_) | Token::IntegerLiteral(_) | Token::LongLiteral(_)
             | Token::FloatingPointLiteral
-        );
+        )?;
 
-        expression_start |=
-            peek!(self,1 => symbol!(Increment | Decrement)) && !self.nth_is(2, Symbol::Semicolon);
+        expression_start |= peek!(self,1 => symbol!(Increment | Decrement))?
+            && !self.nth_is(2, Symbol::Semicolon)?;
 
         /* TODO: at this point additional lookahead can yield better error diagnostics,
         by checking if whatever comes after looks like a method call or like an expression */
-        expression_start |= self.nth_is(1, Symbol::LeftParen);
+        expression_start |= self.nth_is(1, Symbol::LeftParen)?;
 
         /* TODO: can be used for error recovery here, or for providing better error diagnostics */
-        expression_start |= self.nth_is(1, Symbol::Semicolon);
+        expression_start |= self.nth_is(1, Symbol::Semicolon)?;
 
-        yield_token && expression_start
+        Ok(yield_token && expression_start)
     }
 
     fn switch_statement(&mut self) -> ParseResult<Statement> {
@@ -2154,7 +2172,7 @@ impl<'a> Parser<'a> {
     /// ```
     fn switch_block_member(&mut self) -> ParseResult<SwitchBlockMember> {
         let label = self.switch_label()?;
-        if self.accept(Symbol::Colon) {
+        if self.accept(Symbol::Colon)? {
             let mut labels = NonEmptyList::new(label);
             let additional_labels = self.zero_or_more(|this| {
                 let label = this.switch_label()?;
@@ -2164,7 +2182,7 @@ impl<'a> Parser<'a> {
             labels.append_vec(additional_labels);
             let statements = self.zero_or_more(Self::block_statement)?;
             Ok(SwitchBlockMember::LabeledStatements { labels, statements })
-        } else if self.accept(Symbol::Arrow) {
+        } else if self.accept(Symbol::Arrow)? {
             let rule = one_of!(
                 self.switch_rule_expression().map(SwitchRule::from),
                 self.block().map(SwitchRule::from),
@@ -2202,13 +2220,13 @@ impl<'a> Parser<'a> {
     /// ```
     fn switch_case_label(&mut self) -> ParseResult<SwitchLabel> {
         self.expect(Symbol::Case)?;
-        if self.accept(Symbol::NullLiteral) {
+        if self.accept(Symbol::NullLiteral)? {
             let default =
-                self.accept(Symbol::Comma) && self.assert(Symbol::Default).map(|_| true)?;
+                self.accept(Symbol::Comma)? && self.assert(Symbol::Default).map(|_| true)?;
             return Ok(SwitchLabel::Null { default });
         }
 
-        if self.check_pattern() {
+        if self.check_pattern()? {
             self.switch_case_pattern_label()
         } else {
             let labels = self.delimited_at_least_1(Self::conditional_expression, Symbol::Comma)?;
@@ -2216,15 +2234,15 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn check_pattern(&mut self) -> bool {
+    fn check_pattern(&mut self) -> ParseResult<bool> {
         let mut lookahead = 0;
         let mut paren_depth = 0;
         let mut temp_result = false;
-        loop {
+        let is_pattern = loop {
             let token = match self.peek_n(lookahead) {
                 Ok(token) => token,
                 Err(_) => {
-                    return false;
+                    break false;
                 }
             };
             match token {
@@ -2240,70 +2258,71 @@ impl<'a> Parser<'a> {
                     | Symbol::Void,
                 )
                 | Token::Id(_) => match self.peek_n(lookahead + 1) {
-                    Ok(Token::Id(_)) | Ok(symbol!(Underscore)) if paren_depth == 0 => return true,
+                    Ok(Token::Id(_)) | Ok(symbol!(Underscore)) if paren_depth == 0 => break true,
                     Ok(Token::Id(_)) | Ok(symbol!(Underscore)) => temp_result = true,
                     Ok(symbol!(Arrow | Comma)) if paren_depth == 0 => {
-                        return false;
+                        break false;
                     }
-                    Err(_) => return false,
+                    Err(_) => break false,
                     _ => {}
                 },
                 symbol!(Underscore) => match self.peek_n(lookahead + 1) {
-                    Ok(symbol!(RightParen | Comma)) => return true,
-                    Ok(Token::Id(_) | symbol!(Underscore)) if paren_depth == 0 => return true,
+                    Ok(symbol!(RightParen | Comma)) => break true,
+                    Ok(Token::Id(_) | symbol!(Underscore)) if paren_depth == 0 => break true,
                     Ok(Token::Id(_) | symbol!(Underscore)) => temp_result = true,
-                    Err(_) => return false,
+                    Err(_) => break false,
                     _ => {}
                 },
                 symbol!(Dot | QuestionMark | Extends | Super | Comma) => {}
                 symbol!(
                     LessThan | LeftShift | GreaterThan | SignedRightShift | UnsignedRightShift
-                ) => return false,
-                symbol!(At) => lookahead = self.skip_annotation(lookahead),
+                ) => break false,
+                symbol!(At) => lookahead = self.skip_annotation(lookahead)?,
                 symbol!(LeftBracket) => {
-                    if peek!(self, lookahead + 1 => symbol!(RightBracket), lookahead + 2 => Token::Id(_) | symbol!(Underscore))
+                    if peek!(self, lookahead + 1 => symbol!(RightBracket), lookahead + 2 => Token::Id(_) | symbol!(Underscore))?
                     {
-                        return true;
-                    } else if self.nth_is(lookahead + 1, Symbol::RightBracket) {
+                        break true;
+                    } else if self.nth_is(lookahead + 1, Symbol::RightBracket)? {
                         lookahead += 1;
                     } else {
-                        return temp_result;
+                        break temp_result;
                     }
                 }
                 symbol!(LeftParen) => {
-                    if self.nth_is(lookahead + 1, Symbol::RightParen) {
-                        return paren_depth == 0 || !self.nth_is(lookahead + 2, Symbol::Arrow);
+                    if self.nth_is(lookahead + 1, Symbol::RightParen)? {
+                        break paren_depth == 0 || !self.nth_is(lookahead + 2, Symbol::Arrow)?;
                     }
                     paren_depth += 1;
                 }
                 symbol!(RightParen) => {
                     paren_depth -= 1;
                     if paren_depth == 0
-                        && peek!(self, lookahead + 1 => Token::Id(s) if s.as_str() == "when")
+                        && peek!(self, lookahead + 1 => Token::Id(s) if s.as_str() == "when")?
                     {
-                        return true;
+                        break true;
                     }
                 }
-                symbol!(Arrow) => return if paren_depth > 0 { false } else { temp_result },
+                symbol!(Arrow) => break if paren_depth > 0 { false } else { temp_result },
                 symbol!(Final) => {
                     if paren_depth > 0 {
-                        return true;
+                        break true;
                     }
                 }
-                _ => return temp_result,
+                _ => break temp_result,
             }
             lookahead += 1;
-        }
+        };
+        Ok(is_pattern)
     }
 
-    fn skip_annotation(&mut self, mut lookahead: usize) -> usize {
-        if !self.nth_is(lookahead, Symbol::At) {
-            return lookahead;
+    fn skip_annotation(&mut self, mut lookahead: usize) -> ParseResult<usize> {
+        if !self.nth_is(lookahead, Symbol::At)? {
+            return Ok(lookahead);
         }
         lookahead += 2; // skip @ and identifier
 
         // skip full name
-        while self.nth_is(lookahead, Symbol::Dot) {
+        while self.nth_is(lookahead, Symbol::Dot)? {
             lookahead += 2;
         }
         let mut nesting = 0;
@@ -2321,7 +2340,7 @@ impl<'a> Parser<'a> {
                 _ => {}
             }
         }
-        lookahead
+        Ok(lookahead)
     }
 
     /// ```text
@@ -2330,7 +2349,7 @@ impl<'a> Parser<'a> {
     /// ```
     fn switch_case_pattern_label(&mut self) -> ParseResult<SwitchLabel> {
         let patterns = self.delimited_at_least_1(Self::pattern, Symbol::Comma)?;
-        let guard = if peek!(self, 0 => Token::Id(s) if s.as_str() == "when") {
+        let guard = if peek!(self, 0 => Token::Id(s) if s.as_str() == "when")? {
             self.next()?;
             Some(self.expression()?)
         } else {
@@ -2353,7 +2372,7 @@ impl<'a> Parser<'a> {
     ///     _
     /// ```
     fn record_component_pattern(&mut self) -> ParseResult<ComponentPattern> {
-        if self.accept(Symbol::Underscore) {
+        if self.accept(Symbol::Underscore)? {
             Ok(ComponentPattern::MatchAll)
         } else {
             Ok(ComponentPattern::Pattern(self.pattern()?))
@@ -2368,7 +2387,7 @@ impl<'a> Parser<'a> {
     fn pattern(&mut self) -> ParseResult<Pattern> {
         let modifiers = self.modifiers(ModifierKind::VARIABLE)?;
         let type_term = self.type_term()?;
-        if self.accept(Symbol::LeftParen) {
+        if self.accept(Symbol::LeftParen)? {
             let reference_type = type_term.try_into().map_err(|_| Failure::NoProduction)?;
             let components = self.record_component_pattern_list()?;
             self.assert(Symbol::RightParen)?;
