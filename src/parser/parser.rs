@@ -1415,8 +1415,10 @@ impl<'a> Parser<'a> {
     ///         ~  !  +  -  ++  --
     /// ```
     fn unary_expression(&mut self) -> ParseResult<Expression> {
-        if let Ok(switch) = self.switch() {
-            return Ok(switch.into());
+        match self.switch() {
+            Ok(switch) => return Ok(switch.into()),
+            Err(Failure::NoProduction) => {}
+            Err(e) => return Err(e),
         }
         if self.accept(Symbol::Tilde)? {
             Ok(Expression::BitwiseComplement(Box::new(self.unary_expression()?)))
