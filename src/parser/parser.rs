@@ -40,14 +40,17 @@ macro_rules! accept_with_value {
     ($self:expr, $($token:expr => $result:expr),+ $(,)?) => {{
         Err(Failure::NoProduction)
         $(
-            .or_else(|_| {
-                $self.accept($token)
-                    .map_err(Into::into)
-                    .and_then(|accepted| {
-                        accepted
-                            .then_some($result)
-                            .ok_or(Failure::NoProduction)
-                    })
+            .or_else(|e| match e {
+                Failure::NoProduction => {
+                    $self.accept($token)
+                        .map_err(Into::into)
+                        .and_then(|accepted| {
+                            accepted
+                                .then_some($result)
+                                .ok_or(Failure::NoProduction)
+                        })
+                }
+                _ => Err(e),
             })
         )+
     }};
