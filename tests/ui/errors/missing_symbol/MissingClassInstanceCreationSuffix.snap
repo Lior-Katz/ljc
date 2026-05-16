@@ -2,5 +2,6 @@
 source: tests/ui/ui_tests.rs
 ---
 Symbol expected: '(' or '['
-
-
+tests/ui/errors/missing_symbol/MissingClassInstanceCreationSuffix.java:3:30
+        Object o = new Object;
+                             ^

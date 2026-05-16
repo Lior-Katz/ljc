@@ -2,3 +2,6 @@
 source: tests/ui/ui_tests.rs
 ---
 Expected expression after '='
+tests/ui/errors/missing_symbol/MissingVariableInitializer.java:3:17
+        int x = ;
+                ^

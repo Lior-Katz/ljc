@@ -2,3 +2,6 @@
 source: tests/ui/ui_tests.rs
 ---
 Expected identifier
+tests/ui/errors/missing_symbol/MissingVariableArityParameterName.java:2:18
+    void f(int...) {}
+                 ^

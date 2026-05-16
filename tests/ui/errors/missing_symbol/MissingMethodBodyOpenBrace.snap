@@ -2,3 +2,6 @@
 source: tests/ui/ui_tests.rs
 ---
 Symbol expected: ';' or '{'
+tests/ui/errors/missing_symbol/MissingMethodBodyOpenBrace.java:3:1
+}
+^

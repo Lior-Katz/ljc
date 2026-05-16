@@ -2,3 +2,6 @@
 source: tests/ui/ui_tests.rs
 ---
 Expected statement after else
+tests/ui/errors/missing_symbol/MissingElseBody.java:5:5
+    }
+    ^

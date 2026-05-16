@@ -2,3 +2,6 @@
 source: tests/ui/ui_tests.rs
 ---
 Invalid type name
+tests/ui/errors/contextual_keywords/YieldInEnumImplementsList.java:1:22
+enum Test implements yield {}
+                     ^

@@ -2,3 +2,6 @@
 source: tests/ui/ui_tests.rs
 ---
 Expected identifier
+tests/ui/errors/missing_symbol/MissingClassName.java:1:7
+class {
+      ^

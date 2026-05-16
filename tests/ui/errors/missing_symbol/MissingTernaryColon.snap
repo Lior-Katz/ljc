@@ -2,3 +2,6 @@
 source: tests/ui/ui_tests.rs
 ---
 Symbol expected: ':'
+tests/ui/errors/missing_symbol/MissingTernaryColon.java:2:21
+    int x = true ? 1;
+                    ^

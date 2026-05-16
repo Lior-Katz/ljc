@@ -2,4 +2,4 @@
 source: tests/snapshot/snapshot_test.rs
 ---
 LEX_ERROR:
-2:15	Unclosed character literal
+Unclosed character literal

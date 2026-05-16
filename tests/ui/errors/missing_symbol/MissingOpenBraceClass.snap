@@ -3,3 +3,4 @@ source: tests/ui/ui_tests.rs
 ---
 Missing class body
 hint: expected '{'
+tests/ui/errors/missing_symbol/MissingOpenBraceClass.java:2:1
