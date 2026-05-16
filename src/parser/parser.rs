@@ -1606,13 +1606,15 @@ impl<'a> Parser<'a> {
     }
 
     fn variable_declarator_id(&mut self) -> ParseResult<VariableDeclaratorId> {
-        if let Ok((value, span)) = accept_with_value!(self, Token::Id) {
-            Ok(VariableDeclaratorId::Named(Identifier { value, span }))
-        } else if self.accept(Symbol::Underscore)? {
-            Ok(VariableDeclaratorId::Unnamed)
-        } else {
-            Err(Failure::NoProduction)
-        }
+        one_of!(
+            accept_with_value!(self, Token::Id)
+                .map(|(value, span)| VariableDeclaratorId::Named(Identifier { value, span })),
+            self.accept(Symbol::Underscore)
+                .map_err(Into::into)
+                .and_then(|b| b
+                    .then_some(VariableDeclaratorId::Unnamed)
+                    .ok_or(Failure::NoProduction))
+        )
     }
 
     fn variable_declarator_initializer(&mut self) -> ParseResult<VariableInitializer> {
