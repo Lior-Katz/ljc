@@ -320,7 +320,7 @@ impl<'a> Tokens<'a> {
             .take_while(|t| t.is_some())
             .last()
             .flatten()?;
-        self.pos += len;
+        self.eat_n(len);
         Some(token)
     }
 
@@ -437,8 +437,8 @@ impl<'a> Tokens<'a> {
             return true;
         }
         let sequence_len = sequence.chars().count();
-        let mut walk = Walk::new(&self.input[self.pos..]).skip(sequence_len - 1);
-        match walk.next() {
+        let mut walk = Walk::new(&self.input[self.pos..]);
+        match walk.nth(sequence_len - 1) {
             Some(s) if s == sequence => {
                 self.eat_n(sequence_len);
                 true
