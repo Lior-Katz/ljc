@@ -4,3 +4,5 @@ pub mod lexer;
 pub use lexer::Error as LexicalError;
 pub mod parser;
 mod collections;
+pub mod error;
+mod file;

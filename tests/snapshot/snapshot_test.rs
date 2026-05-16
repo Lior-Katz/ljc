@@ -9,7 +9,7 @@ fn lex_to_string(path: &Path) -> datatest_stable::Result<String> {
     let mut out = Vec::new();
 
     loop {
-        match tokens.next() {
+        match tokens.next().map(|(t, _)| t).map_err(|(e, _)| e) {
             Ok(Token::EOF) => break,
             Ok(token) => out.push(format!("{:?}", token)),
             Err(e) => return Err(e.into()),

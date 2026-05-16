@@ -1,5 +1,7 @@
 use crate::LexicalError;
+use crate::file::Span;
 use crate::lexer::Symbol;
+use crate::parser::Diagnostic;
 use std::fmt::{Debug, Display, Formatter};
 use thiserror::Error;
 
@@ -7,40 +9,7 @@ pub type ParseResult<T> = Result<T, Failure>;
 
 pub enum Failure {
     NoProduction,
-    Error(Error),
-}
-
-impl From<Error> for Failure {
-    fn from(value: Error) -> Self {
-        Failure::Error(value)
-    }
-}
-
-impl From<LexicalError> for Error {
-    fn from(value: LexicalError) -> Self {
-        Error::Lexical(value)
-    }
-}
-
-impl From<LexicalError> for Failure {
-    fn from(value: LexicalError) -> Self {
-        Error::from(value).into()
-    }
-}
-
-#[allow(dead_code)]
-pub trait ResultExtension {
-    fn assert(self, error: Error) -> Self;
-}
-
-impl<T> ResultExtension for ParseResult<T> {
-    fn assert(self, error: Error) -> Self {
-        match self {
-            Ok(v) => Ok(v),
-            Err(Failure::NoProduction) => Err(Failure::Error(error)),
-            Err(Failure::Error(cause)) => Err(Failure::Error(cause)),
-        }
-    }
+    Error(Diagnostic),
 }
 
 #[derive(Error, Debug)]
@@ -63,6 +32,48 @@ pub enum Error {
     MissingTryBlock,
     #[error("Missing class body\nhint: expected '{{'")]
     MissingClassBody,
+}
+
+impl Error {
+    pub fn at(self, span: Span) -> Diagnostic {
+        Diagnostic { span, message: self }
+    }
+}
+
+impl From<LexicalError> for Error {
+    fn from(value: LexicalError) -> Self {
+        Error::Lexical(value)
+    }
+}
+
+impl From<Diagnostic> for Failure {
+    fn from(value: Diagnostic) -> Self {
+        Failure::Error(value)
+    }
+}
+
+impl<T> From<(T, Span)> for Diagnostic
+where
+    T: Into<Error>,
+{
+    fn from(value: (T, Span)) -> Self {
+        value.0.into().at(value.1)
+    }
+}
+
+#[allow(dead_code)]
+pub trait AssertResult {
+    fn assert(self, error: Diagnostic) -> Self;
+}
+
+impl<T> AssertResult for ParseResult<T> {
+    fn assert(self, error: Diagnostic) -> Self {
+        match self {
+            Ok(v) => Ok(v),
+            Err(Failure::NoProduction) => Err(Failure::Error(error)),
+            Err(Failure::Error(cause)) => Err(Failure::Error(cause)),
+        }
+    }
 }
 
 #[derive(Debug)]

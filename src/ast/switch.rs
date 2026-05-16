@@ -2,6 +2,7 @@ use crate::ast::expressions::Expression;
 use crate::ast::patterns::Pattern;
 use crate::ast::statements::{BlockStatements, Statement};
 use crate::collections::AtLeastOne;
+use crate::file::Span;
 
 pub type SwitchBlockMembers = Vec<SwitchBlockMember>;
 pub type CaseConstant = Expression;
@@ -10,6 +11,7 @@ pub type CaseConstant = Expression;
 pub struct Switch {
     pub expression: Expression,
     pub block: SwitchBlockMembers,
+    pub span: Span,
 }
 
 #[derive(Debug)]

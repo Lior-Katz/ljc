@@ -1,0 +1,6 @@
+---
+source: tests/ui/ui_tests.rs
+---
+tests/ui/errors/missing_symbol/MissingFieldSemicolon.java:3:1: Symbol expected: ';'
+}
+^
