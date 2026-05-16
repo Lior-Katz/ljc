@@ -1286,11 +1286,17 @@ impl<'a> Parser<'a> {
     {
         let mut expr = subexpression(self)?;
 
-        while let Ok(op) = operation(self) {
-            expr = Expression::BinaryOp {
-                left: Box::new(expr),
-                right: Box::new(subexpression(self)?),
-                op,
+        loop {
+            match operation(self).map_err(|e| Failure::from(e)) {
+                Ok(op) => {
+                    expr = Expression::BinaryOp {
+                        left: Box::new(expr),
+                        right: Box::new(subexpression(self)?),
+                        op,
+                    }
+                }
+                Err(Failure::NoProduction) => break,
+                Err(e) => return Err(e),
             }
         }
         Ok(expr)
