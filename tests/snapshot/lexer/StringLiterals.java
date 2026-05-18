@@ -29,9 +29,10 @@ class StringLiterals {
         String o2 = "\79";
         String o3 = "\123";
         String o4 = "\12a";
-        String o5 = "\1111"
+        String o5 = "\1111";
         String o6 = "\000";
         String o7 = "\0001";
+        String o8 = "\431";
 
 //         // --- Mixed content ---
 //         String m1 = "mix\n\t\u0041\\\"";

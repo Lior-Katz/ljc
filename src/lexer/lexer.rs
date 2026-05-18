@@ -241,10 +241,16 @@ impl<'a> Tokens<'a> {
             if self.accept('\\') {
                 return Ok('\\');
             }
-            if let Some((n, len)) = Walk::while_holds(&self.input[self.pos..], |c| c.is_digit(8))
-                .take(3)
-                .zip(1..)
-                .last()
+
+            let max_octal_escape_len = match self.peek() {
+                Some('0'..='3') => 3,
+                _ => 2,
+            };
+            if let Some((n, len)) =
+                Walk::while_holds(&self.input[self.pos..], |c| c.is_digit(Radix::Octal.into()))
+                    .take(max_octal_escape_len)
+                    .zip(1..)
+                    .last()
             {
                 let r = u8::from_str_radix(n, 8).unwrap() as char;
                 self.eat_n(len);
@@ -260,7 +266,6 @@ impl<'a> Tokens<'a> {
 
     fn scan_string_literal(&mut self) -> LexResult<String> {
         let mut s = String::new();
-        // let start = self.pos;
         loop {
             if self.peek() == Some('"') {
                 break;
