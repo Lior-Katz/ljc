@@ -2,3 +2,6 @@
 source: tests/ui/ui_tests.rs
 ---
 Invalid type name
+tests/ui/errors/contextual_keywords/RecordInClassImplementsList.java:1:23
+class Test implements record {}
+                      ^

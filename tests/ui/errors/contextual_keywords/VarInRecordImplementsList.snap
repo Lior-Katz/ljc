@@ -2,3 +2,6 @@
 source: tests/ui/ui_tests.rs
 ---
 Invalid type name
+tests/ui/errors/contextual_keywords/VarInRecordImplementsList.java:1:26
+record Test() implements var {}
+                         ^

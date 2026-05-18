@@ -2,3 +2,6 @@
 source: tests/ui/ui_tests.rs
 ---
 Expected expression after ':'
+tests/ui/errors/missing_symbol/MissingTernaryFalseBranch.java:2:23
+    int x = true ? 1 :;
+                      ^

@@ -2,3 +2,6 @@
 source: tests/ui/ui_tests.rs
 ---
 Symbol expected: ')'
+tests/ui/errors/missing_symbol/MissingWhileCloseParen.java:3:21
+        while (true {}
+                    ^

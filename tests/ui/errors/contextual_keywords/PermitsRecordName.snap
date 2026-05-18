@@ -2,3 +2,6 @@
 source: tests/ui/ui_tests.rs
 ---
 Invalid type name
+tests/ui/errors/contextual_keywords/PermitsRecordName.java:1:8
+record permits() {}
+       ^

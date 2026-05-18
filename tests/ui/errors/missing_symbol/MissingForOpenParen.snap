@@ -2,3 +2,6 @@
 source: tests/ui/ui_tests.rs
 ---
 Symbol expected: '('
+tests/ui/errors/missing_symbol/MissingForOpenParen.java:3:13
+        for int i = 0; i < 1; i++) {}
+            ^

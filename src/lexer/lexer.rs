@@ -1,6 +1,6 @@
-use crate::lexer::Symbol;
-use crate::lexer::error::{Error, invalid_escape, invalid_sequence, numeric_literal_error};
-use crate::lexer::tokens::Token;
+use crate::file::Span;
+use crate::lexer::error::{Error, LexResult};
+use crate::lexer::tokens::{Symbol, Token};
 use crate::lexer::util::{Radix, convert_to_int, is_whitespace};
 
 macro_rules! get {
@@ -29,28 +29,14 @@ impl<'a> Tokens<'a> {
         }
     }
 
-    pub fn next(&mut self) -> Result<Token, Error> {
-        loop {
-            if is_whitespace(&get!(self)) {
-                self.skip_whitespace();
-            } else if self.accept_sequence("//") {
-                self.eat_to_line_end();
-            } else if self.accept_sequence("/*") {
-                match self.eat_until("*/", EatMode::IncludeEnd) {
-                    Err(_) => {
-                        return invalid_sequence(
-                            self.line,
-                            self.column,
-                            "end of comment not found",
-                        );
-                    }
-                    _ => {}
-                };
-            } else {
-                break;
-            }
-        }
+    pub fn next(&mut self) -> LexResult<(Token, Span)> {
+        self.skip_comments_and_whitespace()?;
+        let span = self.pos();
+        let token = self.get_token()?;
+        Ok((token, span))
+    }
 
+    fn get_token(&mut self) -> LexResult<Token> {
         // separators
         if self.accept_sequence("...") {
             return Ok(Symbol::Ellipsis.into());
@@ -78,7 +64,7 @@ impl<'a> Tokens<'a> {
 
         if self.accept('\'') {
             if self.accept('\'') {
-                return invalid_sequence(self.line, self.column, "Empty char literal");
+                return Err((Error::EmptyCharLiteral, self.pos()));
             }
             let c = self.scan_char_literal()?;
             if self.accept('\'') {
@@ -90,18 +76,14 @@ impl<'a> Tokens<'a> {
                 EatMode::IncludeEnd,
             );
             if self.accept('\'') {
-                return invalid_sequence(
-                    self.line,
-                    column,
-                    "Too many characters in character literal",
-                );
+                return Err((Error::MultipleCharactersInCharLiteral, Span::new(self.line, column)));
             }
-            return invalid_sequence(self.line, column, "Unclosed character literal");
+            return Err((Error::UnclosedCharLiteral, Span::new(self.line, column)));
         }
         if self.accept('"') {
             let s = self.scan_string_literal()?;
             if !self.accept('"') {
-                return invalid_sequence(self.line, self.column, "Unterminated string literal");
+                return Err((Error::UnclosedStringLiteral, self.pos()));
             }
             return Ok(Token::StringLiteral(s));
         }
@@ -207,7 +189,30 @@ impl<'a> Tokens<'a> {
         Ok(Token::EOF)
     }
 
-    fn scan_char_literal(&mut self) -> Result<char, Error> {
+    fn skip_comments_and_whitespace(&mut self) -> LexResult<()> {
+        loop {
+            let Some(x) = self.peek() else {
+                break;
+            };
+            if is_whitespace(&x) {
+                self.skip_whitespace();
+            } else if self.accept_sequence("//") {
+                self.eat_to_line_end();
+            } else if self.accept_sequence("/*") {
+                match self.eat_until("*/", EatMode::IncludeEnd) {
+                    Err(_) => {
+                        return Err((Error::UnterminatedBlockComment, self.pos()));
+                    }
+                    _ => {}
+                };
+            } else {
+                break;
+            }
+        }
+        Ok(())
+    }
+
+    fn scan_char_literal(&mut self) -> LexResult<char> {
         if self.accept('\\') {
             if self.accept('b') {
                 return Ok('\u{0008}');
@@ -245,15 +250,15 @@ impl<'a> Tokens<'a> {
                 self.eat_n(len);
                 return Ok(r);
             }
-            return invalid_escape(self.line, self.column);
+            return Err((Error::InvalidEscapeSequence, self.pos()));
         }
         match self.eat() {
             Some(c) => Ok(c),
-            None => invalid_sequence(self.line, self.column, "Unclosed character literal"),
+            None => Err((Error::UnclosedCharLiteral, self.pos())),
         }
     }
 
-    fn scan_string_literal(&mut self) -> Result<String, Error> {
+    fn scan_string_literal(&mut self) -> LexResult<String> {
         let mut s = String::new();
         // let start = self.pos;
         loop {
@@ -266,18 +271,14 @@ impl<'a> Tokens<'a> {
         Ok(s)
     }
 
-    fn scan_number(&mut self, radix: Radix) -> Result<Token, Error> {
+    fn scan_number(&mut self, radix: Radix) -> LexResult<Token> {
         let radix: u32 = radix.into();
         match self.peek() {
             Some('_') => {
-                return numeric_literal_error(self.line, self.column, "Illegal underscore");
+                return Err((Error::NumericLiteralIllegalUnderscore, self.pos()));
             }
             None => {
-                return numeric_literal_error(
-                    self.line,
-                    self.column,
-                    "Numbers must contain at least one digit",
-                );
+                return Err((Error::IncompleteNumericLiteral, self.pos()));
             }
             _ => {}
         }
@@ -293,7 +294,7 @@ impl<'a> Tokens<'a> {
             .unwrap();
         let value = convert_to_int(whole, radix).unwrap();
         if matches!(self.peek(), Some('_')) {
-            return numeric_literal_error(self.line, self.column, "Illegal underscore");
+            return Err((Error::NumericLiteralIllegalUnderscore, self.pos()));
         }
         match self.peek() {
             Some('l') | Some('L') => {
@@ -320,7 +321,7 @@ impl<'a> Tokens<'a> {
             .take_while(|t| t.is_some())
             .last()
             .flatten()?;
-        self.pos += len;
+        self.eat_n(len);
         Some(token)
     }
 
@@ -437,8 +438,8 @@ impl<'a> Tokens<'a> {
             return true;
         }
         let sequence_len = sequence.chars().count();
-        let mut walk = Walk::new(&self.input[self.pos..]).skip(sequence_len - 1);
-        match walk.next() {
+        let mut walk = Walk::new(&self.input[self.pos..]);
+        match walk.nth(sequence_len - 1) {
             Some(s) if s == sequence => {
                 self.eat_n(sequence_len);
                 true
@@ -514,6 +515,10 @@ impl<'a> Tokens<'a> {
             self.pos - last_char.len_utf8()
         };
         Some(&self.input[start..end])
+    }
+
+    pub fn pos(&self) -> Span {
+        Span::new(self.line, self.column)
     }
 }
 

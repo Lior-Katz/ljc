@@ -1,3 +1,4 @@
+use ljc::error::SourceWithDiagnostic;
 use ljc::parser::Parser;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -11,7 +12,8 @@ fn error_tests(path: &Path) -> datatest_stable::Result<()> {
             snapshot_path => PathBuf::from("errors").join(test_dir),
             prepend_module_to_snapshot => false,
         }, {
-            insta::assert_snapshot!(path.file_stem().unwrap().to_str().unwrap(), e.to_string());
+            let sourced = SourceWithDiagnostic::new(path, &input, e);
+            insta::assert_snapshot!(path.file_stem().unwrap().to_str().unwrap(), sourced.to_string());
         });
         Ok(())
     } else {

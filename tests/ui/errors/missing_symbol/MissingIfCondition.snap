@@ -2,3 +2,6 @@
 source: tests/ui/ui_tests.rs
 ---
 Expected expression after '('
+tests/ui/errors/missing_symbol/MissingIfCondition.java:3:13
+        if () {}
+            ^

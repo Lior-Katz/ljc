@@ -1,6 +1,7 @@
 use crate::ast::identifiers::Identifier;
 use crate::ast::switch::Switch;
 use crate::ast::types::Type;
+use crate::file::Span;
 
 pub type ExpressionList = Vec<Expression>;
 pub type ArgumentList = Vec<Expression>;
@@ -8,12 +9,27 @@ pub type VariableInitializerList = Vec<VariableInitializer>;
 
 #[derive(Debug)]
 pub enum Expression {
-    IntegerLiteral(u64),
-    LongLiteral(u64),
-    BooleanLiteral(bool),
-    CharLiteral(char),
-    StringLiteral(String),
-    NullLiteral,
+    IntegerLiteral {
+        value: u64,
+        span: Span,
+    },
+    LongLiteral {
+        value: u64,
+        span: Span,
+    },
+    BooleanLiteral {
+        value: bool,
+        span: Span,
+    },
+    CharLiteral {
+        value: char,
+        span: Span,
+    },
+    StringLiteral {
+        value: String,
+        span: Span,
+    },
+    NullLiteral(Span),
     Name(Identifier),
     Assignment {
         lhs: LeftHandSide,
@@ -51,12 +67,12 @@ pub enum Expression {
     },
     ArrayAccess(ArrayAccess),
     Switch(Box<Switch>),
-    This,
+    This(Span),
     QualifiedThis(Type),
     ClassLiteral(Type),
-    MethodReference{
+    MethodReference {
         target: Box<Expression>,
-        method: MethodReferenceType
+        method: MethodReferenceType,
     },
 }
 
@@ -144,4 +160,74 @@ pub enum VariableInitializer {
 pub enum MethodReferenceType {
     Constructor,
     Named(Identifier),
+}
+
+impl Expression {
+    pub fn span(&self) -> &Span {
+        match self {
+            Self::IntegerLiteral { span, .. }
+            | Self::LongLiteral { span, .. }
+            | Self::BooleanLiteral { span, .. }
+            | Self::CharLiteral { span, .. }
+            | Self::StringLiteral { span, .. }
+            | Self::NullLiteral(span)
+            | Self::Name(Identifier { span, .. })
+            | Self::This(span) => span,
+
+            Self::PostIncrement(expression)
+            | Self::PostDecrement(expression)
+            | Self::PreIncrement(expression)
+            | Self::PreDecrement(expression)
+            | Self::BitwiseComplement(expression)
+            | Self::LogicalNot(expression)
+            | Self::UnaryPlus(expression)
+            | Self::UnaryMinus(expression)
+            | Self::BinaryOp { left: expression, .. }
+            | Self::ConditionalExpression { condition: expression, .. }
+            | Self::MethodReference { target: expression, .. } => expression.span(),
+
+            Self::Type(t) => t.span(),
+            Self::QualifiedThis(t) => t.span(),
+            Self::ClassLiteral(t) => t.span(),
+            Self::InstanceCreation { type_to_instantiate: t, .. }
+            | Self::ArrayCreation { element_type: t, .. } => t.span(),
+
+            Self::Assignment { lhs, .. } => lhs.span(),
+            Self::MethodCall(v) => v.span(),
+            Self::MemberAccess(v) => v.span(),
+            Self::ArrayAccess(v) => v.span(),
+            Self::Switch(v) => &v.span,
+        }
+    }
+}
+
+impl LeftHandSide {
+    pub fn span(&self) -> &Span {
+        match self {
+            Self::ExpressionName(id) => &id.span,
+            Self::MemberAccess(member_access) => member_access.span(),
+            Self::ArrayAccess(array_access) => array_access.span(),
+        }
+    }
+}
+
+impl MethodCall {
+    fn span(&self) -> &Span {
+        match &self.target {
+            Some(e) => e.span(),
+            None => &self.name.span,
+        }
+    }
+}
+
+impl MemberAccess {
+    fn span(&self) -> &Span {
+        self.target.span()
+    }
+}
+
+impl ArrayAccess {
+    fn span(&self) -> &Span {
+        self.target.span()
+    }
 }

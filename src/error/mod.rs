@@ -1,0 +1,2 @@
+mod diagnostic;
+pub use diagnostic::{Diagnostic, SourceWithDiagnostic};

@@ -2,3 +2,6 @@
 source: tests/ui/ui_tests.rs
 ---
 Symbol expected: ')'
+tests/ui/errors/missing_symbol/MissingIfCloseParen.java:3:18
+        if (true {}
+                 ^

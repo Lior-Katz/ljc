@@ -2,3 +2,6 @@
 source: tests/ui/ui_tests.rs
 ---
 Expected identifier
+tests/ui/errors/missing_symbol/MissingAnnotationName.java:2:1
+class Test {}
+^

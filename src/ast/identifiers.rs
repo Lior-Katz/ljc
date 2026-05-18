@@ -1,5 +1,12 @@
+use crate::file::Span;
+
 pub trait IdentifierKind {}
-pub type Identifier = String;
+
+#[derive(Debug)]
+pub struct Identifier {
+    pub value: String,
+    pub span: Span,
+}
 
 #[derive(Debug)]
 pub struct TypeIdentifier(Identifier);
@@ -13,9 +20,13 @@ impl TypeIdentifier {
         &self.0
     }
 
+    pub fn span(&self) -> &Span {
+        &self.0.span
+    }
+
     pub fn from(identifier: Identifier) -> Result<Self, InvalidTypeIdentifier> {
         let type_identifier_exclude = ["permits", "record", "sealed", "var", "yield"];
-        if type_identifier_exclude.contains(&identifier.as_str()) {
+        if type_identifier_exclude.contains(&identifier.value.as_str()) {
             Err(InvalidTypeIdentifier)
         } else {
             Ok(Self(identifier))

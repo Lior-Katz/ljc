@@ -2,3 +2,6 @@
 source: tests/ui/ui_tests.rs
 ---
 Invalid type name
+tests/ui/errors/contextual_keywords/SealedInterfaceName.java:1:11
+interface sealed {}
+          ^

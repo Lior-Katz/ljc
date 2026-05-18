@@ -3,12 +3,13 @@ use crate::ast::{
     AssignmentOp, BinOp, CatchClause, ClassBodyDeclaration, ClassDeclaration,
     ClassMemberDeclaration, ClassType, ClassTypePart, CompilationUnit, ComponentPattern,
     ConstructorBody, ConstructorInvocation, ElementValue, ElementValuePair, EnumConstant,
-    EnumDeclaration, Expression, ForInit, FormalParameter, IdentifierKind, InterfaceDeclaration,
-    LeftHandSide, MemberAccess, MethodBody, MethodCall, MethodDeclaration, MethodReferenceType,
-    Modified, Modifier, Modifiers, NormalClassDeclaration, NormalInterfaceDeclaration, Pattern,
-    Program, RecordComponent, RecordDeclaration, Resource, Statement, Switch, SwitchBlockMember,
-    SwitchLabel, SwitchRule, TopLevelClassOrInterfaceDeclaration, Type, TypeIdentifier,
-    VariableDeclaration, VariableDeclarator, VariableDeclaratorId, VariableInitializer,
+    EnumDeclaration, Expression, ForInit, FormalParameter, Identifier, IdentifierKind,
+    InterfaceDeclaration, LeftHandSide, MemberAccess, MethodBody, MethodCall, MethodDeclaration,
+    MethodReferenceType, Modified, Modifier, Modifiers, NormalClassDeclaration,
+    NormalInterfaceDeclaration, Pattern, Program, RecordComponent, RecordDeclaration, Resource,
+    Statement, Switch, SwitchBlockMember, SwitchLabel, SwitchRule,
+    TopLevelClassOrInterfaceDeclaration, Type, TypeIdentifier, VariableDeclaration,
+    VariableDeclarator, VariableDeclaratorId, VariableInitializer,
 };
 use crate::collections::NonEmptyList;
 use std::fmt;
@@ -197,6 +198,19 @@ impl TreeDisplayWithContext<Modifiers> for NormalClassDeclaration {
     }
 }
 
+impl Display for Identifier {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.value)
+    }
+}
+
+impl TreeDisplay for Identifier {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        let (line_prefix, _) = branch(&prefix, is_last);
+        writeln!(f, "{line_prefix}{}", self.value)
+    }
+}
+
 impl Display for TypeIdentifier {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.identifier())
@@ -381,15 +395,15 @@ impl TreeDisplayWithContext<Modifiers> for Type {
 
         let (type_line_prefix, type_prefix) = branch(&new_prefix, true);
         match self {
-            Type::Byte => writeln!(f, "{type_line_prefix}byte"),
-            Type::Short => writeln!(f, "{type_line_prefix}short"),
-            Type::Int => writeln!(f, "{type_line_prefix}int"),
-            Type::Long => writeln!(f, "{type_line_prefix}long"),
-            Type::Char => writeln!(f, "{type_line_prefix}char"),
-            Type::Float => writeln!(f, "{type_line_prefix}float"),
-            Type::Double => writeln!(f, "{type_line_prefix}double"),
-            Type::Boolean => writeln!(f, "{type_line_prefix}boolean"),
-            Type::Void => writeln!(f, "{type_line_prefix}void"),
+            Type::Byte(_) => writeln!(f, "{type_line_prefix}byte"),
+            Type::Short(_) => writeln!(f, "{type_line_prefix}short"),
+            Type::Int(_) => writeln!(f, "{type_line_prefix}int"),
+            Type::Long(_) => writeln!(f, "{type_line_prefix}long"),
+            Type::Char(_) => writeln!(f, "{type_line_prefix}char"),
+            Type::Float(_) => writeln!(f, "{type_line_prefix}float"),
+            Type::Double(_) => writeln!(f, "{type_line_prefix}double"),
+            Type::Boolean(_) => writeln!(f, "{type_line_prefix}boolean"),
+            Type::Void(_) => writeln!(f, "{type_line_prefix}void"),
             Type::Class(c) => c.fmt_tree(f, &new_prefix, true),
             Type::Array(ArrayType { element_type }) => {
                 writeln!(f, "{type_line_prefix}ArrayType")?;
@@ -611,12 +625,16 @@ impl TreeDisplay for Expression {
         let (line_prefix, new_prefix) = branch(&prefix, is_last);
 
         match self {
-            Expression::IntegerLiteral(v) => writeln!(f, "{line_prefix}int {}", v),
-            Expression::LongLiteral(v) => writeln!(f, "{line_prefix}long {}", v),
-            Expression::BooleanLiteral(v) => writeln!(f, "{line_prefix}boolean {}", v),
-            Expression::CharLiteral(v) => writeln!(f, "{line_prefix}char '{}'", v),
-            Expression::StringLiteral(v) => writeln!(f, "{line_prefix}String \"{}\"", v),
-            Expression::NullLiteral => writeln!(f, "{line_prefix}null"),
+            Expression::IntegerLiteral { value, .. } => writeln!(f, "{line_prefix}int {}", value),
+            Expression::LongLiteral { value, .. } => writeln!(f, "{line_prefix}long {}", value),
+            Expression::BooleanLiteral { value, .. } => {
+                writeln!(f, "{line_prefix}boolean {}", value)
+            }
+            Expression::CharLiteral { value, .. } => writeln!(f, "{line_prefix}char '{}'", value),
+            Expression::StringLiteral { value, .. } => {
+                writeln!(f, "{line_prefix}String \"{}\"", value)
+            }
+            Expression::NullLiteral(_) => writeln!(f, "{line_prefix}null"),
             Expression::Name(v) => writeln!(f, "{line_prefix}{}", v),
             Expression::Assignment { lhs, rhs, op } => {
                 writeln!(f, "{line_prefix}Assignment {op}")?;
@@ -684,7 +702,7 @@ impl TreeDisplay for Expression {
             }
             Expression::ArrayAccess(a) => a.fmt_tree(f, &prefix, is_last),
             Expression::Switch(s) => s.fmt_tree(f, &prefix, is_last),
-            Expression::This => writeln!(f, "{line_prefix}this"),
+            Expression::This(_) => writeln!(f, "{line_prefix}this"),
             Expression::QualifiedThis(t) => {
                 writeln!(f, "{line_prefix}QualifiedThis")?;
                 t.fmt_tree(f, &new_prefix, true)
@@ -813,7 +831,7 @@ impl TreeDisplay for VariableInitializer {
 impl Display for VariableDeclaratorId {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let name = match self {
-            VariableDeclaratorId::Named(name) => name,
+            VariableDeclaratorId::Named(name) => &name.value,
             VariableDeclaratorId::Unnamed => "unnamed",
         };
         write!(f, "{}", name)
