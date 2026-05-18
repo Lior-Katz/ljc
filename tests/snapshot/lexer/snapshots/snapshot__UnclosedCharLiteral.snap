@@ -1,5 +1,0 @@
----
-source: tests/snapshot/snapshot_test.rs
----
-LEX_ERROR:
-Unclosed character literal

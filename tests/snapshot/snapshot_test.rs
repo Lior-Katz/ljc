@@ -20,32 +20,36 @@ fn lex_to_string(path: &Path) -> datatest_stable::Result<String> {
 }
 
 fn lexer_snapshot_test(path: &Path) -> datatest_stable::Result<()> {
-    let output = lex_to_string(&path).unwrap_or_else(|e| format!("LEX_ERROR:\n{}", e));
-
-    // need to remove file extension because snapshots are saved in the dataset-stable root directory.
-    // this means that otherwise dataset-stable (which runs on all java files) would pick up the snapshots as well.
-    let name = path.file_stem().unwrap().to_str().unwrap();
-    insta::with_settings!({
-        snapshot_path => "lexer/snapshots",
-        omit_expression => true,
-    }, {
-        insta::assert_snapshot!(name, output);
-    });
-    Ok(()) // to satisfy return type check. insta fails when the output doesn't match
+    match lex_to_string(&path) {
+        Ok(output) => {
+            let name = path.file_stem().unwrap().to_str().unwrap();
+            insta::with_settings!({
+                snapshot_path => "lexer/snapshots",
+                omit_expression => true,
+            }, {
+                insta::assert_snapshot!(name, output);
+            });
+            Ok(())
+        }
+        Err(e) => Err(e),
+    }
 }
 
 fn parser_snapshot_test(path: &Path) -> datatest_stable::Result<()> {
     let input = fs::read_to_string(path)?;
-    if let Ok(program) = Parser::new(&input).parse() {
-        let name = path.file_stem().unwrap().to_str().unwrap();
-        insta::with_settings!({
-            snapshot_path => "parser/snapshots",
-            omit_expression => true,
-        }, {
-            insta::assert_snapshot!(name, program.to_string());
-        });
-    };
-    Ok(()) // to satisfy return type check. insta fails when the output doesn't match
+    match Parser::new(&input).parse() {
+        Ok(program) => {
+            let name = path.file_stem().unwrap().to_str().unwrap();
+            insta::with_settings!({
+                snapshot_path => "parser/snapshots",
+                omit_expression => true,
+            }, {
+                insta::assert_snapshot!(name, program.to_string());
+            });
+            Ok(())
+        }
+        Err(e) => Err(e.to_string().into()),
+    }
 }
 
 datatest_stable::harness! {

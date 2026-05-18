@@ -1,5 +1,0 @@
----
-source: tests/snapshot/snapshot_test.rs
----
-LEX_ERROR:
-Too many characters in character literal
