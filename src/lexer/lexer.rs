@@ -1,7 +1,6 @@
 use crate::file::Span;
-use crate::lexer::Symbol;
-use crate::lexer::error::{LexResult, invalid_escape, invalid_sequence, numeric_literal_error};
-use crate::lexer::tokens::Token;
+use crate::lexer::error::{Error, LexResult};
+use crate::lexer::tokens::{Symbol, Token};
 use crate::lexer::util::{Radix, convert_to_int, is_whitespace};
 
 macro_rules! get {
@@ -65,7 +64,7 @@ impl<'a> Tokens<'a> {
 
         if self.accept('\'') {
             if self.accept('\'') {
-                return invalid_sequence(self.pos(), "Empty char literal");
+                return Err((Error::EmptyCharLiteral, self.pos()));
             }
             let c = self.scan_char_literal()?;
             if self.accept('\'') {
@@ -77,17 +76,14 @@ impl<'a> Tokens<'a> {
                 EatMode::IncludeEnd,
             );
             if self.accept('\'') {
-                return invalid_sequence(
-                    Span::new(self.line, column),
-                    "Too many characters in character literal",
-                );
+                return Err((Error::MultipleCharactersInCharLiteral, Span::new(self.line, column)));
             }
-            return invalid_sequence(Span::new(self.line, column), "Unclosed character literal");
+            return Err((Error::UnclosedCharLiteral, Span::new(self.line, column)));
         }
         if self.accept('"') {
             let s = self.scan_string_literal()?;
             if !self.accept('"') {
-                return invalid_sequence(self.pos(), "Unterminated string literal");
+                return Err((Error::UnclosedStringLiteral, self.pos()));
             }
             return Ok(Token::StringLiteral(s));
         }
@@ -205,8 +201,7 @@ impl<'a> Tokens<'a> {
             } else if self.accept_sequence("/*") {
                 match self.eat_until("*/", EatMode::IncludeEnd) {
                     Err(_) => {
-                        let span = self.pos();
-                        return invalid_sequence(span, "end of comment not found");
+                        return Err((Error::UnterminatedBlockComment, self.pos()));
                     }
                     _ => {}
                 };
@@ -255,11 +250,11 @@ impl<'a> Tokens<'a> {
                 self.eat_n(len);
                 return Ok(r);
             }
-            return invalid_escape(self.pos());
+            return Err((Error::InvalidEscapeSequence, self.pos()));
         }
         match self.eat() {
             Some(c) => Ok(c),
-            None => invalid_sequence(self.pos(), "Unclosed character literal"),
+            None => Err((Error::UnclosedCharLiteral, self.pos())),
         }
     }
 
@@ -280,13 +275,10 @@ impl<'a> Tokens<'a> {
         let radix: u32 = radix.into();
         match self.peek() {
             Some('_') => {
-                return numeric_literal_error(self.pos(), "Illegal underscore");
+                return Err((Error::NumericLiteralIllegalUnderscore, self.pos()));
             }
             None => {
-                return numeric_literal_error(
-                    self.pos(),
-                    "Numbers must contain at least one digit",
-                );
+                return Err((Error::IncompleteNumericLiteral, self.pos()));
             }
             _ => {}
         }
@@ -302,7 +294,7 @@ impl<'a> Tokens<'a> {
             .unwrap();
         let value = convert_to_int(whole, radix).unwrap();
         if matches!(self.peek(), Some('_')) {
-            return numeric_literal_error(self.pos(), "Illegal underscore");
+            return Err((Error::NumericLiteralIllegalUnderscore, self.pos()));
         }
         match self.peek() {
             Some('l') | Some('L') => {
