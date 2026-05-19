@@ -7,6 +7,8 @@ class StringLiterals {
         String s2 = "";
         String s3 = "with spaces";
         String s4 = "123";
+        String s5 = " // this " // should count as a closing quote
+        String s6 = " /* this " // should count as a closing quote
 
         // --- Escape sequences ---
         String e1 = "line\nbreak";
@@ -29,9 +31,10 @@ class StringLiterals {
         String o2 = "\79";
         String o3 = "\123";
         String o4 = "\12a";
-        String o5 = "\1111"
+        String o5 = "\1111";
         String o6 = "\000";
         String o7 = "\0001";
+        String o8 = "\431";
 
 //         // --- Mixed content ---
 //         String m1 = "mix\n\t\u0041\\\"";

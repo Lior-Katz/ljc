@@ -1,0 +1,7 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Unclosed character literal
+tests/ui/errors/invalid_symbol/literals/UnclosedStringLiteralEOF.java:2:23
+    String s = "EOF ->
+                      ^

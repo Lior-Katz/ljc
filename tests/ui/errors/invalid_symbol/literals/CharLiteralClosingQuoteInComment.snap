@@ -1,0 +1,7 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Too many characters in character literal
+tests/ui/errors/invalid_symbol/literals/CharLiteralClosingQuoteInComment.java:2:16
+    char a = ' // this '; // should count as a closing quote and the error should be for too many characters
+               ^

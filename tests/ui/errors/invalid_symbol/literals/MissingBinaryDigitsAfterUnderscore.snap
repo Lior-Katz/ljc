@@ -1,0 +1,7 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Illegal underscore
+tests/ui/errors/invalid_symbol/literals/MissingBinaryDigitsAfterUnderscore.java:2:15
+    int n = 0b_;
+              ^

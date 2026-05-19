@@ -1,0 +1,7 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Symbol expected: ';'
+tests/ui/errors/invalid_symbol/literals/InvalidLetterInHexLiteral.java:2:17
+    int n = 0x12G;
+                ^

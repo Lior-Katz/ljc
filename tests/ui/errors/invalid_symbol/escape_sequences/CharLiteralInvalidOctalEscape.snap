@@ -1,0 +1,7 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Invalid escape sequence
+tests/ui/errors/invalid_symbol/escape_sequences/CharLiteralInvalidOctalEscape.java:2:16
+    char a = '\9';
+               ^

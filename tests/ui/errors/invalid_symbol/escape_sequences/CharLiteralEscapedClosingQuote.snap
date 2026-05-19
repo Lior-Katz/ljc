@@ -1,0 +1,7 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Unclosed character literal
+tests/ui/errors/invalid_symbol/escape_sequences/CharLiteralEscapedClosingQuote.java:3:17
+    char a = '\';
+                ^

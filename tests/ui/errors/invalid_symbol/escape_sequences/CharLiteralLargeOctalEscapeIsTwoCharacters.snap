@@ -1,0 +1,7 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Too many characters in character literal
+tests/ui/errors/invalid_symbol/escape_sequences/CharLiteralLargeOctalEscapeIsTwoCharacters.java:2:18
+    char a = '\456'; // the escape is \45, and 6 is a second character in a char literal
+                 ^
