@@ -7,6 +7,8 @@ class StringLiterals {
         String s2 = "";
         String s3 = "with spaces";
         String s4 = "123";
+        String s5 = " // this " // should count as a closing quote
+        String s6 = " /* this " // should count as a closing quote
 
         // --- Escape sequences ---
         String e1 = "line\nbreak";
