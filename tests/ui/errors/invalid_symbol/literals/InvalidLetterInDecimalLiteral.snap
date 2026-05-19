@@ -1,0 +1,7 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Symbol expected: ';'
+tests/ui/errors/invalid_symbol/literals/InvalidLetterInDecimalLiteral.java:2:15
+    int n = 12a3;
+              ^

@@ -1,0 +1,7 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Symbol expected: ';'
+tests/ui/errors/invalid_symbol/literals/InvalidLetterInOctalLiteral.java:2:16
+    int n = 012A;
+               ^
