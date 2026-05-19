@@ -1,0 +1,7 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Illegal underscore
+tests/ui/errors/invalid_symbol/literals/HexLiteralLeadingUnderscore.java:2:15
+    int n = 0x_1;
+              ^
