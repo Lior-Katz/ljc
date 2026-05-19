@@ -1,0 +1,7 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Trailing ',' not allowed here
+tests/ui/errors/missing_symbol/FormalParametersTrailingComma.java:2:17
+    void f(int a,) {}
+                ^

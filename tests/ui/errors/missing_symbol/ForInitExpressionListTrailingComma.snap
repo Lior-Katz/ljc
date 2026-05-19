@@ -1,0 +1,7 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Trailing ',' not allowed here
+tests/ui/errors/missing_symbol/ForInitExpressionListTrailingComma.java:3:14
+        foo(a, ; true; );
+             ^

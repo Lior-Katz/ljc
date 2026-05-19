@@ -1,0 +1,7 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Trailing ',' not allowed here
+tests/ui/errors/missing_symbol/ThrowsListTrailingComma.java:2:30
+    void f() throws Exception, {
+                             ^

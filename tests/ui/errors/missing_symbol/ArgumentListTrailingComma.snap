@@ -1,0 +1,7 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Trailing ',' not allowed here
+tests/ui/errors/missing_symbol/ArgumentListTrailingComma.java:2:30
+    Integer n = new Integer(1,);
+                             ^
