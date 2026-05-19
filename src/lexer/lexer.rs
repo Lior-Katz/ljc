@@ -304,6 +304,10 @@ impl<'a> Tokens<'a> {
         if let Some(pos) = trailing_underscore {
             return Err((Error::NumericLiteralIllegalUnderscore, pos));
         }
+        if whole.is_empty() {
+            return Err((Error::IncompleteNumericLiteral, self.pos()));
+        }
+
         let value = convert_to_int(whole, radix).unwrap();
         match self.peek() {
             Some('l') | Some('L') => {

@@ -1,0 +1,7 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Numeric literal must contain at least one digit
+tests/ui/errors/invalid_symbol/literals/MissingHexDigits.java:2:15
+    int n = 0x;
+              ^
