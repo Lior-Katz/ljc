@@ -112,15 +112,13 @@ impl<'a> Tokens<'a> {
         }
 
         if is_identifier_start(c) {
-            let identifier_or_kw = self
-                .eat_while(
-                    |tokens| match tokens.peek() {
-                        None => false,
-                        Some(c) => is_identifier_part(c),
-                    },
-                    EatMode::IncludeEnd,
-                )
-                .unwrap();
+            let identifier_or_kw = self.eat_while(
+                |tokens| match tokens.peek() {
+                    None => false,
+                    Some(c) => is_identifier_part(c),
+                },
+                EatMode::IncludeEnd,
+            );
             let token = match identifier_or_kw {
                 // keywords
                 "abstract" => Symbol::Abstract.into(),
@@ -287,20 +285,26 @@ impl<'a> Tokens<'a> {
             }
             _ => {}
         }
-        let whole = self
-            .eat_while(
-                |tokens| match tokens.peek() {
-                    Some(c) if c.is_digit(radix) => true,
-                    Some('_') => true,
-                    _ => false,
-                },
-                EatMode::IncludeEnd,
-            )
-            .unwrap();
-        let value = convert_to_int(whole, radix).unwrap();
-        if matches!(self.peek(), Some('_')) {
-            return Err((Error::NumericLiteralIllegalUnderscore, self.pos()));
+        let mut trailing_underscore = None;
+        let whole = self.eat_while(
+            |tokens: &mut Tokens| match tokens.peek() {
+                Some(c) if c.is_digit(radix) => {
+                    trailing_underscore = None;
+                    true
+                }
+                Some('_') => {
+                    trailing_underscore = trailing_underscore.or(Some(tokens.pos()));
+                    true
+                }
+                _ => false,
+            },
+            EatMode::IncludeEnd,
+        );
+
+        if let Some(pos) = trailing_underscore {
+            return Err((Error::NumericLiteralIllegalUnderscore, pos));
         }
+        let value = convert_to_int(whole, radix).unwrap();
         match self.peek() {
             Some('l') | Some('L') => {
                 self.eat();
@@ -498,13 +502,13 @@ impl<'a> Tokens<'a> {
         }
     }
 
-    fn eat_while<F>(&mut self, predicate: F, eat_mode: EatMode) -> Option<&str>
+    fn eat_while<F>(&mut self, mut predicate: F, eat_mode: EatMode) -> &str
     where
-        F: Fn(&mut Self) -> bool,
+        F: FnMut(&mut Self) -> bool,
     {
         let mut last_char = match self.peek() {
             Some(c) => c,
-            None => return None,
+            None => return &"",
         };
         let start = self.pos;
         while let Some(c) = self.peek() {
@@ -519,7 +523,7 @@ impl<'a> Tokens<'a> {
         } else {
             self.pos - last_char.len_utf8()
         };
-        Some(&self.input[start..end])
+        &self.input[start..end]
     }
 
     pub fn pos(&self) -> Span {

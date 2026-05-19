@@ -1,0 +1,7 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Illegal underscore
+tests/ui/errors/invalid_symbol/literals/BinaryLiteralTrailingUnderscoreDirectlyBeforeSuffix.java:2:20
+    long n = 0b1010_L;
+                   ^

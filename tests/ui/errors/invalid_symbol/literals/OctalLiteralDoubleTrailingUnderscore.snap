@@ -1,0 +1,7 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Illegal underscore
+tests/ui/errors/invalid_symbol/literals/OctalLiteralDoubleTrailingUnderscore.java:2:17
+    int n = 0123__;
+                ^

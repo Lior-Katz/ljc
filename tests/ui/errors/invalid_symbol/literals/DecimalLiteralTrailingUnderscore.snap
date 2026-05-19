@@ -1,0 +1,7 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Illegal underscore
+tests/ui/errors/invalid_symbol/literals/DecimalLiteralTrailingUnderscore.java:2:16
+    int n = 123_;
+               ^

@@ -1,0 +1,7 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Illegal underscore
+tests/ui/errors/invalid_symbol/literals/HexLiteralTrailingUnderscoreDirectlyBeforeSuffix.java:2:18
+    long n = 0xFF_L;
+                 ^

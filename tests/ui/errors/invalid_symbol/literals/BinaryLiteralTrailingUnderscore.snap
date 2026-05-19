@@ -1,0 +1,7 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Illegal underscore
+tests/ui/errors/invalid_symbol/literals/BinaryLiteralTrailingUnderscore.java:2:19
+    int n = 0b1010_;
+                  ^
