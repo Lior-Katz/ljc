@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 fn error_tests(path: &Path) -> datatest_stable::Result<()> {
     let input = fs::read_to_string(path)?;
     if let Err(e) = Parser::new(&input).parse() {
-        let test_dir = path.parent().unwrap().file_name().unwrap();
+        let test_dir = path.parent().unwrap().canonicalize()?;
         insta::with_settings!({
             omit_expression => true,
             snapshot_path => PathBuf::from("errors").join(test_dir),
