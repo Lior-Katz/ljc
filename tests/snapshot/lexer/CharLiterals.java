@@ -8,8 +8,9 @@ class CharLiteralsTest {
         char c3 = '0';
         char c4 = '$';
         char c5 = '_';
-//         char c6 = 'α';        // Unicode (Greek)
-//         char c7 = '你';        // Unicode (Chinese)
+        char c6 = '"';
+//         char c7 = 'α';        // Unicode (Greek)
+//         char c8 = '你';        // Unicode (Chinese)
 
         // --- Standard escape sequences ---
         char e1 = '\n';       // newline
