@@ -1,0 +1,7 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Symbol expected: ')'
+tests/ui/errors/missing_symbol/ForUpdateTrailingComma.java:3:13
+        foo(; true; a++,);
+            ^

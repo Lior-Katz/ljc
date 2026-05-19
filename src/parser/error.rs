@@ -16,7 +16,7 @@ pub enum Failure {
 pub enum Error {
     #[error(transparent)]
     Lexical(LexicalError),
-    #[error("Missing element after {0}")]
+    #[error("Trailing {0} not allowed here",)]
     MissingElementAfterDelimiter(Symbol),
     #[error("Symbol expected: {0}")]
     SymbolExpected(Symbol),

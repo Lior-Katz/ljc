@@ -248,11 +248,12 @@ impl<'a> Parser<'a> {
             Err(Failure::Error(err)) => return Err(err.into()),
         };
         loop {
+            let delimiter_pos = self.pos();
             if !self.accept(delim)? {
                 break;
             }
             let elem =
-                next(self).assert(Error::MissingElementAfterDelimiter(delim).at(self.pos()))?;
+                next(self).assert(Error::MissingElementAfterDelimiter(delim).at(delimiter_pos))?;
             list.push(elem);
         }
         Ok(list)
