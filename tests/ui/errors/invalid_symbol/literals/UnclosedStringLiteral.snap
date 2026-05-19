@@ -1,0 +1,7 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Unterminated string literal
+tests/ui/errors/invalid_symbol/literals/UnclosedStringLiteral.java:2:29
+    String s = "Unterminated
+                            ^

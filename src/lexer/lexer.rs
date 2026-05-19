@@ -267,7 +267,7 @@ impl<'a> Tokens<'a> {
     fn scan_string_literal(&mut self) -> LexResult<String> {
         let mut s = String::new();
         loop {
-            if self.peek() == Some('"') {
+            if matches!(self.peek(), Some('"' | '\r' | '\n')) {
                 break;
             }
             s.push(self.scan_char_literal()?);

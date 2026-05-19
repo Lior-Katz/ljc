@@ -1,0 +1,7 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Unterminated string literal
+tests/ui/errors/invalid_symbol/literals/UnclosedStringLiteralEOL.java:2:20
+    String s = "abc
+                   ^

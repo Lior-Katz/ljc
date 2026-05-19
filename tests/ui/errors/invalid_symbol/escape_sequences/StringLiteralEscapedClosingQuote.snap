@@ -1,0 +1,7 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Unterminated string literal
+tests/ui/errors/invalid_symbol/escape_sequences/StringLiteralEscapedClosingQuote.java:2:111
+    String a = "\"; // \" is treated as a an escaped single quote, therefore the character literal is unclosed
+                                                                                                              ^

@@ -2,6 +2,6 @@
 source: tests/ui/ui_tests.rs
 ---
 Unclosed character literal
-tests/ui/errors/invalid_symbol/UnclosedCharLiteral.java:2:16
+tests/ui/errors/invalid_symbol/literals/UnclosedCharLiteral.java:2:16
     char c = 'a
                ^

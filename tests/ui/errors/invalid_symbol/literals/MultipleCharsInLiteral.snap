@@ -2,6 +2,6 @@
 source: tests/ui/ui_tests.rs
 ---
 Too many characters in character literal
-tests/ui/errors/invalid_symbol/MultipleCharsInLiteral.java:2:16
+tests/ui/errors/invalid_symbol/literals/MultipleCharsInLiteral.java:2:16
     char c = 'ad';
                ^
