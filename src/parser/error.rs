@@ -27,6 +27,8 @@ pub enum Error {
     SymbolExpected(Symbol),
     #[error("Symbol expected: {0} or {1}")]
     SymbolExpected2(Symbol, Symbol),
+    #[error("Expected {0}")]
+    SyntaxExpected(SyntaxKind),
     #[error("Expected {0} after {1}")]
     SyntaxExpectedAfter(SyntaxKind, Symbol),
     #[error("Invalid type name")]
@@ -90,6 +92,7 @@ impl<T> AssertResult for ParseResult<T> {
 pub enum SyntaxKind {
     Expression,
     Statement,
+    Type,
 }
 
 impl Display for SyntaxKind {
@@ -97,6 +100,7 @@ impl Display for SyntaxKind {
         match self {
             SyntaxKind::Expression => write!(f, "expression"),
             SyntaxKind::Statement => write!(f, "statement"),
+            SyntaxKind::Type => write!(f, "type"),
         }
     }
 }

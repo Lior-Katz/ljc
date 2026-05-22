@@ -1181,7 +1181,10 @@ impl<'a> Parser<'a> {
     /// ```
     fn statement_starting_with_name(&mut self) -> ParseResult<Statement> {
         let modifiers = self.modifiers(ModifierKind::VARIABLE)?;
-        let expression = self.term()?;
+        let expression = self.term().assert_if(
+            !modifiers.is_empty(),
+            Error::SyntaxExpected(SyntaxKind::Type).at(self.pos()),
+        )?;
 
         if self.accept(Symbol::Colon)? {
             return match expression {

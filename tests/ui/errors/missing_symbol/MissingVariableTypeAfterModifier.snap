@@ -1,0 +1,7 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Expected type
+tests/ui/errors/missing_symbol/MissingVariableTypeAfterModifier.java:4:5
+    }
+    ^
