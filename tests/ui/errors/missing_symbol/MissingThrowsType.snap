@@ -1,0 +1,7 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Expected identifier
+tests/ui/errors/missing_symbol/MissingThrowsType.java:2:21
+    void f() throws {}
+                    ^

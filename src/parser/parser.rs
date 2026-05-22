@@ -968,6 +968,7 @@ impl<'a> Parser<'a> {
                 },
                 Symbol::Comma,
             )
+            .assert(Error::IdentifierExpected.at(self.pos()))
             .map(|non_empty| non_empty.into())
         } else {
             Ok(vec![])
