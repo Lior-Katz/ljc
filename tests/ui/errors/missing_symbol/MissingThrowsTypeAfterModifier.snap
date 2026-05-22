@@ -1,0 +1,7 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Expected identifier
+tests/ui/errors/missing_symbol/MissingThrowsTypeAfterModifier.java:2:24
+    void f() throws @A {}
+                       ^

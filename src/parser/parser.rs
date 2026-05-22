@@ -961,7 +961,10 @@ impl<'a> Parser<'a> {
             self.delimited_at_least_1(
                 |this| {
                     let modifiers = this.modifiers(ModifierKind::VARIABLE)?;
-                    Ok(this.reference_type()?.with_modifiers(modifiers))
+                    Ok(this
+                        .reference_type()
+                        .assert_if(!modifiers.is_empty(), Error::IdentifierExpected.at(this.pos()))?
+                        .with_modifiers(modifiers))
                 },
                 Symbol::Comma,
             )
