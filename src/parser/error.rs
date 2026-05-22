@@ -140,6 +140,11 @@ impl ExpectedDeclarationType {
         CLASS | RECORD | ENUM | INTERFACE | ANNOTATION_INTERFACE,
     ));
 
+    pub const CLASS_MEMBER: Self = Self(bitflag_combination!(
+        DeclarationTypeFlags,
+        CLASS | RECORD | ENUM | INTERFACE | ANNOTATION_INTERFACE | CONSTRUCTOR | METHOD | FIELD,
+    ));
+
     pub fn contains(self, other: Self) -> bool {
         self.0.contains(other.0)
     }

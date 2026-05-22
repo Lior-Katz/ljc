@@ -636,6 +636,10 @@ impl<'a> Parser<'a> {
             self.constructor_declaration(),
             self.method_or_field_declaration()
         )
+        .assert_if(
+            !modifiers.is_empty(),
+            Error::DanglingModifiers(ExpectedDeclarationType::CLASS_MEMBER).at(self.pos()),
+        )
         .map(|d| d.with_modifiers(modifiers))
     }
 

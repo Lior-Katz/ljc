@@ -1,0 +1,8 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Missing declaration after modifiers.
+Hint: expected class, record, enum, interface, annotation interface, constructor, method, or field declaration
+tests/ui/errors/missing_symbol/MissingRecordMemberDeclarationAfterModifier.java:3:1
+}
+^
