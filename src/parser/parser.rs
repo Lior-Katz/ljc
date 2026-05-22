@@ -908,7 +908,10 @@ impl<'a> Parser<'a> {
 
     fn formal_parameter(&mut self) -> ParseResult<Modified<FormalParameter>> {
         let modifiers = self.modifiers(ModifierKind::VARIABLE)?;
-        let param_type = self.type_term()?;
+        let param_type = self.type_term().assert_if(
+            !modifiers.is_empty(),
+            Error::DanglingModifiers(ExpectedDeclarationType::PARAMETER).at(self.pos()),
+        )?;
         if self.accept(Symbol::Ellipsis)? {
             // variable arity
             let identifier = self

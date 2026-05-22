@@ -103,7 +103,7 @@ impl Display for SyntaxKind {
 
 bitflags! {
     #[derive(Debug, PartialEq, Eq, Clone)]
-    struct DeclarationTypeFlags: u8 {
+    struct DeclarationTypeFlags: u16 {
         const CLASS                 = 1 << 0;
         const RECORD                = 1 << 1;
         const ENUM                  = 1 << 2;
@@ -112,6 +112,7 @@ bitflags! {
         const CONSTRUCTOR           = 1 << 5;
         const METHOD                = 1 << 6;
         const FIELD                 = 1 << 7;
+        const PARAMETER             = 1 << 8;
     }
 }
 
@@ -134,6 +135,8 @@ impl ExpectedDeclarationType {
     pub const METHOD: Self = Self(DeclarationTypeFlags::METHOD);
 
     pub const FIELD: Self = Self(DeclarationTypeFlags::FIELD);
+
+    pub const PARAMETER: Self = Self(DeclarationTypeFlags::PARAMETER);
 
     pub const TOP_LEVEL: Self = Self(bitflag_combination!(
         DeclarationTypeFlags,
@@ -169,6 +172,7 @@ impl Display for ExpectedDeclarationType {
                     DeclarationTypeFlags::CONSTRUCTOR => "constructor",
                     DeclarationTypeFlags::METHOD => "method",
                     DeclarationTypeFlags::FIELD => "field",
+                    DeclarationTypeFlags::PARAMETER => "parameter",
                     _ => unreachable!(),
                 })
             })
