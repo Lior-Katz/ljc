@@ -13,9 +13,11 @@ use crate::ast::{
     TypeIdentifier, TypeList, VariableDeclaration, VariableDeclarator, VariableDeclaratorId,
     VariableDeclaratorList, VariableInitializer, VariableInitializerList,
 };
-use crate::collections::{AtLeastOne, Multiple, NonEmptyList};
+use crate::collections::{AtLeastOne, Multiple, NonEmptyList, bitflag_combination};
 use crate::lexer::{Symbol, Token, Tokens};
-use crate::parser::error::{AssertResult, Error, Failure, ParseResult, SyntaxKind};
+use crate::parser::error::{
+    AssertResult, Error, ExpectedDeclarationType, Failure, ParseResult, SyntaxKind,
+};
 
 use crate::file::Span;
 use crate::parser::Diagnostic;
@@ -138,7 +140,10 @@ impl<'a> Parser<'a> {
     }
 
     fn pos(&mut self) -> Span {
-       self.buffer.front().map(|bt| bt.span).unwrap_or(self.tokens.pos())
+        self.buffer
+            .front()
+            .map(|bt| bt.span)
+            .unwrap_or(self.tokens.pos())
     }
 
     fn buffer(&mut self, count: usize) -> Result<(), Diagnostic> {
@@ -303,6 +308,10 @@ impl<'a> Parser<'a> {
         one_of!(
             self.class_declaration().map(ClassDeclaration::into),
             self.interface_declaration().map(InterfaceDeclaration::into)
+        )
+        .assert_if(
+            !modifiers.is_empty(),
+            Error::DanglingModifiers(ExpectedDeclarationType::TOP_LEVEL).at(self.pos()),
         )
         .map(|d: TopLevelClassOrInterfaceDeclaration| d.with_modifiers(modifiers))
     }
@@ -691,6 +700,9 @@ impl<'a> Parser<'a> {
     /// ```text
     /// enum_body:
     ///     { enum_constant_list [enum_body_declarations] }
+    ///
+    /// enum_body_declarations:
+    ///     ; {class_body_declaration}
     /// ```
     fn enum_body(&mut self) -> ParseResult<EnumBody> {
         self.expect(Symbol::LeftBrace)?;
@@ -2468,14 +2480,6 @@ enum ForHeader {
     },
 }
 
-macro_rules! bitflag_combination {
-    ($($n:ident),+ $(,)?) => {
-        0 $(
-            | Self::$n.bits()
-        )+
-    };
-}
-
 bitflags! {
     #[derive(Copy, Clone)]
     struct ModifierKind: u8 {
@@ -2485,7 +2489,7 @@ bitflags! {
         const VARIABLE      = 1 << 3;
         const INTERFACE     = 1 << 4;
         const ANNOTATION    = 1 << 5;
-        const CLASS_MEMBER = bitflag_combination!(CLASS, INTERFACE, FIELD, METHOD);
+        const CLASS_MEMBER = bitflag_combination!(CLASS | INTERFACE | FIELD | METHOD);
     }
 }
 
