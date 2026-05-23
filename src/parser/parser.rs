@@ -13,9 +13,11 @@ use crate::ast::{
     TypeIdentifier, TypeList, VariableDeclaration, VariableDeclarator, VariableDeclaratorId,
     VariableDeclaratorList, VariableInitializer, VariableInitializerList,
 };
-use crate::collections::{AtLeastOne, Multiple, NonEmptyList};
+use crate::collections::{AtLeastOne, Multiple, NonEmptyList, bitflag_combination};
 use crate::lexer::{Symbol, Token, Tokens};
-use crate::parser::error::{AssertResult, Error, Failure, ParseResult, SyntaxKind};
+use crate::parser::error::{
+    AssertResult, Error, ExpectedDeclarationType, Failure, ParseResult, SyntaxKind,
+};
 
 use crate::file::Span;
 use crate::parser::Diagnostic;
@@ -138,7 +140,10 @@ impl<'a> Parser<'a> {
     }
 
     fn pos(&mut self) -> Span {
-       self.buffer.front().map(|bt| bt.span).unwrap_or(self.tokens.pos())
+        self.buffer
+            .front()
+            .map(|bt| bt.span)
+            .unwrap_or(self.tokens.pos())
     }
 
     fn buffer(&mut self, count: usize) -> Result<(), Diagnostic> {
@@ -303,6 +308,10 @@ impl<'a> Parser<'a> {
         one_of!(
             self.class_declaration().map(ClassDeclaration::into),
             self.interface_declaration().map(InterfaceDeclaration::into)
+        )
+        .assert_if(
+            !modifiers.is_empty(),
+            Error::DanglingModifiers(ExpectedDeclarationType::TOP_LEVEL).at(self.pos()),
         )
         .map(|d: TopLevelClassOrInterfaceDeclaration| d.with_modifiers(modifiers))
     }
@@ -627,6 +636,10 @@ impl<'a> Parser<'a> {
             self.constructor_declaration(),
             self.method_or_field_declaration()
         )
+        .assert_if(
+            !modifiers.is_empty(),
+            Error::DanglingModifiers(ExpectedDeclarationType::CLASS_MEMBER).at(self.pos()),
+        )
         .map(|d| d.with_modifiers(modifiers))
     }
 
@@ -691,6 +704,9 @@ impl<'a> Parser<'a> {
     /// ```text
     /// enum_body:
     ///     { enum_constant_list [enum_body_declarations] }
+    ///
+    /// enum_body_declarations:
+    ///     ; {class_body_declaration}
     /// ```
     fn enum_body(&mut self) -> ParseResult<EnumBody> {
         self.expect(Symbol::LeftBrace)?;
@@ -892,7 +908,10 @@ impl<'a> Parser<'a> {
 
     fn formal_parameter(&mut self) -> ParseResult<Modified<FormalParameter>> {
         let modifiers = self.modifiers(ModifierKind::VARIABLE)?;
-        let param_type = self.type_term()?;
+        let param_type = self.type_term().assert_if(
+            !modifiers.is_empty(),
+            Error::DanglingModifiers(ExpectedDeclarationType::PARAMETER).at(self.pos()),
+        )?;
         if self.accept(Symbol::Ellipsis)? {
             // variable arity
             let identifier = self
@@ -942,10 +961,14 @@ impl<'a> Parser<'a> {
             self.delimited_at_least_1(
                 |this| {
                     let modifiers = this.modifiers(ModifierKind::VARIABLE)?;
-                    Ok(this.reference_type()?.with_modifiers(modifiers))
+                    Ok(this
+                        .reference_type()
+                        .assert_if(!modifiers.is_empty(), Error::IdentifierExpected.at(this.pos()))?
+                        .with_modifiers(modifiers))
                 },
                 Symbol::Comma,
             )
+            .assert(Error::IdentifierExpected.at(self.pos()))
             .map(|non_empty| non_empty.into())
         } else {
             Ok(vec![])
@@ -1158,7 +1181,10 @@ impl<'a> Parser<'a> {
     /// ```
     fn statement_starting_with_name(&mut self) -> ParseResult<Statement> {
         let modifiers = self.modifiers(ModifierKind::VARIABLE)?;
-        let expression = self.term()?;
+        let expression = self.term().assert_if(
+            !modifiers.is_empty(),
+            Error::SyntaxExpected(SyntaxKind::Type).at(self.pos()),
+        )?;
 
         if self.accept(Symbol::Colon)? {
             return match expression {
@@ -2468,14 +2494,6 @@ enum ForHeader {
     },
 }
 
-macro_rules! bitflag_combination {
-    ($($n:ident),+ $(,)?) => {
-        0 $(
-            | Self::$n.bits()
-        )+
-    };
-}
-
 bitflags! {
     #[derive(Copy, Clone)]
     struct ModifierKind: u8 {
@@ -2485,7 +2503,7 @@ bitflags! {
         const VARIABLE      = 1 << 3;
         const INTERFACE     = 1 << 4;
         const ANNOTATION    = 1 << 5;
-        const CLASS_MEMBER = bitflag_combination!(CLASS, INTERFACE, FIELD, METHOD);
+        const CLASS_MEMBER = bitflag_combination!(CLASS | INTERFACE | FIELD | METHOD);
     }
 }
 

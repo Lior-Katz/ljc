@@ -1,0 +1,8 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Missing declaration after modifiers.
+Hint: expected parameter declaration
+tests/ui/errors/missing_symbol/MissingParameterDeclarationAfterModifier.java:2:17
+    void f(final) {}
+                ^
