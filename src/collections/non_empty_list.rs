@@ -1,3 +1,7 @@
+use crate::collections::iter::TryFromIterator;
+use std::iter::{Chain, Once};
+use std::slice::Iter;
+
 pub type AtLeastOne<T> = NonEmptyList<T>;
 
 #[derive(Debug, Clone, Copy)]
@@ -55,8 +59,31 @@ impl<T> NonEmptyList<T> {
         }
     }
 
-    pub fn iter(&self) -> impl Iterator<Item = &T> {
-        std::iter::once(&self.head).chain(self.rest.iter())
+    pub fn iter(&self) -> Chain<Once<&T>, Iter<'_, T>> {
+        std::iter::once(&self.head).chain((&self.rest).into_iter())
+    }
+}
+
+impl<T> IntoIterator for NonEmptyList<T> {
+    type Item = T;
+
+    type IntoIter = Chain<Once<T>, std::vec::IntoIter<T>>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        std::iter::once(self.head).chain(self.rest.into_iter())
+    }
+}
+
+impl<T, I> TryFromIterator<I, T> for NonEmptyList<T>
+where
+    I: IntoIterator<Item = T>,
+{
+    type Error = EmptyVecError;
+
+    fn try_from_iter(iter: I) -> Result<Self, Self::Error> {
+        let mut iter = iter.into_iter();
+        let head = iter.next().ok_or(EmptyVecError)?;
+        Ok(Self { head, rest: iter.collect() })
     }
 }
 
