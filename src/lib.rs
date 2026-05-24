@@ -12,3 +12,5 @@ pub use error::Error;
 mod file;
 
 pub mod parser;
+
+pub mod semantic;

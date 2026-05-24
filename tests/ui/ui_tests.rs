@@ -1,12 +1,17 @@
 use ljc::Error;
 use ljc::error::{Diagnostic, SourceWithDiagnostic};
 use ljc::parser::Parser;
+use ljc::semantic::analyze;
 use std::fs;
 use std::path::{Path, PathBuf};
 
 fn run(input: &String) -> Result<(), Vec<Diagnostic<Error>>> {
-    let _ = Parser::new(input).parse().map_err(|e| vec![e.into()])?;
-    Ok(())
+    let program = Parser::new(input).parse().map_err(|e| vec![e.into()])?;
+    analyze(&program).map_err(|e| {
+        e.into_iter()
+            .map(|x| Diagnostic::from(x))
+            .collect::<Vec<Diagnostic<Error>>>()
+    })
 }
 
 fn error_tests(path: &Path) -> datatest_stable::Result<()> {
