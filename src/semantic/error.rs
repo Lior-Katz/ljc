@@ -8,9 +8,30 @@ pub type SemanticResult<T = ()> = Result<T, AtLeastOne<Diagnostic>>;
 pub enum Error {
     #[error("{0} not yet supported")]
     Unimplemented(#[from] UnimplementedFeature),
+
+    #[error(transparent)]
+    TypeMismatch(#[from] TypeMismatch),
+}
+
+#[derive(thiserror::Error, Debug)]
+pub enum TypeMismatch {
+    #[error("Expected a variable, but found value")]
+    NeedVariableFoundValue,
+
+    #[error("Expression of type 'void' is not allowed here")]
+    VoidExpression,
+
+    #[error(
+        "Expected a numeric operand.\n\
+             Hint: an operand is numeric if it is of a numeric type (i.e. byte, short, int, long, char, float, or double),\n\
+             or if it is a reference type and can be unboxed to a numeric type (i.e. Byte, Short, Integer, Long, Character, Float, or Double)."
+    )]
+    NonNumericOperand,
 }
 
 trait SubError: Into<Error> + Display {}
+
+impl SubError for TypeMismatch {}
 
 impl Into<AtLeastOne<Diagnostic>> for Diagnostic {
     fn into(self) -> AtLeastOne<Diagnostic> {
@@ -69,14 +90,14 @@ pub enum UnimplementedFeature {
     NameExpression,
     #[error("Assignment expressions")]
     Assignment,
-    #[error("Postfix-increment expressions")]
-    PostIncrement,
-    #[error("Postfix-decrement expressions")]
-    PostDecrement,
-    #[error("Prefix-increment expressions")]
-    PreIncrement,
-    #[error("Prefix-decrement expressions")]
-    PreDecrement,
+    #[error("Postfix-increment as sub-expression")]
+    PostIncrementAsSubExpression,
+    #[error("Postfix-decrement as sub-expression")]
+    PostDecrementAsSubExpression,
+    #[error("Prefix-increment as sub-expression")]
+    PreIncrementAsSubExpression,
+    #[error("Prefix-decrement as sub-expression")]
+    PreDecrementAsSubExpression,
     #[error("Bitwise complement expressions")]
     BitwiseComplement,
     #[error("Logical not expressions")]

@@ -1,0 +1,12 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Expected a variable, but found value
+tests/ui/errors/type_mismatch/NonVariablePostfixOp.java:3:9
+        1++;
+        ^
+
+Expected a variable, but found value
+tests/ui/errors/type_mismatch/NonVariablePostfixOp.java:4:9
+        1--;
+        ^

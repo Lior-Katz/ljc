@@ -1,0 +1,12 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Expected a variable, but found value
+tests/ui/errors/type_mismatch/NonVariablePrefixOp.java:3:11
+        ++1;
+          ^
+
+Expected a variable, but found value
+tests/ui/errors/type_mismatch/NonVariablePrefixOp.java:4:11
+        --1;
+          ^
