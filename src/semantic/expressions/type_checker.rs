@@ -40,7 +40,9 @@ pub fn type_check(expression: &Expression) -> SemanticResult {
             Err(UnimplementedFeature::BitwiseComplement.at(span).into())
         }
         Expression::LogicalNot(_) => Err(UnimplementedFeature::LogicalNot.at(span).into()),
-        Expression::BinaryOp { .. } => Err(UnimplementedFeature::BinaryOp.at(span).into()),
+        Expression::BinaryOp { op, .. } => {
+            Err(UnimplementedFeature::BinaryOp.at(op.span().clone()).into())
+        }
         Expression::ConditionalExpression { .. } => {
             Err(UnimplementedFeature::TernaryConditional.at(span).into())
         }
