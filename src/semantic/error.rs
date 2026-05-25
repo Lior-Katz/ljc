@@ -66,13 +66,13 @@ where
 {
     fn coalesce<F>(&self, op: F) -> SemanticResult
     where
-        F: Fn(&T) -> SemanticResult;
+        F: FnMut(&T) -> SemanticResult;
 }
 
 impl<T> Coalesce<T> for Multiple<T> {
-    fn coalesce<F>(&self, op: F) -> SemanticResult
+    fn coalesce<F>(&self, mut op: F) -> SemanticResult
     where
-        F: Fn(&T) -> SemanticResult,
+        F: FnMut(&T) -> SemanticResult,
     {
         self.into_iter()
             .filter_map(|d| op(d).err())
