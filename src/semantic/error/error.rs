@@ -28,6 +28,13 @@ pub enum TypeMismatch {
     )]
     NonNumericOperand,
 
+    #[error(
+        "Expected an integral operand.\n\
+             Hint: an operand is integral if it is of an integral type (i.e. byte, short, int, long, or char),\n\
+             or if it is a reference type and can be unboxed to an integral type (i.e. Byte, Short, Integer, Long, or Character)."
+    )]
+    NonIntegralOperand,
+
     #[error("Expected an operand of type boolean or Boolean")]
     NonBooleanOperand,
 }
