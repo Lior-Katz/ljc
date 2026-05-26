@@ -76,14 +76,14 @@ pub enum UnimplementedFeature {
     PreIncrementAsSubExpression,
     #[error("Prefix-decrement as sub-expression")]
     PreDecrementAsSubExpression,
-    #[error("Bitwise complement expressions")]
-    BitwiseComplement,
+    #[error("Bitwise complement as sub-expressions")]
+    BitwiseComplementAsSubExpression,
     #[error("Logical not expressions")]
     LogicalNot,
-    #[error("Unary plus operator")]
-    UnaryPlus,
-    #[error("Unary minus operator")]
-    UnaryMinus,
+    #[error("Unary plus operator in sub-expressions")]
+    UnaryPlusInSubExpression,
+    #[error("Unary minus operator in sub-expressions")]
+    UnaryMinusInSubExpression,
     #[error("Binary operations")]
     BinaryOp,
     #[error("Ternary conditional expressions")]

@@ -1,0 +1,38 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Expected a numeric operand.
+Hint: an operand is numeric if it is of a numeric type (i.e. byte, short, int, long, char, float, or double),
+or if it is a reference type and can be unboxed to a numeric type (i.e. Byte, Short, Integer, Long, Character, Float, or Double).
+tests/ui/errors/type_mismatch/NonNumericUnaryOp.java:3:18
+        int a = +true;
+                 ^
+
+Variable declarations not yet supported
+tests/ui/errors/type_mismatch/NonNumericUnaryOp.java:3:9
+        int a = +true;
+        ^
+
+Expected a numeric operand.
+Hint: an operand is numeric if it is of a numeric type (i.e. byte, short, int, long, char, float, or double),
+or if it is a reference type and can be unboxed to a numeric type (i.e. Byte, Short, Integer, Long, Character, Float, or Double).
+tests/ui/errors/type_mismatch/NonNumericUnaryOp.java:4:18
+        int b = -true;
+                 ^
+
+Variable declarations not yet supported
+tests/ui/errors/type_mismatch/NonNumericUnaryOp.java:4:9
+        int b = -true;
+        ^
+
+Expected a numeric operand.
+Hint: an operand is numeric if it is of a numeric type (i.e. byte, short, int, long, char, float, or double),
+or if it is a reference type and can be unboxed to a numeric type (i.e. Byte, Short, Integer, Long, Character, Float, or Double).
+tests/ui/errors/type_mismatch/NonNumericUnaryOp.java:5:18
+        int c = ~true;
+                 ^
+
+Variable declarations not yet supported
+tests/ui/errors/type_mismatch/NonNumericUnaryOp.java:5:9
+        int c = ~true;
+        ^

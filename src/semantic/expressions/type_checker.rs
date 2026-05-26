@@ -2,9 +2,11 @@ use crate::ast;
 use crate::error::Diagnose;
 use crate::semantic::error::{SemanticResult, TypeMismatch, UnimplementedFeature};
 use ast::Expression;
+use std::ops::Not;
 
 pub fn type_check(expression: &Expression) -> SemanticResult {
     let span = expression.span().clone();
+    // TODO: add tests for non-numeric variables in arithmetic operations once names are possible
     match expression {
         Expression::IntegerLiteral { .. }
         | Expression::LongLiteral { .. }
@@ -17,27 +19,9 @@ pub fn type_check(expression: &Expression) -> SemanticResult {
         Expression::PostIncrement(e)
         | Expression::PostDecrement(e)
         | Expression::PreIncrement(e)
-        | Expression::PreDecrement(e) => {
-            let eval_type = e.evaluation_type()?;
-            let span = e.span().clone();
-            match eval_type {
-                ExpressionResult::Variable(ty) => {
-                    if ty.is_convertible_to_numeric_type() {
-                        Ok(())
-                    } else {
-                        Err(TypeMismatch::NonNumericOperand.at(span).into()) // TODO: add test
-                    }
-                }
-                ExpressionResult::Void => Err(TypeMismatch::VoidExpression.at(span).into()), // TODO: add test
-                ExpressionResult::Value(_) => {
-                    Err(TypeMismatch::NeedVariableFoundValue.at(span).into())
-                }
-            }
-        }
-        Expression::UnaryPlus(_) => Err(UnimplementedFeature::UnaryPlus.at(span).into()),
-        Expression::UnaryMinus(_) => Err(UnimplementedFeature::UnaryMinus.at(span).into()),
-        Expression::BitwiseComplement(_) => {
-            Err(UnimplementedFeature::BitwiseComplement.at(span).into())
+        | Expression::PreDecrement(e) => check_convertible_to_numeric_type(e, AllowValue::False),
+        Expression::UnaryPlus(e) | Expression::UnaryMinus(e) | Expression::BitwiseComplement(e) => {
+            check_convertible_to_numeric_type(e, AllowValue::True)
         }
         Expression::LogicalNot(_) => Err(UnimplementedFeature::LogicalNot.at(span).into()),
         Expression::BinaryOp { op, .. } => {
@@ -96,11 +80,11 @@ impl ExpressionNode for Expression {
                 .at(span)
                 .into()),
             Expression::BitwiseComplement(_) => {
-                Err(UnimplementedFeature::BitwiseComplement.at(span).into())
+                Err(UnimplementedFeature::BitwiseComplementAsSubExpression.at(span).into())
             }
             Expression::LogicalNot(_) => Err(UnimplementedFeature::LogicalNot.at(span).into()),
-            Expression::UnaryPlus(_) => Err(UnimplementedFeature::UnaryPlus.at(span).into()),
-            Expression::UnaryMinus(_) => Err(UnimplementedFeature::UnaryMinus.at(span).into()),
+            Expression::UnaryPlus(_) => Err(UnimplementedFeature::UnaryPlusInSubExpression.at(span).into()),
+            Expression::UnaryMinus(_) => Err(UnimplementedFeature::UnaryMinusInSubExpression.at(span).into()),
             Expression::BinaryOp { .. } => Err(UnimplementedFeature::BinaryOp.at(span).into()),
             Expression::ConditionalExpression { .. } => {
                 Err(UnimplementedFeature::TernaryConditional.at(span).into())
@@ -124,6 +108,33 @@ impl ExpressionNode for Expression {
                 Err(UnimplementedFeature::MethodReference.at(span).into())
             }
         }
+    }
+}
+
+enum AllowValue {
+    True,
+    False,
+}
+
+fn check_convertible_to_numeric_type(
+    expression: &Expression,
+    allow_value: AllowValue,
+) -> SemanticResult {
+    let eval_type = expression.evaluation_type()?;
+    match eval_type {
+        ExpressionResult::Value(_) if !allow_value => Err(TypeMismatch::NeedVariableFoundValue
+            .at(*expression.span())
+            .into()),
+        ExpressionResult::Value(ty) | ExpressionResult::Variable(ty) => {
+            if ty.is_convertible_to_numeric_type() {
+                Ok(())
+            } else {
+                Err(TypeMismatch::NonNumericOperand
+                    .at(*expression.span())
+                    .into()) // TODO: add tests for variables
+            }
+        }
+        ExpressionResult::Void => Err(TypeMismatch::VoidExpression.at(*expression.span()).into()), // TODO: add test once function calls are implemented
     }
 }
 
@@ -171,5 +182,16 @@ impl Type {
 impl From<Numeric> for Type {
     fn from(value: Numeric) -> Self {
         Self::Numeric(value)
+    }
+}
+
+impl Not for AllowValue {
+    type Output = bool;
+
+    fn not(self) -> Self::Output {
+        match self {
+            AllowValue::True => false,
+            AllowValue::False => true,
+        }
     }
 }
