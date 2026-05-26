@@ -1,7 +1,8 @@
-use crate::ast::Statement;
+use crate::ast::{Modified, Modifiers, Statement, VariableDeclaration, VariableInitializer};
 use crate::error::Diagnose;
+use crate::file::Span;
 use crate::semantic::SemanticAnalyzer;
-use crate::semantic::error::{SemanticResult, UnimplementedFeature};
+use crate::semantic::error::{CoalesceIter, CoalesceRes, SemanticResult, UnimplementedFeature};
 
 impl SemanticAnalyzer {
     pub(super) fn statement(&mut self, statement: &Statement) -> SemanticResult {
@@ -12,8 +13,8 @@ impl SemanticAnalyzer {
             }
             Statement::ExpressionStatement(e) => self.expression(e),
             Statement::Block(_) => Err(UnimplementedFeature::Block.at(span).into()),
-            Statement::VariableDeclaration(_) => {
-                Err(UnimplementedFeature::VariableDeclaration.at(span).into())
+            Statement::VariableDeclaration(Modified { item: var_decl, modifiers }) => {
+                self.variable_declaration(var_decl, modifiers, span)
             }
             Statement::If { .. } => Err(UnimplementedFeature::If.at(span).into()),
             Statement::While { .. } => Err(UnimplementedFeature::While.at(span).into()),
@@ -33,5 +34,25 @@ impl SemanticAnalyzer {
             Statement::Switch(_) => Err(UnimplementedFeature::SwitchStatement.at(span).into()),
             Statement::Yield { .. } => Err(UnimplementedFeature::Yield.at(span).into()),
         }
+    }
+
+    #[allow(unused_variables)]
+    fn variable_declaration(
+        &mut self,
+        var_decl: &VariableDeclaration,
+        modifiers: &Modifiers,
+        span: Span,
+    ) -> SemanticResult {
+        (&var_decl.declarators)
+            .coalesce(|declarator| {
+                match &declarator.initializer {
+                    Some(VariableInitializer::Expression(e)) => {
+                        self.expression(e)?;
+                    }
+                    _ => {}
+                }
+                Ok(())
+            })
+            .coalesce(Err(UnimplementedFeature::VariableDeclaration.at(span).into()))
     }
 }
