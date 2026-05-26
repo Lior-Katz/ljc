@@ -1,4 +1,4 @@
-use crate::collections::{AtLeastOne, Multiple, TryCollect};
+use crate::collections::AtLeastOne;
 use crate::semantic::Diagnostic;
 use std::fmt::Display;
 
@@ -57,28 +57,6 @@ where
             span: value.span,
             message: value.message.into(),
         }
-    }
-}
-
-pub trait Coalesce<T>
-where
-    Self: IntoIterator<Item = T>,
-{
-    fn coalesce<F>(&self, op: F) -> SemanticResult
-    where
-        F: FnMut(&T) -> SemanticResult;
-}
-
-impl<T> Coalesce<T> for Multiple<T> {
-    fn coalesce<F>(&self, mut op: F) -> SemanticResult
-    where
-        F: FnMut(&T) -> SemanticResult,
-    {
-        self.into_iter()
-            .filter_map(|d| op(d).err())
-            .flat_map(IntoIterator::into_iter)
-            .try_collect()
-            .map_or(Ok(()), Err)
     }
 }
 

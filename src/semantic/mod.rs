@@ -1,5 +1,5 @@
 use crate::ast::{Program, WithModifiers};
-use crate::semantic::error::{Coalesce, SemanticResult};
+use crate::semantic::error::{CoalesceIter, SemanticResult};
 
 mod classes;
 mod error;

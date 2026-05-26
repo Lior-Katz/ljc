@@ -1,7 +1,7 @@
 use crate::ast;
 use crate::ast::{ClassBodyDeclaration, Modified, Modifiers};
 use crate::error::Diagnose;
-use crate::semantic::error::{Coalesce, SemanticResult, UnimplementedFeature};
+use crate::semantic::error::{CoalesceIter, SemanticResult, UnimplementedFeature};
 use crate::semantic::SemanticAnalyzer;
 
 impl SemanticAnalyzer {

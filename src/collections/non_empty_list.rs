@@ -74,6 +74,16 @@ impl<T> IntoIterator for NonEmptyList<T> {
     }
 }
 
+impl<'a, T> IntoIterator for &'a NonEmptyList<T> {
+    type Item = &'a T;
+
+    type IntoIter = Chain<Once<&'a T>, Iter<'a, T>>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+
 impl<T, I> TryFromIterator<I, T> for NonEmptyList<T>
 where
     I: IntoIterator<Item = T>,
