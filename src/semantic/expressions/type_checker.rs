@@ -23,7 +23,19 @@ pub fn type_check(expression: &Expression) -> SemanticResult {
         Expression::UnaryPlus(e) | Expression::UnaryMinus(e) | Expression::BitwiseComplement(e) => {
             check_convertible_to_numeric_type(e, AllowValue::True)
         }
-        Expression::LogicalNot(_) => Err(UnimplementedFeature::LogicalNot.at(span).into()),
+        Expression::LogicalNot(e) => {
+            let eval_type = e.evaluation_type()?;
+            match eval_type {
+                ExpressionResult::Void => Err(TypeMismatch::VoidExpression.at(*e.span()).into()),
+                ExpressionResult::Value(ty) | ExpressionResult::Variable(ty) => {
+                    if ty.is_primitive_or_boxed_boolean() {
+                        Ok(())
+                    } else {
+                        Err(TypeMismatch::NonBooleanOperand.at(*e.span()).into())
+                    }
+                }
+            }
+        }
         Expression::BinaryOp { op, .. } => {
             Err(UnimplementedFeature::BinaryOp.at(op.span().clone()).into())
         }
@@ -80,11 +92,17 @@ impl ExpressionNode for Expression {
                 .at(span)
                 .into()),
             Expression::BitwiseComplement(_) => {
-                Err(UnimplementedFeature::BitwiseComplementAsSubExpression.at(span).into())
+                Err(UnimplementedFeature::BitwiseComplementAsSubExpression
+                    .at(span)
+                    .into())
             }
             Expression::LogicalNot(_) => Err(UnimplementedFeature::LogicalNot.at(span).into()),
-            Expression::UnaryPlus(_) => Err(UnimplementedFeature::UnaryPlusInSubExpression.at(span).into()),
-            Expression::UnaryMinus(_) => Err(UnimplementedFeature::UnaryMinusInSubExpression.at(span).into()),
+            Expression::UnaryPlus(_) => Err(UnimplementedFeature::UnaryPlusInSubExpression
+                .at(span)
+                .into()),
+            Expression::UnaryMinus(_) => Err(UnimplementedFeature::UnaryMinusInSubExpression
+                .at(span)
+                .into()),
             Expression::BinaryOp { .. } => Err(UnimplementedFeature::BinaryOp.at(span).into()),
             Expression::ConditionalExpression { .. } => {
                 Err(UnimplementedFeature::TernaryConditional.at(span).into())
@@ -176,6 +194,12 @@ impl Type {
             Self::Numeric(_) => true,
             Self::Boolean | Self::Null => false,
         }
+    }
+
+    #[allow(non_snake_case)]
+    pub fn is_primitive_or_boxed_boolean(&self) -> bool {
+        matches!(self, Self::Boolean)
+        // TODO: check for boxed Boolean as well
     }
 }
 

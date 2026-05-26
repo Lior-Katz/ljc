@@ -27,6 +27,9 @@ pub enum TypeMismatch {
              or if it is a reference type and can be unboxed to a numeric type (i.e. Byte, Short, Integer, Long, Character, Float, or Double)."
     )]
     NonNumericOperand,
+
+    #[error("Expected an operand of type boolean or Boolean")]
+    NonBooleanOperand,
 }
 
 trait SubError: Into<Error> + Display {}
