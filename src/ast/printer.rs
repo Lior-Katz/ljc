@@ -1,6 +1,6 @@
 use crate::ast::{
     Annotation, AnnotationInterfaceDeclaration, ArrayAccess, ArrayCreationMode, ArrayType,
-    AssignmentOp, BinOp, CatchClause, ClassBodyDeclaration, ClassDeclaration,
+    AssignmentOp, BinOp, Block, CatchClause, ClassBodyDeclaration, ClassDeclaration,
     ClassMemberDeclaration, ClassType, ClassTypePart, CompilationUnit, ComponentPattern,
     ConstructorBody, ConstructorInvocation, ElementValue, ElementValuePair, EnumConstant,
     EnumDeclaration, Expression, ExpressionOrType, ForInit, FormalParameter, Identifier,
@@ -221,12 +221,12 @@ impl TreeDisplay for ClassBodyDeclaration {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         match self {
             ClassBodyDeclaration::ClassMember(m) => m.fmt_tree(f, prefix, is_last),
-            ClassBodyDeclaration::InstanceInitializer(statements) => {
+            ClassBodyDeclaration::InstanceInitializer(Block { statements, .. }) => {
                 let (line_prefix, new_prefix) = branch(&prefix, is_last);
                 writeln!(f, "{line_prefix}Instance Initializer")?;
                 statements.fmt_tree(f, &new_prefix, true)
             }
-            ClassBodyDeclaration::StaticInitializer(statements) => {
+            ClassBodyDeclaration::StaticInitializer(Block { statements, .. }) => {
                 let (line_prefix, new_prefix) = branch(&prefix, is_last);
                 writeln!(f, "{line_prefix}Static Initializer")?;
                 statements.fmt_tree(f, &new_prefix, true)
@@ -427,20 +427,20 @@ impl TreeDisplay for Modifier {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         let (line_prefix, _) = branch(&prefix, is_last);
         match self {
-            Modifier::Public => writeln!(f, "{line_prefix}public"),
-            Modifier::Protected => writeln!(f, "{line_prefix}protected"),
-            Modifier::Private => writeln!(f, "{line_prefix}private"),
-            Modifier::Abstract => writeln!(f, "{line_prefix}abstract"),
-            Modifier::Static => writeln!(f, "{line_prefix}static"),
-            Modifier::Final => writeln!(f, "{line_prefix}final"),
-            Modifier::Default => writeln!(f, "{line_prefix}default"),
-            Modifier::Sealed => writeln!(f, "{line_prefix}sealed"),
-            Modifier::NonSealed => writeln!(f, "{line_prefix}non-sealed"),
-            Modifier::Strictfp => writeln!(f, "{line_prefix}strictfp"),
-            Modifier::Native => writeln!(f, "{line_prefix}native"),
-            Modifier::Transient => writeln!(f, "{line_prefix}transient"),
-            Modifier::Volatile => writeln!(f, "{line_prefix}volatile"),
-            Modifier::Synchronized => writeln!(f, "{line_prefix}synchronized"),
+            Modifier::Public(_) => writeln!(f, "{line_prefix}public"),
+            Modifier::Protected(_) => writeln!(f, "{line_prefix}protected"),
+            Modifier::Private(_) => writeln!(f, "{line_prefix}private"),
+            Modifier::Abstract(_) => writeln!(f, "{line_prefix}abstract"),
+            Modifier::Static(_) => writeln!(f, "{line_prefix}static"),
+            Modifier::Final(_) => writeln!(f, "{line_prefix}final"),
+            Modifier::Default(_) => writeln!(f, "{line_prefix}default"),
+            Modifier::Sealed(_) => writeln!(f, "{line_prefix}sealed"),
+            Modifier::NonSealed(_) => writeln!(f, "{line_prefix}non-sealed"),
+            Modifier::Strictfp(_) => writeln!(f, "{line_prefix}strictfp"),
+            Modifier::Native(_) => writeln!(f, "{line_prefix}native"),
+            Modifier::Transient(_) => writeln!(f, "{line_prefix}transient"),
+            Modifier::Volatile(_) => writeln!(f, "{line_prefix}volatile"),
+            Modifier::Synchronized(_) => writeln!(f, "{line_prefix}synchronized"),
             Modifier::Annotation(a) => a.fmt_tree(f, prefix, is_last),
         }
     }
@@ -458,7 +458,7 @@ impl TreeDisplay for MethodBody {
         let (line_prefix, new_prefix) = branch(&prefix, is_last);
 
         match self {
-            MethodBody::Semicolon => {
+            MethodBody::Semicolon(_) => {
                 writeln!(f, "{line_prefix};")
             }
             MethodBody::Block(stmts) => {
@@ -474,16 +474,18 @@ impl TreeDisplay for Statement {
         let (line_prefix, new_prefix) = branch(&prefix, is_last);
 
         match self {
-            Statement::EmptyStatement => {
+            Statement::EmptyStatement(_) => {
                 writeln!(f, "{line_prefix}EmptyStatement")
             }
             Statement::ExpressionStatement(e) => e.fmt_tree(f, &prefix, is_last),
-            Statement::Block(statements) => {
+            Statement::Block(Block { statements, .. }) => {
                 writeln!(f, "{line_prefix}BlockStatement")?;
                 statements.fmt_tree(f, &new_prefix, true)
             }
             Statement::VariableDeclaration(v) => v.fmt_tree(f, &prefix, is_last),
-            Statement::If { condition, if_true, if_false } => {
+            Statement::If {
+                condition, if_true, if_false, ..
+            } => {
                 writeln!(f, "{line_prefix}IfStatement")?;
                 let children = Children::new()
                     .push("Condition", condition)
@@ -491,7 +493,7 @@ impl TreeDisplay for Statement {
                     .push_opt("if_false", if_false);
                 children.fmt_tree(f, &new_prefix, true)
             }
-            Statement::While { condition, statement } => {
+            Statement::While { condition, statement, .. } => {
                 writeln!(f, "{line_prefix}WhileStatement")?;
                 let (condition_label_prefix, condition_prefix) = branch(&new_prefix, false);
                 let (statement_label_prefix, statement_prefix) = branch(&new_prefix, true);
@@ -507,6 +509,7 @@ impl TreeDisplay for Statement {
                 condition,
                 update,
                 statement,
+                ..
             } => {
                 writeln!(f, "{line_prefix}ForStatement")?;
                 let (initializer_label_prefix, initializer_prefix) = branch(&new_prefix, false);
@@ -532,6 +535,7 @@ impl TreeDisplay for Statement {
                 variable_declaration,
                 iterable,
                 statement,
+                ..
             } => {
                 writeln!(f, "{line_prefix}ForEachStatement")?;
                 let (var_declaration_label_prefix, var_declaration_prefix) =
@@ -548,7 +552,7 @@ impl TreeDisplay for Statement {
                 writeln!(f, "{statement_label_prefix}Body")?;
                 statement.fmt_tree(f, &statement_prefix, true)
             }
-            Statement::DoWhile { statement, condition } => {
+            Statement::DoWhile { statement, condition, .. } => {
                 writeln!(f, "{line_prefix}DoWhileStatement")?;
                 let (statement_label_prefix, statement_prefix) = branch(&new_prefix, false);
                 let (condition_label_prefix, condition_prefix) = branch(&new_prefix, true);
@@ -563,28 +567,28 @@ impl TreeDisplay for Statement {
                 writeln!(f, "{line_prefix}LabeledStatement: {label}")?;
                 body.fmt_tree(f, &new_prefix, true)
             }
-            Statement::Break(label) => {
+            Statement::Break { label, .. } => {
                 let label = match label {
                     None => "",
                     Some(v) => &format!(" {}", &v),
                 };
                 writeln!(f, "{line_prefix}BreakStatement{label}")
             }
-            Statement::Continue(label) => {
+            Statement::Continue { label, .. } => {
                 let label = match label {
                     None => "",
                     Some(v) => &format!(" {}", &v),
                 };
                 writeln!(f, "{line_prefix}ContinueStatement{label}")
             }
-            Statement::Assert { condition, detail_message } => {
+            Statement::Assert { condition, detail_message, .. } => {
                 writeln!(f, "{line_prefix}AssertStatement")?;
                 let children = Children::new()
                     .push("Condition", condition)
                     .push_opt("DetailMessage", detail_message);
                 children.fmt_tree(f, &new_prefix, true)
             }
-            Statement::Return(e) => {
+            Statement::Return { value: e, .. } => {
                 writeln!(f, "{line_prefix}ReturnStatement")?;
                 if let Some(e) = e {
                     e.fmt_tree(f, &new_prefix, true)?;
@@ -596,6 +600,7 @@ impl TreeDisplay for Statement {
                 try_block,
                 exception_handlers,
                 finally_block,
+                ..
             } => {
                 writeln!(f, "{line_prefix}TryStatement")?;
 
@@ -606,11 +611,11 @@ impl TreeDisplay for Statement {
                     .push_opt("FinallyBlock", finally_block)
                     .fmt_tree(f, &new_prefix, true)
             }
-            Statement::Throw(e) => {
+            Statement::Throw { value: e, .. } => {
                 writeln!(f, "{line_prefix}ThrowStatement")?;
                 e.fmt_tree(f, &new_prefix, true)
             }
-            Statement::Synchronized { lock, body } => {
+            Statement::Synchronized { lock, body, .. } => {
                 writeln!(f, "{line_prefix}SynchronizedStatement")?;
                 Children::new()
                     .push("Lock", lock)
@@ -621,7 +626,7 @@ impl TreeDisplay for Statement {
                 writeln!(f, "{line_prefix}Switch Statement")?;
                 s.fmt_tree(f, &new_prefix, true)
             }
-            Statement::Yield(e) => {
+            Statement::Yield { value: e, .. } => {
                 writeln!(f, "{line_prefix}Yield Statement")?;
                 e.fmt_tree(f, &new_prefix, true)
             }
@@ -772,25 +777,25 @@ impl LeftHandSide {
 impl TreeDisplay for BinOp {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, _is_last: bool) -> fmt::Result {
         match self {
-            BinOp::Add => writeln!(f, "{prefix} +"),
-            BinOp::Subtract => writeln!(f, "{prefix} -"),
-            BinOp::Multiply => writeln!(f, "{prefix} *"),
-            BinOp::Divide => writeln!(f, "{prefix} /"),
-            BinOp::Modulo => writeln!(f, "{prefix} %"),
-            BinOp::LeftShift => writeln!(f, "{prefix} <<"),
-            BinOp::SignedRightShift => writeln!(f, "{prefix} >>"),
-            BinOp::UnsignedRightShift => writeln!(f, "{prefix} >>>"),
-            BinOp::Less => writeln!(f, "{prefix} <"),
-            BinOp::Greater => writeln!(f, "{prefix} >"),
-            BinOp::LessEqual => writeln!(f, "{prefix} <="),
-            BinOp::GreaterEqual => writeln!(f, "{prefix} >="),
-            BinOp::Equal => writeln!(f, "{prefix} =="),
-            BinOp::NotEqual => writeln!(f, "{prefix} !="),
-            BinOp::BitwiseAnd => writeln!(f, "{prefix} &"),
-            BinOp::BitwiseXor => writeln!(f, "{prefix} ^"),
-            BinOp::BitwiseOr => writeln!(f, "{prefix} |"),
-            BinOp::LogicalAnd => writeln!(f, "{prefix} &&"),
-            BinOp::LogicalOr => writeln!(f, "{prefix} ||"),
+            BinOp::Add(_) => writeln!(f, "{prefix} +"),
+            BinOp::Subtract(_) => writeln!(f, "{prefix} -"),
+            BinOp::Multiply(_) => writeln!(f, "{prefix} *"),
+            BinOp::Divide(_) => writeln!(f, "{prefix} /"),
+            BinOp::Modulo(_) => writeln!(f, "{prefix} %"),
+            BinOp::LeftShift(_) => writeln!(f, "{prefix} <<"),
+            BinOp::SignedRightShift(_) => writeln!(f, "{prefix} >>"),
+            BinOp::UnsignedRightShift(_) => writeln!(f, "{prefix} >>>"),
+            BinOp::Less(_) => writeln!(f, "{prefix} <"),
+            BinOp::Greater(_) => writeln!(f, "{prefix} >"),
+            BinOp::LessEqual(_) => writeln!(f, "{prefix} <="),
+            BinOp::GreaterEqual(_) => writeln!(f, "{prefix} >="),
+            BinOp::Equal(_) => writeln!(f, "{prefix} =="),
+            BinOp::NotEqual(_) => writeln!(f, "{prefix} !="),
+            BinOp::BitwiseAnd(_) => writeln!(f, "{prefix} &"),
+            BinOp::BitwiseXor(_) => writeln!(f, "{prefix} ^"),
+            BinOp::BitwiseOr(_) => writeln!(f, "{prefix} |"),
+            BinOp::LogicalAnd(_) => writeln!(f, "{prefix} &&"),
+            BinOp::LogicalOr(_) => writeln!(f, "{prefix} ||"),
         }
     }
 }
@@ -1090,11 +1095,11 @@ impl TreeDisplay for Annotation {
         let (line_prefix, new_prefix) = branch(prefix, is_last);
         writeln!(f, "{line_prefix}Annotation")?;
         let children = match self {
-            Annotation::Marker(name) => Children::new().push("Name", name),
-            Annotation::SingleElement { name, value } => {
+            Annotation::Marker { name, .. } => Children::new().push("Name", name),
+            Annotation::SingleElement { name, value, .. } => {
                 Children::new().push("Name", name).push("Value", value)
             }
-            Annotation::Normal { name, values } => {
+            Annotation::Normal { name, values, .. } => {
                 Children::new().push("Name", name).push("Value", values)
             }
         };

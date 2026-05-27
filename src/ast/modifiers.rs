@@ -1,4 +1,5 @@
 use crate::ast::{Expression, Identifier, TypeName};
+use crate::file::Span;
 
 pub type Modified<T> = WithModifiers<T>;
 pub type Modifiers = Vec<Modifier>;
@@ -13,33 +14,38 @@ pub struct WithModifiers<T> {
 
 #[derive(Debug)]
 pub enum Modifier {
-    Public,
-    Protected,
-    Private,
-    Abstract,
-    Static,
-    Final,
-    Default,
-    Sealed,
-    NonSealed,
-    Strictfp,
-    Native,
-    Transient,
-    Volatile,
-    Synchronized,
+    Public(Span),
+    Protected(Span),
+    Private(Span),
+    Abstract(Span),
+    Static(Span),
+    Final(Span),
+    Default(Span),
+    Sealed(Span),
+    NonSealed(Span),
+    Strictfp(Span),
+    Native(Span),
+    Transient(Span),
+    Volatile(Span),
+    Synchronized(Span),
     Annotation(Annotation),
 }
 
 #[derive(Debug)]
 pub enum Annotation {
-    Marker(TypeName),
+    Marker {
+        name: TypeName,
+        span: Span,
+    },
     SingleElement {
         name: TypeName,
         value: ElementValue,
+        span: Span,
     },
     Normal {
         name: TypeName,
         values: ElementValuePairList,
+        span: Span,
     },
 }
 
@@ -76,5 +82,37 @@ impl<T> Modifiable for T {}
 impl<T> From<T> for Modified<T> {
     fn from(value: T) -> Self {
         value.with_modifiers(Modifiers::default())
+    }
+}
+
+impl Modifier {
+    pub fn span(&self) -> &Span {
+        match self {
+            Modifier::Public(span)
+            | Modifier::Protected(span)
+            | Modifier::Private(span)
+            | Modifier::Abstract(span)
+            | Modifier::Static(span)
+            | Modifier::Final(span)
+            | Modifier::Default(span)
+            | Modifier::Sealed(span)
+            | Modifier::NonSealed(span)
+            | Modifier::Strictfp(span)
+            | Modifier::Native(span)
+            | Modifier::Transient(span)
+            | Modifier::Volatile(span)
+            | Modifier::Synchronized(span) => span,
+            Modifier::Annotation(a) => a.span(),
+        }
+    }
+}
+
+impl Annotation {
+    pub fn span(&self) -> &Span {
+        match self {
+            Annotation::Marker { span, .. }
+            | Annotation::SingleElement { span, .. }
+            | Annotation::Normal { span, .. } => span,
+        }
     }
 }

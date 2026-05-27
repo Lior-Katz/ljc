@@ -1,9 +1,11 @@
+use crate::ast::Block;
 use crate::ast::expressions::{ArgumentList, VariableInitializer};
 use crate::ast::identifiers::{Identifier, TypeIdentifier};
 use crate::ast::modifiers::{ElementValue, Modified};
 use crate::ast::statements::{BlockStatements, ConstructorInvocation};
 use crate::ast::types::{Type, TypeList};
 use crate::collections::{AtLeastOne, Multiple};
+use crate::file::Span;
 
 pub type ClassBodyDeclarations = Vec<ClassBodyDeclaration>;
 pub type FormalParameterList = Vec<Modified<FormalParameter>>;
@@ -32,13 +34,14 @@ pub struct NormalClassDeclaration {
     pub implements: Option<TypeList>,
     pub permits: Option<TypeList>,
     pub body: ClassBodyDeclarations,
+    pub span: Span,
 }
 
 #[derive(Debug)]
 pub enum ClassBodyDeclaration {
     ClassMember(Modified<ClassMemberDeclaration>),
-    InstanceInitializer(BlockStatements),
-    StaticInitializer(BlockStatements),
+    InstanceInitializer(Block),
+    StaticInitializer(Block),
 }
 
 #[derive(Debug)]
@@ -74,12 +77,14 @@ pub struct NormalInterfaceDeclaration {
     pub extends: Option<TypeList>,
     pub permits: Option<TypeList>,
     pub body: Vec<Modified<ClassMemberDeclaration>>,
+    pub span: Span,
 }
 
 #[derive(Debug)]
 pub struct AnnotationInterfaceDeclaration {
     pub name: TypeIdentifier,
     pub body: Vec<Modified<ClassMemberDeclaration>>,
+    pub span: Span,
 }
 
 #[derive(Debug)]
@@ -88,6 +93,7 @@ pub struct RecordDeclaration {
     pub components: RecordComponentList,
     pub implements: Option<TypeList>,
     pub body: Vec<RecordBodyDeclaration>,
+    pub span: Span,
 }
 
 #[derive(Debug)]
@@ -107,6 +113,7 @@ pub struct EnumDeclaration {
     pub name: TypeIdentifier,
     pub implements: Option<TypeList>,
     pub body: EnumBody,
+    pub span: Span,
 }
 
 #[derive(Debug)]
@@ -140,7 +147,7 @@ pub enum FormalParameter {
 
 #[derive(Debug)]
 pub enum MethodBody {
-    Semicolon,
+    Semicolon(Span),
     Block(BlockStatements),
 }
 
@@ -167,4 +174,64 @@ pub struct VariableDeclarator {
 pub enum VariableDeclaratorId {
     Named(Identifier),
     Unnamed,
+}
+
+impl TopLevelClassOrInterfaceDeclaration {
+    pub fn span(&self) -> &Span {
+        match self {
+            TopLevelClassOrInterfaceDeclaration::Class(c) => c.span(),
+            TopLevelClassOrInterfaceDeclaration::Interface(i) => i.span(),
+        }
+    }
+}
+
+impl ClassDeclaration {
+    pub fn span(&self) -> &Span {
+        match self {
+            ClassDeclaration::NormalClass(c) => &c.span,
+            ClassDeclaration::Record(r) => &r.span,
+            ClassDeclaration::Enum(e) => &e.span,
+        }
+    }
+}
+
+impl InterfaceDeclaration {
+    pub fn span(&self) -> &Span {
+        match self {
+            InterfaceDeclaration::NormalInterface(i) => &i.span,
+            InterfaceDeclaration::AnnotationInterface(a) => &a.span,
+        }
+    }
+}
+
+impl ClassBodyDeclaration {
+    pub fn span(&self) -> &Span {
+        match self {
+            ClassBodyDeclaration::ClassMember(member) => match member.modifiers.first() {
+                Some(m) => m.span(),
+                None => member.item.span(),
+            },
+            ClassBodyDeclaration::InstanceInitializer(Block { span, .. })
+            | ClassBodyDeclaration::StaticInitializer(Block { span, .. }) => span,
+        }
+    }
+}
+
+impl ClassMemberDeclaration {
+    pub fn span(&self) -> &Span {
+        match self {
+            ClassMemberDeclaration::Method(MethodDeclaration { result, .. }) => result.span(),
+            ClassMemberDeclaration::NestedClass(c) => c.span(),
+            ClassMemberDeclaration::NestedInterface(i) => i.span(),
+            ClassMemberDeclaration::Field { variable_type, .. } => variable_type.span(),
+            ClassMemberDeclaration::Constructor { name, .. }
+            | ClassMemberDeclaration::CompactConstructor { name, .. } => name.span(),
+        }
+    }
+}
+
+impl VariableDeclaration {
+    pub fn span(&self) -> &Span {
+        self.variable_type.span()
+    }
 }

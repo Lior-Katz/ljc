@@ -99,25 +99,25 @@ pub enum AssignmentOp {
 
 #[derive(Debug)]
 pub enum BinOp {
-    Add,
-    Subtract,
-    Multiply,
-    Divide,
-    Modulo,
-    LeftShift,
-    SignedRightShift,
-    UnsignedRightShift,
-    Less,
-    Greater,
-    LessEqual,
-    GreaterEqual,
-    Equal,
-    NotEqual,
-    BitwiseAnd,
-    BitwiseXor,
-    BitwiseOr,
-    LogicalAnd,
-    LogicalOr,
+    Add(Span),
+    Subtract(Span),
+    Multiply(Span),
+    Divide(Span),
+    Modulo(Span),
+    LeftShift(Span),
+    SignedRightShift(Span),
+    UnsignedRightShift(Span),
+    Less(Span),
+    Greater(Span),
+    LessEqual(Span),
+    GreaterEqual(Span),
+    Equal(Span),
+    NotEqual(Span),
+    BitwiseAnd(Span),
+    BitwiseXor(Span),
+    BitwiseOr(Span),
+    LogicalAnd(Span),
+    LogicalOr(Span),
 }
 
 #[derive(Debug)]
@@ -235,7 +235,7 @@ impl MethodCall {
 }
 
 impl MemberAccess {
-    fn span(&self) -> &Span {
+    pub fn span(&self) -> &Span {
         self.target.span()
     }
 }
@@ -243,5 +243,31 @@ impl MemberAccess {
 impl ArrayAccess {
     fn span(&self) -> &Span {
         self.target.span()
+    }
+}
+
+impl BinOp {
+    pub fn span(&self) -> &Span {
+        match self {
+            BinOp::Add(span)
+            | BinOp::Subtract(span)
+            | BinOp::Multiply(span)
+            | BinOp::Divide(span)
+            | BinOp::Modulo(span)
+            | BinOp::LeftShift(span)
+            | BinOp::SignedRightShift(span)
+            | BinOp::UnsignedRightShift(span)
+            | BinOp::Less(span)
+            | BinOp::Greater(span)
+            | BinOp::LessEqual(span)
+            | BinOp::GreaterEqual(span)
+            | BinOp::Equal(span)
+            | BinOp::NotEqual(span)
+            | BinOp::BitwiseAnd(span)
+            | BinOp::BitwiseXor(span)
+            | BinOp::BitwiseOr(span)
+            | BinOp::LogicalAnd(span)
+            | BinOp::LogicalOr(span) => span,
+        }
     }
 }
