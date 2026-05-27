@@ -1,4 +1,4 @@
-use crate::ast::Block;
+use crate::ast::{Block, TypeOrVoid};
 use crate::ast::expressions::{ArgumentList, VariableInitializer};
 use crate::ast::identifiers::{Identifier, TypeIdentifier};
 use crate::ast::modifiers::{ElementValue, Modified};
@@ -10,7 +10,7 @@ use crate::file::Span;
 pub type ClassBodyDeclarations = Vec<ClassBodyDeclaration>;
 pub type FormalParameterList = Vec<Modified<FormalParameter>>;
 pub type VariableDeclaratorList = AtLeastOne<VariableDeclarator>;
-pub type MethodResult = Type;
+pub type MethodResult = TypeOrVoid;
 pub type RecordComponentList = Vec<Modified<RecordComponent>>;
 pub type RecordBodyDeclaration = ClassBodyDeclaration;
 

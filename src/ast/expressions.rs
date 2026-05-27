@@ -1,3 +1,4 @@
+use crate::ast::TypeOrVoid;
 use crate::ast::identifiers::Identifier;
 use crate::ast::switch::Switch;
 use crate::ast::types::Type;
@@ -68,7 +69,7 @@ pub enum Expression {
     Switch(Box<Switch>),
     This(Span),
     QualifiedThis(Type),
-    ClassLiteral(Type),
+    ClassLiteral(TypeOrVoid),
     MethodReference {
         target: Box<ExpressionOrType>,
         method: MethodReferenceType,
@@ -78,7 +79,7 @@ pub enum Expression {
 #[derive(Debug)]
 pub enum ExpressionOrType {
     Expression(Expression),
-    Type(Type),
+    Type(TypeOrVoid),
 }
 
 #[derive(Debug)]

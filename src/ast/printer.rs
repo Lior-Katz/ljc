@@ -8,7 +8,7 @@ use crate::ast::{
     MethodDeclaration, MethodReferenceType, Modified, Modifier, Modifiers, NormalClassDeclaration,
     NormalInterfaceDeclaration, Pattern, Program, RecordComponent, RecordDeclaration, Resource,
     Statement, Switch, SwitchBlockMember, SwitchLabel, SwitchRule,
-    TopLevelClassOrInterfaceDeclaration, Type, TypeIdentifier, VariableDeclaration,
+    TopLevelClassOrInterfaceDeclaration, Type, TypeIdentifier, TypeOrVoid, VariableDeclaration,
     VariableDeclarator, VariableDeclaratorId, VariableInitializer,
 };
 use crate::collections::NonEmptyList;
@@ -384,6 +384,21 @@ impl TreeDisplay for ExpressionOrType {
     }
 }
 
+impl TreeDisplay for TypeOrVoid {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        let (line_prefix, new_prefix) = branch(&prefix, is_last);
+        let (void_prefix, _) = branch(&new_prefix, true);
+        match self {
+            TypeOrVoid::Type(ty) => ty.fmt_tree(f, prefix, is_last),
+            TypeOrVoid::Void(_) => writeln!(
+                f,
+                "{line_prefix}Type\n\
+                                                {void_prefix}void"
+            ),
+        }
+    }
+}
+
 impl TreeDisplay for Type {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         self.fmt_tree_with_context(f, prefix, is_last, &vec![])
@@ -412,7 +427,6 @@ impl TreeDisplayWithContext<Modifiers> for Type {
             Type::Float(_) => writeln!(f, "{type_line_prefix}float"),
             Type::Double(_) => writeln!(f, "{type_line_prefix}double"),
             Type::Boolean(_) => writeln!(f, "{type_line_prefix}boolean"),
-            Type::Void(_) => writeln!(f, "{type_line_prefix}void"),
             Type::Class(c) => c.fmt_tree(f, &new_prefix, true),
             Type::Array(ArrayType { element_type }) => {
                 writeln!(f, "{type_line_prefix}ArrayType")?;

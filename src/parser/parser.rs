@@ -10,9 +10,9 @@ use crate::ast::{
     Modified, Modifier, NormalClassDeclaration, NormalInterfaceDeclaration, Pattern, Program,
     RecordBodyDeclaration, RecordComponent, RecordDeclaration, Resource, Statement, Switch,
     SwitchBlockMember, SwitchBlockMembers, SwitchLabel, SwitchRule,
-    TopLevelClassOrInterfaceDeclaration, Type, TypeIdentifier, TypeList, VariableDeclaration,
-    VariableDeclarator, VariableDeclaratorId, VariableDeclaratorList, VariableInitializer,
-    VariableInitializerList,
+    TopLevelClassOrInterfaceDeclaration, Type, TypeIdentifier, TypeList, TypeOrVoid,
+    VariableDeclaration, VariableDeclarator, VariableDeclaratorId, VariableDeclaratorList,
+    VariableInitializer, VariableInitializerList,
 };
 use crate::collections::{AtLeastOne, Multiple, NonEmptyList, bitflag_combination};
 use crate::error::Diagnose;
@@ -941,7 +941,8 @@ impl<'a> Parser<'a> {
     ///     type_term identifier [= variable_initializer] {, identifier [= variable_initializer]}
     /// ```
     fn method_or_field_declaration(&mut self) -> ParseResult<ClassMemberDeclaration> {
-        let type_term = self.type_term()?;
+        let type_term =
+            one_of!(self.type_term().map(Into::into), self.void().map(TypeOrVoid::Void))?;
         let identifier = self
             .identifier()
             .assert(Error::IdentifierExpected.at(self.pos()))?;
@@ -976,7 +977,7 @@ impl<'a> Parser<'a> {
             }
             self.assert(Symbol::Semicolon)?;
             Ok(ClassMemberDeclaration::Field {
-                variable_type: type_term,
+                variable_type: type_term.try_into()?,
                 declarations: field_declaration,
             })
         }
@@ -1029,11 +1030,15 @@ impl<'a> Parser<'a> {
             Ok(Type::Double(span))
         } else if self.accept(Symbol::Boolean)? {
             Ok(Type::Boolean(span))
-        } else if self.accept(Symbol::Void)? {
-            Ok(Type::Void(span))
         } else {
             Err(Failure::NoProduction)
         }
+    }
+
+    fn void(&mut self) -> ParseResult<Span> {
+        self.accept_full(Symbol::Void)
+            .map_err(Into::into)
+            .and_then(|accept| accept.span().ok_or(Failure::NoProduction))
     }
 
     fn opt_throws(&mut self) -> ParseResult<Multiple<Modified<Type>>> {
@@ -1591,6 +1596,9 @@ impl<'a> Parser<'a> {
             )
             .map(Expression::into),
             self.primitive_type().map(Type::into),
+            self.void()
+                .map(TypeOrVoid::Void)
+                .map(ExpressionOrType::Type)
         )
     }
 
@@ -1665,7 +1673,7 @@ impl<'a> Parser<'a> {
                         .into()
                     }
                 } else if self.accept(Symbol::Class)? {
-                    expr = Expression::ClassLiteral(expr.try_into()?).into();
+                    expr = Expression::ClassLiteral(TypeOrVoid::try_from(expr)?).into();
                 } else if self.accept(Symbol::This)? {
                     expr = Expression::QualifiedThis(Type::try_from(expr)?).into();
                 } else {
@@ -2700,6 +2708,23 @@ impl TryFrom<Expression> for Type {
     }
 }
 
+impl From<Type> for TypeOrVoid {
+    fn from(value: Type) -> Self {
+        TypeOrVoid::Type(value)
+    }
+}
+
+impl TryFrom<TypeOrVoid> for Type {
+    type Error = Failure;
+
+    fn try_from(value: TypeOrVoid) -> Result<Self, Self::Error> {
+        match value {
+            TypeOrVoid::Type(ty) => Ok(ty),
+            TypeOrVoid::Void(_) => Err(Failure::NoProduction),
+        }
+    }
+}
+
 impl From<Expression> for ExpressionOrType {
     fn from(value: Expression) -> Self {
         ExpressionOrType::Expression(value)
@@ -2714,7 +2739,7 @@ impl From<Switch> for ExpressionOrType {
 
 impl From<Type> for ExpressionOrType {
     fn from(value: Type) -> Self {
-        ExpressionOrType::Type(value)
+        ExpressionOrType::Type(value.into())
     }
 }
 
@@ -2722,9 +2747,20 @@ impl TryFrom<ExpressionOrType> for Type {
     type Error = Diagnostic;
 
     fn try_from(value: ExpressionOrType) -> Result<Self, Self::Error> {
+        match TypeOrVoid::try_from(value)? {
+            TypeOrVoid::Type(ty) => Ok(ty),
+            TypeOrVoid::Void(_) => todo!(),
+        }
+    }
+}
+
+impl TryFrom<ExpressionOrType> for TypeOrVoid {
+    type Error = Diagnostic;
+
+    fn try_from(value: ExpressionOrType) -> Result<Self, Self::Error> {
         match value {
             ExpressionOrType::Type(ty) => Ok(ty),
-            ExpressionOrType::Expression(e) => Ok(Type::try_from(e)?),
+            ExpressionOrType::Expression(e) => Ok(TypeOrVoid::Type(Type::try_from(e)?)),
         }
     }
 }

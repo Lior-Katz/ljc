@@ -23,11 +23,16 @@ pub enum Type {
     Float(Span),
     Double(Span),
     Boolean(Span),
-    Void(Span),
 
     // reference types
     Class(ClassType),
     Array(ArrayType),
+}
+
+#[derive(Debug)]
+pub enum TypeOrVoid {
+    Type(Type),
+    Void(Span),
 }
 
 #[derive(Debug)]
@@ -40,6 +45,15 @@ pub struct ArrayType {
     pub element_type: Box<Type>,
 }
 
+impl TypeOrVoid {
+    pub fn span(&self) -> &Span {
+        match self {
+            TypeOrVoid::Type(ty) => ty.span(),
+            TypeOrVoid::Void(span) => span,
+        }
+    }
+}
+
 impl Type {
     pub fn span(&self) -> &Span {
         match self {
@@ -50,8 +64,7 @@ impl Type {
             | Self::Char(span)
             | Self::Float(span)
             | Self::Double(span)
-            | Self::Boolean(span)
-            | Self::Void(span) => span,
+            | Self::Boolean(span) => span,
 
             Self::Class(class_type) => class_type.span(),
             Self::Array(array_type) => array_type.span(),
