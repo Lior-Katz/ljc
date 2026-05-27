@@ -1,5 +1,6 @@
 mod parser;
 pub use parser::Parser;
 mod error;
+pub use error::Error as ParserError;
 
-type Diagnostic = crate::error::Diagnostic<error::Error>;
+pub type Diagnostic = crate::error::Diagnostic<ParserError>;

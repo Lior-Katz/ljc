@@ -1,5 +1,6 @@
 use crate::LexicalError;
 use crate::collections::bitflag_combination;
+use crate::error::Diagnose;
 use crate::file::Span;
 use crate::lexer::Symbol;
 use crate::parser::Diagnostic;
@@ -39,12 +40,6 @@ pub enum Error {
     MissingTryBlock,
     #[error("Missing class body\nhint: expected '{{'")]
     MissingClassBody,
-}
-
-impl Error {
-    pub fn at(self, span: Span) -> Diagnostic {
-        Diagnostic { span, message: self }
-    }
 }
 
 impl From<LexicalError> for Error {

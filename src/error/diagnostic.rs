@@ -8,9 +8,19 @@ pub struct Diagnostic<T: Display> {
     pub message: T,
 }
 
-impl<T: Display> Display for Diagnostic<T> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}: {}", self.span, self.message)
+pub trait Diagnose
+where
+    Self: Sized + Display,
+{
+    fn at(self, span: Span) -> Diagnostic<Self>;
+}
+
+impl<T> Diagnose for T
+where
+    T: Display,
+{
+    fn at(self, span: Span) -> Diagnostic<Self> {
+        Diagnostic { span, message: self }
     }
 }
 

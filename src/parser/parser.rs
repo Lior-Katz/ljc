@@ -14,13 +14,14 @@ use crate::ast::{
     VariableDeclaratorList, VariableInitializer, VariableInitializerList,
 };
 use crate::collections::{AtLeastOne, Multiple, NonEmptyList, bitflag_combination};
+use crate::error::Diagnose;
+use crate::file::Span;
 use crate::lexer::{Symbol, Token, Tokens};
+use crate::parser::Diagnostic;
 use crate::parser::error::{
     AssertResult, Error, ExpectedDeclarationType, Failure, ParseResult, SyntaxKind,
 };
 
-use crate::file::Span;
-use crate::parser::Diagnostic;
 use bitflags::bitflags;
 use std::collections::VecDeque;
 use std::vec;

@@ -1,6 +1,7 @@
-use std::fs;
+use ljc::error::SourceWithDiagnostic;
 use ljc::lexer::{Token, Tokens};
 use ljc::parser::Parser;
+use std::fs;
 use std::path::Path;
 
 fn lex_to_string(path: &Path) -> datatest_stable::Result<String> {
@@ -37,19 +38,17 @@ fn lexer_snapshot_test(path: &Path) -> datatest_stable::Result<()> {
 
 fn parser_snapshot_test(path: &Path) -> datatest_stable::Result<()> {
     let input = fs::read_to_string(path)?;
-    match Parser::new(&input).parse() {
-        Ok(program) => {
-            let name = path.file_stem().unwrap().to_str().unwrap();
-            insta::with_settings!({
-                snapshot_path => "parser/snapshots",
-                omit_expression => true,
-            }, {
-                insta::assert_snapshot!(name, program.to_string());
-            });
-            Ok(())
-        }
-        Err(e) => Err(e.to_string().into()),
-    }
+    let program = Parser::new(&input)
+        .parse()
+        .map_err(|e| SourceWithDiagnostic::new(path, &input, e).to_string())?;
+    let name = path.file_stem().unwrap().to_str().unwrap();
+    insta::with_settings!({
+        snapshot_path => "parser/snapshots",
+        omit_expression => true,
+    }, {
+        insta::assert_snapshot!(name, program.to_string());
+    });
+    Ok(())
 }
 
 datatest_stable::harness! {
