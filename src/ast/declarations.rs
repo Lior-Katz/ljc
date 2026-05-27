@@ -2,7 +2,7 @@ use crate::ast::expressions::{ArgumentList, VariableInitializer};
 use crate::ast::identifiers::{Identifier, TypeIdentifier};
 use crate::ast::modifiers::{ElementValue, Modified};
 use crate::ast::statements::{BlockStatements, ConstructorInvocation};
-use crate::ast::types::{TypeList, Type};
+use crate::ast::types::{Type, TypeList};
 use crate::collections::{AtLeastOne, Multiple};
 
 pub type ClassBodyDeclarations = Vec<ClassBodyDeclaration>;

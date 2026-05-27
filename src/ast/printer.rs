@@ -3,9 +3,9 @@ use crate::ast::{
     AssignmentOp, BinOp, CatchClause, ClassBodyDeclaration, ClassDeclaration,
     ClassMemberDeclaration, ClassType, ClassTypePart, CompilationUnit, ComponentPattern,
     ConstructorBody, ConstructorInvocation, ElementValue, ElementValuePair, EnumConstant,
-    EnumDeclaration, Expression, ForInit, FormalParameter, Identifier, IdentifierKind,
-    InterfaceDeclaration, LeftHandSide, MemberAccess, MethodBody, MethodCall, MethodDeclaration,
-    MethodReferenceType, Modified, Modifier, Modifiers, NormalClassDeclaration,
+    EnumDeclaration, Expression, ExpressionOrType, ForInit, FormalParameter, Identifier,
+    IdentifierKind, InterfaceDeclaration, LeftHandSide, MemberAccess, MethodBody, MethodCall,
+    MethodDeclaration, MethodReferenceType, Modified, Modifier, Modifiers, NormalClassDeclaration,
     NormalInterfaceDeclaration, Pattern, Program, RecordComponent, RecordDeclaration, Resource,
     Statement, Switch, SwitchBlockMember, SwitchLabel, SwitchRule,
     TopLevelClassOrInterfaceDeclaration, Type, TypeIdentifier, VariableDeclaration,
@@ -375,6 +375,15 @@ impl TreeDisplayWithContext<Modifiers> for FormalParameter {
     }
 }
 
+impl TreeDisplay for ExpressionOrType {
+    fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
+        match self {
+            ExpressionOrType::Expression(e) => e.fmt_tree(f, prefix, is_last),
+            ExpressionOrType::Type(ty) => ty.fmt_tree(f, prefix, is_last),
+        }
+    }
+}
+
 impl TreeDisplay for Type {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         self.fmt_tree_with_context(f, prefix, is_last, &vec![])
@@ -684,7 +693,6 @@ impl TreeDisplay for Expression {
                 if_true.fmt_tree(f, &new_prefix, false)?;
                 if_false.fmt_tree(f, &new_prefix, true)
             }
-            Expression::Type(t) => t.fmt_tree(f, &prefix, is_last),
             Expression::MemberAccess(v) => v.fmt_tree(f, &prefix, is_last),
             Expression::MethodCall(v) => v.fmt_tree(f, &prefix, is_last),
             Expression::InstanceCreation { type_to_instantiate, arguments } => {

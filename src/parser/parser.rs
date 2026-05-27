@@ -4,14 +4,15 @@ use crate::ast::{
     ClassBodyDeclarations, ClassDeclaration, ClassMemberDeclaration, ClassType, ClassTypePart,
     ClassTypePartList, CompilationUnit, ComponentPattern, ComponentPatternList, ConstructorBody,
     ConstructorInvocation, ElementValue, ElementValueList, ElementValuePair, EnumBody,
-    EnumConstant, EnumDeclaration, Expression, ForInit, ForUpdate, FormalParameter,
-    FormalParameterList, Identifier, InterfaceDeclaration, LeftHandSide, MemberAccess, MethodBody,
-    MethodCall, MethodDeclaration, MethodReferenceType, Modifiable, Modified, Modifier,
-    NormalClassDeclaration, NormalInterfaceDeclaration, Pattern, Program, RecordBodyDeclaration,
-    RecordComponent, RecordDeclaration, Resource, Statement, Switch, SwitchBlockMember,
-    SwitchBlockMembers, SwitchLabel, SwitchRule, TopLevelClassOrInterfaceDeclaration, Type,
-    TypeIdentifier, TypeList, VariableDeclaration, VariableDeclarator, VariableDeclaratorId,
-    VariableDeclaratorList, VariableInitializer, VariableInitializerList,
+    EnumConstant, EnumDeclaration, Expression, ExpressionOrType, ForInit, ForUpdate,
+    FormalParameter, FormalParameterList, Identifier, InterfaceDeclaration, LeftHandSide,
+    MemberAccess, MethodBody, MethodCall, MethodDeclaration, MethodReferenceType, Modifiable,
+    Modified, Modifier, NormalClassDeclaration, NormalInterfaceDeclaration, Pattern, Program,
+    RecordBodyDeclaration, RecordComponent, RecordDeclaration, Resource, Statement, Switch,
+    SwitchBlockMember, SwitchBlockMembers, SwitchLabel, SwitchRule,
+    TopLevelClassOrInterfaceDeclaration, Type, TypeIdentifier, TypeList, VariableDeclaration,
+    VariableDeclarator, VariableDeclaratorId, VariableDeclaratorList, VariableInitializer,
+    VariableInitializerList,
 };
 use crate::collections::{AtLeastOne, Multiple, NonEmptyList, bitflag_combination};
 use crate::error::Diagnose;
@@ -520,7 +521,8 @@ impl<'a> Parser<'a> {
     /// ```
     fn element_value(&mut self) -> ParseResult<ElementValue> {
         one_of!(
-            self.conditional_expression().map(Expression::into),
+            self.conditional_expression()
+                .and_then(|e| ExpressionOrType::try_into(e).map_err(Into::into)),
             self.element_value_array_initializer()
                 .map(ElementValueList::into),
             self.annotation().map(Annotation::into),
@@ -1188,7 +1190,7 @@ impl<'a> Parser<'a> {
         )?;
 
         if self.accept(Symbol::Colon)? {
-            return match expression {
+            return match Expression::try_from(expression)? {
                 Expression::Name(id) => {
                     let body = Box::new(self.block_statement()?);
                     Ok(Statement::Labeled { label: id, body })
@@ -1198,7 +1200,7 @@ impl<'a> Parser<'a> {
         }
 
         if self.accept(Symbol::Semicolon)? {
-            return Ok(Statement::ExpressionStatement(expression));
+            return Ok(Statement::ExpressionStatement(expression.try_into()?));
         }
 
         let var_declarations = self.variable_declarators_list()?;
@@ -1237,7 +1239,7 @@ impl<'a> Parser<'a> {
     ///     field_access
     ///     array_access
     /// ```
-    fn term(&mut self) -> ParseResult<Expression> {
+    fn term(&mut self) -> ParseResult<ExpressionOrType> {
         let expr = self.conditional_expression()?;
         if let Ok(op) = accept_with_value!(self,
             Symbol::Assign => AssignmentOp::Identity,
@@ -1254,7 +1256,7 @@ impl<'a> Parser<'a> {
             Symbol::OrAssign => AssignmentOp::BitwiseOr,
         ) {
             let lhs = expr.try_into()?;
-            let rhs = self.term().assert(
+            let rhs = self.expression().assert(
                 Error::SyntaxExpectedAfter(SyntaxKind::Expression, Symbol::Assign).at(self.pos()),
             )?;
             /*
@@ -1267,21 +1269,21 @@ impl<'a> Parser<'a> {
                 f().x = f().x + 5
             will evaluate f() twice.
             */
-            Ok(Expression::Assignment { lhs, rhs: Box::new(rhs), op })
+            Ok(Expression::Assignment { lhs, rhs: Box::new(rhs), op }.into())
         } else {
             Ok(expr)
         }
     }
 
     fn expression(&mut self) -> ParseResult<Expression> {
-        self.term()
+        Expression::try_from(self.term()?).map_err(Into::into)
     }
 
     /// ```text
     /// conditional_expression:
     ///     conditional_or_expression [? expression : conditional_expression]
     /// ```
-    fn conditional_expression(&mut self) -> ParseResult<Expression> {
+    fn conditional_expression(&mut self) -> ParseResult<ExpressionOrType> {
         let condition = self.conditional_or_expression()?;
         if self.accept(Symbol::QuestionMark)? {
             let if_true = self.expression().assert(
@@ -1289,14 +1291,19 @@ impl<'a> Parser<'a> {
                     .at(self.pos()),
             )?;
             self.assert(Symbol::Colon)?;
-            let if_false = self.conditional_expression().assert(
-                Error::SyntaxExpectedAfter(SyntaxKind::Expression, Symbol::Colon).at(self.pos()),
-            )?;
+            let if_false = self
+                .conditional_expression()
+                .assert(
+                    Error::SyntaxExpectedAfter(SyntaxKind::Expression, Symbol::Colon)
+                        .at(self.pos()),
+                )?
+                .try_into()?;
             Ok(Expression::ConditionalExpression {
-                condition: Box::new(condition),
+                condition: Box::new(condition.try_into()?),
                 if_true: Box::new(if_true),
                 if_false: Box::new(if_false),
-            })
+            }
+            .into())
         } else {
             Ok(condition)
         }
@@ -1306,9 +1313,9 @@ impl<'a> Parser<'a> {
         &mut self,
         subexpression: F,
         operation: G,
-    ) -> ParseResult<Expression>
+    ) -> ParseResult<ExpressionOrType>
     where
-        F: Fn(&mut Self) -> ParseResult<Expression>,
+        F: Fn(&mut Self) -> ParseResult<ExpressionOrType>,
         G: Fn(&mut Self) -> Result<BinOp, E>,
         Failure: From<E>,
     {
@@ -1318,10 +1325,11 @@ impl<'a> Parser<'a> {
             match operation(self).map_err(|e| Failure::from(e)) {
                 Ok(op) => {
                     expr = Expression::BinaryOp {
-                        left: Box::new(expr),
-                        right: Box::new(subexpression(self)?),
+                        left: Box::new(Expression::try_from(expr)?),
+                        right: Box::new(Expression::try_from(subexpression(self)?)?),
                         op,
                     }
+                    .into()
                 }
                 Err(Failure::NoProduction) => break,
                 Err(e) => return Err(e),
@@ -1330,7 +1338,7 @@ impl<'a> Parser<'a> {
         Ok(expr)
     }
 
-    fn conditional_or_expression(&mut self) -> ParseResult<Expression> {
+    fn conditional_or_expression(&mut self) -> ParseResult<ExpressionOrType> {
         self.left_associative_binary_operation(Self::conditional_and_expression, |this| {
             accept_with_value!(this,
                 Symbol::LogicalOr => BinOp::LogicalOr
@@ -1338,7 +1346,7 @@ impl<'a> Parser<'a> {
         })
     }
 
-    fn conditional_and_expression(&mut self) -> ParseResult<Expression> {
+    fn conditional_and_expression(&mut self) -> ParseResult<ExpressionOrType> {
         self.left_associative_binary_operation(Self::inclusive_or_expression, |this| {
             accept_with_value!(this,
                 Symbol::LogicalAnd => BinOp::LogicalAnd
@@ -1346,7 +1354,7 @@ impl<'a> Parser<'a> {
         })
     }
 
-    fn inclusive_or_expression(&mut self) -> ParseResult<Expression> {
+    fn inclusive_or_expression(&mut self) -> ParseResult<ExpressionOrType> {
         self.left_associative_binary_operation(Self::exclusive_or_expression, |this| {
             accept_with_value!(this,
                 Symbol::BitwiseOr => BinOp::BitwiseOr
@@ -1354,7 +1362,7 @@ impl<'a> Parser<'a> {
         })
     }
 
-    fn exclusive_or_expression(&mut self) -> ParseResult<Expression> {
+    fn exclusive_or_expression(&mut self) -> ParseResult<ExpressionOrType> {
         self.left_associative_binary_operation(Self::and_expression, |this| {
             accept_with_value!(this,
                 Symbol::BitwiseXor => BinOp::BitwiseXor
@@ -1362,7 +1370,7 @@ impl<'a> Parser<'a> {
         })
     }
 
-    fn and_expression(&mut self) -> ParseResult<Expression> {
+    fn and_expression(&mut self) -> ParseResult<ExpressionOrType> {
         self.left_associative_binary_operation(Self::equality_expression, |this| {
             accept_with_value!(this,
                 Symbol::BitwiseAnd => BinOp::BitwiseAnd
@@ -1370,7 +1378,7 @@ impl<'a> Parser<'a> {
         })
     }
 
-    fn equality_expression(&mut self) -> ParseResult<Expression> {
+    fn equality_expression(&mut self) -> ParseResult<ExpressionOrType> {
         self.left_associative_binary_operation(Self::relational_expression, |this| {
             accept_with_value!(this,
                 Symbol::Equals => BinOp::Equal,
@@ -1379,7 +1387,7 @@ impl<'a> Parser<'a> {
         })
     }
 
-    fn relational_expression(&mut self) -> ParseResult<Expression> {
+    fn relational_expression(&mut self) -> ParseResult<ExpressionOrType> {
         let mut expr = self.shift_expression()?;
 
         // not using generic left_associative_binary_operation here
@@ -1393,10 +1401,11 @@ impl<'a> Parser<'a> {
                 Symbol::GreaterThanOrEquals => BinOp::GreaterEqual,
             ) {
                 expr = Expression::BinaryOp {
-                    left: Box::new(expr),
-                    right: Box::new(self.shift_expression()?),
+                    left: Box::new(expr.try_into()?),
+                    right: Box::new(self.shift_expression()?.try_into()?),
                     op,
                 }
+                .into();
             } else {
                 break;
             }
@@ -1404,7 +1413,7 @@ impl<'a> Parser<'a> {
         Ok(expr)
     }
 
-    fn shift_expression(&mut self) -> ParseResult<Expression> {
+    fn shift_expression(&mut self) -> ParseResult<ExpressionOrType> {
         self.left_associative_binary_operation(Self::additive_expression, |this| {
             accept_with_value!(this,
                 Symbol::LeftShift => BinOp::LeftShift,
@@ -1414,7 +1423,7 @@ impl<'a> Parser<'a> {
         })
     }
 
-    fn additive_expression(&mut self) -> ParseResult<Expression> {
+    fn additive_expression(&mut self) -> ParseResult<ExpressionOrType> {
         self.left_associative_binary_operation(Self::multiplicative_expression, |this| {
             accept_with_value!(this,
                 Symbol::Plus => BinOp::Add,
@@ -1423,7 +1432,7 @@ impl<'a> Parser<'a> {
         })
     }
 
-    fn multiplicative_expression(&mut self) -> ParseResult<Expression> {
+    fn multiplicative_expression(&mut self) -> ParseResult<ExpressionOrType> {
         self.left_associative_binary_operation(Self::unary_expression, |this| {
             accept_with_value!(this,
                 Symbol::Multiply => BinOp::Multiply,
@@ -1442,24 +1451,27 @@ impl<'a> Parser<'a> {
     ///     one of:
     ///         ~  !  +  -  ++  --
     /// ```
-    fn unary_expression(&mut self) -> ParseResult<Expression> {
+    fn unary_expression(&mut self) -> ParseResult<ExpressionOrType> {
         match self.switch() {
             Ok(switch) => return Ok(switch.into()),
             Err(Failure::NoProduction) => {}
             Err(e) => return Err(e),
         }
         if self.accept(Symbol::Tilde)? {
-            Ok(Expression::BitwiseComplement(Box::new(self.unary_expression()?)))
+            Ok(
+                Expression::BitwiseComplement(Box::new(self.unary_expression()?.try_into()?))
+                    .into(),
+            )
         } else if self.accept(Symbol::ExclamationMark)? {
-            Ok(Expression::LogicalNot(Box::new(self.unary_expression()?)))
+            Ok(Expression::LogicalNot(Box::new(self.unary_expression()?.try_into()?)).into())
         } else if self.accept(Symbol::Plus)? {
-            Ok(Expression::UnaryPlus(Box::new(self.unary_expression()?)))
+            Ok(Expression::UnaryPlus(Box::new(self.unary_expression()?.try_into()?)).into())
         } else if self.accept(Symbol::Minus)? {
-            Ok(Expression::UnaryMinus(Box::new(self.unary_expression()?)))
+            Ok(Expression::UnaryMinus(Box::new(self.unary_expression()?.try_into()?)).into())
         } else if self.accept(Symbol::Increment)? {
-            Ok(Expression::PreIncrement(Box::new(self.unary_expression()?)))
+            Ok(Expression::PreIncrement(Box::new(self.unary_expression()?.try_into()?)).into())
         } else if self.accept(Symbol::Decrement)? {
-            Ok(Expression::PreDecrement(Box::new(self.unary_expression()?)))
+            Ok(Expression::PreDecrement(Box::new(self.unary_expression()?.try_into()?)).into())
         } else {
             self.postfix_expression()
         }
@@ -1473,26 +1485,29 @@ impl<'a> Parser<'a> {
     ///     ++
     ///     --
     /// ```
-    fn postfix_expression(&mut self) -> ParseResult<Expression> {
+    fn postfix_expression(&mut self) -> ParseResult<ExpressionOrType> {
         let mut expr = self.primary()?;
         expr = self.parse_selectors(expr)?;
         if self.accept(Symbol::Increment)? {
-            expr = Expression::PostIncrement(Box::new(expr));
+            expr = Expression::PostIncrement(Box::new(expr.try_into()?)).into();
         } else if self.accept(Symbol::Decrement)? {
-            expr = Expression::PostDecrement(Box::new(expr));
+            expr = Expression::PostDecrement(Box::new(expr.try_into()?)).into();
         }
 
         Ok(expr)
     }
 
-    fn primary(&mut self) -> ParseResult<Expression> {
+    fn primary(&mut self) -> ParseResult<ExpressionOrType> {
         one_of!(
-            self.literal(),
+            one_of!(
+                self.literal(),
+                self.parenthesized_expression(),
+                self.instance_creation_expression(),
+                self.identifier_expression(),
+                self.this_access(),
+            )
+            .map(Expression::into),
             self.primitive_type().map(Type::into),
-            self.parenthesized_expression(),
-            self.instance_creation_expression(),
-            self.identifier_expression(),
-            self.this_access(),
         )
     }
 
@@ -1545,7 +1560,7 @@ impl<'a> Parser<'a> {
     ///     :: identifier // named method reference
     ///     :: new // constructor method reference
     /// ```
-    fn parse_selectors(&mut self, expr: Expression) -> ParseResult<Expression> {
+    fn parse_selectors(&mut self, expr: ExpressionOrType) -> ParseResult<ExpressionOrType> {
         let mut expr = expr;
         loop {
             if self.accept(Symbol::Dot)? {
@@ -1554,20 +1569,22 @@ impl<'a> Parser<'a> {
                         let arg_list = self.argument_list()?;
                         self.assert(Symbol::RightParen)?;
                         expr = Expression::MethodCall(MethodCall {
-                            target: Some(Box::new(expr)),
+                            target: Some(Box::new(expr.try_into()?)),
                             name: Identifier { value: id, span },
                             arguments: arg_list,
                         })
+                        .into();
                     } else {
                         expr = Expression::MemberAccess(MemberAccess {
-                            target: Box::new(expr),
+                            target: Box::new(expr.try_into()?),
                             name: Identifier { value: id, span },
                         })
+                        .into()
                     }
                 } else if self.accept(Symbol::Class)? {
-                    expr = Expression::ClassLiteral(Type::try_from(expr)?)
+                    expr = Expression::ClassLiteral(expr.try_into()?).into();
                 } else if self.accept(Symbol::This)? {
-                    expr = Expression::QualifiedThis(Type::try_from(expr)?)
+                    expr = Expression::QualifiedThis(Type::try_from(expr)?).into();
                 } else {
                     return Err(Error::IdentifierExpected.at(self.pos()).into());
                 }
@@ -1581,7 +1598,7 @@ impl<'a> Parser<'a> {
                     let index = self.expression()?;
                     self.assert(Symbol::RightBracket)?;
                     expr = ArrayAccess {
-                        target: Box::new(expr),
+                        target: Box::new(expr.try_into()?),
                         index: Box::new(index),
                     }
                     .into();
@@ -1594,6 +1611,7 @@ impl<'a> Parser<'a> {
                     name: expr.try_into()?,
                     arguments: arg_list,
                 })
+                .into();
             } else if self.accept(Symbol::DoubleColon)? {
                 let target = Box::new(expr);
                 let method = if self.accept(Symbol::New)? {
@@ -1602,7 +1620,7 @@ impl<'a> Parser<'a> {
                     let name = self.identifier()?;
                     MethodReferenceType::Named(name)
                 };
-                expr = Expression::MethodReference { target, method };
+                expr = Expression::MethodReference { target, method }.into();
             } else {
                 break;
             }
@@ -1924,7 +1942,7 @@ impl<'a> Parser<'a> {
 
         if self.accept(Symbol::Comma)? {
             // basic for, init is a statement_expression_list
-            let mut init_expressions = vec![expression];
+            let mut init_expressions = vec![expression.try_into()?];
             init_expressions.extend(self.statement_expression_list()?);
             let initializer = ForInit::Expressions(init_expressions);
             self.assert(Symbol::Semicolon)?;
@@ -1934,7 +1952,7 @@ impl<'a> Parser<'a> {
 
         if self.accept(Symbol::Semicolon)? {
             // basic for, single expression init
-            let initializer = ForInit::Expressions(vec![expression]);
+            let initializer = ForInit::Expressions(vec![expression.try_into()?]);
             let (condition, update) = self.basic_for_condition_and_update()?;
             return Ok(ForHeader::BasicForHeader { initializer, condition, update });
         }
@@ -1979,7 +1997,7 @@ impl<'a> Parser<'a> {
     }
 
     fn statement_expression_list(&mut self) -> ParseResult<Vec<Expression>> {
-        self.delimited_list(Self::term, Symbol::Comma)
+        self.delimited_list(Self::expression, Symbol::Comma)
     }
 
     fn do_statement(&mut self) -> ParseResult<Statement> {
@@ -2081,7 +2099,7 @@ impl<'a> Parser<'a> {
                 .with_modifiers(modifiers),
             ))
         } else {
-            Ok(Resource::VariableAccess(expression))
+            Ok(Resource::VariableAccess(expression.try_into()?))
         }
     }
 
@@ -2312,7 +2330,14 @@ impl<'a> Parser<'a> {
         if self.check_pattern()? {
             self.switch_case_pattern_label()
         } else {
-            let labels = self.delimited_at_least_1(Self::conditional_expression, Symbol::Comma)?;
+            let labels = self.delimited_at_least_1(
+                |this| {
+                    this.conditional_expression()?
+                        .try_into()
+                        .map_err(Into::into)
+                },
+                Symbol::Comma,
+            )?;
             Ok(SwitchLabel::Constants(labels))
         }
     }
@@ -2553,12 +2578,19 @@ impl TryFrom<Expression> for Identifier {
     }
 }
 
+impl TryFrom<ExpressionOrType> for Identifier {
+    type Error = Failure;
+
+    fn try_from(value: ExpressionOrType) -> Result<Self, Self::Error> {
+        Identifier::try_from(Expression::try_from(value)?)
+    }
+}
+
 impl TryFrom<Expression> for Type {
     type Error = Diagnostic;
 
     fn try_from(value: Expression) -> Result<Self, Self::Error> {
         match value {
-            Expression::Type(t) => Ok(t),
             Expression::Name(n) => Ok(TypeIdentifier::try_from(n)?.into()),
             Expression::MemberAccess(MemberAccess { target, name }) => Ok(ClassType {
                 name: ClassTypePart { identifier: name.try_into()? },
@@ -2566,6 +2598,48 @@ impl TryFrom<Expression> for Type {
             }
             .into()),
             _ => Err(Error::IdentifierExpected.at(*value.span())),
+        }
+    }
+}
+
+impl From<Expression> for ExpressionOrType {
+    fn from(value: Expression) -> Self {
+        ExpressionOrType::Expression(value)
+    }
+}
+
+impl From<Switch> for ExpressionOrType {
+    fn from(value: Switch) -> Self {
+        Expression::from(value).into()
+    }
+}
+
+impl From<Type> for ExpressionOrType {
+    fn from(value: Type) -> Self {
+        ExpressionOrType::Type(value)
+    }
+}
+
+impl TryFrom<ExpressionOrType> for Type {
+    type Error = Diagnostic;
+
+    fn try_from(value: ExpressionOrType) -> Result<Self, Self::Error> {
+        match value {
+            ExpressionOrType::Type(ty) => Ok(ty),
+            ExpressionOrType::Expression(e) => Ok(Type::try_from(e)?),
+        }
+    }
+}
+
+impl TryFrom<ExpressionOrType> for Expression {
+    type Error = Diagnostic;
+
+    fn try_from(value: ExpressionOrType) -> Result<Self, Self::Error> {
+        match value {
+            ExpressionOrType::Expression(e) => Ok(e),
+            ExpressionOrType::Type(_) => {
+                Err(Error::SyntaxExpected(SyntaxKind::Expression).at(*value.span()))
+            }
         }
     }
 }
@@ -2652,15 +2726,15 @@ impl Into<ClassMemberDeclaration> for MethodDeclaration {
     }
 }
 
-impl Into<Expression> for Type {
-    fn into(self) -> Expression {
-        Expression::Type(self)
+impl From<ArrayAccess> for Expression {
+    fn from(value: ArrayAccess) -> Self {
+        Expression::ArrayAccess(value)
     }
 }
 
-impl Into<Expression> for ArrayAccess {
-    fn into(self) -> Expression {
-        Expression::ArrayAccess(self)
+impl From<ArrayAccess> for ExpressionOrType {
+    fn from(value: ArrayAccess) -> Self {
+        Expression::from(value).into()
     }
 }
 
@@ -2685,6 +2759,14 @@ impl TryFrom<Expression> for LeftHandSide {
     }
 }
 
+impl TryFrom<ExpressionOrType> for LeftHandSide {
+    type Error = Failure;
+
+    fn try_from(value: ExpressionOrType) -> Result<Self, Self::Error> {
+        Expression::try_from(value)?.try_into()
+    }
+}
+
 impl Into<VariableInitializer> for Expression {
     fn into(self) -> VariableInitializer {
         VariableInitializer::Expression(self)
@@ -2694,6 +2776,14 @@ impl Into<VariableInitializer> for Expression {
 impl Into<ElementValue> for Expression {
     fn into(self) -> ElementValue {
         ElementValue::ConditionalExpression(self)
+    }
+}
+
+impl TryInto<ElementValue> for ExpressionOrType {
+    type Error = Diagnostic;
+
+    fn try_into(self) -> Result<ElementValue, Self::Error> {
+        Ok(Expression::try_from(self)?.into())
     }
 }
 

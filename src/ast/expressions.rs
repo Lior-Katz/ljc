@@ -54,7 +54,6 @@ pub enum Expression {
         if_true: Box<Expression>,
         if_false: Box<Expression>,
     },
-    Type(Type),
     MemberAccess(MemberAccess),
     MethodCall(MethodCall),
     InstanceCreation {
@@ -71,9 +70,15 @@ pub enum Expression {
     QualifiedThis(Type),
     ClassLiteral(Type),
     MethodReference {
-        target: Box<Expression>,
+        target: Box<ExpressionOrType>,
         method: MethodReferenceType,
     },
+}
+
+#[derive(Debug)]
+pub enum ExpressionOrType {
+    Expression(Expression),
+    Type(Type),
 }
 
 #[derive(Debug)]
@@ -183,10 +188,10 @@ impl Expression {
             | Self::UnaryPlus(expression)
             | Self::UnaryMinus(expression)
             | Self::BinaryOp { left: expression, .. }
-            | Self::ConditionalExpression { condition: expression, .. }
-            | Self::MethodReference { target: expression, .. } => expression.span(),
+            | Self::ConditionalExpression { condition: expression, .. } => expression.span(),
 
-            Self::Type(t) => t.span(),
+            Self::MethodReference { target, .. } => target.span(),
+
             Self::QualifiedThis(t) => t.span(),
             Self::ClassLiteral(t) => t.span(),
             Self::InstanceCreation { type_to_instantiate: t, .. }
@@ -197,6 +202,15 @@ impl Expression {
             Self::MemberAccess(v) => v.span(),
             Self::ArrayAccess(v) => v.span(),
             Self::Switch(v) => &v.span,
+        }
+    }
+}
+
+impl ExpressionOrType {
+    pub fn span(&self) -> &Span {
+        match self {
+            ExpressionOrType::Expression(e) => e.span(),
+            ExpressionOrType::Type(ty) => ty.span(),
         }
     }
 }
