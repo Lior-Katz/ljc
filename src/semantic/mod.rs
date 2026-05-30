@@ -6,6 +6,7 @@ mod error;
 pub use error::Error as SemanticError;
 mod expressions;
 mod statements;
+mod types;
 
 pub type Diagnostic = crate::error::Diagnostic<SemanticError>;
 

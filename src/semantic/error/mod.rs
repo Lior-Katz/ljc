@@ -2,4 +2,4 @@ mod error;
 pub use error::*;
 
 mod coalescence;
-pub use coalescence::{CoalesceIter, CoalesceRes};
+pub use coalescence::{CoalesceIter, CoalesceRes, Fold};

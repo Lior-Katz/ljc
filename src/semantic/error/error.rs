@@ -178,6 +178,8 @@ pub enum UnimplementedFeature {
     Interface,
     #[error("@interface declarations")]
     AnnotationInterface,
+    #[error("Numeric promotion")]
+    NumericPromotion,
 }
 
 impl SubError for UnimplementedFeature {}

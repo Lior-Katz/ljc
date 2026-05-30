@@ -11,7 +11,10 @@ impl SemanticAnalyzer {
             Statement::EmptyStatement(_) => {
                 Err(UnimplementedFeature::EmptyStatement.at(span).into())
             }
-            Statement::ExpressionStatement(e) => self.expression(e),
+            Statement::ExpressionStatement(e) => {
+                let _ = self.expression(e)?;
+                Ok(())
+            }
             Statement::Block(_) => Err(UnimplementedFeature::Block.at(span).into()),
             Statement::VariableDeclaration(Modified { item: var_decl, modifiers }) => {
                 self.variable_declaration(var_decl, modifiers, span)

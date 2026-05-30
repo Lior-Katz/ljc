@@ -35,3 +35,25 @@ impl CoalesceRes for SemanticResult {
         }
     }
 }
+
+pub trait Fold<T1> {
+    fn fold<T2, F, R>(self, new: SemanticResult<T2>, fold: F) -> SemanticResult<R>
+    where
+        F: FnMut(T1, T2) -> SemanticResult<R>;
+}
+
+impl<T1> Fold<T1> for SemanticResult<T1> {
+    fn fold<T2, F, R>(self, new: SemanticResult<T2>, mut fold: F) -> SemanticResult<R>
+    where
+        F: FnMut(T1, T2) -> SemanticResult<R>,
+    {
+        match (self, new) {
+            (Ok(v1), Ok(v2)) => fold(v1, v2),
+            (Ok(_), Err(e)) | (Err(e), Ok(_)) => Err(e),
+            (Err(mut e1), Err(e2)) => {
+                e1.append(e2);
+                Err(e1)
+            }
+        }
+    }
+}
