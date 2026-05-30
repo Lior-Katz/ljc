@@ -849,7 +849,7 @@ impl TreeDisplay for VariableInitializer {
             VariableInitializer::ArrayInitializer(v) => {
                 let (line_prefix, new_prefix) = branch(&prefix, is_last);
                 writeln!(f, "{line_prefix}ArrayInitializer")?;
-                v.fmt_tree(f, &new_prefix, true)
+                v.initializer.fmt_tree(f, &new_prefix, true)
             }
         }
     }
@@ -1018,7 +1018,7 @@ impl TreeDisplay for ArrayCreationMode {
             ArrayCreationMode::Initialized(v) => {
                 let (line_prefix, new_prefix) = branch(prefix, is_last);
                 writeln!(f, "{line_prefix}Initialized")?;
-                v.fmt_tree(f, &new_prefix, true)
+                v.initializer.fmt_tree(f, &new_prefix, true)
             }
         }
     }

@@ -1,18 +1,18 @@
 use crate::ast::{
     Annotation, AnnotationInterfaceDeclaration, ArgumentList, ArrayAccess, ArrayCreationMode,
-    ArrayType, AssignmentOp, BinOp, Block, BlockStatements, CatchClause, ClassBodyDeclaration,
-    ClassBodyDeclarations, ClassDeclaration, ClassMemberDeclaration, ClassType, ClassTypePart,
-    ClassTypePartList, CompilationUnit, ComponentPattern, ComponentPatternList, ConstructorBody,
-    ConstructorInvocation, ElementValue, ElementValueList, ElementValuePair, EnumBody,
-    EnumConstant, EnumDeclaration, Expression, ExpressionOrType, ForInit, ForUpdate,
-    FormalParameter, FormalParameterList, Identifier, InterfaceDeclaration, LeftHandSide,
-    MemberAccess, MethodBody, MethodCall, MethodDeclaration, MethodReferenceType, Modifiable,
-    Modified, Modifier, NormalClassDeclaration, NormalInterfaceDeclaration, Pattern, Program,
-    RecordBodyDeclaration, RecordComponent, RecordDeclaration, Resource, Statement, Switch,
-    SwitchBlockMember, SwitchBlockMembers, SwitchLabel, SwitchRule,
+    ArrayInitializer, ArrayType, AssignmentOp, BinOp, Block, BlockStatements, CatchClause,
+    ClassBodyDeclaration, ClassBodyDeclarations, ClassDeclaration, ClassMemberDeclaration,
+    ClassType, ClassTypePart, ClassTypePartList, CompilationUnit, ComponentPattern,
+    ComponentPatternList, ConstructorBody, ConstructorInvocation, ElementValue, ElementValueList,
+    ElementValuePair, EnumBody, EnumConstant, EnumDeclaration, Expression, ExpressionOrType,
+    ForInit, ForUpdate, FormalParameter, FormalParameterList, Identifier, InterfaceDeclaration,
+    LeftHandSide, MemberAccess, MethodBody, MethodCall, MethodDeclaration, MethodReferenceType,
+    Modifiable, Modified, Modifier, NormalClassDeclaration, NormalInterfaceDeclaration, Pattern,
+    Program, RecordBodyDeclaration, RecordComponent, RecordDeclaration, Resource, Statement,
+    Switch, SwitchBlockMember, SwitchBlockMembers, SwitchLabel, SwitchRule,
     TopLevelClassOrInterfaceDeclaration, Type, TypeIdentifier, TypeList, TypeOrVoid,
     VariableDeclaration, VariableDeclarator, VariableDeclaratorId, VariableDeclaratorList,
-    VariableInitializer, VariableInitializerList,
+    VariableInitializer,
 };
 use crate::collections::{AtLeastOne, Multiple, NonEmptyList, bitflag_combination};
 use crate::error::Diagnose;
@@ -1907,14 +1907,14 @@ impl<'a> Parser<'a> {
     /// variable_initializer_list:
     ///     variable_initializer {, variable_initializer}
     /// ```
-    fn array_initializer(&mut self) -> ParseResult<VariableInitializerList> {
-        self.expect(Symbol::LeftBrace)?;
+    fn array_initializer(&mut self) -> ParseResult<ArrayInitializer> {
+        let span = self.expect(Symbol::LeftBrace)?;
         let mut items = vec![];
 
         // {,}
         if self.accept(Symbol::Comma)? {
             self.assert(Symbol::RightBrace)?;
-            return Ok(items);
+            return Ok(ArrayInitializer { initializer: items, span });
         }
 
         loop {
@@ -1927,7 +1927,7 @@ impl<'a> Parser<'a> {
             }
         }
         self.assert(Symbol::RightBrace)?;
-        Ok(items)
+        Ok(ArrayInitializer { initializer: items, span })
     }
 
     fn this_access(&mut self) -> ParseResult<Expression> {

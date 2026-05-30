@@ -147,7 +147,7 @@ pub enum ArrayCreationMode {
         sized_dimensions: Vec<Expression>,
         unsized_dimensions: usize,
     },
-    Initialized(VariableInitializerList),
+    Initialized(ArrayInitializer),
 }
 
 #[derive(Debug)]
@@ -159,7 +159,13 @@ pub struct ArrayAccess {
 #[derive(Debug)]
 pub enum VariableInitializer {
     Expression(Expression),
-    ArrayInitializer(VariableInitializerList),
+    ArrayInitializer(ArrayInitializer),
+}
+
+#[derive(Debug)]
+pub struct ArrayInitializer {
+    pub initializer: VariableInitializerList,
+    pub span: Span,
 }
 
 #[derive(Debug)]
