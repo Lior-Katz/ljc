@@ -1,13 +1,13 @@
-use crate::ast::{Block, TypeOrVoid};
 use crate::ast::expressions::{ArgumentList, VariableInitializer};
 use crate::ast::identifiers::{Identifier, TypeIdentifier};
 use crate::ast::modifiers::{ElementValue, Modified};
-use crate::ast::statements::{BlockStatements, ConstructorInvocation};
-use crate::ast::types::{Type, TypeList};
+use crate::ast::statements::{Block, BlockStatements, ConstructorInvocation};
+use crate::ast::types::{Type, TypeList, TypeOrVoid};
 use crate::collections::{AtLeastOne, Multiple};
 use crate::file::Span;
 
 pub type ClassBodyDeclarations = Vec<ClassBodyDeclaration>;
+pub type FieldDeclaration = VariableDeclaration;
 pub type FormalParameterList = Vec<Modified<FormalParameter>>;
 pub type VariableDeclaratorList = AtLeastOne<VariableDeclarator>;
 pub type MethodResult = TypeOrVoid;
@@ -44,10 +44,7 @@ pub enum ClassBodyDeclaration {
 pub enum ClassMemberDeclaration {
     Method(MethodDeclaration),
     NestedClassOrInterface(TypeDeclaration),
-    Field {
-        variable_type: Type,
-        declarations: VariableDeclaratorList,
-    },
+    Field(FieldDeclaration),
     Constructor {
         name: TypeIdentifier, // this is just for validating that the name matches the class
         parameters: FormalParameterList,
@@ -195,7 +192,9 @@ impl ClassMemberDeclaration {
         match self {
             ClassMemberDeclaration::Method(MethodDeclaration { result, .. }) => result.span(),
             ClassMemberDeclaration::NestedClassOrInterface(c) => c.span(),
-            ClassMemberDeclaration::Field { variable_type, .. } => variable_type.span(),
+            ClassMemberDeclaration::Field(FieldDeclaration { variable_type, .. }) => {
+                variable_type.span()
+            }
             ClassMemberDeclaration::Constructor { name, .. }
             | ClassMemberDeclaration::CompactConstructor { name, .. } => name.span(),
         }

@@ -3,10 +3,10 @@ use crate::ast::{
     AssignmentOp, BinOp, Block, CatchClause, ClassBodyDeclaration, ClassDeclaration,
     ClassMemberDeclaration, ClassType, ClassTypePart, CompilationUnit, ComponentPattern,
     ConstructorBody, ConstructorInvocation, ElementValue, ElementValuePair, EnumConstant,
-    EnumDeclaration, Expression, ExpressionOrType, ForInit, FormalParameter, Identifier,
-    IdentifierKind, InterfaceDeclaration, LeftHandSide, MemberAccess, MethodBody, MethodCall,
-    MethodDeclaration, MethodReferenceType, Modified, Modifier, Modifiers, Pattern, Program,
-    RecordComponent, RecordDeclaration, Resource, Statement, Switch, SwitchBlockMember,
+    EnumDeclaration, Expression, ExpressionOrType, FieldDeclaration, ForInit, FormalParameter,
+    Identifier, IdentifierKind, InterfaceDeclaration, LeftHandSide, MemberAccess, MethodBody,
+    MethodCall, MethodDeclaration, MethodReferenceType, Modified, Modifier, Modifiers, Pattern,
+    Program, RecordComponent, RecordDeclaration, Resource, Statement, Switch, SwitchBlockMember,
     SwitchLabel, SwitchRule, Type, TypeDeclaration, TypeIdentifier, TypeOrVoid,
     VariableDeclaration, VariableDeclarator, VariableDeclaratorId, VariableInitializer,
 };
@@ -236,11 +236,11 @@ impl TreeDisplayWithContext<Modifiers> for ClassMemberDeclaration {
             ClassMemberDeclaration::NestedClassOrInterface(c) => {
                 c.fmt_tree_with_context(f, prefix, is_last, modifiers)
             }
-            ClassMemberDeclaration::Field { variable_type, declarations } => {
+            ClassMemberDeclaration::Field(FieldDeclaration { variable_type, declarators }) => {
                 writeln!(f, "{line_prefix}Field declaration")?;
                 fmt_modifiers(f, &new_prefix, false, modifiers)?;
                 variable_type.fmt_tree(f, &new_prefix, false)?;
-                declarations.fmt_tree(f, &new_prefix, true)
+                declarators.fmt_tree(f, &new_prefix, true)
             }
             ClassMemberDeclaration::Constructor {
                 parameters,

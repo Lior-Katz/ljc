@@ -5,13 +5,13 @@ use crate::ast::{
     ClassType, ClassTypePart, ClassTypePartList, CompilationUnit, ComponentPattern,
     ComponentPatternList, ConstructorBody, ConstructorInvocation, ElementValue, ElementValueList,
     ElementValuePair, EnumBody, EnumConstant, EnumDeclaration, Expression, ExpressionOrType,
-    ForInit, ForUpdate, FormalParameter, FormalParameterList, Identifier, InterfaceDeclaration,
-    LeftHandSide, MemberAccess, MethodBody, MethodCall, MethodDeclaration, MethodReferenceType,
-    Modifiable, Modified, Modifier, Pattern, Program, RecordBodyDeclaration, RecordComponent,
-    RecordDeclaration, Resource, Statement, Switch, SwitchBlockMember, SwitchBlockMembers,
-    SwitchLabel, SwitchRule, Type, TypeDeclaration, TypeIdentifier, TypeList, TypeOrVoid,
-    VariableDeclaration, VariableDeclarator, VariableDeclaratorId, VariableDeclaratorList,
-    VariableInitializer,
+    FieldDeclaration, ForInit, ForUpdate, FormalParameter, FormalParameterList, Identifier,
+    InterfaceDeclaration, LeftHandSide, MemberAccess, MethodBody, MethodCall, MethodDeclaration,
+    MethodReferenceType, Modifiable, Modified, Modifier, Pattern, Program, RecordBodyDeclaration,
+    RecordComponent, RecordDeclaration, Resource, Statement, Switch, SwitchBlockMember,
+    SwitchBlockMembers, SwitchLabel, SwitchRule, Type, TypeDeclaration, TypeIdentifier, TypeList,
+    TypeOrVoid, VariableDeclaration, VariableDeclarator, VariableDeclaratorId,
+    VariableDeclaratorList, VariableInitializer,
 };
 use crate::collections::{AtLeastOne, Multiple, NonEmptyList, bitflag_combination};
 use crate::error::Diagnose;
@@ -712,6 +712,7 @@ impl<'a> Parser<'a> {
                 .map(TypeDeclaration::into),
             self.constructor_declaration(),
             self.method_or_field_declaration()
+                .map(MethodOrFieldDeclaration::into),
         )
         .assert_if(
             !modifiers.is_empty(),
@@ -930,7 +931,7 @@ impl<'a> Parser<'a> {
     /// field_declaration:
     ///     type_term identifier [= variable_initializer] {, identifier [= variable_initializer]}
     /// ```
-    fn method_or_field_declaration(&mut self) -> ParseResult<ClassMemberDeclaration> {
+    fn method_or_field_declaration(&mut self) -> ParseResult<MethodOrFieldDeclaration> {
         let type_term =
             one_of!(self.type_term().map(Into::into), self.void().map(TypeOrVoid::Void))?;
         let identifier = self
@@ -966,10 +967,11 @@ impl<'a> Parser<'a> {
                 field_declaration.append(self.variable_declarators_list()?);
             }
             self.assert(Symbol::Semicolon)?;
-            Ok(ClassMemberDeclaration::Field {
+            Ok(FieldDeclaration {
                 variable_type: type_term.try_into()?,
-                declarations: field_declaration,
-            })
+                declarators: field_declaration,
+            }
+            .into())
         }
     }
 
@@ -2604,6 +2606,32 @@ impl<'a> Parser<'a> {
     }
 }
 
+enum MethodOrFieldDeclaration {
+    Method(MethodDeclaration),
+    Field(FieldDeclaration),
+}
+
+impl From<MethodDeclaration> for MethodOrFieldDeclaration {
+    fn from(value: MethodDeclaration) -> Self {
+        MethodOrFieldDeclaration::Method(value)
+    }
+}
+
+impl From<FieldDeclaration> for MethodOrFieldDeclaration {
+    fn from(value: FieldDeclaration) -> Self {
+        MethodOrFieldDeclaration::Field(value)
+    }
+}
+
+impl From<MethodOrFieldDeclaration> for ClassMemberDeclaration {
+    fn from(value: MethodOrFieldDeclaration) -> Self {
+        match value {
+            MethodOrFieldDeclaration::Method(m) => ClassMemberDeclaration::Method(m),
+            MethodOrFieldDeclaration::Field(f) => ClassMemberDeclaration::Field(f),
+        }
+    }
+}
+
 enum ForHeader {
     BasicForHeader {
         initializer: ForInit,
@@ -2824,12 +2852,6 @@ impl Into<TypeDeclaration> for AnnotationInterfaceDeclaration {
 impl Into<ClassMemberDeclaration> for TypeDeclaration {
     fn into(self) -> ClassMemberDeclaration {
         ClassMemberDeclaration::NestedClassOrInterface(self)
-    }
-}
-
-impl Into<ClassMemberDeclaration> for MethodDeclaration {
-    fn into(self) -> ClassMemberDeclaration {
-        ClassMemberDeclaration::Method(self)
     }
 }
 
