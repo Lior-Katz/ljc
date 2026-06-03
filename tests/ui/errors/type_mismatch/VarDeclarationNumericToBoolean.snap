@@ -1,0 +1,17 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/VarDeclarationNumericToBoolean.java:3:22
+        boolean bi = 1;
+                     ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/VarDeclarationNumericToBoolean.java:4:22
+        boolean bl = 1L;
+                     ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/VarDeclarationNumericToBoolean.java:5:22
+        boolean bc = 'a';
+                     ^

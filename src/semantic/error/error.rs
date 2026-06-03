@@ -37,6 +37,9 @@ pub enum TypeMismatch {
 
     #[error("Expected an operand of type boolean or Boolean")]
     NonBooleanOperand,
+
+    #[error("Incompatible types in assignment")]
+    IncompatibleAssignment,
 }
 
 trait SubError: Into<Error> + Display {}
@@ -176,6 +179,10 @@ pub enum UnimplementedFeature {
     Interface,
     #[error("@interface declarations")]
     AnnotationInterface,
+    #[error("Reference types (classes, records, enums, interfaces)")]
+    ReferenceTypes,
+    #[error("Array types")]
+    ArrayTypes,
     #[error("Array initializers in variable declarations")]
     ArrayInitializer,
     #[error("Numeric promotion")]

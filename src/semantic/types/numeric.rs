@@ -1,6 +1,5 @@
 use crate::semantic::types::Type;
 
-#[allow(dead_code)]
 #[derive(Eq, PartialEq)]
 pub enum Numeric {
     Byte,
