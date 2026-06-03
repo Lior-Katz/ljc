@@ -21,3 +21,24 @@ or if it is a reference type and can be unboxed to a numeric type (i.e. Byte, Sh
 tests/ui/errors/type_mismatch/NonNumericUnaryOp.java:5:18
         int c = ~true;
                  ^
+
+Expected a numeric operand.
+Hint: an operand is numeric if it is of a numeric type (i.e. byte, short, int, long, char, float, or double),
+or if it is a reference type and can be unboxed to a numeric type (i.e. Byte, Short, Integer, Long, Character, Float, or Double).
+tests/ui/errors/type_mismatch/NonNumericUnaryOp.java:8:18
+        int d = +b;
+                 ^
+
+Expected a numeric operand.
+Hint: an operand is numeric if it is of a numeric type (i.e. byte, short, int, long, char, float, or double),
+or if it is a reference type and can be unboxed to a numeric type (i.e. Byte, Short, Integer, Long, Character, Float, or Double).
+tests/ui/errors/type_mismatch/NonNumericUnaryOp.java:9:18
+        int e = -b;
+                 ^
+
+Expected a numeric operand.
+Hint: an operand is numeric if it is of a numeric type (i.e. byte, short, int, long, char, float, or double),
+or if it is a reference type and can be unboxed to a numeric type (i.e. Byte, Short, Integer, Long, Character, Float, or Double).
+tests/ui/errors/type_mismatch/NonNumericUnaryOp.java:10:18
+        int f = ~b;
+                 ^

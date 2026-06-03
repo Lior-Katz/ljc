@@ -15,3 +15,18 @@ Incompatible types in assignment
 tests/ui/errors/type_mismatch/VarDeclarationNumericToBoolean.java:5:22
         boolean bc = 'a';
                      ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/VarDeclarationNumericToBoolean.java:10:22
+        boolean bi = i;
+                     ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/VarDeclarationNumericToBoolean.java:13:22
+        boolean bl = l;
+                     ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/VarDeclarationNumericToBoolean.java:16:22
+        boolean bc = c;
+                     ^

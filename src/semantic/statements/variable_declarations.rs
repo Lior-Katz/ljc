@@ -30,7 +30,7 @@ impl<'a> SemanticAnalyzer<'a> {
                 .insert(declarator, VariableDeclaratorAttributes { ty: declaration_type.clone() });
             match &declarator.initializer {
                 Some(VariableInitializer::Expression(e)) => {
-                    self.check_initializer(&declaration_type, e, *e.span())?;
+                    self.check_initializer(&declaration_type, e, *e.span(), scope)?;
                     Ok(())
                 }
                 Some(VariableInitializer::ArrayInitializer(a)) => {
@@ -45,8 +45,9 @@ impl<'a> SemanticAnalyzer<'a> {
         expected_type: &Type,
         expression: &Expression,
         span: Span,
+        scope: ScopeId,
     ) -> SemanticResult {
-        let expression_result = self.expression(expression)?;
+        let expression_result = self.expression(expression, scope)?;
         match expression_result {
             ExpressionResult::Void => Err(TypeMismatch::VoidExpression.at(span).into()),
             ExpressionResult::Value(ref ty) | ExpressionResult::Variable(ref ty) => {

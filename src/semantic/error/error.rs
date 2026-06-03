@@ -11,6 +11,15 @@ pub enum Error {
 
     #[error(transparent)]
     TypeMismatch(#[from] TypeMismatch),
+
+    #[error("Symbol {0} not found in current scope")]
+    UnknownSymbol(String),
+
+    #[error(
+        "Expected an expression, but {0} resolves to a {1}.\n\
+        Names can be used as expressions only if they refer to a local variable, method parameter, exception parameter, or a field."
+    )]
+    ExpressionNameNotVariable(String, NameResolutionKind),
 }
 
 #[derive(thiserror::Error, Debug)]
@@ -69,6 +78,21 @@ where
         Diagnostic {
             span: value.span,
             message: value.message.into(),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub enum NameResolutionKind {
+    Type,
+    Method,
+}
+
+impl Display for NameResolutionKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            NameResolutionKind::Type => write!(f, "type"),
+            NameResolutionKind::Method => write!(f, "method"),
         }
     }
 }
@@ -187,6 +211,8 @@ pub enum UnimplementedFeature {
     ArrayInitializer,
     #[error("Numeric promotion")]
     NumericPromotion,
+    #[error("Field access by simple name")]
+    FieldAccessSimpleName,
 }
 
 impl SubError for UnimplementedFeature {}

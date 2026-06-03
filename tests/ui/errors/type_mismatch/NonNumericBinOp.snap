@@ -4,167 +4,167 @@ source: tests/ui/ui_tests.rs
 Expected a numeric operand.
 Hint: an operand is numeric if it is of a numeric type (i.e. byte, short, int, long, char, float, or double),
 or if it is a reference type and can be unboxed to a numeric type (i.e. Byte, Short, Integer, Long, Character, Float, or Double).
-tests/ui/errors/type_mismatch/NonNumericBinOp.java:3:17
-        int a = false * true;
-                ^
-
-Expected a numeric operand.
-Hint: an operand is numeric if it is of a numeric type (i.e. byte, short, int, long, char, float, or double),
-or if it is a reference type and can be unboxed to a numeric type (i.e. Byte, Short, Integer, Long, Character, Float, or Double).
-tests/ui/errors/type_mismatch/NonNumericBinOp.java:3:25
-        int a = false * true;
-                        ^
-
-Expected a numeric operand.
-Hint: an operand is numeric if it is of a numeric type (i.e. byte, short, int, long, char, float, or double),
-or if it is a reference type and can be unboxed to a numeric type (i.e. Byte, Short, Integer, Long, Character, Float, or Double).
 tests/ui/errors/type_mismatch/NonNumericBinOp.java:4:17
-        int b = false / true;
+        int a = false * z;
                 ^
 
 Expected a numeric operand.
 Hint: an operand is numeric if it is of a numeric type (i.e. byte, short, int, long, char, float, or double),
 or if it is a reference type and can be unboxed to a numeric type (i.e. Byte, Short, Integer, Long, Character, Float, or Double).
 tests/ui/errors/type_mismatch/NonNumericBinOp.java:4:25
-        int b = false / true;
+        int a = false * z;
                         ^
 
 Expected a numeric operand.
 Hint: an operand is numeric if it is of a numeric type (i.e. byte, short, int, long, char, float, or double),
 or if it is a reference type and can be unboxed to a numeric type (i.e. Byte, Short, Integer, Long, Character, Float, or Double).
 tests/ui/errors/type_mismatch/NonNumericBinOp.java:5:17
-        int c = false % true;
+        int b = false / z;
                 ^
 
 Expected a numeric operand.
 Hint: an operand is numeric if it is of a numeric type (i.e. byte, short, int, long, char, float, or double),
 or if it is a reference type and can be unboxed to a numeric type (i.e. Byte, Short, Integer, Long, Character, Float, or Double).
 tests/ui/errors/type_mismatch/NonNumericBinOp.java:5:25
-        int c = false % true;
+        int b = false / z;
                         ^
 
 Expected a numeric operand.
 Hint: an operand is numeric if it is of a numeric type (i.e. byte, short, int, long, char, float, or double),
 or if it is a reference type and can be unboxed to a numeric type (i.e. Byte, Short, Integer, Long, Character, Float, or Double).
 tests/ui/errors/type_mismatch/NonNumericBinOp.java:6:17
-        int d = false + true;
+        int c = false % z;
                 ^
 
 Expected a numeric operand.
 Hint: an operand is numeric if it is of a numeric type (i.e. byte, short, int, long, char, float, or double),
 or if it is a reference type and can be unboxed to a numeric type (i.e. Byte, Short, Integer, Long, Character, Float, or Double).
 tests/ui/errors/type_mismatch/NonNumericBinOp.java:6:25
-        int d = false + true;
+        int c = false % z;
                         ^
 
 Expected a numeric operand.
 Hint: an operand is numeric if it is of a numeric type (i.e. byte, short, int, long, char, float, or double),
 or if it is a reference type and can be unboxed to a numeric type (i.e. Byte, Short, Integer, Long, Character, Float, or Double).
 tests/ui/errors/type_mismatch/NonNumericBinOp.java:7:17
-        int e = false - true;
+        int d = false + z;
                 ^
 
 Expected a numeric operand.
 Hint: an operand is numeric if it is of a numeric type (i.e. byte, short, int, long, char, float, or double),
 or if it is a reference type and can be unboxed to a numeric type (i.e. Byte, Short, Integer, Long, Character, Float, or Double).
 tests/ui/errors/type_mismatch/NonNumericBinOp.java:7:25
-        int e = false - true;
+        int d = false + z;
+                        ^
+
+Expected a numeric operand.
+Hint: an operand is numeric if it is of a numeric type (i.e. byte, short, int, long, char, float, or double),
+or if it is a reference type and can be unboxed to a numeric type (i.e. Byte, Short, Integer, Long, Character, Float, or Double).
+tests/ui/errors/type_mismatch/NonNumericBinOp.java:8:17
+        int e = false - z;
+                ^
+
+Expected a numeric operand.
+Hint: an operand is numeric if it is of a numeric type (i.e. byte, short, int, long, char, float, or double),
+or if it is a reference type and can be unboxed to a numeric type (i.e. Byte, Short, Integer, Long, Character, Float, or Double).
+tests/ui/errors/type_mismatch/NonNumericBinOp.java:8:25
+        int e = false - z;
                         ^
 
 Expected an integral operand.
 Hint: an operand is integral if it is of an integral type (i.e. byte, short, int, long, or char),
 or if it is a reference type and can be unboxed to an integral type (i.e. Byte, Short, Integer, Long, or Character).
-tests/ui/errors/type_mismatch/NonNumericBinOp.java:8:17
-        int f = false << true;
-                ^
-
-Expected an integral operand.
-Hint: an operand is integral if it is of an integral type (i.e. byte, short, int, long, or char),
-or if it is a reference type and can be unboxed to an integral type (i.e. Byte, Short, Integer, Long, or Character).
-tests/ui/errors/type_mismatch/NonNumericBinOp.java:8:26
-        int f = false << true;
-                         ^
-
-Expected an integral operand.
-Hint: an operand is integral if it is of an integral type (i.e. byte, short, int, long, or char),
-or if it is a reference type and can be unboxed to an integral type (i.e. Byte, Short, Integer, Long, or Character).
 tests/ui/errors/type_mismatch/NonNumericBinOp.java:9:17
-        int g = false >> true;
+        int f = false << z;
                 ^
 
 Expected an integral operand.
 Hint: an operand is integral if it is of an integral type (i.e. byte, short, int, long, or char),
 or if it is a reference type and can be unboxed to an integral type (i.e. Byte, Short, Integer, Long, or Character).
 tests/ui/errors/type_mismatch/NonNumericBinOp.java:9:26
-        int g = false >> true;
+        int f = false << z;
                          ^
 
 Expected an integral operand.
 Hint: an operand is integral if it is of an integral type (i.e. byte, short, int, long, or char),
 or if it is a reference type and can be unboxed to an integral type (i.e. Byte, Short, Integer, Long, or Character).
 tests/ui/errors/type_mismatch/NonNumericBinOp.java:10:17
-        int h = false >>> true;
+        int g = false >> z;
                 ^
 
 Expected an integral operand.
 Hint: an operand is integral if it is of an integral type (i.e. byte, short, int, long, or char),
 or if it is a reference type and can be unboxed to an integral type (i.e. Byte, Short, Integer, Long, or Character).
-tests/ui/errors/type_mismatch/NonNumericBinOp.java:10:27
-        int h = false >>> true;
+tests/ui/errors/type_mismatch/NonNumericBinOp.java:10:26
+        int g = false >> z;
+                         ^
+
+Expected an integral operand.
+Hint: an operand is integral if it is of an integral type (i.e. byte, short, int, long, or char),
+or if it is a reference type and can be unboxed to an integral type (i.e. Byte, Short, Integer, Long, or Character).
+tests/ui/errors/type_mismatch/NonNumericBinOp.java:11:17
+        int h = false >>> z;
+                ^
+
+Expected an integral operand.
+Hint: an operand is integral if it is of an integral type (i.e. byte, short, int, long, or char),
+or if it is a reference type and can be unboxed to an integral type (i.e. Byte, Short, Integer, Long, or Character).
+tests/ui/errors/type_mismatch/NonNumericBinOp.java:11:27
+        int h = false >>> z;
                           ^
 
 Expected a numeric operand.
 Hint: an operand is numeric if it is of a numeric type (i.e. byte, short, int, long, char, float, or double),
 or if it is a reference type and can be unboxed to a numeric type (i.e. Byte, Short, Integer, Long, Character, Float, or Double).
-tests/ui/errors/type_mismatch/NonNumericBinOp.java:11:17
-        int i = false < true;
-                ^
-
-Expected a numeric operand.
-Hint: an operand is numeric if it is of a numeric type (i.e. byte, short, int, long, char, float, or double),
-or if it is a reference type and can be unboxed to a numeric type (i.e. Byte, Short, Integer, Long, Character, Float, or Double).
-tests/ui/errors/type_mismatch/NonNumericBinOp.java:11:25
-        int i = false < true;
-                        ^
-
-Expected a numeric operand.
-Hint: an operand is numeric if it is of a numeric type (i.e. byte, short, int, long, char, float, or double),
-or if it is a reference type and can be unboxed to a numeric type (i.e. Byte, Short, Integer, Long, Character, Float, or Double).
 tests/ui/errors/type_mismatch/NonNumericBinOp.java:12:17
-        int j = false <= true;
+        int i = false < z;
                 ^
 
 Expected a numeric operand.
 Hint: an operand is numeric if it is of a numeric type (i.e. byte, short, int, long, char, float, or double),
 or if it is a reference type and can be unboxed to a numeric type (i.e. Byte, Short, Integer, Long, Character, Float, or Double).
-tests/ui/errors/type_mismatch/NonNumericBinOp.java:12:26
-        int j = false <= true;
-                         ^
+tests/ui/errors/type_mismatch/NonNumericBinOp.java:12:25
+        int i = false < z;
+                        ^
 
 Expected a numeric operand.
 Hint: an operand is numeric if it is of a numeric type (i.e. byte, short, int, long, char, float, or double),
 or if it is a reference type and can be unboxed to a numeric type (i.e. Byte, Short, Integer, Long, Character, Float, or Double).
 tests/ui/errors/type_mismatch/NonNumericBinOp.java:13:17
-        int k = false > true;
+        int j = false <= z;
                 ^
 
 Expected a numeric operand.
 Hint: an operand is numeric if it is of a numeric type (i.e. byte, short, int, long, char, float, or double),
 or if it is a reference type and can be unboxed to a numeric type (i.e. Byte, Short, Integer, Long, Character, Float, or Double).
-tests/ui/errors/type_mismatch/NonNumericBinOp.java:13:25
-        int k = false > true;
-                        ^
+tests/ui/errors/type_mismatch/NonNumericBinOp.java:13:26
+        int j = false <= z;
+                         ^
 
 Expected a numeric operand.
 Hint: an operand is numeric if it is of a numeric type (i.e. byte, short, int, long, char, float, or double),
 or if it is a reference type and can be unboxed to a numeric type (i.e. Byte, Short, Integer, Long, Character, Float, or Double).
 tests/ui/errors/type_mismatch/NonNumericBinOp.java:14:17
-        int l = false >= true;
+        int k = false > z;
                 ^
 
 Expected a numeric operand.
 Hint: an operand is numeric if it is of a numeric type (i.e. byte, short, int, long, char, float, or double),
 or if it is a reference type and can be unboxed to a numeric type (i.e. Byte, Short, Integer, Long, Character, Float, or Double).
-tests/ui/errors/type_mismatch/NonNumericBinOp.java:14:26
-        int l = false >= true;
+tests/ui/errors/type_mismatch/NonNumericBinOp.java:14:25
+        int k = false > z;
+                        ^
+
+Expected a numeric operand.
+Hint: an operand is numeric if it is of a numeric type (i.e. byte, short, int, long, char, float, or double),
+or if it is a reference type and can be unboxed to a numeric type (i.e. Byte, Short, Integer, Long, Character, Float, or Double).
+tests/ui/errors/type_mismatch/NonNumericBinOp.java:15:17
+        int l = false >= z;
+                ^
+
+Expected a numeric operand.
+Hint: an operand is numeric if it is of a numeric type (i.e. byte, short, int, long, char, float, or double),
+or if it is a reference type and can be unboxed to a numeric type (i.e. Byte, Short, Integer, Long, Character, Float, or Double).
+tests/ui/errors/type_mismatch/NonNumericBinOp.java:15:26
+        int l = false >= z;
                          ^

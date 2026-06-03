@@ -79,7 +79,6 @@ impl<'a> Attributes<'a> {
         self.0.insert(Key::from(node), Node::wrap_attribute(attrs));
     }
 
-    #[expect(dead_code)]
     pub fn get<Node, Attrs>(&'a self, node: &'a Node) -> Option<&'a Attrs>
     where
         Node: Hash + HasAttributes<'a, Attrs>,

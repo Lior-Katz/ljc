@@ -14,7 +14,7 @@ impl<'a> SemanticAnalyzer<'a> {
                 Err(UnimplementedFeature::EmptyStatement.at(span).into())
             }
             Statement::ExpressionStatement(e) => {
-                let _ = self.expression(e)?;
+                let _ = self.expression(e, scope)?;
                 Ok(())
             }
             Statement::Block(_) => Err(UnimplementedFeature::Block.at(span).into()),

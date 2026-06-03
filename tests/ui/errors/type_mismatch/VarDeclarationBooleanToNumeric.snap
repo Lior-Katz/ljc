@@ -35,3 +35,38 @@ Incompatible types in assignment
 tests/ui/errors/type_mismatch/VarDeclarationBooleanToNumeric.java:9:20
         double d = true;
                    ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/VarDeclarationBooleanToNumeric.java:14:18
+        byte x = b;
+                 ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/VarDeclarationBooleanToNumeric.java:15:19
+        short y = b;
+                  ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/VarDeclarationBooleanToNumeric.java:16:17
+        int z = b;
+                ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/VarDeclarationBooleanToNumeric.java:17:18
+        long w = b;
+                 ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/VarDeclarationBooleanToNumeric.java:18:18
+        char c = b;
+                 ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/VarDeclarationBooleanToNumeric.java:19:19
+        float f = b;
+                  ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/VarDeclarationBooleanToNumeric.java:20:20
+        double d = b;
+                   ^

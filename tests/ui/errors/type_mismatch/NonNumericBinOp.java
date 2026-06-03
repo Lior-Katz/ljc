@@ -1,16 +1,17 @@
 class Test {
     void f() {
-        int a = false * true;
-        int b = false / true;
-        int c = false % true;
-        int d = false + true;
-        int e = false - true;
-        int f = false << true;
-        int g = false >> true;
-        int h = false >>> true;
-        int i = false < true;
-        int j = false <= true;
-        int k = false > true;
-        int l = false >= true;
+        boolean z = true;
+        int a = false * z;
+        int b = false / z;
+        int c = false % z;
+        int d = false + z;
+        int e = false - z;
+        int f = false << z;
+        int g = false >> z;
+        int h = false >>> z;
+        int i = false < z;
+        int j = false <= z;
+        int k = false > z;
+        int l = false >= z;
     }
 }
