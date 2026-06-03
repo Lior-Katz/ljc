@@ -124,10 +124,8 @@ pub enum UnimplementedFeature {
     StaticInitializer,
     #[error("Methods without bodies")]
     NoBodyMethod,
-    #[error("Nested classes")]
-    NestedClass,
-    #[error("Nested interfaces")]
-    NestedInterface,
+    #[error("Nested classes and interfaces")]
+    NestedClassOrInterface,
     #[error("Class fields")]
     ClassField,
     #[error("Constructors")]

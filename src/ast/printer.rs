@@ -5,11 +5,10 @@ use crate::ast::{
     ConstructorBody, ConstructorInvocation, ElementValue, ElementValuePair, EnumConstant,
     EnumDeclaration, Expression, ExpressionOrType, ForInit, FormalParameter, Identifier,
     IdentifierKind, InterfaceDeclaration, LeftHandSide, MemberAccess, MethodBody, MethodCall,
-    MethodDeclaration, MethodReferenceType, Modified, Modifier, Modifiers, NormalClassDeclaration,
-    NormalInterfaceDeclaration, Pattern, Program, RecordComponent, RecordDeclaration, Resource,
-    Statement, Switch, SwitchBlockMember, SwitchLabel, SwitchRule,
-    TopLevelClassOrInterfaceDeclaration, Type, TypeIdentifier, TypeOrVoid, VariableDeclaration,
-    VariableDeclarator, VariableDeclaratorId, VariableInitializer,
+    MethodDeclaration, MethodReferenceType, Modified, Modifier, Modifiers, Pattern, Program,
+    RecordComponent, RecordDeclaration, Resource, Statement, Switch, SwitchBlockMember,
+    SwitchLabel, SwitchRule, Type, TypeDeclaration, TypeIdentifier, TypeOrVoid,
+    VariableDeclaration, VariableDeclarator, VariableDeclaratorId, VariableInitializer,
 };
 use crate::collections::NonEmptyList;
 use std::fmt;
@@ -139,7 +138,7 @@ impl TreeDisplay for Program {
     }
 }
 
-impl TreeDisplayWithContext<Modifiers> for TopLevelClassOrInterfaceDeclaration {
+impl TreeDisplayWithContext<Modifiers> for TypeDeclaration {
     fn fmt_tree_with_context(
         &self,
         f: &mut Formatter<'_>,
@@ -148,10 +147,11 @@ impl TreeDisplayWithContext<Modifiers> for TopLevelClassOrInterfaceDeclaration {
         modifiers: &Modifiers,
     ) -> fmt::Result {
         match self {
-            TopLevelClassOrInterfaceDeclaration::Class(c) => {
-                c.fmt_tree_with_context(f, prefix, is_last, modifiers)
-            }
-            TopLevelClassOrInterfaceDeclaration::Interface(i) => {
+            TypeDeclaration::Class(c) => c.fmt_tree_with_context(f, prefix, is_last, modifiers),
+            TypeDeclaration::Record(r) => r.fmt_tree_with_context(f, prefix, is_last, modifiers),
+            TypeDeclaration::Enum(e) => e.fmt_tree_with_context(f, prefix, is_last, modifiers),
+            TypeDeclaration::Interface(i) => i.fmt_tree_with_context(f, prefix, is_last, modifiers),
+            TypeDeclaration::AnnotationInterface(i) => {
                 i.fmt_tree_with_context(f, prefix, is_last, modifiers)
             }
         }
@@ -166,27 +166,9 @@ impl TreeDisplayWithContext<Modifiers> for ClassDeclaration {
         is_last: bool,
         modifiers: &Modifiers,
     ) -> fmt::Result {
-        match self {
-            ClassDeclaration::NormalClass(c) => {
-                c.fmt_tree_with_context(f, prefix, is_last, modifiers)
-            }
-            ClassDeclaration::Record(r) => r.fmt_tree_with_context(f, prefix, is_last, modifiers),
-            ClassDeclaration::Enum(e) => e.fmt_tree_with_context(f, prefix, is_last, modifiers),
-        }
-    }
-}
-
-impl TreeDisplayWithContext<Modifiers> for NormalClassDeclaration {
-    fn fmt_tree_with_context(
-        &self,
-        f: &mut Formatter<'_>,
-        prefix: &str,
-        is_last: bool,
-        modifiers: &Modifiers,
-    ) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(&prefix, is_last);
 
-        writeln!(f, "{line_prefix}Class {}", self.identifier)?;
+        writeln!(f, "{line_prefix}Class {}", self.name)?;
         Children::new()
             .push_if_non_empty("Modifiers", modifiers)
             .push_opt("Extends", &self.extends)
@@ -251,11 +233,8 @@ impl TreeDisplayWithContext<Modifiers> for ClassMemberDeclaration {
                 fmt_modifiers(f, &new_prefix, false, modifiers)?;
                 m.fmt_tree(f, &new_prefix, true)
             }
-            ClassMemberDeclaration::NestedClass(c) => {
+            ClassMemberDeclaration::NestedClassOrInterface(c) => {
                 c.fmt_tree_with_context(f, prefix, is_last, modifiers)
-            }
-            ClassMemberDeclaration::NestedInterface(i) => {
-                i.fmt_tree_with_context(f, prefix, is_last, modifiers)
             }
             ClassMemberDeclaration::Field { variable_type, declarations } => {
                 writeln!(f, "{line_prefix}Field declaration")?;
@@ -294,27 +273,8 @@ impl TreeDisplayWithContext<Modifiers> for InterfaceDeclaration {
         is_last: bool,
         modifiers: &Modifiers,
     ) -> fmt::Result {
-        match self {
-            InterfaceDeclaration::NormalInterface(i) => {
-                i.fmt_tree_with_context(f, prefix, is_last, modifiers)
-            }
-            InterfaceDeclaration::AnnotationInterface(i) => {
-                i.fmt_tree_with_context(f, prefix, is_last, modifiers)
-            }
-        }
-    }
-}
-
-impl TreeDisplayWithContext<Modifiers> for NormalInterfaceDeclaration {
-    fn fmt_tree_with_context(
-        &self,
-        f: &mut Formatter<'_>,
-        prefix: &str,
-        is_last: bool,
-        modifiers: &Modifiers,
-    ) -> fmt::Result {
         let (line_prefix, new_prefix) = branch(&prefix, is_last);
-        writeln!(f, "{line_prefix}Interface {}", self.identifier)?;
+        writeln!(f, "{line_prefix}Interface {}", self.name)?;
 
         Children::new()
             .push_if_non_empty("Modifiers", modifiers)

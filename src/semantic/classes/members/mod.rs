@@ -10,11 +10,8 @@ impl SemanticAnalyzer {
         let span = member.span().clone();
         match member {
             ClassMemberDeclaration::Method(m) => self.method(m, modifiers),
-            ClassMemberDeclaration::NestedClass(_) => {
-                Err(UnimplementedFeature::NestedClass.at(span).into())
-            }
-            ClassMemberDeclaration::NestedInterface(_) => {
-                Err(UnimplementedFeature::NestedInterface.at(span).into())
+            ClassMemberDeclaration::NestedClassOrInterface(_) => {
+                Err(UnimplementedFeature::NestedClassOrInterface.at(span).into())
             }
             ClassMemberDeclaration::Field { .. } => {
                 Err(UnimplementedFeature::ClassField.at(span).into())

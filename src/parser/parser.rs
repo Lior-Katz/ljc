@@ -7,10 +7,9 @@ use crate::ast::{
     ElementValuePair, EnumBody, EnumConstant, EnumDeclaration, Expression, ExpressionOrType,
     ForInit, ForUpdate, FormalParameter, FormalParameterList, Identifier, InterfaceDeclaration,
     LeftHandSide, MemberAccess, MethodBody, MethodCall, MethodDeclaration, MethodReferenceType,
-    Modifiable, Modified, Modifier, NormalClassDeclaration, NormalInterfaceDeclaration, Pattern,
-    Program, RecordBodyDeclaration, RecordComponent, RecordDeclaration, Resource, Statement,
-    Switch, SwitchBlockMember, SwitchBlockMembers, SwitchLabel, SwitchRule,
-    TopLevelClassOrInterfaceDeclaration, Type, TypeIdentifier, TypeList, TypeOrVoid,
+    Modifiable, Modified, Modifier, Pattern, Program, RecordBodyDeclaration, RecordComponent,
+    RecordDeclaration, Resource, Statement, Switch, SwitchBlockMember, SwitchBlockMembers,
+    SwitchLabel, SwitchRule, Type, TypeDeclaration, TypeIdentifier, TypeList, TypeOrVoid,
     VariableDeclaration, VariableDeclarator, VariableDeclaratorId, VariableDeclaratorList,
     VariableInitializer,
 };
@@ -348,33 +347,33 @@ impl<'a> Parser<'a> {
     /// ```
     fn top_level_class_or_interface_declaration(
         &mut self,
-    ) -> ParseResult<Modified<TopLevelClassOrInterfaceDeclaration>> {
+    ) -> ParseResult<Modified<TypeDeclaration>> {
         while self.accept(Symbol::Semicolon)? {} // §7.6 (p. 231), ignore semicolons at class or interface declarations level
 
         let modifiers = self.modifiers(ModifierKind::CLASS | ModifierKind::INTERFACE)?;
-        one_of!(
-            self.class_declaration().map(ClassDeclaration::into),
-            self.interface_declaration().map(InterfaceDeclaration::into)
-        )
-        .assert_if(
-            !modifiers.is_empty(),
-            Error::DanglingModifiers(ExpectedDeclarationType::TOP_LEVEL).at(self.pos()),
-        )
-        .map(|d: TopLevelClassOrInterfaceDeclaration| d.with_modifiers(modifiers))
+        self.class_or_interface_declaration()
+            .assert_if(
+                !modifiers.is_empty(),
+                Error::DanglingModifiers(ExpectedDeclarationType::TOP_LEVEL).at(self.pos()),
+            )
+            .map(|d: TypeDeclaration| d.with_modifiers(modifiers))
     }
 
-    fn class_declaration(&mut self) -> ParseResult<ClassDeclaration> {
+    fn class_or_interface_declaration(&mut self) -> ParseResult<TypeDeclaration> {
         one_of!(
-            self.normal_class_declaration()
-                .map(NormalClassDeclaration::into),
+            self.normal_class_declaration().map(ClassDeclaration::into),
             self.record_declaration().map(RecordDeclaration::into),
             self.enum_declaration().map(EnumDeclaration::into),
+            self.interface_declaration()
+                .map(InterfaceDeclaration::into),
+            self.annotation_interface_declaration()
+                .map(AnnotationInterfaceDeclaration::into),
         )
     }
 
-    fn normal_class_declaration(&mut self) -> ParseResult<NormalClassDeclaration> {
+    fn normal_class_declaration(&mut self) -> ParseResult<ClassDeclaration> {
         let span = self.expect(Symbol::Class)?;
-        let identifier = self
+        let name = self
             .type_identifier()
             .assert(Error::IdentifierExpected.at(self.pos()))?;
         let extends = self.opt_class_extends()?;
@@ -383,8 +382,8 @@ impl<'a> Parser<'a> {
         let body = self
             .class_body()
             .assert(Error::MissingClassBody.at(self.pos()))?;
-        let class_decl = NormalClassDeclaration {
-            identifier,
+        let class_decl = ClassDeclaration {
+            name,
             extends,
             implements,
             permits,
@@ -709,8 +708,8 @@ impl<'a> Parser<'a> {
         let modifiers = self.modifiers(ModifierKind::CLASS_MEMBER)?;
 
         one_of!(
-            self.class_declaration().map(ClassDeclaration::into),
-            self.interface_declaration().map(InterfaceDeclaration::into),
+            self.class_or_interface_declaration()
+                .map(TypeDeclaration::into),
             self.constructor_declaration(),
             self.method_or_field_declaration()
         )
@@ -848,22 +847,13 @@ impl<'a> Parser<'a> {
     }
 
     fn interface_declaration(&mut self) -> ParseResult<InterfaceDeclaration> {
-        one_of!(
-            self.normal_interface_declaration()
-                .map(NormalInterfaceDeclaration::into),
-            self.annotation_interface_declaration()
-                .map(AnnotationInterfaceDeclaration::into),
-        )
-    }
-
-    fn normal_interface_declaration(&mut self) -> ParseResult<NormalInterfaceDeclaration> {
         let span = self.expect(Symbol::Interface)?;
-        let identifier = self.type_identifier()?;
+        let name = self.type_identifier()?;
         let extends = self.opt_interface_extends()?;
         let permits = self.opt_class_permits()?;
         let body = self.interface_body()?;
-        Ok(NormalInterfaceDeclaration {
-            identifier,
+        Ok(InterfaceDeclaration {
+            name,
             extends,
             permits,
             body,
@@ -2794,33 +2784,22 @@ impl TryFrom<Expression> for ClassTypePartList {
     }
 }
 
-impl Into<TopLevelClassOrInterfaceDeclaration> for ClassDeclaration {
-    fn into(self) -> TopLevelClassOrInterfaceDeclaration {
-        TopLevelClassOrInterfaceDeclaration::Class(self)
+impl Into<TypeDeclaration> for ClassDeclaration {
+    fn into(self) -> TypeDeclaration {
+        TypeDeclaration::Class(self)
+
     }
 }
 
-impl Into<TopLevelClassOrInterfaceDeclaration> for InterfaceDeclaration {
-    fn into(self) -> TopLevelClassOrInterfaceDeclaration {
-        TopLevelClassOrInterfaceDeclaration::Interface(self)
+impl Into<TypeDeclaration> for RecordDeclaration {
+    fn into(self) -> TypeDeclaration {
+        TypeDeclaration::Record(self)
     }
 }
 
-impl Into<ClassDeclaration> for NormalClassDeclaration {
-    fn into(self) -> ClassDeclaration {
-        ClassDeclaration::NormalClass(self)
-    }
-}
-
-impl Into<ClassDeclaration> for RecordDeclaration {
-    fn into(self) -> ClassDeclaration {
-        ClassDeclaration::Record(self)
-    }
-}
-
-impl Into<ClassDeclaration> for EnumDeclaration {
-    fn into(self) -> ClassDeclaration {
-        ClassDeclaration::Enum(self)
+impl Into<TypeDeclaration> for EnumDeclaration {
+    fn into(self) -> TypeDeclaration {
+        TypeDeclaration::Enum(self)
     }
 }
 
@@ -2830,27 +2809,21 @@ impl Into<ClassBodyDeclaration> for Modified<ClassMemberDeclaration> {
     }
 }
 
-impl Into<InterfaceDeclaration> for NormalInterfaceDeclaration {
-    fn into(self) -> InterfaceDeclaration {
-        InterfaceDeclaration::NormalInterface(self)
+impl Into<TypeDeclaration> for InterfaceDeclaration {
+    fn into(self) -> TypeDeclaration {
+        TypeDeclaration::Interface(self)
     }
 }
 
-impl Into<InterfaceDeclaration> for AnnotationInterfaceDeclaration {
-    fn into(self) -> InterfaceDeclaration {
-        InterfaceDeclaration::AnnotationInterface(self)
+impl Into<TypeDeclaration> for AnnotationInterfaceDeclaration {
+    fn into(self) -> TypeDeclaration {
+        TypeDeclaration::AnnotationInterface(self)
     }
 }
 
-impl Into<ClassMemberDeclaration> for ClassDeclaration {
+impl Into<ClassMemberDeclaration> for TypeDeclaration {
     fn into(self) -> ClassMemberDeclaration {
-        ClassMemberDeclaration::NestedClass(self)
-    }
-}
-
-impl Into<ClassMemberDeclaration> for InterfaceDeclaration {
-    fn into(self) -> ClassMemberDeclaration {
-        ClassMemberDeclaration::NestedInterface(self)
+        ClassMemberDeclaration::NestedClassOrInterface(self)
     }
 }
 

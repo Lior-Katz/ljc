@@ -8,7 +8,7 @@ impl SemanticAnalyzer {
     #[allow(unused_variables)]
     pub(super) fn class_declaration(
         &mut self,
-        class_decl: &ast::NormalClassDeclaration,
+        class_decl: &ast::ClassDeclaration,
         modifiers: &Modifiers,
     ) -> SemanticResult {
         class_decl

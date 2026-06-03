@@ -15,21 +15,17 @@ pub type RecordComponentList = Vec<Modified<RecordComponent>>;
 pub type RecordBodyDeclaration = ClassBodyDeclaration;
 
 #[derive(Debug)]
-pub enum TopLevelClassOrInterfaceDeclaration {
+pub enum TypeDeclaration {
     Class(ClassDeclaration),
-    Interface(InterfaceDeclaration),
-}
-
-#[derive(Debug)]
-pub enum ClassDeclaration {
-    NormalClass(NormalClassDeclaration),
     Record(RecordDeclaration),
     Enum(EnumDeclaration),
+    Interface(InterfaceDeclaration),
+    AnnotationInterface(AnnotationInterfaceDeclaration),
 }
 
 #[derive(Debug)]
-pub struct NormalClassDeclaration {
-    pub identifier: TypeIdentifier,
+pub struct ClassDeclaration {
+    pub name: TypeIdentifier,
     pub extends: Option<Type>,
     pub implements: Option<TypeList>,
     pub permits: Option<TypeList>,
@@ -47,8 +43,7 @@ pub enum ClassBodyDeclaration {
 #[derive(Debug)]
 pub enum ClassMemberDeclaration {
     Method(MethodDeclaration),
-    NestedClass(ClassDeclaration),
-    NestedInterface(InterfaceDeclaration),
+    NestedClassOrInterface(TypeDeclaration),
     Field {
         variable_type: Type,
         declarations: VariableDeclaratorList,
@@ -66,14 +61,8 @@ pub enum ClassMemberDeclaration {
 }
 
 #[derive(Debug)]
-pub enum InterfaceDeclaration {
-    NormalInterface(NormalInterfaceDeclaration),
-    AnnotationInterface(AnnotationInterfaceDeclaration),
-}
-
-#[derive(Debug)]
-pub struct NormalInterfaceDeclaration {
-    pub identifier: TypeIdentifier,
+pub struct InterfaceDeclaration {
+    pub name: TypeIdentifier,
     pub extends: Option<TypeList>,
     pub permits: Option<TypeList>,
     pub body: Vec<Modified<ClassMemberDeclaration>>,
@@ -176,30 +165,14 @@ pub enum VariableDeclaratorId {
     Unnamed,
 }
 
-impl TopLevelClassOrInterfaceDeclaration {
+impl TypeDeclaration {
     pub fn span(&self) -> &Span {
         match self {
-            TopLevelClassOrInterfaceDeclaration::Class(c) => c.span(),
-            TopLevelClassOrInterfaceDeclaration::Interface(i) => i.span(),
-        }
-    }
-}
-
-impl ClassDeclaration {
-    pub fn span(&self) -> &Span {
-        match self {
-            ClassDeclaration::NormalClass(c) => &c.span,
-            ClassDeclaration::Record(r) => &r.span,
-            ClassDeclaration::Enum(e) => &e.span,
-        }
-    }
-}
-
-impl InterfaceDeclaration {
-    pub fn span(&self) -> &Span {
-        match self {
-            InterfaceDeclaration::NormalInterface(i) => &i.span,
-            InterfaceDeclaration::AnnotationInterface(a) => &a.span,
+            TypeDeclaration::Class(c) => &c.span,
+            TypeDeclaration::Record(r) => &r.span,
+            TypeDeclaration::Enum(e) => &e.span,
+            TypeDeclaration::Interface(i) => &i.span,
+            TypeDeclaration::AnnotationInterface(a) => &a.span,
         }
     }
 }
@@ -221,8 +194,7 @@ impl ClassMemberDeclaration {
     pub fn span(&self) -> &Span {
         match self {
             ClassMemberDeclaration::Method(MethodDeclaration { result, .. }) => result.span(),
-            ClassMemberDeclaration::NestedClass(c) => c.span(),
-            ClassMemberDeclaration::NestedInterface(i) => i.span(),
+            ClassMemberDeclaration::NestedClassOrInterface(c) => c.span(),
             ClassMemberDeclaration::Field { variable_type, .. } => variable_type.span(),
             ClassMemberDeclaration::Constructor { name, .. }
             | ClassMemberDeclaration::CompactConstructor { name, .. } => name.span(),
