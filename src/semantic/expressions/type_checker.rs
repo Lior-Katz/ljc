@@ -120,6 +120,21 @@ impl SemanticAnalyzer<'_> {
                         ))?;
                     Ok(ExpressionResult::Value(Type::Boolean))
                 }
+                BinOp::Equal(_) | BinOp::NotEqual(_) => {
+                    let left_type = self.check_not_void(left, scope)?;
+                    let right_type = self.check_not_void(right, scope)?;
+                    if left_type.is_convertible_to_numeric_type()
+                        && right_type.is_convertible_to_numeric_type()
+                    {
+                        Ok(ExpressionResult::Value(Type::Boolean))
+                    } else if left_type.is_primitive_or_boxed_boolean()
+                        && right_type.is_primitive_or_boxed_boolean()
+                    {
+                        Ok(ExpressionResult::Value(Type::Boolean))
+                    } else {
+                        Err(TypeMismatch::IncompatibleEquality.at(span).into())
+                    }
+                }
                 _ => todo!(),
             },
             Expression::ConditionalExpression { .. } => {
@@ -196,6 +211,15 @@ impl SemanticAnalyzer<'_> {
             ExpressionResult::Void => {
                 Err(TypeMismatch::VoidExpression.at(*expression.span()).into())
             } // TODO: add test once function calls are implemented
+        }
+    }
+
+    fn check_not_void(&self, expression: &Expression, scope: ScopeId) -> SemanticResult<Type> {
+        match self.type_check(expression, scope)? {
+            ExpressionResult::Value(ty) | ExpressionResult::Variable(ty) => Ok(ty),
+            ExpressionResult::Void => {
+                Err(TypeMismatch::VoidExpression.at(*expression.span()).into())
+            }
         }
     }
 }

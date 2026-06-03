@@ -49,6 +49,15 @@ pub enum TypeMismatch {
 
     #[error("Incompatible types in assignment")]
     IncompatibleAssignment,
+
+    #[error(
+        "Incompatible types in equality comparison\n\
+         Hint: the operands of an equality operator must either:\n\
+            \t1. both be convertible to a numeric type, or\n\
+            \t2. both be either boolean or Boolean, or\n\
+            \t3. both be of either a reference type or null."
+    )]
+    IncompatibleEquality,
 }
 
 trait SubError: Into<Error> + Display {}
