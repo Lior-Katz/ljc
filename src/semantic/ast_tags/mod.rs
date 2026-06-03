@@ -1,13 +1,15 @@
-use crate::ast::{CompilationUnit, TypeDeclaration};
+use crate::ast::{CompilationUnit, TypeDeclaration, VariableDeclarator};
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::hash::Hash;
 
 mod compilation_unit;
 mod type_declaration;
+mod variable_declarator;
 
 pub use crate::semantic::ast_tags::compilation_unit::CompilationUnitAttributes;
 pub use crate::semantic::ast_tags::type_declaration::TypeDeclarationAttributes;
+pub use crate::semantic::ast_tags::variable_declarator::VariableDeclaratorAttributes;
 
 macro_rules! attributes {
     ($($node:ident => $attr:ty),+ $(,)?) => {
@@ -59,6 +61,7 @@ macro_rules! attributes {
 attributes!(
     CompilationUnit => CompilationUnitAttributes,
     TypeDeclaration => TypeDeclarationAttributes,
+    VariableDeclarator => VariableDeclaratorAttributes,
 );
 
 pub struct Attributes<'a>(HashMap<Key<'a>, NodeAttribute>);

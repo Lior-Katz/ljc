@@ -4,6 +4,7 @@ use crate::ast::{
 use crate::error::Diagnose;
 use crate::file::Span;
 use crate::semantic::SemanticAnalyzer;
+use crate::semantic::ast_tags::VariableDeclaratorAttributes;
 use crate::semantic::error::{CoalesceIter, SemanticResult, TypeMismatch, UnimplementedFeature};
 use crate::semantic::expressions::ExpressionResult;
 use crate::semantic::symbol_table::{Entity, ScopeId};
@@ -25,6 +26,8 @@ impl<'a> SemanticAnalyzer<'a> {
                     .scope_mut(scope)
                     .put(name.value.clone(), Entity::Variable(declarator));
             }
+            self.attributes
+                .insert(declarator, VariableDeclaratorAttributes { ty: declaration_type.clone() });
             match &declarator.initializer {
                 Some(VariableInitializer::Expression(e)) => {
                     self.check_initializer(&declaration_type, e, *e.span())?;

@@ -6,7 +6,7 @@ use crate::error::Diagnose;
 use crate::semantic::error::{SemanticResult, UnimplementedFeature};
 pub use numeric::Numeric;
 
-#[derive(Eq, PartialEq)]
+#[derive(Clone, Eq, PartialEq)]
 pub enum Type {
     Numeric(Numeric),
     Boolean,
