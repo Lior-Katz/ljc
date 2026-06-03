@@ -14,7 +14,7 @@ pub type MethodResult = TypeOrVoid;
 pub type RecordComponentList = Vec<Modified<RecordComponent>>;
 pub type RecordBodyDeclaration = ClassBodyDeclaration;
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub enum TypeDeclaration {
     Class(ClassDeclaration),
     Record(RecordDeclaration),
@@ -23,7 +23,7 @@ pub enum TypeDeclaration {
     AnnotationInterface(AnnotationInterfaceDeclaration),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub struct ClassDeclaration {
     pub name: TypeIdentifier,
     pub extends: Option<Type>,
@@ -33,14 +33,14 @@ pub struct ClassDeclaration {
     pub span: Span,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub enum ClassBodyDeclaration {
     ClassMember(Modified<ClassMemberDeclaration>),
     InstanceInitializer(Block),
     StaticInitializer(Block),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub enum ClassMemberDeclaration {
     Method(MethodDeclaration),
     NestedClassOrInterface(TypeDeclaration),
@@ -57,7 +57,7 @@ pub enum ClassMemberDeclaration {
     },
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub struct InterfaceDeclaration {
     pub name: TypeIdentifier,
     pub extends: Option<TypeList>,
@@ -66,14 +66,14 @@ pub struct InterfaceDeclaration {
     pub span: Span,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub struct AnnotationInterfaceDeclaration {
     pub name: TypeIdentifier,
     pub body: Vec<Modified<ClassMemberDeclaration>>,
     pub span: Span,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub struct RecordDeclaration {
     pub name: TypeIdentifier,
     pub components: RecordComponentList,
@@ -82,7 +82,7 @@ pub struct RecordDeclaration {
     pub span: Span,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub enum RecordComponent {
     Normal {
         component_type: Type,
@@ -94,7 +94,7 @@ pub enum RecordComponent {
     },
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub struct EnumDeclaration {
     pub name: TypeIdentifier,
     pub implements: Option<TypeList>,
@@ -102,20 +102,20 @@ pub struct EnumDeclaration {
     pub span: Span,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub struct EnumBody {
     pub constants: Vec<Modified<EnumConstant>>,
     pub body_declarations: ClassBodyDeclarations,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub struct EnumConstant {
     pub name: Identifier,
     pub args: Option<ArgumentList>,
     pub body: Option<ClassBodyDeclarations>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub struct MethodDeclaration {
     pub result: MethodResult,
     pub identifier: Identifier,
@@ -125,38 +125,38 @@ pub struct MethodDeclaration {
     pub default: Option<ElementValue>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub enum FormalParameter {
     NormalParameter(Type, VariableDeclaratorId),
     VariableArityParameter(Type, Identifier),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub enum MethodBody {
     Semicolon(Span),
     Block(BlockStatements),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub struct ConstructorBody {
     pub prologue: Option<BlockStatements>,
     pub constructor_invocation: Option<ConstructorInvocation>,
     pub epilogue: BlockStatements,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub struct VariableDeclaration {
     pub variable_type: Type,
     pub declarators: VariableDeclaratorList,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub struct VariableDeclarator {
     pub name: VariableDeclaratorId,
     pub initializer: Option<VariableInitializer>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub enum VariableDeclaratorId {
     Named(Identifier),
     Unnamed,
@@ -170,6 +170,18 @@ impl TypeDeclaration {
             TypeDeclaration::Enum(e) => &e.span,
             TypeDeclaration::Interface(i) => &i.span,
             TypeDeclaration::AnnotationInterface(a) => &a.span,
+        }
+    }
+
+    pub fn name(&self) -> &TypeIdentifier {
+        match self {
+            TypeDeclaration::Class(ClassDeclaration { name, .. })
+            | TypeDeclaration::Enum(EnumDeclaration { name, .. })
+            | TypeDeclaration::Record(RecordDeclaration { name, .. })
+            | TypeDeclaration::Interface(InterfaceDeclaration { name, .. })
+            | TypeDeclaration::AnnotationInterface(AnnotationInterfaceDeclaration {
+                name, ..
+            }) => name,
         }
     }
 }

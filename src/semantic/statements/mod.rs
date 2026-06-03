@@ -4,7 +4,7 @@ use crate::file::Span;
 use crate::semantic::SemanticAnalyzer;
 use crate::semantic::error::{CoalesceIter, CoalesceRes, SemanticResult, UnimplementedFeature};
 
-impl SemanticAnalyzer {
+impl SemanticAnalyzer<'_> {
     pub(super) fn statement(&mut self, statement: &Statement) -> SemanticResult {
         let span = statement.span().clone();
         match statement {

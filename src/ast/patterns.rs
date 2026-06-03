@@ -5,7 +5,7 @@ use crate::collections::Multiple;
 
 pub type ComponentPatternList = Multiple<ComponentPattern>;
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub enum Pattern {
     Type(Modified<VariableDeclaration>),
     Record {
@@ -14,7 +14,7 @@ pub enum Pattern {
     },
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub enum ComponentPattern {
     Pattern(Pattern),
     MatchAll,

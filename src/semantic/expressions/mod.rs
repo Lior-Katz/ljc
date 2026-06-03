@@ -5,13 +5,13 @@ use crate::semantic::types::Type;
 
 mod type_checker;
 
-impl SemanticAnalyzer {
+impl SemanticAnalyzer<'_> {
     pub(super) fn expression(&self, expression: &Expression) -> SemanticResult<ExpressionResult> {
         type_checker::type_check(expression)
     }
 }
 
-#[allow(dead_code)]
+#[expect(dead_code)]
 pub enum ExpressionResult {
     Void,
     Value(Type),

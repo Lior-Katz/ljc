@@ -3,7 +3,7 @@ use crate::error::Diagnose;
 use crate::semantic::SemanticAnalyzer;
 use crate::semantic::error::{CoalesceIter, SemanticResult, UnimplementedFeature};
 
-impl SemanticAnalyzer {
+impl SemanticAnalyzer<'_> {
     #[allow(unused_variables)]
     pub(super) fn method(
         &mut self,

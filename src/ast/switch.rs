@@ -7,14 +7,14 @@ use crate::file::Span;
 pub type SwitchBlockMembers = Vec<SwitchBlockMember>;
 pub type CaseConstant = Expression;
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub struct Switch {
     pub expression: Expression,
     pub block: SwitchBlockMembers,
     pub span: Span,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub enum SwitchBlockMember {
     Rule {
         case: SwitchLabel,
@@ -26,7 +26,7 @@ pub enum SwitchBlockMember {
     },
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub enum SwitchLabel {
     Constants(AtLeastOne<CaseConstant>),
     Null {
@@ -39,7 +39,7 @@ pub enum SwitchLabel {
     },
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub enum SwitchRule {
     Expression(Expression),
     Block(BlockStatements),

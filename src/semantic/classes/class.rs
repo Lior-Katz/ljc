@@ -4,7 +4,7 @@ use crate::error::Diagnose;
 use crate::semantic::error::{CoalesceIter, SemanticResult, UnimplementedFeature};
 use crate::semantic::SemanticAnalyzer;
 
-impl SemanticAnalyzer {
+impl SemanticAnalyzer<'_> {
     #[allow(unused_variables)]
     pub(super) fn class_declaration(
         &mut self,

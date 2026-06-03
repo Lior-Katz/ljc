@@ -7,7 +7,7 @@ pub type AtLeastOne<T> = NonEmptyList<T>;
 #[derive(Debug, Clone, Copy)]
 pub struct EmptyVecError;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Hash, Eq, PartialEq)]
 pub struct NonEmptyList<T> {
     head: T,
     rest: Vec<T>,

@@ -6,13 +6,13 @@ pub type Modifiers = Vec<Modifier>;
 pub type ElementValuePairList = Vec<ElementValuePair>;
 pub type ElementValueList = Vec<ElementValue>;
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub struct WithModifiers<T> {
     pub modifiers: Vec<Modifier>,
     pub item: T,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub enum Modifier {
     Public(Span),
     Protected(Span),
@@ -31,7 +31,7 @@ pub enum Modifier {
     Annotation(Annotation),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub enum Annotation {
     Marker {
         name: TypeName,
@@ -49,14 +49,14 @@ pub enum Annotation {
     },
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub enum ElementValue {
     ConditionalExpression(Expression),
     ElementValueList(ElementValueList),
     Annotation(Box<Annotation>),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub struct ElementValuePair {
     pub(crate) name: Identifier,
     pub(crate) value: ElementValue,

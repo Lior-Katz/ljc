@@ -8,7 +8,7 @@ pub type ExpressionList = Vec<Expression>;
 pub type ArgumentList = Vec<Expression>;
 pub type VariableInitializerList = Vec<VariableInitializer>;
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub enum Expression {
     IntegerLiteral {
         value: u64,
@@ -76,13 +76,13 @@ pub enum Expression {
     },
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub enum ExpressionOrType {
     Expression(Expression),
     Type(TypeOrVoid),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub enum AssignmentOp {
     Add,
     Subtract,
@@ -98,7 +98,7 @@ pub enum AssignmentOp {
     BitwiseOr,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub enum BinOp {
     Add(Span),
     Subtract(Span),
@@ -121,27 +121,27 @@ pub enum BinOp {
     LogicalOr(Span),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub enum LeftHandSide {
     ExpressionName(Identifier),
     MemberAccess(MemberAccess),
     ArrayAccess(ArrayAccess),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub struct MemberAccess {
     pub target: Box<Expression>,
     pub name: Identifier,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub struct MethodCall {
     pub target: Option<Box<Expression>>,
     pub name: Identifier,
     pub arguments: ArgumentList,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub enum ArrayCreationMode {
     Sized {
         sized_dimensions: Vec<Expression>,
@@ -150,25 +150,25 @@ pub enum ArrayCreationMode {
     Initialized(ArrayInitializer),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub struct ArrayAccess {
     pub target: Box<Expression>,
     pub index: Box<Expression>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub enum VariableInitializer {
     Expression(Expression),
     ArrayInitializer(ArrayInitializer),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub struct ArrayInitializer {
     pub initializer: VariableInitializerList,
     pub span: Span,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub enum MethodReferenceType {
     Constructor,
     Named(Identifier),
