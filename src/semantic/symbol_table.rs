@@ -1,4 +1,4 @@
-use crate::ast::{FieldDeclaration, MethodDeclaration, TypeDeclaration};
+use crate::ast::{FieldDeclaration, MethodDeclaration, TypeDeclaration, VariableDeclarator};
 use std::collections::HashMap;
 use std::fmt::Debug;
 
@@ -84,4 +84,5 @@ pub enum Entity<'a> {
     Type(&'a TypeDeclaration),
     Method(&'a MethodDeclaration),
     Field(&'a FieldDeclaration),
+    Variable(&'a VariableDeclarator),
 }

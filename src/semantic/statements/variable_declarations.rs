@@ -1,29 +1,40 @@
-use crate::ast::{Expression, Modifiers, VariableDeclaration, VariableInitializer};
+use crate::ast::{
+    Expression, Modifiers, VariableDeclaration, VariableDeclaratorId, VariableInitializer,
+};
 use crate::error::Diagnose;
 use crate::file::Span;
 use crate::semantic::SemanticAnalyzer;
 use crate::semantic::error::{CoalesceIter, SemanticResult, TypeMismatch, UnimplementedFeature};
 use crate::semantic::expressions::ExpressionResult;
+use crate::semantic::symbol_table::{Entity, ScopeId};
 use crate::semantic::types::Type;
 
-impl SemanticAnalyzer<'_> {
+impl<'a> SemanticAnalyzer<'a> {
     #[allow(unused_variables)]
     pub fn variable_declaration(
         &mut self,
-        var_decl: &VariableDeclaration,
+        var_decl: &'a VariableDeclaration,
         modifiers: &Modifiers,
         span: Span,
+        scope: ScopeId,
     ) -> SemanticResult {
         let declaration_type = Type::resolve(&var_decl.variable_type)?;
-        (&var_decl.declarators).coalesce(|declarator| match &declarator.initializer {
-            Some(VariableInitializer::Expression(e)) => {
-                self.check_initializer(&declaration_type, e, *e.span())?;
-                Ok(())
+        (&var_decl.declarators).coalesce(|declarator| {
+            if let VariableDeclaratorId::Named(name) = &declarator.name {
+                self.symbol_table
+                    .scope_mut(scope)
+                    .put(name.value.clone(), Entity::Variable(declarator));
             }
-            Some(VariableInitializer::ArrayInitializer(a)) => {
-                Err(UnimplementedFeature::ArrayInitializer.at(a.span).into())
+            match &declarator.initializer {
+                Some(VariableInitializer::Expression(e)) => {
+                    self.check_initializer(&declaration_type, e, *e.span())?;
+                    Ok(())
+                }
+                Some(VariableInitializer::ArrayInitializer(a)) => {
+                    Err(UnimplementedFeature::ArrayInitializer.at(a.span).into())
+                }
+                None => Ok(()),
             }
-            None => Ok(()),
         })
     }
     fn check_initializer(

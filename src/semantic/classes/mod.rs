@@ -15,7 +15,7 @@ mod members;
 impl<'a> SemanticAnalyzer<'a> {
     pub(super) fn top_level_class_or_interface_declaration(
         &mut self,
-        declaration: &TypeDeclaration,
+        declaration: &'a TypeDeclaration,
         modifiers: &Modifiers,
     ) -> SemanticResult {
         let span = declaration.span().clone();

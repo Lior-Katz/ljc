@@ -5,8 +5,8 @@ use crate::error::Diagnose;
 use crate::semantic::SemanticAnalyzer;
 use crate::semantic::error::{SemanticResult, UnimplementedFeature};
 
-impl SemanticAnalyzer<'_> {
-    pub(super) fn class_member(&mut self, member: &ClassMemberDeclaration, modifiers: &Modifiers) -> SemanticResult {
+impl<'a> SemanticAnalyzer<'a> {
+    pub(super) fn class_member(&mut self, member: &'a ClassMemberDeclaration, modifiers: &Modifiers) -> SemanticResult {
         let span = member.span().clone();
         match member {
             ClassMemberDeclaration::Method(m) => self.method(m, modifiers),

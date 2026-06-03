@@ -1,14 +1,13 @@
-use crate::ast;
-use crate::ast::{ClassBodyDeclaration, Modified, Modifiers};
+use crate::ast::{ClassBodyDeclaration, ClassDeclaration, Modified, Modifiers};
 use crate::error::Diagnose;
-use crate::semantic::error::{CoalesceIter, SemanticResult, UnimplementedFeature};
 use crate::semantic::SemanticAnalyzer;
+use crate::semantic::error::{CoalesceIter, SemanticResult, UnimplementedFeature};
 
-impl SemanticAnalyzer<'_> {
+impl<'a> SemanticAnalyzer<'a> {
     #[allow(unused_variables)]
     pub(super) fn class_declaration(
         &mut self,
-        class_decl: &ast::ClassDeclaration,
+        class_decl: &'a ClassDeclaration,
         modifiers: &Modifiers,
     ) -> SemanticResult {
         class_decl

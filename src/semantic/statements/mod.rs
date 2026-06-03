@@ -4,9 +4,10 @@ use crate::ast::{Modified, Statement};
 use crate::error::Diagnose;
 use crate::semantic::SemanticAnalyzer;
 use crate::semantic::error::{SemanticResult, UnimplementedFeature};
+use crate::semantic::symbol_table::ScopeId;
 
-impl SemanticAnalyzer<'_> {
-    pub(super) fn statement(&mut self, statement: &Statement) -> SemanticResult {
+impl<'a> SemanticAnalyzer<'a> {
+    pub(super) fn statement(&mut self, statement: &'a Statement, scope: ScopeId) -> SemanticResult {
         let span = statement.span().clone();
         match statement {
             Statement::EmptyStatement(_) => {
@@ -18,7 +19,7 @@ impl SemanticAnalyzer<'_> {
             }
             Statement::Block(_) => Err(UnimplementedFeature::Block.at(span).into()),
             Statement::VariableDeclaration(Modified { item: var_decl, modifiers }) => {
-                self.variable_declaration(var_decl, modifiers, span)
+                self.variable_declaration(var_decl, modifiers, span, scope)
             }
             Statement::If { .. } => Err(UnimplementedFeature::If.at(span).into()),
             Statement::While { .. } => Err(UnimplementedFeature::While.at(span).into()),
