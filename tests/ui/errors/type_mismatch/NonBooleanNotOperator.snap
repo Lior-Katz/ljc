@@ -5,8 +5,3 @@ Expected an operand of type boolean or Boolean
 tests/ui/errors/type_mismatch/NonBooleanNotOperator.java:3:22
         boolean a = !1;
                      ^
-
-Variable declarations not yet supported
-tests/ui/errors/type_mismatch/NonBooleanNotOperator.java:3:9
-        boolean a = !1;
-        ^

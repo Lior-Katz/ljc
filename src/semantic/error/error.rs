@@ -176,6 +176,8 @@ pub enum UnimplementedFeature {
     Interface,
     #[error("@interface declarations")]
     AnnotationInterface,
+    #[error("Array initializers in variable declarations")]
+    ArrayInitializer,
     #[error("Numeric promotion")]
     NumericPromotion,
 }

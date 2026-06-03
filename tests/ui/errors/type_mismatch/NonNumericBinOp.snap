@@ -15,11 +15,6 @@ tests/ui/errors/type_mismatch/NonNumericBinOp.java:3:25
         int a = false * true;
                         ^
 
-Variable declarations not yet supported
-tests/ui/errors/type_mismatch/NonNumericBinOp.java:3:9
-        int a = false * true;
-        ^
-
 Expected a numeric operand.
 Hint: an operand is numeric if it is of a numeric type (i.e. byte, short, int, long, char, float, or double),
 or if it is a reference type and can be unboxed to a numeric type (i.e. Byte, Short, Integer, Long, Character, Float, or Double).
@@ -33,11 +28,6 @@ or if it is a reference type and can be unboxed to a numeric type (i.e. Byte, Sh
 tests/ui/errors/type_mismatch/NonNumericBinOp.java:4:25
         int b = false / true;
                         ^
-
-Variable declarations not yet supported
-tests/ui/errors/type_mismatch/NonNumericBinOp.java:4:9
-        int b = false / true;
-        ^
 
 Expected a numeric operand.
 Hint: an operand is numeric if it is of a numeric type (i.e. byte, short, int, long, char, float, or double),
@@ -53,11 +43,6 @@ tests/ui/errors/type_mismatch/NonNumericBinOp.java:5:25
         int c = false % true;
                         ^
 
-Variable declarations not yet supported
-tests/ui/errors/type_mismatch/NonNumericBinOp.java:5:9
-        int c = false % true;
-        ^
-
 Expected a numeric operand.
 Hint: an operand is numeric if it is of a numeric type (i.e. byte, short, int, long, char, float, or double),
 or if it is a reference type and can be unboxed to a numeric type (i.e. Byte, Short, Integer, Long, Character, Float, or Double).
@@ -71,11 +56,6 @@ or if it is a reference type and can be unboxed to a numeric type (i.e. Byte, Sh
 tests/ui/errors/type_mismatch/NonNumericBinOp.java:6:25
         int d = false + true;
                         ^
-
-Variable declarations not yet supported
-tests/ui/errors/type_mismatch/NonNumericBinOp.java:6:9
-        int d = false + true;
-        ^
 
 Expected a numeric operand.
 Hint: an operand is numeric if it is of a numeric type (i.e. byte, short, int, long, char, float, or double),
@@ -91,11 +71,6 @@ tests/ui/errors/type_mismatch/NonNumericBinOp.java:7:25
         int e = false - true;
                         ^
 
-Variable declarations not yet supported
-tests/ui/errors/type_mismatch/NonNumericBinOp.java:7:9
-        int e = false - true;
-        ^
-
 Expected an integral operand.
 Hint: an operand is integral if it is of an integral type (i.e. byte, short, int, long, or char),
 or if it is a reference type and can be unboxed to an integral type (i.e. Byte, Short, Integer, Long, or Character).
@@ -109,11 +84,6 @@ or if it is a reference type and can be unboxed to an integral type (i.e. Byte, 
 tests/ui/errors/type_mismatch/NonNumericBinOp.java:8:26
         int f = false << true;
                          ^
-
-Variable declarations not yet supported
-tests/ui/errors/type_mismatch/NonNumericBinOp.java:8:9
-        int f = false << true;
-        ^
 
 Expected an integral operand.
 Hint: an operand is integral if it is of an integral type (i.e. byte, short, int, long, or char),
@@ -129,11 +99,6 @@ tests/ui/errors/type_mismatch/NonNumericBinOp.java:9:26
         int g = false >> true;
                          ^
 
-Variable declarations not yet supported
-tests/ui/errors/type_mismatch/NonNumericBinOp.java:9:9
-        int g = false >> true;
-        ^
-
 Expected an integral operand.
 Hint: an operand is integral if it is of an integral type (i.e. byte, short, int, long, or char),
 or if it is a reference type and can be unboxed to an integral type (i.e. Byte, Short, Integer, Long, or Character).
@@ -147,11 +112,6 @@ or if it is a reference type and can be unboxed to an integral type (i.e. Byte, 
 tests/ui/errors/type_mismatch/NonNumericBinOp.java:10:27
         int h = false >>> true;
                           ^
-
-Variable declarations not yet supported
-tests/ui/errors/type_mismatch/NonNumericBinOp.java:10:9
-        int h = false >>> true;
-        ^
 
 Expected a numeric operand.
 Hint: an operand is numeric if it is of a numeric type (i.e. byte, short, int, long, char, float, or double),
@@ -167,11 +127,6 @@ tests/ui/errors/type_mismatch/NonNumericBinOp.java:11:25
         int i = false < true;
                         ^
 
-Variable declarations not yet supported
-tests/ui/errors/type_mismatch/NonNumericBinOp.java:11:9
-        int i = false < true;
-        ^
-
 Expected a numeric operand.
 Hint: an operand is numeric if it is of a numeric type (i.e. byte, short, int, long, char, float, or double),
 or if it is a reference type and can be unboxed to a numeric type (i.e. Byte, Short, Integer, Long, Character, Float, or Double).
@@ -185,11 +140,6 @@ or if it is a reference type and can be unboxed to a numeric type (i.e. Byte, Sh
 tests/ui/errors/type_mismatch/NonNumericBinOp.java:12:26
         int j = false <= true;
                          ^
-
-Variable declarations not yet supported
-tests/ui/errors/type_mismatch/NonNumericBinOp.java:12:9
-        int j = false <= true;
-        ^
 
 Expected a numeric operand.
 Hint: an operand is numeric if it is of a numeric type (i.e. byte, short, int, long, char, float, or double),
@@ -205,11 +155,6 @@ tests/ui/errors/type_mismatch/NonNumericBinOp.java:13:25
         int k = false > true;
                         ^
 
-Variable declarations not yet supported
-tests/ui/errors/type_mismatch/NonNumericBinOp.java:13:9
-        int k = false > true;
-        ^
-
 Expected a numeric operand.
 Hint: an operand is numeric if it is of a numeric type (i.e. byte, short, int, long, char, float, or double),
 or if it is a reference type and can be unboxed to a numeric type (i.e. Byte, Short, Integer, Long, Character, Float, or Double).
@@ -223,8 +168,3 @@ or if it is a reference type and can be unboxed to a numeric type (i.e. Byte, Sh
 tests/ui/errors/type_mismatch/NonNumericBinOp.java:14:26
         int l = false >= true;
                          ^
-
-Variable declarations not yet supported
-tests/ui/errors/type_mismatch/NonNumericBinOp.java:14:9
-        int l = false >= true;
-        ^

@@ -1,8 +1,9 @@
-use crate::ast::{Modified, Modifiers, Statement, VariableDeclaration, VariableInitializer};
+mod variable_declarations;
+
+use crate::ast::{Modified, Statement};
 use crate::error::Diagnose;
-use crate::file::Span;
 use crate::semantic::SemanticAnalyzer;
-use crate::semantic::error::{CoalesceIter, CoalesceRes, SemanticResult, UnimplementedFeature};
+use crate::semantic::error::{SemanticResult, UnimplementedFeature};
 
 impl SemanticAnalyzer<'_> {
     pub(super) fn statement(&mut self, statement: &Statement) -> SemanticResult {
@@ -37,25 +38,5 @@ impl SemanticAnalyzer<'_> {
             Statement::Switch(_) => Err(UnimplementedFeature::SwitchStatement.at(span).into()),
             Statement::Yield { .. } => Err(UnimplementedFeature::Yield.at(span).into()),
         }
-    }
-
-    #[allow(unused_variables)]
-    fn variable_declaration(
-        &mut self,
-        var_decl: &VariableDeclaration,
-        modifiers: &Modifiers,
-        span: Span,
-    ) -> SemanticResult {
-        (&var_decl.declarators)
-            .coalesce(|declarator| {
-                match &declarator.initializer {
-                    Some(VariableInitializer::Expression(e)) => {
-                        self.expression(e)?;
-                    }
-                    _ => {}
-                }
-                Ok(())
-            })
-            .coalesce(Err(UnimplementedFeature::VariableDeclaration.at(span).into()))
     }
 }
