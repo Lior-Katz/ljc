@@ -4,7 +4,7 @@ use crate::semantic::error::SemanticResult;
 use crate::semantic::symbol_table::ScopeId;
 use crate::semantic::types::Type;
 
-mod type_checker;
+mod type_check;
 
 impl SemanticAnalyzer<'_> {
     pub(super) fn expression(&self, expression: &Expression, scope: ScopeId) -> SemanticResult<ExpressionResult> {
