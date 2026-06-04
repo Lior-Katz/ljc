@@ -66,19 +66,8 @@ impl SemanticAnalyzer<'_> {
                 Ok(ExpressionResult::Value(ty))
             }
             Expression::LogicalNot(e) => {
-                let eval_type = self.type_check(e, scope)?;
-                match eval_type {
-                    ExpressionResult::Void => {
-                        Err(TypeMismatch::VoidExpression.at(*e.span()).into())
-                    }
-                    ExpressionResult::Value(ty) | ExpressionResult::Variable(ty) => {
-                        if ty.is_primitive_or_boxed_boolean() {
-                            Ok(ExpressionResult::Value(Type::Boolean))
-                        } else {
-                            Err(TypeMismatch::NonBooleanOperand.at(*e.span()).into())
-                        }
-                    }
-                }
+                self.check_primitive_or_boxed_boolean(e, scope)?;
+                Ok(ExpressionResult::Value(Type::Boolean))
             }
             Expression::BinaryOp { left, right, op } => match op {
                 BinOp::Multiply(_)
@@ -150,7 +139,11 @@ impl SemanticAnalyzer<'_> {
                         Err(TypeMismatch::BitwiseOpIncompatibleType.at(span).into())
                     }
                 }
-                _ => todo!(),
+                BinOp::LogicalAnd(_) | BinOp::LogicalOr(_) => {
+                    self.check_primitive_or_boxed_boolean(left, scope)
+                        .coalesce(self.check_primitive_or_boxed_boolean(right, scope))?;
+                    Ok(ExpressionResult::Value(Type::Boolean))
+                }
             },
             Expression::ConditionalExpression { .. } => {
                 Err(UnimplementedFeature::TernaryConditional.at(span).into())
@@ -237,7 +230,24 @@ impl SemanticAnalyzer<'_> {
             }
         }
     }
+
+    fn check_primitive_or_boxed_boolean(&self, expression: &Expression, scope: ScopeId) ->SemanticResult {
+        let eval_type = self.type_check(expression, scope)?;
+        match eval_type {
+            ExpressionResult::Void => {
+                Err(TypeMismatch::VoidExpression.at(*expression.span()).into())
+            }
+            ExpressionResult::Value(ty) | ExpressionResult::Variable(ty) => {
+                if ty.is_primitive_or_boxed_boolean() {
+                    Ok(())
+                } else {
+                    Err(TypeMismatch::NonBooleanOperand.at(*expression.span()).into())
+                }
+            }
+        }
+    }
 }
+
 enum AllowValue {
     True,
     False,

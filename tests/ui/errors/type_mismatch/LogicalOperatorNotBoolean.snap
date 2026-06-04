@@ -1,0 +1,22 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Expected an operand of type boolean or Boolean
+tests/ui/errors/type_mismatch/LogicalOperatorNotBoolean.java:3:22
+        boolean b1 = 1 && 2;
+                     ^
+
+Expected an operand of type boolean or Boolean
+tests/ui/errors/type_mismatch/LogicalOperatorNotBoolean.java:3:27
+        boolean b1 = 1 && 2;
+                          ^
+
+Expected an operand of type boolean or Boolean
+tests/ui/errors/type_mismatch/LogicalOperatorNotBoolean.java:4:22
+        boolean b2 = 'a' || 'b';
+                     ^
+
+Expected an operand of type boolean or Boolean
+tests/ui/errors/type_mismatch/LogicalOperatorNotBoolean.java:4:29
+        boolean b2 = 'a' || 'b';
+                            ^
