@@ -1,0 +1,44 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Expected an integral operand.
+Hint: an operand is integral if it is of an integral type (i.e. byte, short, int, long, or char),
+or if it is a reference type and can be unboxed to an integral type (i.e. Byte, Short, Integer, Long, or Character).
+tests/ui/errors/type_mismatch/NonIntegralShiftOp.java:3:17
+        int f = false << true;
+                ^
+
+Expected an integral operand.
+Hint: an operand is integral if it is of an integral type (i.e. byte, short, int, long, or char),
+or if it is a reference type and can be unboxed to an integral type (i.e. Byte, Short, Integer, Long, or Character).
+tests/ui/errors/type_mismatch/NonIntegralShiftOp.java:3:26
+        int f = false << true;
+                         ^
+
+Expected an integral operand.
+Hint: an operand is integral if it is of an integral type (i.e. byte, short, int, long, or char),
+or if it is a reference type and can be unboxed to an integral type (i.e. Byte, Short, Integer, Long, or Character).
+tests/ui/errors/type_mismatch/NonIntegralShiftOp.java:4:17
+        int g = false >> true;
+                ^
+
+Expected an integral operand.
+Hint: an operand is integral if it is of an integral type (i.e. byte, short, int, long, or char),
+or if it is a reference type and can be unboxed to an integral type (i.e. Byte, Short, Integer, Long, or Character).
+tests/ui/errors/type_mismatch/NonIntegralShiftOp.java:4:26
+        int g = false >> true;
+                         ^
+
+Expected an integral operand.
+Hint: an operand is integral if it is of an integral type (i.e. byte, short, int, long, or char),
+or if it is a reference type and can be unboxed to an integral type (i.e. Byte, Short, Integer, Long, or Character).
+tests/ui/errors/type_mismatch/NonIntegralShiftOp.java:5:17
+        int h = false >>> true;
+                ^
+
+Expected an integral operand.
+Hint: an operand is integral if it is of an integral type (i.e. byte, short, int, long, or char),
+or if it is a reference type and can be unboxed to an integral type (i.e. Byte, Short, Integer, Long, or Character).
+tests/ui/errors/type_mismatch/NonIntegralShiftOp.java:5:27
+        int h = false >>> true;
+                          ^
