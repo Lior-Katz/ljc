@@ -63,7 +63,6 @@ where
     }
 }
 
-#[allow(dead_code)]
 pub trait AssertResult {
     fn assert(self, error: Diagnostic) -> Self;
     fn assert_if(self, cond: bool, error: Diagnostic) -> Self;

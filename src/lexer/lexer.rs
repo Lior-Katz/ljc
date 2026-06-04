@@ -535,7 +535,7 @@ impl<'a> Tokens<'a> {
     }
 }
 
-#[allow(dead_code)]
+#[expect(dead_code)]
 enum EatMode {
     IncludeEnd,
     NoEnd,

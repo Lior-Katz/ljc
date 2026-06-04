@@ -24,7 +24,6 @@ impl<'a> SymbolTable<'a> {
         ScopeId(id)
     }
 
-    #[allow(dead_code)]
     fn scope(&self, id: ScopeId) -> &Scope<'a> {
         &self.scopes[id.0]
     }
@@ -33,7 +32,6 @@ impl<'a> SymbolTable<'a> {
         &mut self.scopes[id.0]
     }
 
-    #[allow(dead_code)]
     pub fn lookup(&'_ self, name: &str, scope_id: ScopeId) -> Option<&'_ Entity<'_>> {
         let scope = self.scope(scope_id);
         scope.lookup(name).or_else(|| {
@@ -47,7 +45,6 @@ impl<'a> SymbolTable<'a> {
 #[derive(Debug)]
 pub struct Scope<'a> {
     entities: HashMap<String, Entity<'a>>,
-    #[allow(dead_code)]
     parent: Option<ScopeId>,
 }
 
