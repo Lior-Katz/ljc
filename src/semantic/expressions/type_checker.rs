@@ -135,6 +135,21 @@ impl SemanticAnalyzer<'_> {
                         Err(TypeMismatch::IncompatibleEquality.at(span).into())
                     }
                 }
+                BinOp::BitwiseAnd(_) | BinOp::BitwiseXor(_) | BinOp::BitwiseOr(_) => {
+                    let left_type = self.check_not_void(left, scope)?;
+                    let right_type = self.check_not_void(right, scope)?;
+                    if left_type.is_primitive_or_boxed_boolean()
+                        && right_type.is_primitive_or_boxed_boolean()
+                    {
+                        Ok(ExpressionResult::Value(Type::Boolean))
+                    } else if left_type.is_convertible_to_integral_type()
+                        && right_type.is_convertible_to_integral_type()
+                    {
+                        Err(UnimplementedFeature::NumericPromotion.at(span).into())
+                    } else {
+                        Err(TypeMismatch::BitwiseOpIncompatibleType.at(span).into())
+                    }
+                }
                 _ => todo!(),
             },
             Expression::ConditionalExpression { .. } => {

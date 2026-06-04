@@ -58,6 +58,13 @@ pub enum TypeMismatch {
             \t3. both be of either a reference type or null."
     )]
     IncompatibleEquality,
+
+    #[error("Incompatible types in bitwise operation.\n\
+             Hint: the operands of a bitwise operator must either:\n\
+                \t1. both be of type boolean or Boolean, or\n\
+                \t2. both be of an integral type (i.e. byte, short, int, long, or char), or a reference type that can be unboxed to an integral type (i.e. Byte, Short, Integer, Long, or Character)."
+    )]
+    BitwiseOpIncompatibleType,
 }
 
 trait SubError: Into<Error> + Display {}
