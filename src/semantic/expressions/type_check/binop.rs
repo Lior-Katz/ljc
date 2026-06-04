@@ -111,7 +111,7 @@ impl SemanticAnalyzer<'_> {
                 } else {
                     Err(TypeMismatch::NonIntegralOperand
                         .at(*expression.span())
-                        .into()) // TODO: add tests for variables
+                        .into())
                 }
             }
             ExpressionResult::Void => {
@@ -119,5 +119,4 @@ impl SemanticAnalyzer<'_> {
             } // TODO: add test once function calls are implemented
         }
     }
-
 }

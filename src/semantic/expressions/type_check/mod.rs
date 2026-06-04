@@ -19,7 +19,6 @@ impl SemanticAnalyzer<'_> {
         scope: ScopeId,
     ) -> SemanticResult<ExpressionResult> {
         let span = expression.span().clone();
-        // TODO: add tests for non-numeric variables in arithmetic operations once names are possible
         match expression {
             Expression::IntegerLiteral { .. } => Ok(ExpressionResult::Value(Numeric::Int.into())),
             Expression::LongLiteral { .. } => Ok(ExpressionResult::Value(Numeric::Long.into())),
@@ -90,7 +89,7 @@ impl SemanticAnalyzer<'_> {
                 } else {
                     Err(TypeMismatch::NonNumericOperand
                         .at(*expression.span())
-                        .into()) // TODO: add tests for variables
+                        .into())
                 }
             }
             ExpressionResult::Void => {
