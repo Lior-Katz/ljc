@@ -1,14 +1,16 @@
 mod assignment;
 mod numeric;
+pub use numeric::{Numeric, NumericBoxed, NumericMaybeBoxed};
 
 use crate::ast;
 use crate::error::Diagnose;
 use crate::semantic::error::{SemanticResult, UnimplementedFeature};
-pub use numeric::Numeric;
+use crate::semantic::types::numeric::{Integral, IntegralBoxed, IntegralMaybeBoxed};
 
 #[derive(Clone, Eq, PartialEq)]
 pub enum Type {
     Numeric(Numeric),
+    NumericBoxed(NumericBoxed),
     Boolean,
     Null,
 }
@@ -33,5 +35,41 @@ impl Type {
 impl From<Numeric> for Type {
     fn from(value: Numeric) -> Self {
         Self::Numeric(value)
+    }
+}
+
+impl From<NumericBoxed> for Type {
+    fn from(value: NumericBoxed) -> Self {
+        Self::NumericBoxed(value)
+    }
+}
+
+impl From<NumericMaybeBoxed> for Type {
+    fn from(value: NumericMaybeBoxed) -> Self {
+        match value {
+            NumericMaybeBoxed::Primitive(numeric) => numeric.into(),
+            NumericMaybeBoxed::Boxed(numeric_boxed) => numeric_boxed.into(),
+        }
+    }
+}
+
+impl From<Integral> for Type {
+    fn from(value: Integral) -> Self {
+        Self::from(Numeric::from(value))
+    }
+}
+
+impl From<IntegralBoxed> for Type {
+    fn from(value: IntegralBoxed) -> Self {
+        Self::from(NumericBoxed::from(value))
+    }
+}
+
+impl From<IntegralMaybeBoxed> for Type {
+    fn from(value: IntegralMaybeBoxed) -> Self {
+        match value {
+            IntegralMaybeBoxed::Primitive(integral) => integral.into(),
+            IntegralMaybeBoxed::Boxed(integral_boxed) => integral_boxed.into(),
+        }
     }
 }
