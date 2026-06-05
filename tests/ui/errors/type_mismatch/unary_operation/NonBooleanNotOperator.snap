@@ -2,11 +2,11 @@
 source: tests/ui/ui_tests.rs
 ---
 Expected an operand of type boolean or Boolean
-tests/ui/errors/type_mismatch/NonBooleanNotOperator.java:3:22
+tests/ui/errors/type_mismatch/unary_operation/NonBooleanNotOperator.java:3:22
         boolean a = !1;
                      ^
 
 Expected an operand of type boolean or Boolean
-tests/ui/errors/type_mismatch/NonBooleanNotOperator.java:6:22
+tests/ui/errors/type_mismatch/unary_operation/NonBooleanNotOperator.java:6:22
         boolean b = !n;
                      ^

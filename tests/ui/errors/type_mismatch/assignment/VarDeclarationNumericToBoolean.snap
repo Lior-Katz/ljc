@@ -2,31 +2,31 @@
 source: tests/ui/ui_tests.rs
 ---
 Incompatible types in assignment
-tests/ui/errors/type_mismatch/VarDeclarationNumericToBoolean.java:3:22
+tests/ui/errors/type_mismatch/assignment/VarDeclarationNumericToBoolean.java:3:22
         boolean bi = 1;
                      ^
 
 Incompatible types in assignment
-tests/ui/errors/type_mismatch/VarDeclarationNumericToBoolean.java:4:22
+tests/ui/errors/type_mismatch/assignment/VarDeclarationNumericToBoolean.java:4:22
         boolean bl = 1L;
                      ^
 
 Incompatible types in assignment
-tests/ui/errors/type_mismatch/VarDeclarationNumericToBoolean.java:5:22
+tests/ui/errors/type_mismatch/assignment/VarDeclarationNumericToBoolean.java:5:22
         boolean bc = 'a';
                      ^
 
 Incompatible types in assignment
-tests/ui/errors/type_mismatch/VarDeclarationNumericToBoolean.java:10:22
+tests/ui/errors/type_mismatch/assignment/VarDeclarationNumericToBoolean.java:10:22
         boolean bi = i;
                      ^
 
 Incompatible types in assignment
-tests/ui/errors/type_mismatch/VarDeclarationNumericToBoolean.java:13:22
+tests/ui/errors/type_mismatch/assignment/VarDeclarationNumericToBoolean.java:13:22
         boolean bl = l;
                      ^
 
 Incompatible types in assignment
-tests/ui/errors/type_mismatch/VarDeclarationNumericToBoolean.java:16:22
+tests/ui/errors/type_mismatch/assignment/VarDeclarationNumericToBoolean.java:16:22
         boolean bc = c;
                      ^

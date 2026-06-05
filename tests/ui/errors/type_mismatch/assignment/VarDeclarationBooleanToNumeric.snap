@@ -1,0 +1,72 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/VarDeclarationBooleanToNumeric.java:3:18
+        byte b = true;
+                 ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/VarDeclarationBooleanToNumeric.java:4:19
+        short s = true;
+                  ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/VarDeclarationBooleanToNumeric.java:5:17
+        int i = true;
+                ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/VarDeclarationBooleanToNumeric.java:6:18
+        long l = true;
+                 ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/VarDeclarationBooleanToNumeric.java:7:18
+        char c = true;
+                 ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/VarDeclarationBooleanToNumeric.java:8:19
+        float f = true;
+                  ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/VarDeclarationBooleanToNumeric.java:9:20
+        double d = true;
+                   ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/VarDeclarationBooleanToNumeric.java:14:18
+        byte x = b;
+                 ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/VarDeclarationBooleanToNumeric.java:15:19
+        short y = b;
+                  ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/VarDeclarationBooleanToNumeric.java:16:17
+        int z = b;
+                ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/VarDeclarationBooleanToNumeric.java:17:18
+        long w = b;
+                 ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/VarDeclarationBooleanToNumeric.java:18:18
+        char c = b;
+                 ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/VarDeclarationBooleanToNumeric.java:19:19
+        float f = b;
+                  ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/VarDeclarationBooleanToNumeric.java:20:20
+        double d = b;
+                   ^

@@ -4,13 +4,13 @@ source: tests/ui/ui_tests.rs
 Expected a numeric operand.
 Hint: an operand is numeric if it is of a numeric type (i.e. byte, short, int, long, char, float, or double),
 or if it is a reference type and can be unboxed to a numeric type (i.e. Byte, Short, Integer, Long, Character, Float, or Double).
-tests/ui/errors/type_mismatch/NonNumericPrefixOp.java:4:19
+tests/ui/errors/type_mismatch/unary_operation/NonNumericPrefixOp.java:4:19
         int a = ++x;
                   ^
 
 Expected a numeric operand.
 Hint: an operand is numeric if it is of a numeric type (i.e. byte, short, int, long, char, float, or double),
 or if it is a reference type and can be unboxed to a numeric type (i.e. Byte, Short, Integer, Long, Character, Float, or Double).
-tests/ui/errors/type_mismatch/NonNumericPrefixOp.java:5:19
+tests/ui/errors/type_mismatch/unary_operation/NonNumericPrefixOp.java:5:19
         int b = --x;
                   ^
