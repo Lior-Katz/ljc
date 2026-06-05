@@ -4,13 +4,13 @@ mod conversions;
 mod numeric;
 
 pub use contexts::NumericContext;
-pub use conversions::binary_numeric_promotion;
-pub use numeric::{Numeric, NumericBoxed, NumericMaybeBoxed};
+pub use conversions::{binary_numeric_promotion, unary_numeric_promotion};
+pub use numeric::{IntegralMaybeBoxed, Numeric, NumericBoxed, NumericMaybeBoxed};
 
 use crate::ast;
 use crate::error::Diagnose;
 use crate::semantic::error::{SemanticResult, UnimplementedFeature};
-use crate::semantic::types::numeric::{Integral, IntegralBoxed, IntegralMaybeBoxed};
+use crate::semantic::types::numeric::{Integral, IntegralBoxed};
 
 #[derive(Clone, Eq, PartialEq)]
 pub enum Type {
