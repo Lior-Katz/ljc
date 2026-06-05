@@ -1,13 +1,11 @@
 use crate::ast::{BinOp, Expression};
 use crate::error::Diagnose;
 use crate::semantic::SemanticAnalyzer;
-use crate::semantic::error::{
-    CoalesceRes, Fold, SemanticResult, TypeMismatch, UnimplementedFeature,
-};
+use crate::semantic::error::{CoalesceRes, Fold, SemanticResult, TypeMismatch};
 use crate::semantic::expressions::ExpressionResult;
 use crate::semantic::expressions::type_check::AllowValue;
 use crate::semantic::symbol_table::ScopeId;
-use crate::semantic::types::Type;
+use crate::semantic::types::{NumericContext, Type, binary_numeric_promotion};
 
 impl SemanticAnalyzer<'_> {
     pub(super) fn binary_op(
@@ -28,13 +26,10 @@ impl SemanticAnalyzer<'_> {
                 .fold(
                     self.check_convertible_to_numeric_type(right, AllowValue::True, scope),
                     |ty_left, ty_right| {
-                        if ty_left == ty_right {
-                            Ok(ExpressionResult::Value(ty_left.into()))
-                        } else {
-                            Err(UnimplementedFeature::NumericPromotion
-                                .at(*left.span())
-                                .into())
-                        }
+                        Ok(ExpressionResult::Value(
+                            binary_numeric_promotion(ty_left, ty_right, NumericContext::Arithmetic)
+                                .into(),
+                        ))
                     },
                 ),
             BinOp::Less(_) | BinOp::LessEqual(_) | BinOp::Greater(_) | BinOp::GreaterEqual(_) => {
@@ -77,10 +72,17 @@ impl SemanticAnalyzer<'_> {
                     && right_type.is_primitive_or_boxed_boolean()
                 {
                     Ok(ExpressionResult::Value(Type::Boolean))
-                } else if left_type.is_convertible_to_integral_type()
-                    && right_type.is_convertible_to_integral_type()
+                } else if let (Some(left_type), Some(right_type)) =
+                    (left_type.as_integral_maybe_boxed(), right_type.as_integral_maybe_boxed())
                 {
-                    Err(UnimplementedFeature::NumericPromotion.at(span).into())
+                    Ok(ExpressionResult::Value(
+                        binary_numeric_promotion(
+                            left_type.into(),
+                            right_type.into(),
+                            NumericContext::Arithmetic,
+                        )
+                        .into(),
+                    ))
                 } else {
                     Err(TypeMismatch::BitwiseOpIncompatibleType.at(span).into())
                 }
