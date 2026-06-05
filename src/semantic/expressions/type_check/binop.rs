@@ -5,7 +5,9 @@ use crate::semantic::error::{CoalesceRes, Fold, SemanticResult, TypeMismatch};
 use crate::semantic::expressions::ExpressionResult;
 use crate::semantic::expressions::type_check::AllowValue;
 use crate::semantic::symbol_table::ScopeId;
-use crate::semantic::types::{NumericContext, Type, binary_numeric_promotion};
+use crate::semantic::types::{
+    IntegralMaybeBoxed, NumericContext, Type, binary_numeric_promotion, unary_numeric_promotion,
+};
 
 impl SemanticAnalyzer<'_> {
     pub(super) fn binary_op(
@@ -42,12 +44,17 @@ impl SemanticAnalyzer<'_> {
                 Ok(ExpressionResult::Value(Type::Boolean))
             }
             BinOp::LeftShift(_) | BinOp::SignedRightShift(_) | BinOp::UnsignedRightShift(_) => {
+                // TODO: add test for non-integral operands in shift expressions
                 self.check_convertible_to_integral_type(left, AllowValue::True, scope)
-                    .coalesce(self.check_convertible_to_integral_type(
-                        right,
-                        AllowValue::True,
-                        scope,
-                    ))?;
+                    .fold(
+                        self.check_convertible_to_integral_type(right, AllowValue::True, scope),
+                        |ty_left, _| {
+                            Ok(ExpressionResult::Value(
+                                unary_numeric_promotion(ty_left.into(), NumericContext::Arithmetic)
+                                    .into(),
+                            ))
+                        },
+                    )?;
                 Ok(ExpressionResult::Value(Type::Boolean))
             }
             BinOp::Equal(_) | BinOp::NotEqual(_) => {
@@ -100,21 +107,19 @@ impl SemanticAnalyzer<'_> {
         expression: &Expression,
         allow_value: AllowValue,
         scope: ScopeId,
-    ) -> SemanticResult {
+    ) -> SemanticResult<IntegralMaybeBoxed> {
         let eval_type = self.type_check(expression, scope)?;
         match eval_type {
             ExpressionResult::Value(_) if !allow_value => Err(TypeMismatch::NeedVariableFoundValue
                 .at(*expression.span())
                 .into()),
             ExpressionResult::Value(ty) | ExpressionResult::Variable(ty) => {
-                if ty.is_convertible_to_integral_type() {
-                    // TODO: add test once float/double literals are implemented, or variables/parameters
-                    Ok(())
-                } else {
-                    Err(TypeMismatch::NonIntegralOperand
+                // TODO: add test once float/double literals are implemented, or variables/parameters
+                ty.as_integral_maybe_boxed().ok_or(
+                    TypeMismatch::NonIntegralOperand
                         .at(*expression.span())
-                        .into())
-                }
+                        .into(),
+                )
             }
             ExpressionResult::Void => {
                 Err(TypeMismatch::VoidExpression.at(*expression.span()).into())
