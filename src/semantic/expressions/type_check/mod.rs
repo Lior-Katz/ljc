@@ -7,8 +7,7 @@ use crate::semantic::SemanticAnalyzer;
 use crate::semantic::error::{SemanticResult, TypeMismatch, UnimplementedFeature};
 use crate::semantic::expressions::ExpressionResult;
 use crate::semantic::symbol_table::ScopeId;
-use crate::semantic::types::Numeric;
-use crate::semantic::types::Type;
+use crate::semantic::types::{Numeric, NumericMaybeBoxed, Type};
 use ast::Expression;
 use std::ops::Not;
 
@@ -35,13 +34,13 @@ impl SemanticAnalyzer<'_> {
             | Expression::PreIncrement(e)
             | Expression::PreDecrement(e) => {
                 let ty = self.check_convertible_to_numeric_type(e, AllowValue::False, scope)?;
-                Ok(ExpressionResult::Value(ty))
+                Ok(ExpressionResult::Value(ty.into()))
             }
             Expression::UnaryPlus(e)
             | Expression::UnaryMinus(e)
             | Expression::BitwiseComplement(e) => {
                 let ty = self.check_convertible_to_numeric_type(e, AllowValue::True, scope)?;
-                Ok(ExpressionResult::Value(ty))
+                Ok(ExpressionResult::Value(ty.into()))
             }
             Expression::LogicalNot(e) => {
                 self.check_primitive_or_boxed_boolean(e, scope)?;
@@ -77,20 +76,18 @@ impl SemanticAnalyzer<'_> {
         expression: &Expression,
         allow_value: AllowValue,
         scope: ScopeId,
-    ) -> SemanticResult<Type> {
+    ) -> SemanticResult<NumericMaybeBoxed> {
         let eval_type = self.type_check(expression, scope)?;
         match eval_type {
             ExpressionResult::Value(_) if !allow_value => Err(TypeMismatch::NeedVariableFoundValue
                 .at(*expression.span())
                 .into()),
             ExpressionResult::Value(ty) | ExpressionResult::Variable(ty) => {
-                if ty.is_convertible_to_numeric_type() {
-                    Ok(ty)
-                } else {
-                    Err(TypeMismatch::NonNumericOperand
+                ty.as_numeric_maybe_boxed().ok_or(
+                    TypeMismatch::NonNumericOperand
                         .at(*expression.span())
-                        .into())
-                }
+                        .into(),
+                )
             }
             ExpressionResult::Void => {
                 Err(TypeMismatch::VoidExpression.at(*expression.span()).into())

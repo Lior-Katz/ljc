@@ -29,7 +29,7 @@ impl SemanticAnalyzer<'_> {
                     self.check_convertible_to_numeric_type(right, AllowValue::True, scope),
                     |ty_left, ty_right| {
                         if ty_left == ty_right {
-                            Ok(ExpressionResult::Value(ty_left))
+                            Ok(ExpressionResult::Value(ty_left.into()))
                         } else {
                             Err(UnimplementedFeature::NumericPromotion
                                 .at(*left.span())
