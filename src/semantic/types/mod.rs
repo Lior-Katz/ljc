@@ -1,5 +1,10 @@
 mod assignment;
+mod contexts;
+mod conversions;
 mod numeric;
+
+pub use contexts::NumericContext;
+pub use conversions::binary_numeric_promotion;
 pub use numeric::{Numeric, NumericBoxed, NumericMaybeBoxed};
 
 use crate::ast;
