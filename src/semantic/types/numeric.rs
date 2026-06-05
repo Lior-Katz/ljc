@@ -1,4 +1,4 @@
-use crate::semantic::types::Type;
+use crate::semantic::types::{BooleanMaybeBoxed, Boxed, Primitive, Type};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Numeric {
@@ -11,7 +11,7 @@ pub enum Numeric {
     Double,
 }
 
-#[derive(Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum NumericBoxed {
     Byte,
     Short,
@@ -22,7 +22,7 @@ pub enum NumericBoxed {
     Double,
 }
 
-#[derive(Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum NumericMaybeBoxed {
     Primitive(Numeric),
     Boxed(NumericBoxed),
@@ -97,17 +97,11 @@ impl Type {
 
     /// [§4.2](https://docs.oracle.com/javase/specs/jls/se26/html/jls-4.html#jls-4.2) - The numeric types are the integral types and the floating-point types.
     fn as_numeric(&self) -> Option<Numeric> {
-        match self {
-            Self::Numeric(numeric) => Some(numeric.clone()),
-            Self::NumericBoxed(_) | Self::Boolean | Self::Null => None,
-        }
+        self.as_primitive()?.as_numeric()
     }
 
     fn as_numeric_boxed(&self) -> Option<NumericBoxed> {
-        match self {
-            Type::NumericBoxed(numeric_boxed) => Some(numeric_boxed.clone()),
-            Type::Numeric(_) | Type::Boolean | Type::Null => None,
-        }
+        self.as_boxed()?.as_numeric()
     }
 
     pub fn is_convertible_to_integral_type(&self) -> bool {
@@ -121,22 +115,21 @@ impl Type {
     }
 
     fn as_integral(&self) -> Option<Integral> {
-        match self {
-            Type::Numeric(numeric) => numeric.as_integral(),
-            Type::NumericBoxed(_) | Type::Boolean | Type::Null => None,
-        }
+        self.as_numeric()?.as_integral()
     }
 
     fn as_integral_boxed(&self) -> Option<IntegralBoxed> {
-        match self {
-            Type::NumericBoxed(numeric_boxed) => numeric_boxed.as_integral(),
-            Type::Numeric(_) | Type::Boolean | Type::Null => None,
-        }
+        self.as_numeric_boxed()?.as_integral()
     }
 
     pub fn is_primitive_or_boxed_boolean(&self) -> bool {
-        matches!(self, Self::Boolean)
-        // TODO: check for boxed Boolean as well
+        self.as_boolean_maybe_boxed().is_some()
+    }
+
+    pub fn as_boolean_maybe_boxed(&self) -> Option<BooleanMaybeBoxed> {
+        matches!(self.as_primitive(), Some(Primitive::Boolean))
+            .then_some(BooleanMaybeBoxed::Primitive)
+            .or(matches!(self.as_boxed(), Some(Boxed::Boolean)).then_some(BooleanMaybeBoxed::Boxed))
     }
 }
 
@@ -193,6 +186,36 @@ impl From<IntegralMaybeBoxed> for NumericMaybeBoxed {
         match value {
             IntegralMaybeBoxed::Primitive(integral) => Numeric::from(integral).into(),
             IntegralMaybeBoxed::Boxed(integral_boxed) => NumericBoxed::from(integral_boxed).into(),
+        }
+    }
+}
+
+impl From<NumericMaybeBoxed> for Type {
+    fn from(value: NumericMaybeBoxed) -> Self {
+        match value {
+            NumericMaybeBoxed::Primitive(numeric) => numeric.into(),
+            NumericMaybeBoxed::Boxed(numeric_boxed) => numeric_boxed.into(),
+        }
+    }
+}
+
+impl From<Integral> for Type {
+    fn from(value: Integral) -> Self {
+        Self::from(Numeric::from(value))
+    }
+}
+
+impl From<IntegralBoxed> for Type {
+    fn from(value: IntegralBoxed) -> Self {
+        Self::from(NumericBoxed::from(value))
+    }
+}
+
+impl From<IntegralMaybeBoxed> for Type {
+    fn from(value: IntegralMaybeBoxed) -> Self {
+        match value {
+            IntegralMaybeBoxed::Primitive(integral) => integral.into(),
+            IntegralMaybeBoxed::Boxed(integral_boxed) => integral_boxed.into(),
         }
     }
 }

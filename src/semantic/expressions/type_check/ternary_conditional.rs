@@ -6,7 +6,7 @@ use crate::semantic::error::{SemanticResult, UnimplementedFeature};
 use crate::semantic::expressions::ExpressionResult;
 use crate::semantic::symbol_table::ScopeId;
 use crate::semantic::types::{
-    Numeric, NumericContext, NumericMaybeBoxed, Type, binary_numeric_promotion,
+    BooleanMaybeBoxed, NumericContext, NumericMaybeBoxed, Type, binary_numeric_promotion,
 };
 
 impl SemanticAnalyzer<'_> {
@@ -24,7 +24,7 @@ impl SemanticAnalyzer<'_> {
         if true_branch_type.is_primitive_or_boxed_boolean()
             && false_branch_type.is_primitive_or_boxed_boolean()
         {
-            Ok(ExpressionResult::Value(boolean_conditional_expression()))
+            Ok(ExpressionResult::Value(boolean_conditional_expression().into()))
         } else if let (Some(t), Some(f)) = (
             true_branch_type.as_numeric_maybe_boxed(),
             false_branch_type.as_numeric_maybe_boxed(),
@@ -36,15 +36,15 @@ impl SemanticAnalyzer<'_> {
     }
 }
 
-fn boolean_conditional_expression() -> Type {
+fn boolean_conditional_expression() -> BooleanMaybeBoxed {
     // TODO: if both operands are boxed Booleans, result is boxed as well
-    Type::Boolean
+    BooleanMaybeBoxed::Primitive
 }
 
 fn numeric_conditional_expression(
     true_branch_type: NumericMaybeBoxed,
     false_branch_type: NumericMaybeBoxed,
-) -> Numeric {
+) -> NumericMaybeBoxed {
     binary_numeric_promotion(true_branch_type, false_branch_type, NumericContext::Choice).into()
 }
 fn reference_conditional_expression(
@@ -68,7 +68,7 @@ fn reference_conditional_expression(
 #[cfg(test)]
 mod tests {
     use crate::semantic::expressions::type_check::ternary_conditional::numeric_conditional_expression;
-    use crate::semantic::types::{Numeric, NumericBoxed};
+    use crate::semantic::types::{Numeric, NumericBoxed, NumericMaybeBoxed};
 
     macro_rules! assert {
         (
@@ -76,7 +76,10 @@ mod tests {
             t = $t_ty:expr,
             f = $f_ty:expr
         ) => {
-            assert_eq!($expected, numeric_conditional_expression($t_ty.into(), $f_ty.into()))
+            assert_eq!(
+                NumericMaybeBoxed::from($expected),
+                numeric_conditional_expression($t_ty.into(), $f_ty.into())
+            )
         };
     }
 

@@ -8,7 +8,7 @@ use crate::semantic::SemanticAnalyzer;
 use crate::semantic::error::{SemanticResult, TypeMismatch, UnimplementedFeature};
 use crate::semantic::expressions::ExpressionResult;
 use crate::semantic::symbol_table::ScopeId;
-use crate::semantic::types::{Numeric, NumericMaybeBoxed, Type};
+use crate::semantic::types::{Numeric, NumericMaybeBoxed, Primitive, Type};
 use ast::Expression;
 use std::ops::Not;
 
@@ -22,7 +22,7 @@ impl SemanticAnalyzer<'_> {
         match expression {
             Expression::IntegerLiteral { .. } => Ok(ExpressionResult::Value(Numeric::Int.into())),
             Expression::LongLiteral { .. } => Ok(ExpressionResult::Value(Numeric::Long.into())),
-            Expression::BooleanLiteral { .. } => Ok(ExpressionResult::Value(Type::Boolean)),
+            Expression::BooleanLiteral { .. } => Ok(ExpressionResult::Value(Primitive::Boolean.into())),
             Expression::CharLiteral { .. } => Ok(ExpressionResult::Value(Numeric::Char.into())),
             Expression::NullLiteral(_) => Ok(ExpressionResult::Value(Type::Null).into()),
             Expression::StringLiteral { .. } => {
@@ -45,7 +45,7 @@ impl SemanticAnalyzer<'_> {
             }
             Expression::LogicalNot(e) => {
                 self.check_primitive_or_boxed_boolean(e, scope)?;
-                Ok(ExpressionResult::Value(Type::Boolean))
+                Ok(ExpressionResult::Value(Primitive::Boolean.into()))
             }
             Expression::BinaryOp { left, right, op } => self.binary_op(left, right, op, scope),
             Expression::ConditionalExpression { condition, if_true, if_false } => {

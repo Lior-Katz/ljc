@@ -10,14 +10,29 @@ pub use numeric::{IntegralMaybeBoxed, Numeric, NumericBoxed, NumericMaybeBoxed};
 use crate::ast;
 use crate::error::Diagnose;
 use crate::semantic::error::{SemanticResult, UnimplementedFeature};
-use crate::semantic::types::numeric::{Integral, IntegralBoxed};
 
 #[derive(Clone, Eq, PartialEq)]
 pub enum Type {
-    Numeric(Numeric),
-    NumericBoxed(NumericBoxed),
-    Boolean,
+    Primitive(Primitive),
+    Boxed(Boxed),
     Null,
+}
+
+#[derive(Clone, Eq, PartialEq)]
+pub enum Primitive {
+    Numeric(Numeric),
+    Boolean,
+}
+
+#[derive(Clone, Eq, PartialEq)]
+pub enum Boxed {
+    Numeric(NumericBoxed),
+    Boolean,
+}
+
+pub enum BooleanMaybeBoxed {
+    Primitive,
+    Boxed,
 }
 
 impl Type {
@@ -30,51 +45,86 @@ impl Type {
             ast::Type::Char(_) => Ok(Numeric::Char.into()),
             ast::Type::Float(_) => Ok(Numeric::Float.into()),
             ast::Type::Double(_) => Ok(Numeric::Double.into()),
-            ast::Type::Boolean(_) => Ok(Self::Boolean),
+            ast::Type::Boolean(_) => Ok(Primitive::Boolean.into()),
             ast::Type::Class(_) => Err(UnimplementedFeature::ReferenceTypes.at(*ty.span()).into()),
             ast::Type::Array(_) => Err(UnimplementedFeature::ArrayTypes.at(*ty.span()).into()),
         }
+    }
+
+    pub fn as_primitive(&self) -> Option<Primitive> {
+        match self {
+            Type::Primitive(primitive) => Some(primitive.clone()),
+            Type::Boxed(_) | Type::Null => None,
+        }
+    }
+
+    pub fn as_boxed(&self) -> Option<Boxed> {
+        match self {
+            Type::Boxed(boxed) => Some(boxed.clone()),
+            Type::Primitive(_) | Type::Null => None,
+        }
+    }
+}
+
+impl Primitive {
+    pub fn as_numeric(&self) -> Option<Numeric> {
+        match self {
+            Primitive::Numeric(numeric) => Some(numeric.clone()),
+            Primitive::Boolean => None,
+        }
+    }
+}
+
+impl Boxed {
+    pub fn as_numeric(&self) -> Option<NumericBoxed> {
+        match self {
+            Boxed::Numeric(numeric_boxed) => Some(numeric_boxed.clone()),
+            Boxed::Boolean => None,
+        }
+    }
+}
+
+impl From<Primitive> for Type {
+    fn from(value: Primitive) -> Self {
+        Type::Primitive(value)
+    }
+}
+
+impl From<Boxed> for Type {
+    fn from(value: Boxed) -> Self {
+        Type::Boxed(value)
+    }
+}
+
+impl From<Numeric> for Primitive {
+    fn from(value: Numeric) -> Self {
+        Primitive::Numeric(value)
+    }
+}
+
+impl From<NumericBoxed> for Boxed {
+    fn from(value: NumericBoxed) -> Self {
+        Boxed::Numeric(value)
     }
 }
 
 impl From<Numeric> for Type {
     fn from(value: Numeric) -> Self {
-        Self::Numeric(value)
+        Type::from(Primitive::from(value))
     }
 }
 
 impl From<NumericBoxed> for Type {
     fn from(value: NumericBoxed) -> Self {
-        Self::NumericBoxed(value)
+        Type::from(Boxed::from(value))
     }
 }
 
-impl From<NumericMaybeBoxed> for Type {
-    fn from(value: NumericMaybeBoxed) -> Self {
+impl From<BooleanMaybeBoxed> for Type {
+    fn from(value: BooleanMaybeBoxed) -> Self {
         match value {
-            NumericMaybeBoxed::Primitive(numeric) => numeric.into(),
-            NumericMaybeBoxed::Boxed(numeric_boxed) => numeric_boxed.into(),
-        }
-    }
-}
-
-impl From<Integral> for Type {
-    fn from(value: Integral) -> Self {
-        Self::from(Numeric::from(value))
-    }
-}
-
-impl From<IntegralBoxed> for Type {
-    fn from(value: IntegralBoxed) -> Self {
-        Self::from(NumericBoxed::from(value))
-    }
-}
-
-impl From<IntegralMaybeBoxed> for Type {
-    fn from(value: IntegralMaybeBoxed) -> Self {
-        match value {
-            IntegralMaybeBoxed::Primitive(integral) => integral.into(),
-            IntegralMaybeBoxed::Boxed(integral_boxed) => integral_boxed.into(),
+            BooleanMaybeBoxed::Primitive => Primitive::Boolean.into(),
+            BooleanMaybeBoxed::Boxed => Boxed::Boolean.into(),
         }
     }
 }

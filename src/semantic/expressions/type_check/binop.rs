@@ -6,7 +6,8 @@ use crate::semantic::expressions::ExpressionResult;
 use crate::semantic::expressions::type_check::AllowValue;
 use crate::semantic::symbol_table::ScopeId;
 use crate::semantic::types::{
-    IntegralMaybeBoxed, NumericContext, Type, binary_numeric_promotion, unary_numeric_promotion,
+    IntegralMaybeBoxed, NumericContext, Primitive, binary_numeric_promotion,
+    unary_numeric_promotion,
 };
 
 impl SemanticAnalyzer<'_> {
@@ -41,7 +42,7 @@ impl SemanticAnalyzer<'_> {
                         self.check_convertible_to_numeric_type(right, AllowValue::True, scope)
                             .map(|_| ()),
                     )?;
-                Ok(ExpressionResult::Value(Type::Boolean))
+                Ok(ExpressionResult::Value(Primitive::Boolean.into()))
             }
             BinOp::LeftShift(_) | BinOp::SignedRightShift(_) | BinOp::UnsignedRightShift(_) => {
                 // TODO: add test for non-integral operands in shift expressions
@@ -55,7 +56,7 @@ impl SemanticAnalyzer<'_> {
                             ))
                         },
                     )?;
-                Ok(ExpressionResult::Value(Type::Boolean))
+                Ok(ExpressionResult::Value(Primitive::Boolean.into()))
             }
             BinOp::Equal(_) | BinOp::NotEqual(_) => {
                 let left_type = self.check_not_void(left, scope)?;
@@ -63,11 +64,11 @@ impl SemanticAnalyzer<'_> {
                 if left_type.is_convertible_to_numeric_type()
                     && right_type.is_convertible_to_numeric_type()
                 {
-                    Ok(ExpressionResult::Value(Type::Boolean))
+                    Ok(ExpressionResult::Value(Primitive::Boolean.into()))
                 } else if left_type.is_primitive_or_boxed_boolean()
                     && right_type.is_primitive_or_boxed_boolean()
                 {
-                    Ok(ExpressionResult::Value(Type::Boolean))
+                    Ok(ExpressionResult::Value(Primitive::Boolean.into()))
                 } else {
                     Err(TypeMismatch::IncompatibleEquality.at(span).into())
                 }
@@ -78,7 +79,7 @@ impl SemanticAnalyzer<'_> {
                 if left_type.is_primitive_or_boxed_boolean()
                     && right_type.is_primitive_or_boxed_boolean()
                 {
-                    Ok(ExpressionResult::Value(Type::Boolean))
+                    Ok(ExpressionResult::Value(Primitive::Boolean.into()))
                 } else if let (Some(left_type), Some(right_type)) =
                     (left_type.as_integral_maybe_boxed(), right_type.as_integral_maybe_boxed())
                 {
@@ -97,7 +98,7 @@ impl SemanticAnalyzer<'_> {
             BinOp::LogicalAnd(_) | BinOp::LogicalOr(_) => {
                 self.check_primitive_or_boxed_boolean(left, scope)
                     .coalesce(self.check_primitive_or_boxed_boolean(right, scope))?;
-                Ok(ExpressionResult::Value(Type::Boolean))
+                Ok(ExpressionResult::Value(Primitive::Boolean.into()))
             }
         }
     }
