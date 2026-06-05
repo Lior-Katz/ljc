@@ -1,0 +1,7 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Expected an operand of type boolean or Boolean
+tests/ui/errors/type_mismatch/TernaryConditionalNonBoolean.java:3:17
+        int x = 1 ? 2 : 3;
+                ^

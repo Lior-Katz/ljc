@@ -1,5 +1,6 @@
 mod binop;
 mod name_expression;
+mod ternary_conditional;
 
 use crate::ast;
 use crate::error::Diagnose;
@@ -47,8 +48,8 @@ impl SemanticAnalyzer<'_> {
                 Ok(ExpressionResult::Value(Type::Boolean))
             }
             Expression::BinaryOp { left, right, op } => self.binary_op(left, right, op, scope),
-            Expression::ConditionalExpression { .. } => {
-                Err(UnimplementedFeature::TernaryConditional.at(span).into())
+            Expression::ConditionalExpression { condition, if_true, if_false } => {
+                self.ternary_conditional(condition, if_true, if_false, scope)
             }
             Expression::MemberAccess(_) => Err(UnimplementedFeature::MemberAccess.at(span).into()),
             Expression::MethodCall(_) => Err(UnimplementedFeature::MethodCall.at(span).into()),

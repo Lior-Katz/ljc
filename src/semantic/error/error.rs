@@ -139,8 +139,8 @@ pub enum UnimplementedFeature {
     UnaryMinusInSubExpression,
     #[error("Binary operations")]
     BinaryOp,
-    #[error("Ternary conditional expressions")]
-    TernaryConditional,
+    #[error("Ternary conditional expressions with 2nd and 3rd operands being reference types")]
+    TernaryConditional2ReferenceTypes,
     #[error("Member access expressions")]
     MemberAccess,
     #[error("Method calls")]
