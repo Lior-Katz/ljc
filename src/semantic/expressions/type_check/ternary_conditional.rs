@@ -21,10 +21,11 @@ impl SemanticAnalyzer<'_> {
         let true_branch_type = self.check_not_void(if_true, scope)?;
         let false_branch_type = self.check_not_void(if_false, scope)?;
 
-        if true_branch_type.is_primitive_or_boxed_boolean()
-            && false_branch_type.is_primitive_or_boxed_boolean()
-        {
-            Ok(ExpressionResult::Value(boolean_conditional_expression().into()))
+        if let (Some(t), Some(f)) = (
+            true_branch_type.as_boolean_maybe_boxed(),
+            false_branch_type.as_boolean_maybe_boxed(),
+        ) {
+            Ok(ExpressionResult::Value(boolean_conditional_expression(t, f).into()))
         } else if let (Some(t), Some(f)) = (
             true_branch_type.as_numeric_maybe_boxed(),
             false_branch_type.as_numeric_maybe_boxed(),
@@ -36,9 +37,13 @@ impl SemanticAnalyzer<'_> {
     }
 }
 
-fn boolean_conditional_expression() -> BooleanMaybeBoxed {
-    // TODO: if both operands are boxed Booleans, result is boxed as well
-    BooleanMaybeBoxed::Primitive
+fn boolean_conditional_expression(t: BooleanMaybeBoxed, f: BooleanMaybeBoxed) -> BooleanMaybeBoxed {
+    match (t, f) {
+        (BooleanMaybeBoxed::Boxed, BooleanMaybeBoxed::Boxed) => BooleanMaybeBoxed::Boxed,
+        (BooleanMaybeBoxed::Primitive, BooleanMaybeBoxed::Primitive)
+        | (BooleanMaybeBoxed::Primitive, BooleanMaybeBoxed::Boxed)
+        | (BooleanMaybeBoxed::Boxed, BooleanMaybeBoxed::Primitive) => BooleanMaybeBoxed::Primitive,
+    }
 }
 
 fn numeric_conditional_expression(
@@ -67,8 +72,10 @@ fn reference_conditional_expression(
 
 #[cfg(test)]
 mod tests {
-    use crate::semantic::expressions::type_check::ternary_conditional::numeric_conditional_expression;
-    use crate::semantic::types::{Numeric, NumericBoxed, NumericMaybeBoxed};
+    use crate::semantic::expressions::type_check::ternary_conditional::{
+        boolean_conditional_expression, numeric_conditional_expression,
+    };
+    use crate::semantic::types::{BooleanMaybeBoxed, Numeric, NumericBoxed, NumericMaybeBoxed};
 
     macro_rules! assert {
         (
@@ -145,6 +152,29 @@ mod tests {
             boxed1 = NumericBoxed::Byte,
             primitive2 = Numeric::Short,
             boxed2 = NumericBoxed::Short
+        );
+    }
+
+    #[test]
+    fn boolean_conditional() {
+        assert_eq!(
+            BooleanMaybeBoxed::Primitive,
+            boolean_conditional_expression(
+                BooleanMaybeBoxed::Primitive,
+                BooleanMaybeBoxed::Primitive
+            )
+        );
+        assert_eq!(
+            BooleanMaybeBoxed::Primitive,
+            boolean_conditional_expression(BooleanMaybeBoxed::Boxed, BooleanMaybeBoxed::Primitive)
+        );
+        assert_eq!(
+            BooleanMaybeBoxed::Primitive,
+            boolean_conditional_expression(BooleanMaybeBoxed::Primitive, BooleanMaybeBoxed::Boxed)
+        );
+        assert_eq!(
+            BooleanMaybeBoxed::Boxed,
+            boolean_conditional_expression(BooleanMaybeBoxed::Boxed, BooleanMaybeBoxed::Boxed)
         );
     }
 }

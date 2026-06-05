@@ -30,6 +30,7 @@ pub enum Boxed {
     Boolean,
 }
 
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum BooleanMaybeBoxed {
     Primitive,
     Boxed,
