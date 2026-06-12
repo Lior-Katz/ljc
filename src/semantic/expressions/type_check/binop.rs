@@ -20,11 +20,7 @@ impl SemanticAnalyzer<'_> {
     ) -> SemanticResult<ExpressionResult> {
         let span = *left.span();
         match op {
-            BinOp::Multiply(_)
-            | BinOp::Divide(_)
-            | BinOp::Modulo(_)
-            | BinOp::Add(_)
-            | BinOp::Subtract(_) => self
+            BinOp::Multiply | BinOp::Divide | BinOp::Modulo | BinOp::Add | BinOp::Subtract => self
                 .check_convertible_to_numeric_type(left, AllowValue::True, scope)
                 .fold(
                     self.check_convertible_to_numeric_type(right, AllowValue::True, scope),
@@ -35,7 +31,7 @@ impl SemanticAnalyzer<'_> {
                         ))
                     },
                 ),
-            BinOp::Less(_) | BinOp::LessEqual(_) | BinOp::Greater(_) | BinOp::GreaterEqual(_) => {
+            BinOp::Less | BinOp::LessEqual | BinOp::Greater | BinOp::GreaterEqual => {
                 self.check_convertible_to_numeric_type(left, AllowValue::True, scope)
                     .map(|_| ())
                     .coalesce(
@@ -44,7 +40,7 @@ impl SemanticAnalyzer<'_> {
                     )?;
                 Ok(ExpressionResult::Value(Primitive::Boolean.into()))
             }
-            BinOp::LeftShift(_) | BinOp::SignedRightShift(_) | BinOp::UnsignedRightShift(_) => {
+            BinOp::LeftShift | BinOp::SignedRightShift | BinOp::UnsignedRightShift => {
                 // TODO: add test for non-integral operands in shift expressions
                 self.check_convertible_to_integral_type(left, AllowValue::True, scope)
                     .fold(
@@ -58,7 +54,7 @@ impl SemanticAnalyzer<'_> {
                     )?;
                 Ok(ExpressionResult::Value(Primitive::Boolean.into()))
             }
-            BinOp::Equal(_) | BinOp::NotEqual(_) => {
+            BinOp::Equal | BinOp::NotEqual => {
                 let left_type = self.check_not_void(left, scope)?;
                 let right_type = self.check_not_void(right, scope)?;
                 if left_type.is_convertible_to_numeric_type()
@@ -73,7 +69,7 @@ impl SemanticAnalyzer<'_> {
                     Err(TypeMismatch::IncompatibleEquality.at(span).into())
                 }
             }
-            BinOp::BitwiseAnd(_) | BinOp::BitwiseXor(_) | BinOp::BitwiseOr(_) => {
+            BinOp::BitwiseAnd | BinOp::BitwiseXor | BinOp::BitwiseOr => {
                 let left_type = self.check_not_void(left, scope)?;
                 let right_type = self.check_not_void(right, scope)?;
                 if left_type.is_primitive_or_boxed_boolean()
@@ -95,7 +91,7 @@ impl SemanticAnalyzer<'_> {
                     Err(TypeMismatch::BitwiseOpIncompatibleType.at(span).into())
                 }
             }
-            BinOp::LogicalAnd(_) | BinOp::LogicalOr(_) => {
+            BinOp::LogicalAnd | BinOp::LogicalOr => {
                 self.check_primitive_or_boxed_boolean(left, scope)
                     .coalesce(self.check_primitive_or_boxed_boolean(right, scope))?;
                 Ok(ExpressionResult::Value(Primitive::Boolean.into()))

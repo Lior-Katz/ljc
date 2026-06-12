@@ -40,25 +40,6 @@ macro_rules! accept_with_value {
         }
     }};
 
-    // this arm needs to go before the next one so that more specific patterns much this first
-    ($self:expr, $($token:expr => |$span:ident| $result:expr),+ $(,)?) => {{
-        Err(Failure::NoProduction)
-        $(
-            .or_else(|e| match e {
-                Failure::NoProduction => {
-                    $self.accept_full($token)
-                        .map_err(Into::into)
-                        .and_then(|accepted| {
-                            accepted.span()
-                                .map(|$span| $result)
-                                .ok_or(Failure::NoProduction)
-                        })
-                }
-                _ => Err(e),
-            })
-        )+
-    }};
-
     ($self:expr, $($token:expr => $result:expr),+ $(,)?) => {{
         Err(Failure::NoProduction)
         $(
@@ -364,8 +345,7 @@ impl<'a> Parser<'a> {
             self.normal_class_declaration().map(ClassDeclaration::into),
             self.record_declaration().map(RecordDeclaration::into),
             self.enum_declaration().map(EnumDeclaration::into),
-            self.interface_declaration()
-                .map(InterfaceDeclaration::into),
+            self.interface_declaration().map(InterfaceDeclaration::into),
             self.annotation_interface_declaration()
                 .map(AnnotationInterfaceDeclaration::into),
         )
@@ -1421,7 +1401,7 @@ impl<'a> Parser<'a> {
     fn conditional_or_expression(&mut self) -> ParseResult<ExpressionOrType> {
         self.left_associative_binary_operation(Self::conditional_and_expression, |this| {
             accept_with_value!(this,
-                Symbol::LogicalOr => |span| BinOp::LogicalOr(span)
+                Symbol::LogicalOr => BinOp::LogicalOr
             )
         })
     }
@@ -1429,7 +1409,7 @@ impl<'a> Parser<'a> {
     fn conditional_and_expression(&mut self) -> ParseResult<ExpressionOrType> {
         self.left_associative_binary_operation(Self::inclusive_or_expression, |this| {
             accept_with_value!(this,
-                Symbol::LogicalAnd => |span| BinOp::LogicalAnd(span)
+                Symbol::LogicalAnd => BinOp::LogicalAnd
             )
         })
     }
@@ -1437,7 +1417,7 @@ impl<'a> Parser<'a> {
     fn inclusive_or_expression(&mut self) -> ParseResult<ExpressionOrType> {
         self.left_associative_binary_operation(Self::exclusive_or_expression, |this| {
             accept_with_value!(this,
-                Symbol::BitwiseOr => |span| BinOp::BitwiseOr(span)
+                Symbol::BitwiseOr => BinOp::BitwiseOr
             )
         })
     }
@@ -1445,7 +1425,7 @@ impl<'a> Parser<'a> {
     fn exclusive_or_expression(&mut self) -> ParseResult<ExpressionOrType> {
         self.left_associative_binary_operation(Self::and_expression, |this| {
             accept_with_value!(this,
-                Symbol::BitwiseXor => |span| BinOp::BitwiseXor(span)
+                Symbol::BitwiseXor => BinOp::BitwiseXor
             )
         })
     }
@@ -1453,7 +1433,7 @@ impl<'a> Parser<'a> {
     fn and_expression(&mut self) -> ParseResult<ExpressionOrType> {
         self.left_associative_binary_operation(Self::equality_expression, |this| {
             accept_with_value!(this,
-                Symbol::BitwiseAnd => |span| BinOp::BitwiseAnd(span)
+                Symbol::BitwiseAnd => BinOp::BitwiseAnd
             )
         })
     }
@@ -1461,8 +1441,8 @@ impl<'a> Parser<'a> {
     fn equality_expression(&mut self) -> ParseResult<ExpressionOrType> {
         self.left_associative_binary_operation(Self::relational_expression, |this| {
             accept_with_value!(this,
-                Symbol::Equals => |span| BinOp::Equal(span),
-                Symbol::NotEquals => |span| BinOp::NotEqual(span),
+                Symbol::Equals => BinOp::Equal,
+                Symbol::NotEquals => BinOp::NotEqual,
             )
         })
     }
@@ -1475,10 +1455,10 @@ impl<'a> Parser<'a> {
         // which does not take symmetric operands.
         loop {
             if let Ok(op) = accept_with_value!(self,
-                Symbol::LessThan => |span| BinOp::Less(span),
-                Symbol::GreaterThan => |span| BinOp::Greater(span),
-                Symbol::LessThanOrEquals => |span| BinOp::LessEqual(span),
-                Symbol::GreaterThanOrEquals => |span| BinOp::GreaterEqual(span),
+                Symbol::LessThan => BinOp::Less,
+                Symbol::GreaterThan => BinOp::Greater,
+                Symbol::LessThanOrEquals => BinOp::LessEqual,
+                Symbol::GreaterThanOrEquals => BinOp::GreaterEqual,
             ) {
                 expr = Expression::BinaryOp {
                     left: Box::new(expr.try_into()?),
@@ -1496,9 +1476,9 @@ impl<'a> Parser<'a> {
     fn shift_expression(&mut self) -> ParseResult<ExpressionOrType> {
         self.left_associative_binary_operation(Self::additive_expression, |this| {
             accept_with_value!(this,
-                Symbol::LeftShift => |span| BinOp::LeftShift(span),
-                Symbol::SignedRightShift => |span| BinOp::SignedRightShift(span),
-                Symbol::UnsignedRightShift => |span| BinOp::UnsignedRightShift(span),
+                Symbol::LeftShift => BinOp::LeftShift,
+                Symbol::SignedRightShift => BinOp::SignedRightShift,
+                Symbol::UnsignedRightShift => BinOp::UnsignedRightShift,
             )
         })
     }
@@ -1506,8 +1486,8 @@ impl<'a> Parser<'a> {
     fn additive_expression(&mut self) -> ParseResult<ExpressionOrType> {
         self.left_associative_binary_operation(Self::multiplicative_expression, |this| {
             accept_with_value!(this,
-                Symbol::Plus => |span| BinOp::Add(span),
-                Symbol::Minus => |span| BinOp::Subtract(span),
+                Symbol::Plus => BinOp::Add,
+                Symbol::Minus => BinOp::Subtract,
             )
         })
     }
@@ -1515,9 +1495,9 @@ impl<'a> Parser<'a> {
     fn multiplicative_expression(&mut self) -> ParseResult<ExpressionOrType> {
         self.left_associative_binary_operation(Self::unary_expression, |this| {
             accept_with_value!(this,
-                Symbol::Multiply => |span| BinOp::Multiply(span),
-                Symbol::Divide   => |span| BinOp::Divide(span),
-                Symbol::Modulo   => |span| BinOp::Modulo(span),
+                Symbol::Multiply => BinOp::Multiply,
+                Symbol::Divide   => BinOp::Divide,
+                Symbol::Modulo   => BinOp::Modulo,
             )
         })
     }
@@ -2815,7 +2795,6 @@ impl TryFrom<Expression> for ClassTypePartList {
 impl Into<TypeDeclaration> for ClassDeclaration {
     fn into(self) -> TypeDeclaration {
         TypeDeclaration::Class(self)
-
     }
 }
 
