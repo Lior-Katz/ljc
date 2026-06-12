@@ -2874,22 +2874,22 @@ impl From<ArrayType> for Type {
 }
 
 impl TryFrom<Expression> for LeftHandSide {
-    type Error = Failure;
+    type Error = Diagnostic;
 
-    fn try_from(value: Expression) -> ParseResult<Self> {
+    fn try_from(value: Expression) -> Result<Self, Self::Error> {
         match value {
             Expression::Name(id) => Ok(LeftHandSide::ExpressionName(id)),
             Expression::MemberAccess(member_access) => {
                 Ok(LeftHandSide::MemberAccess(member_access))
             }
             Expression::ArrayAccess(array_access) => Ok(LeftHandSide::ArrayAccess(array_access)),
-            _ => Err(Failure::NoProduction),
+            _ => Err(Error::NotLValue.at(*value.span()).into()),
         }
     }
 }
 
 impl TryFrom<ExpressionOrType> for LeftHandSide {
-    type Error = Failure;
+    type Error = Diagnostic;
 
     fn try_from(value: ExpressionOrType) -> Result<Self, Self::Error> {
         Expression::try_from(value)?.try_into()

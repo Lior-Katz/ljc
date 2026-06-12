@@ -40,6 +40,8 @@ pub enum Error {
     MissingTryBlock,
     #[error("Missing class body\nhint: expected '{{'")]
     MissingClassBody,
+    #[error("Only field access, array access, or simple name expressions can be used as the left-hand-side of an assignment")]
+    NotLValue,
 }
 
 impl From<LexicalError> for Error {

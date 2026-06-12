@@ -1,0 +1,32 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/AssignmentNumericToBoolean.java:3:26
+        boolean bi; bi = 1;
+                         ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/AssignmentNumericToBoolean.java:4:26
+        boolean bl; bl = 1L;
+                         ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/AssignmentNumericToBoolean.java:5:26
+        boolean bc; bc = 'a';
+                         ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/AssignmentNumericToBoolean.java:10:26
+        boolean bi; bi = i;
+                         ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/AssignmentNumericToBoolean.java:13:26
+        boolean bl; bl = l;
+                         ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/AssignmentNumericToBoolean.java:16:26
+        boolean bc; bc = c;
+                         ^

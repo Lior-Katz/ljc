@@ -1,0 +1,72 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/AssignmentBooleanToNumeric.java:3:21
+        byte b; b = true;
+                    ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/AssignmentBooleanToNumeric.java:4:22
+        short s; s = true;
+                     ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/AssignmentBooleanToNumeric.java:5:20
+        int i; i = true;
+                   ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/AssignmentBooleanToNumeric.java:6:21
+        long l; l = true;
+                    ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/AssignmentBooleanToNumeric.java:7:21
+        char c; c = true;
+                    ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/AssignmentBooleanToNumeric.java:8:22
+        float f; f = true;
+                     ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/AssignmentBooleanToNumeric.java:9:23
+        double d; d = true;
+                      ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/AssignmentBooleanToNumeric.java:14:21
+        byte x; x = b;
+                    ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/AssignmentBooleanToNumeric.java:15:22
+        short y; y = b;
+                     ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/AssignmentBooleanToNumeric.java:16:20
+        int z; z = b;
+                   ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/AssignmentBooleanToNumeric.java:17:21
+        long w; w = b;
+                    ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/AssignmentBooleanToNumeric.java:18:21
+        char c; c = b;
+                    ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/AssignmentBooleanToNumeric.java:19:22
+        float f; f = b;
+                     ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/AssignmentBooleanToNumeric.java:20:23
+        double d; d = b;
+                      ^

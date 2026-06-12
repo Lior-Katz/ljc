@@ -1,0 +1,42 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/AssignmentNullToPrimitive.java:3:21
+        byte b; b = null;
+                    ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/AssignmentNullToPrimitive.java:4:22
+        short s; s = null;
+                     ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/AssignmentNullToPrimitive.java:5:20
+        int i; i = null;
+                   ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/AssignmentNullToPrimitive.java:6:21
+        long l; l = null;
+                    ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/AssignmentNullToPrimitive.java:7:21
+        char c; c = null;
+                    ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/AssignmentNullToPrimitive.java:8:22
+        float f; f = null;
+                     ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/AssignmentNullToPrimitive.java:9:23
+        double d; d = null;
+                      ^
+
+Incompatible types in assignment
+tests/ui/errors/type_mismatch/assignment/AssignmentNullToPrimitive.java:10:30
+        boolean bool; bool = null;
+                             ^

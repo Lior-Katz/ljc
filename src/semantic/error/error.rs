@@ -119,8 +119,6 @@ pub enum UnimplementedFeature {
     StringLiteral,
     #[error("Name expressions")]
     NameExpression,
-    #[error("Assignment expressions")]
-    Assignment,
     #[error("Postfix-increment as sub-expression")]
     PostIncrementAsSubExpression,
     #[error("Postfix-decrement as sub-expression")]
@@ -229,6 +227,8 @@ pub enum UnimplementedFeature {
     NumericPromotion,
     #[error("Field access by simple name")]
     FieldAccessSimpleName,
+    #[error("Compound assignment operators")]
+    CompoundAssignment,
 }
 
 impl SubError for UnimplementedFeature {}

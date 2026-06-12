@@ -1,0 +1,7 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Only field access, array access, or simple name expressions can be used as the left-hand-side of an assignment
+tests/ui/errors/type_mismatch/assignment/AssignmentNotVariable.java:3:9
+        1 = 2;
+        ^

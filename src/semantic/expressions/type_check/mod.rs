@@ -1,6 +1,7 @@
 mod binop;
 mod name_expression;
 mod ternary_conditional;
+mod assignment;
 
 use crate::ast;
 use crate::error::Diagnose;
@@ -29,7 +30,9 @@ impl SemanticAnalyzer<'_> {
                 Err(UnimplementedFeature::StringLiteral.at(span).into())
             }
             Expression::Name(name) => self.name_expression(name, scope),
-            Expression::Assignment { .. } => Err(UnimplementedFeature::Assignment.at(span).into()),
+            Expression::Assignment { lhs, rhs, op } => {
+                self.assignment(lhs, rhs, op, scope)
+            },
             Expression::PostIncrement(e)
             | Expression::PostDecrement(e)
             | Expression::PreIncrement(e)
