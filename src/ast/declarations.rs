@@ -144,19 +144,19 @@ pub struct ConstructorBody {
     pub epilogue: BlockStatements,
 }
 
-#[derive(Debug, Hash, Eq, PartialEq)]
+#[derive(Debug, Hash, Eq, PartialEq, Clone)]
 pub struct VariableDeclaration {
     pub variable_type: Type,
     pub declarators: VariableDeclaratorList,
 }
 
-#[derive(Debug, Hash, Eq, PartialEq)]
+#[derive(Debug, Hash, Eq, PartialEq, Clone)]
 pub struct VariableDeclarator {
     pub name: VariableDeclaratorId,
     pub initializer: Option<VariableInitializer>,
 }
 
-#[derive(Debug, Hash, Eq, PartialEq)]
+#[derive(Debug, Hash, Eq, PartialEq, Clone)]
 pub enum VariableDeclaratorId {
     Named(Identifier),
     Unnamed,

@@ -13,7 +13,7 @@ pub type CatchClauseList = Multiple<CatchClause>;
 pub type CatchType = AtLeastOne<Modified<Type>>;
 pub type Resources = AtLeastOne<Resource>;
 
-#[derive(Debug, Hash, Eq, PartialEq)]
+#[derive(Debug, Hash, Eq, PartialEq, Clone)]
 pub enum Statement {
     EmptyStatement(Span),
     ExpressionStatement(Expression),
@@ -92,25 +92,25 @@ pub enum Statement {
     },
 }
 
-#[derive(Debug, Hash, Eq, PartialEq)]
+#[derive(Debug, Hash, Eq, PartialEq, Clone)]
 pub struct Block {
     pub statements: BlockStatements,
     pub span: Span,
 }
 
-#[derive(Debug, Hash, Eq, PartialEq)]
+#[derive(Debug, Hash, Eq, PartialEq, Clone)]
 pub enum ForInit {
     LocalVarDeclaration(Modified<VariableDeclaration>),
     Expressions(ExpressionList),
 }
 
-#[derive(Debug, Hash, Eq, PartialEq)]
+#[derive(Debug, Hash, Eq, PartialEq, Clone)]
 pub enum Resource {
     VariableDeclaration(Modified<VariableDeclaration>),
     VariableAccess(Expression),
 }
 
-#[derive(Debug, Hash, Eq, PartialEq)]
+#[derive(Debug, Hash, Eq, PartialEq, Clone)]
 pub struct CatchClause {
     pub catch_type: CatchType,
     pub var_id: VariableDeclaratorId,

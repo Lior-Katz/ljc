@@ -6,13 +6,13 @@ pub type TypeList = AtLeastOne<Type>;
 pub type TypeName = AtLeastOne<Identifier>;
 pub type ClassTypePartList = Multiple<ClassTypePart>;
 
-#[derive(Debug, Hash, Eq, PartialEq)]
+#[derive(Debug, Hash, Eq, PartialEq, Clone)]
 pub struct ClassType {
     pub namespace: ClassTypePartList,
     pub name: ClassTypePart<TypeIdentifier>,
 }
 
-#[derive(Debug, Hash, Eq, PartialEq)]
+#[derive(Debug, Hash, Eq, PartialEq, Clone)]
 pub enum Type {
     // primitive types
     Byte(Span),
@@ -29,18 +29,18 @@ pub enum Type {
     Array(ArrayType),
 }
 
-#[derive(Debug, Hash, Eq, PartialEq)]
+#[derive(Debug, Hash, Eq, PartialEq, Clone)]
 pub enum TypeOrVoid {
     Type(Type),
     Void(Span),
 }
 
-#[derive(Debug, Hash, Eq, PartialEq)]
+#[derive(Debug, Hash, Eq, PartialEq, Clone)]
 pub struct ClassTypePart<T: IdentifierKind = Identifier> {
     pub identifier: T,
 }
 
-#[derive(Debug, Hash, Eq, PartialEq)]
+#[derive(Debug, Hash, Eq, PartialEq, Clone)]
 pub struct ArrayType {
     pub element_type: Box<Type>,
 }

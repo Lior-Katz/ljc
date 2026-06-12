@@ -227,8 +227,6 @@ pub enum UnimplementedFeature {
     NumericPromotion,
     #[error("Field access by simple name")]
     FieldAccessSimpleName,
-    #[error("Compound assignment operators")]
-    CompoundAssignment,
 }
 
 impl SubError for UnimplementedFeature {}

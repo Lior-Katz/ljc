@@ -13,8 +13,8 @@ use crate::semantic::types::{
 impl SemanticAnalyzer<'_> {
     pub(super) fn binary_op(
         &self,
-        left: &Box<Expression>,
-        right: &Box<Expression>,
+        left: &Expression,
+        right: &Expression,
         op: &BinOp,
         scope: ScopeId,
     ) -> SemanticResult<ExpressionResult> {

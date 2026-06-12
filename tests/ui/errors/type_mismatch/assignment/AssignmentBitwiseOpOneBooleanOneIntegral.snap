@@ -1,0 +1,26 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Incompatible types in bitwise operation.
+Hint: the operands of a bitwise operator must either:
+	1. both be of type boolean or Boolean, or
+	2. both be of an integral type (i.e. byte, short, int, long, or char), or a reference type that can be unboxed to an integral type (i.e. Byte, Short, Integer, Long, or Character).
+tests/ui/errors/type_mismatch/assignment/AssignmentBitwiseOpOneBooleanOneIntegral.java:3:17
+        int n1; n1 &= false;
+                ^
+
+Incompatible types in bitwise operation.
+Hint: the operands of a bitwise operator must either:
+	1. both be of type boolean or Boolean, or
+	2. both be of an integral type (i.e. byte, short, int, long, or char), or a reference type that can be unboxed to an integral type (i.e. Byte, Short, Integer, Long, or Character).
+tests/ui/errors/type_mismatch/assignment/AssignmentBitwiseOpOneBooleanOneIntegral.java:4:17
+        int n2; n2 |= false;
+                ^
+
+Incompatible types in bitwise operation.
+Hint: the operands of a bitwise operator must either:
+	1. both be of type boolean or Boolean, or
+	2. both be of an integral type (i.e. byte, short, int, long, or char), or a reference type that can be unboxed to an integral type (i.e. Byte, Short, Integer, Long, or Character).
+tests/ui/errors/type_mismatch/assignment/AssignmentBitwiseOpOneBooleanOneIntegral.java:5:17
+        int n3; n3 ^= false;
+                ^

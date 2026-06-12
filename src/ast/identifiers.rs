@@ -2,13 +2,13 @@ use crate::file::Span;
 
 pub trait IdentifierKind {}
 
-#[derive(Debug, Hash, Eq, PartialEq)]
+#[derive(Debug, Hash, Eq, PartialEq, Clone)]
 pub struct Identifier {
     pub value: String,
     pub span: Span,
 }
 
-#[derive(Debug, Hash, Eq, PartialEq)]
+#[derive(Debug, Hash, Eq, PartialEq, Clone)]
 pub struct TypeIdentifier(Identifier);
 impl IdentifierKind for TypeIdentifier {}
 impl IdentifierKind for Identifier {}

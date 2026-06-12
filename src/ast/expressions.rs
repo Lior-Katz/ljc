@@ -8,7 +8,7 @@ pub type ExpressionList = Vec<Expression>;
 pub type ArgumentList = Vec<Expression>;
 pub type VariableInitializerList = Vec<VariableInitializer>;
 
-#[derive(Debug, Hash, Eq, PartialEq)]
+#[derive(Debug, Hash, Eq, PartialEq, Clone)]
 pub enum Expression {
     IntegerLiteral {
         value: u64,
@@ -76,13 +76,13 @@ pub enum Expression {
     },
 }
 
-#[derive(Debug, Hash, Eq, PartialEq)]
+#[derive(Debug, Hash, Eq, PartialEq, Clone)]
 pub enum ExpressionOrType {
     Expression(Expression),
     Type(TypeOrVoid),
 }
 
-#[derive(Debug, Hash, Eq, PartialEq)]
+#[derive(Debug, Hash, Eq, PartialEq, Clone)]
 pub enum AssignmentOp {
     Add,
     Subtract,
@@ -98,7 +98,7 @@ pub enum AssignmentOp {
     BitwiseOr,
 }
 
-#[derive(Debug, Hash, Eq, PartialEq)]
+#[derive(Debug, Hash, Eq, PartialEq, Clone)]
 pub enum BinOp {
     Add,
     Subtract,
@@ -121,27 +121,27 @@ pub enum BinOp {
     LogicalOr,
 }
 
-#[derive(Debug, Hash, Eq, PartialEq)]
+#[derive(Debug, Hash, Eq, PartialEq, Clone)]
 pub enum LeftHandSide {
     ExpressionName(Identifier),
     MemberAccess(MemberAccess),
     ArrayAccess(ArrayAccess),
 }
 
-#[derive(Debug, Hash, Eq, PartialEq)]
+#[derive(Debug, Hash, Eq, PartialEq, Clone)]
 pub struct MemberAccess {
     pub target: Box<Expression>,
     pub name: Identifier,
 }
 
-#[derive(Debug, Hash, Eq, PartialEq)]
+#[derive(Debug, Hash, Eq, PartialEq, Clone)]
 pub struct MethodCall {
     pub target: Option<Box<Expression>>,
     pub name: Identifier,
     pub arguments: ArgumentList,
 }
 
-#[derive(Debug, Hash, Eq, PartialEq)]
+#[derive(Debug, Hash, Eq, PartialEq, Clone)]
 pub enum ArrayCreationMode {
     Sized {
         sized_dimensions: Vec<Expression>,
@@ -150,25 +150,25 @@ pub enum ArrayCreationMode {
     Initialized(ArrayInitializer),
 }
 
-#[derive(Debug, Hash, Eq, PartialEq)]
+#[derive(Debug, Hash, Eq, PartialEq, Clone)]
 pub struct ArrayAccess {
     pub target: Box<Expression>,
     pub index: Box<Expression>,
 }
 
-#[derive(Debug, Hash, Eq, PartialEq)]
+#[derive(Debug, Hash, Eq, PartialEq, Clone)]
 pub enum VariableInitializer {
     Expression(Expression),
     ArrayInitializer(ArrayInitializer),
 }
 
-#[derive(Debug, Hash, Eq, PartialEq)]
+#[derive(Debug, Hash, Eq, PartialEq, Clone)]
 pub struct ArrayInitializer {
     pub initializer: VariableInitializerList,
     pub span: Span,
 }
 
-#[derive(Debug, Hash, Eq, PartialEq)]
+#[derive(Debug, Hash, Eq, PartialEq, Clone)]
 pub enum MethodReferenceType {
     Constructor,
     Named(Identifier),
