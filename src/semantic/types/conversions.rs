@@ -1,6 +1,6 @@
-use crate::semantic::types::Numeric;
 use crate::semantic::types::contexts::NumericContext;
-use crate::semantic::types::numeric::{NumericBoxed, NumericMaybeBoxed};
+use crate::semantic::types::numeric::{Numeric, NumericBoxed, NumericMaybeBoxed};
+use crate::semantic::types::{Boxed, Primitive};
 
 /// [§5.6](https://docs.oracle.com/javase/specs/jls/se26/html/jls-5.html#jls-5.6) - Numeric contexts and numeric promotion
 pub fn unary_numeric_promotion(ty: NumericMaybeBoxed, context: NumericContext) -> Numeric {
@@ -59,6 +59,13 @@ pub fn binary_numeric_promotion(
     }
 }
 
+pub fn unboxing_conversion(ty: Boxed) -> Primitive {
+    match ty {
+        Boxed::Numeric(numeric) => numeric_unboxing_conversion(numeric).into(),
+        Boxed::Boolean => Primitive::Boolean,
+    }
+}
+
 fn numeric_unboxing_conversion(ty: NumericBoxed) -> Numeric {
     match ty {
         NumericBoxed::Byte => Numeric::Byte,
@@ -68,6 +75,25 @@ fn numeric_unboxing_conversion(ty: NumericBoxed) -> Numeric {
         NumericBoxed::Long => Numeric::Long,
         NumericBoxed::Float => Numeric::Float,
         NumericBoxed::Double => Numeric::Double,
+    }
+}
+
+pub fn boxing_conversion(ty: Primitive) -> Boxed {
+    match ty {
+        Primitive::Numeric(numeric) => numeric_boxing_conversion(numeric).into(),
+        Primitive::Boolean => Boxed::Boolean,
+    }
+}
+
+pub fn numeric_boxing_conversion(ty: Numeric) -> NumericBoxed {
+    match ty {
+        Numeric::Byte => NumericBoxed::Byte,
+        Numeric::Short => NumericBoxed::Short,
+        Numeric::Int => NumericBoxed::Integer,
+        Numeric::Long => NumericBoxed::Long,
+        Numeric::Char => NumericBoxed::Character,
+        Numeric::Float => NumericBoxed::Float,
+        Numeric::Double => NumericBoxed::Double,
     }
 }
 
@@ -460,10 +486,7 @@ mod tests {
         use crate::semantic::types::{Numeric, NumericBoxed, NumericContext};
         macro_rules! assert {
             ($expected:expr, $ty:expr, $numeric_context:expr) => {
-                assert_eq!(
-                    $expected,
-                    unary_numeric_promotion($ty.into(), $numeric_context)
-                );
+                assert_eq!($expected, unary_numeric_promotion($ty.into(), $numeric_context));
             };
         }
 
