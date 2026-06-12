@@ -1,0 +1,8 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Expected an expression, but Test resolves to a type.
+Names can be used as expressions only if they refer to a local variable, method parameter, exception parameter, or a field.
+tests/ui/errors/names/TypeUsedAsExpression.java:3:17
+        int a = Test;
+                ^

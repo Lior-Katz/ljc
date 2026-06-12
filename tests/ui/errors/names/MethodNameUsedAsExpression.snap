@@ -1,0 +1,8 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Expected an expression, but main resolves to a method.
+Names can be used as expressions only if they refer to a local variable, method parameter, exception parameter, or a field.
+tests/ui/errors/names/MethodNameUsedAsExpression.java:3:17
+        int a = main;
+                ^
