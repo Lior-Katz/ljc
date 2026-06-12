@@ -4,12 +4,18 @@ use crate::ast::{ClassMemberDeclaration, Modifiers};
 use crate::error::Diagnose;
 use crate::semantic::SemanticAnalyzer;
 use crate::semantic::error::{SemanticResult, UnimplementedFeature};
+use crate::semantic::symbol_table::ScopeId;
 
 impl<'a> SemanticAnalyzer<'a> {
-    pub(super) fn class_member(&mut self, member: &'a ClassMemberDeclaration, modifiers: &Modifiers) -> SemanticResult {
+    pub(super) fn class_member(
+        &mut self,
+        member: &'a ClassMemberDeclaration,
+        modifiers: &Modifiers,
+        current_scope: ScopeId,
+    ) -> SemanticResult {
         let span = member.span().clone();
         match member {
-            ClassMemberDeclaration::Method(m) => self.method(m, modifiers),
+            ClassMemberDeclaration::Method(m) => self.method(m, modifiers, current_scope),
             ClassMemberDeclaration::NestedClassOrInterface(_) => {
                 Err(UnimplementedFeature::NestedClassOrInterface.at(span).into())
             }

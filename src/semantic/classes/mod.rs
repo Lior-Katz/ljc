@@ -19,8 +19,9 @@ impl<'a> SemanticAnalyzer<'a> {
         modifiers: &Modifiers,
     ) -> SemanticResult {
         let span = declaration.span().clone();
+        let scope = self.attributes.get(declaration).unwrap().scope;
         match declaration {
-            TypeDeclaration::Class(c) => self.class_declaration(c, modifiers),
+            TypeDeclaration::Class(c) => self.class_declaration(c, modifiers, scope),
             TypeDeclaration::Record(_) => Err(UnimplementedFeature::RecordClass.at(span).into()),
             TypeDeclaration::Enum(_) => Err(UnimplementedFeature::EnumClass.at(span).into()),
             TypeDeclaration::Interface(_) => Err(UnimplementedFeature::Interface.at(span).into()),

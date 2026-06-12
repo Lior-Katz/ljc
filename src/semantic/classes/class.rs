@@ -2,6 +2,7 @@ use crate::ast::{ClassBodyDeclaration, ClassDeclaration, Modified, Modifiers};
 use crate::error::Diagnose;
 use crate::semantic::SemanticAnalyzer;
 use crate::semantic::error::{CoalesceIter, SemanticResult, UnimplementedFeature};
+use crate::semantic::symbol_table::ScopeId;
 
 impl<'a> SemanticAnalyzer<'a> {
     #[allow(unused_variables)]
@@ -9,12 +10,13 @@ impl<'a> SemanticAnalyzer<'a> {
         &mut self,
         class_decl: &'a ClassDeclaration,
         modifiers: &Modifiers,
+        current_scope: ScopeId,
     ) -> SemanticResult {
         class_decl
             .body
             .coalesce(|body_declaration| match body_declaration {
                 ClassBodyDeclaration::ClassMember(Modified { modifiers, item }) => {
-                    self.class_member(item, modifiers)
+                    self.class_member(item, modifiers, current_scope)
                 }
                 ClassBodyDeclaration::InstanceInitializer(_) => {
                     Err(UnimplementedFeature::InstanceInitializer

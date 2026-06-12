@@ -10,8 +10,9 @@ impl<'a> SemanticAnalyzer<'a> {
         &mut self,
         method: &'a MethodDeclaration,
         modifiers: &Modifiers,
+        current_scope: ScopeId,
     ) -> SemanticResult {
-        let body_scope = self.symbol_table.new_scope();
+        let body_scope = self.symbol_table.new_child_scope(current_scope);
         self.method_body(&method.body, body_scope)
     }
 
