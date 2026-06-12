@@ -1,0 +1,7 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Symbol n not found in current scope
+tests/ui/errors/names/UnknownSymbolInExpression.java:3:17
+        int a = n;
+                ^
