@@ -1,0 +1,8 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Expected a type, but main resolves to a method.
+Names can be used as types only if they refer to a class, record, enum, or interface.
+tests/ui/errors/names/MethodNameInVarType.java:3:9
+        main a;
+        ^

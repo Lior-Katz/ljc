@@ -1,0 +1,8 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Expected a type, but a resolves to a local variable.
+Names can be used as types only if they refer to a class, record, enum, or interface.
+tests/ui/errors/names/LocalVarNameInVarType.java:4:9
+        a b;
+        ^
