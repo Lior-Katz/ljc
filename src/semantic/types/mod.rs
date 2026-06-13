@@ -19,7 +19,7 @@ pub enum Type {
     Primitive(Primitive),
     Boxed(Boxed),
     Null,
-    Reference(TypeId),
+    Reference(ReferenceType),
 }
 
 #[derive(Clone, Eq, PartialEq)]
@@ -39,6 +39,9 @@ pub enum BooleanMaybeBoxed {
     Primitive,
     Boxed,
 }
+
+#[derive(Clone, Eq, PartialEq)]
+pub struct ReferenceType(TypeId);
 
 impl SemanticAnalyzer<'_> {
     pub fn resolve(&self, ty: &ast::Type, scope: ScopeId) -> SemanticResult<Type> {
@@ -68,7 +71,7 @@ impl SemanticAnalyzer<'_> {
                 return Err(Error::UnknownSymbol(name).at(*class.span()).into());
             };
             match entity {
-                Entity::Type(type_id) => Ok(Type::Reference(*type_id)),
+                Entity::Type(type_id) => Ok(ReferenceType(*type_id).into()),
                 Entity::Method(_) => Err(Error::NameNotType(name, NameResolutionKind::Method)),
                 Entity::Field(_) => Err(Error::NameNotType(name, NameResolutionKind::Field)),
                 Entity::Variable(_) => {
@@ -156,5 +159,11 @@ impl From<BooleanMaybeBoxed> for Type {
             BooleanMaybeBoxed::Primitive => Primitive::Boolean.into(),
             BooleanMaybeBoxed::Boxed => Boxed::Boolean.into(),
         }
+    }
+}
+
+impl From<ReferenceType> for Type {
+    fn from(value: ReferenceType) -> Self {
+        Type::Reference(value)
     }
 }

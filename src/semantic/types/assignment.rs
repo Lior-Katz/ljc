@@ -1,12 +1,12 @@
 use crate::semantic::types::conversions::{boxing_conversion, unboxing_conversion};
-use crate::semantic::types::{Numeric, Primitive, Type};
+use crate::semantic::types::{Numeric, Primitive, ReferenceType, Type};
 
 impl Type {
     pub fn is_assignable_from(&self, other: &Self) -> bool {
-        // TODO: add assignment rules for references
+        // TODO: add assignment rules for references to primitives
         // TODO: add assignment rules for narrowing numeric conversions of constant expressions
         match (self, other) {
-            (Type::Boxed(_), Type::Null) => true,
+            (Type::Boxed(_) | Type::Reference(_), Type::Null) => true,
             (Type::Primitive(self_primitive), Type::Primitive(other_primitive)) => {
                 self_primitive.is_assignable_from(other_primitive)
             }
@@ -17,6 +17,9 @@ impl Type {
                 *self_boxed == boxing_conversion(other_primitive.clone())
             }
             (Type::Boxed(self_boxed), Type::Boxed(other_boxed)) => self_boxed == other_boxed,
+            (Type::Reference(self_ref_type), Type::Reference(other_ref_type)) => {
+                self_ref_type.is_assignable_from(other_ref_type)
+            },
             _ => false,
         }
     }
@@ -69,6 +72,13 @@ impl Numeric {
                 (Numeric::Double, Numeric::Float) => true,
                 _ => false,
             }
+    }
+}
+
+impl ReferenceType {
+    fn is_assignable_from(&self, other: &Self) -> bool {
+        // TODO: add assigment rules for widening reference conversion
+        self == other
     }
 }
 
