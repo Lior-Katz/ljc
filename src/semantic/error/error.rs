@@ -20,6 +20,12 @@ pub enum Error {
         Names can be used as expressions only if they refer to a local variable, method parameter, exception parameter, or a field."
     )]
     ExpressionNameNotVariable(String, NameResolutionKind),
+    
+    #[error(
+        "Expected a type, but {0} resolves to a {1}.\n\
+        Names can be used as types only if they refer to a class, record, enum, or interface."
+    )]
+    NameNotType(String, NameResolutionKind)
 }
 
 #[derive(thiserror::Error, Debug)]
@@ -102,6 +108,8 @@ where
 pub enum NameResolutionKind {
     Type,
     Method,
+    Field,
+    LocalVariable,
 }
 
 impl Display for NameResolutionKind {
@@ -109,6 +117,8 @@ impl Display for NameResolutionKind {
         match self {
             NameResolutionKind::Type => write!(f, "type"),
             NameResolutionKind::Method => write!(f, "method"),
+            NameResolutionKind::Field => write!(f, "field"),
+            NameResolutionKind::LocalVariable => write!(f, "local variable"),
         }
     }
 }
@@ -217,8 +227,8 @@ pub enum UnimplementedFeature {
     Interface,
     #[error("@interface declarations")]
     AnnotationInterface,
-    #[error("Reference types (classes, records, enums, interfaces)")]
-    ReferenceTypes,
+    #[error("Qualified types")]
+    QualifiedType,
     #[error("Array types")]
     ArrayTypes,
     #[error("Array initializers in variable declarations")]

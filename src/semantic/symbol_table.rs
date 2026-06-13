@@ -1,6 +1,7 @@
-use crate::ast::{FieldDeclaration, MethodDeclaration, TypeDeclaration, VariableDeclarator};
+use crate::ast::{FieldDeclaration, MethodDeclaration, VariableDeclarator};
 use std::collections::HashMap;
 use std::fmt::Debug;
+use crate::semantic::TypeId;
 
 #[derive(Debug)]
 pub struct SymbolTable<'a> {
@@ -32,7 +33,7 @@ impl<'a> SymbolTable<'a> {
         &mut self.scopes[id.0]
     }
 
-    pub fn lookup(&'_ self, name: &str, scope_id: ScopeId) -> Option<&'_ Entity<'_>> {
+    pub fn lookup(&'a self, name: &str, scope_id: ScopeId) -> Option<&'a Entity<'a>> {
         let scope = self.scope(scope_id);
         scope.lookup(name).or_else(|| {
             scope
@@ -78,7 +79,7 @@ impl<'a> Scope<'a> {
 #[expect(dead_code)]
 #[derive(Debug)]
 pub enum Entity<'a> {
-    Type(&'a TypeDeclaration),
+    Type(TypeId),
     Method(&'a MethodDeclaration),
     Field(&'a FieldDeclaration),
     Variable(&'a VariableDeclarator),

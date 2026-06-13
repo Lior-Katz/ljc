@@ -19,7 +19,7 @@ impl<'a> SemanticAnalyzer<'a> {
         span: Span,
         scope: ScopeId,
     ) -> SemanticResult {
-        let declaration_type = Type::resolve(&var_decl.variable_type)?;
+        let declaration_type = self.resolve(&var_decl.variable_type, scope)?;
         (&var_decl.declarators).coalesce(|declarator| {
             if let VariableDeclaratorId::Named(name) = &declarator.name {
                 self.symbol_table

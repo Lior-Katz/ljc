@@ -1,4 +1,4 @@
-use crate::ast::{Program, WithModifiers};
+use crate::ast::{Program, TypeDeclaration, WithModifiers};
 use crate::semantic::ast_tags::{Attributes, CompilationUnitAttributes};
 use crate::semantic::error::{CoalesceIter, SemanticResult};
 use crate::semantic::symbol_table::{Entity, SymbolTable};
@@ -17,13 +17,18 @@ pub type Diagnostic = crate::error::Diagnostic<SemanticError>;
 pub struct SemanticAnalyzer<'a> {
     attributes: Attributes<'a>,
     symbol_table: SymbolTable<'a>,
+    types: Vec<&'a TypeDeclaration>,
 }
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub struct TypeId(usize);
 
 impl<'a> SemanticAnalyzer<'a> {
     pub fn new() -> Self {
         Self {
             attributes: Attributes::new(),
             symbol_table: SymbolTable::new(),
+            types: Vec::new(),
         }
     }
 
@@ -46,12 +51,23 @@ impl<'a> SemanticAnalyzer<'a> {
             Program::Ordinary(top_level_declarations) => {
                 for WithModifiers { item: declaration, .. } in top_level_declarations {
                     self.add_type_declaration_and_member_names(declaration, scope_id);
-                    self.symbol_table.scope_mut(scope_id).put(
-                        declaration.name().identifier().value.clone(),
-                        Entity::Type(declaration),
-                    );
+                    let type_id = self.add_type(declaration);
+                    self.symbol_table
+                        .scope_mut(scope_id)
+                        .put(declaration.name().identifier().value.clone(), Entity::Type(type_id));
                 }
             }
         }
+    }
+
+    fn add_type(&mut self, type_declaration: &'a TypeDeclaration) -> TypeId {
+        let id = self.types.len();
+        self.types.push(type_declaration);
+        TypeId(id)
+    }
+
+    #[expect(dead_code)]
+    fn get_type(&self, type_id: TypeId) -> &'a TypeDeclaration {
+        self.types[type_id.0]
     }
 }

@@ -42,9 +42,10 @@ impl<'a> SemanticAnalyzer<'a> {
         let members = get_members(type_declaration);
         members.for_each(|member| match member {
             ClassMemberDeclaration::NestedClassOrInterface(ty) => {
+                let type_id = self.add_type(ty);
                 self.symbol_table
                     .scope_mut(scope_id)
-                    .put(ty.name().identifier().value.clone(), Entity::Type(ty));
+                    .put(ty.name().identifier().value.clone(), Entity::Type(type_id));
                 self.add_type_declaration_and_member_names(ty, scope_id);
             }
 
