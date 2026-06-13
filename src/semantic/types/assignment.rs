@@ -6,6 +6,7 @@ impl Type {
         // TODO: add assignment rules for references
         // TODO: add assignment rules for narrowing numeric conversions of constant expressions
         match (self, other) {
+            (Type::Boxed(_), Type::Null) => true,
             (Type::Primitive(self_primitive), Type::Primitive(other_primitive)) => {
                 self_primitive.is_assignable_from(other_primitive)
             }
@@ -185,9 +186,13 @@ mod tests {
     fn widening_numeric_conversion_boxed_to_boxed_unassignable() {
         assert!(!Type::from(NumericBoxed::Double).is_assignable_from(&NumericBoxed::Byte.into()));
         assert!(!Type::from(NumericBoxed::Double).is_assignable_from(&NumericBoxed::Short.into()));
-        assert!(!Type::from(NumericBoxed::Double).is_assignable_from(&NumericBoxed::Integer.into()));
+        assert!(
+            !Type::from(NumericBoxed::Double).is_assignable_from(&NumericBoxed::Integer.into())
+        );
         assert!(!Type::from(NumericBoxed::Double).is_assignable_from(&NumericBoxed::Long.into()));
-        assert!(!Type::from(NumericBoxed::Double).is_assignable_from(&NumericBoxed::Character.into()));
+        assert!(
+            !Type::from(NumericBoxed::Double).is_assignable_from(&NumericBoxed::Character.into())
+        );
         assert!(!Type::from(NumericBoxed::Double).is_assignable_from(&NumericBoxed::Float.into()));
 
         assert!(!Type::from(NumericBoxed::Float).is_assignable_from(&NumericBoxed::Byte.into()));
@@ -199,11 +204,15 @@ mod tests {
         assert!(!Type::from(NumericBoxed::Long).is_assignable_from(&NumericBoxed::Byte.into()));
         assert!(!Type::from(NumericBoxed::Long).is_assignable_from(&NumericBoxed::Short.into()));
         assert!(!Type::from(NumericBoxed::Long).is_assignable_from(&NumericBoxed::Integer.into()));
-        assert!(!Type::from(NumericBoxed::Long).is_assignable_from(&NumericBoxed::Character.into()));
+        assert!(
+            !Type::from(NumericBoxed::Long).is_assignable_from(&NumericBoxed::Character.into())
+        );
 
         assert!(!Type::from(NumericBoxed::Integer).is_assignable_from(&NumericBoxed::Byte.into()));
         assert!(!Type::from(NumericBoxed::Integer).is_assignable_from(&NumericBoxed::Short.into()));
-        assert!(!Type::from(NumericBoxed::Integer).is_assignable_from(&NumericBoxed::Character.into()));
+        assert!(
+            !Type::from(NumericBoxed::Integer).is_assignable_from(&NumericBoxed::Character.into())
+        );
 
         assert!(!Type::from(NumericBoxed::Short).is_assignable_from(&NumericBoxed::Byte.into()));
     }
@@ -267,5 +276,17 @@ mod tests {
         assert!(!Type::from(Primitive::Boolean).is_assignable_from(&Numeric::Char.into()));
         assert!(!Type::from(Primitive::Boolean).is_assignable_from(&Numeric::Float.into()));
         assert!(!Type::from(Primitive::Boolean).is_assignable_from(&Numeric::Double.into()));
+    }
+
+    #[test]
+    fn null_assignable_to_boxed() {
+        assert!(Type::from(Boxed::Boolean).is_assignable_from(&Type::Null));
+        assert!(Type::from(NumericBoxed::Byte).is_assignable_from(&Type::Null));
+        assert!(Type::from(NumericBoxed::Short).is_assignable_from(&Type::Null));
+        assert!(Type::from(NumericBoxed::Integer).is_assignable_from(&Type::Null));
+        assert!(Type::from(NumericBoxed::Long).is_assignable_from(&Type::Null));
+        assert!(Type::from(NumericBoxed::Character).is_assignable_from(&Type::Null));
+        assert!(Type::from(NumericBoxed::Float).is_assignable_from(&Type::Null));
+        assert!(Type::from(NumericBoxed::Double).is_assignable_from(&Type::Null));
     }
 }
