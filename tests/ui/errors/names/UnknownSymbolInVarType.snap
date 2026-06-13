@@ -1,0 +1,7 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Symbol A not found in current scope
+tests/ui/errors/names/UnknownSymbolInVarType.java:3:9
+        A a;
+        ^
