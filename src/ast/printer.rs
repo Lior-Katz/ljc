@@ -3,7 +3,7 @@ use crate::ast::{
     AssignmentOp, BinOp, Block, CatchClause, ClassBodyDeclaration, ClassDeclaration,
     ClassMemberDeclaration, ClassType, ClassTypePart, CompilationUnit, ComponentPattern,
     ConstructorBody, ConstructorInvocation, ElementValue, ElementValuePair, EnumConstant,
-    EnumDeclaration, Expression, ExpressionOrType, ForInit, FormalParameter, Identifier,
+    EnumDeclaration, Expression, ExpressionOrTypeOrVoid, ForInit, FormalParameter, Identifier,
     IdentifierKind, InterfaceDeclaration, LeftHandSide, MemberAccess, MethodBody, MethodCall,
     MethodDeclaration, MethodReferenceType, Modified, Modifier, Modifiers, NormalClassDeclaration,
     NormalInterfaceDeclaration, Pattern, Program, RecordComponent, RecordDeclaration, Resource,
@@ -375,11 +375,15 @@ impl TreeDisplayWithContext<Modifiers> for FormalParameter {
     }
 }
 
-impl TreeDisplay for ExpressionOrType {
+impl TreeDisplay for ExpressionOrTypeOrVoid {
     fn fmt_tree(&self, f: &mut Formatter<'_>, prefix: &str, is_last: bool) -> fmt::Result {
         match self {
-            ExpressionOrType::Expression(e) => e.fmt_tree(f, prefix, is_last),
-            ExpressionOrType::Type(ty) => ty.fmt_tree(f, prefix, is_last),
+            ExpressionOrTypeOrVoid::Expression(e) => e.fmt_tree(f, prefix, is_last),
+            ExpressionOrTypeOrVoid::Type(ty) => ty.fmt_tree(f, prefix, is_last),
+            ExpressionOrTypeOrVoid::Void(_) => {
+                let (line_prefix, _) = branch(&prefix, is_last);
+                writeln!(f, "{line_prefix}void")
+            }
         }
     }
 }
@@ -393,7 +397,7 @@ impl TreeDisplay for TypeOrVoid {
             TypeOrVoid::Void(_) => writeln!(
                 f,
                 "{line_prefix}Type\n\
-                                                {void_prefix}void"
+                {void_prefix}void"
             ),
         }
     }
@@ -475,9 +479,9 @@ impl TreeDisplay for MethodBody {
             MethodBody::Semicolon(_) => {
                 writeln!(f, "{line_prefix};")
             }
-            MethodBody::Block(stmts) => {
+            MethodBody::Block(statements) => {
                 writeln!(f, "{line_prefix}Block")?;
-                stmts.fmt_tree(f, &new_prefix, is_last)
+                statements.fmt_tree(f, &new_prefix, is_last)
             }
         }
     }

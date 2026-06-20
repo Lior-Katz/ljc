@@ -71,15 +71,16 @@ pub enum Expression {
     QualifiedThis(Type),
     ClassLiteral(TypeOrVoid),
     MethodReference {
-        target: Box<ExpressionOrType>,
+        target: Box<ExpressionOrTypeOrVoid>,
         method: MethodReferenceType,
     },
 }
 
 #[derive(Debug)]
-pub enum ExpressionOrType {
+pub enum ExpressionOrTypeOrVoid {
     Expression(Expression),
-    Type(TypeOrVoid),
+    Type(Type),
+    Void(Span),
 }
 
 #[derive(Debug)]
@@ -207,11 +208,12 @@ impl Expression {
     }
 }
 
-impl ExpressionOrType {
+impl ExpressionOrTypeOrVoid {
     pub fn span(&self) -> &Span {
         match self {
-            ExpressionOrType::Expression(e) => e.span(),
-            ExpressionOrType::Type(ty) => ty.span(),
+            ExpressionOrTypeOrVoid::Expression(e) => e.span(),
+            ExpressionOrTypeOrVoid::Type(ty) => ty.span(),
+            ExpressionOrTypeOrVoid::Void(span) => &span,
         }
     }
 }
