@@ -33,3 +33,9 @@ impl TypeIdentifier {
         }
     }
 }
+
+impl From<TypeIdentifier> for Identifier {
+    fn from(value: TypeIdentifier) -> Self {
+        value.0
+    }
+}

@@ -1,0 +1,7 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Expected type
+tests/ui/errors/declarations/VoidAsVarType.java:3:9
+        void a;
+        ^

@@ -131,7 +131,7 @@ pub enum LeftHandSide {
 
 #[derive(Debug, Hash, Eq, PartialEq, Clone)]
 pub struct MemberAccess {
-    pub target: Box<Expression>,
+    pub target: Box<ExpressionOrTypeOrVoid>,
     pub name: Identifier,
 }
 

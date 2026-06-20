@@ -30,6 +30,8 @@ pub enum Error {
     SymbolExpected2(Symbol, Symbol),
     #[error("Expected {0}")]
     SyntaxExpected(SyntaxKind),
+    #[error("Expected {0} or {1}")]
+    SyntaxExpected2(SyntaxKind, SyntaxKind),
     #[error("Expected {0} after {1}")]
     SyntaxExpectedAfter(SyntaxKind, Symbol),
     #[error("Invalid type name")]
@@ -89,6 +91,7 @@ pub enum SyntaxKind {
     Expression,
     Statement,
     Type,
+    Void,
 }
 
 impl Display for SyntaxKind {
@@ -97,6 +100,7 @@ impl Display for SyntaxKind {
             SyntaxKind::Expression => write!(f, "expression"),
             SyntaxKind::Statement => write!(f, "statement"),
             SyntaxKind::Type => write!(f, "type"),
+            SyntaxKind::Void => write!(f, "void"),
         }
     }
 }

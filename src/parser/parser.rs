@@ -1640,7 +1640,7 @@ impl<'a> Parser<'a> {
                         .into();
                     } else {
                         expr = Expression::MemberAccess(MemberAccess {
-                            target: Box::new(expr.try_into()?),
+                            target: Box::new(expr),
                             name: Identifier { value: id, span },
                         })
                         .into()
@@ -2663,6 +2663,14 @@ impl TryFrom<AtLeastOne<ClassTypePart>> for ClassType {
     }
 }
 
+impl From<ClassTypePart<TypeIdentifier>> for ClassTypePart<Identifier> {
+    fn from(value: ClassTypePart<TypeIdentifier>) -> Self {
+        Self {
+            identifier: value.identifier.into(),
+        }
+    }
+}
+
 impl TryFrom<ClassTypePart<Identifier>> for ClassTypePart<TypeIdentifier> {
     type Error = Diagnostic;
     fn try_from(value: ClassTypePart<Identifier>) -> Result<Self, Self::Error> {
@@ -2746,9 +2754,12 @@ impl TryFrom<ExpressionOrTypeOrVoid> for Type {
     type Error = Diagnostic;
 
     fn try_from(value: ExpressionOrTypeOrVoid) -> Result<Self, Self::Error> {
-        match TypeOrVoid::try_from(value)? {
-            TypeOrVoid::Type(ty) => Ok(ty),
-            TypeOrVoid::Void(_) => todo!(),
+        match value {
+            ExpressionOrTypeOrVoid::Type(ty) => Ok(ty),
+            ExpressionOrTypeOrVoid::Void(span) => {
+                Err(Error::SyntaxExpected(SyntaxKind::Type).at(span))
+            }
+            ExpressionOrTypeOrVoid::Expression(e) => Type::try_from(e),
         }
     }
 }
@@ -2776,6 +2787,37 @@ impl TryFrom<ExpressionOrTypeOrVoid> for Expression {
             }
             ExpressionOrTypeOrVoid::Void(span) => {
                 Err(Error::SyntaxExpected(SyntaxKind::Expression).at(span))
+            }
+        }
+    }
+}
+
+impl TryFrom<ExpressionOrTypeOrVoid> for ClassTypePartList {
+    type Error = Diagnostic;
+
+    fn try_from(value: ExpressionOrTypeOrVoid) -> Result<Self, Self::Error> {
+        match value {
+            ExpressionOrTypeOrVoid::Expression(e) => ClassTypePartList::try_from(e),
+            ExpressionOrTypeOrVoid::Type(Type::Class(class_type)) => {
+                let mut list = class_type.namespace;
+                list.push(ClassTypePart::<Identifier>::from(class_type.name));
+                Ok(list)
+            }
+            ExpressionOrTypeOrVoid::Type(
+                Type::Byte(span)
+                | Type::Short(span)
+                | Type::Int(span)
+                | Type::Long(span)
+                | Type::Char(span)
+                | Type::Float(span)
+                | Type::Double(span)
+                | Type::Boolean(span),
+            ) => Err(Error::SyntaxExpected(SyntaxKind::Type).at(span)),
+            ExpressionOrTypeOrVoid::Type(Type::Array(array_type)) => {
+                Err(Error::SyntaxExpected(SyntaxKind::Type).at(*array_type.span()))
+            }
+            ExpressionOrTypeOrVoid::Void(span) => {
+                Err(Error::SyntaxExpected(SyntaxKind::Type).at(span))
             }
         }
     }
