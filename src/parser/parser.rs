@@ -4,7 +4,7 @@ use crate::ast::{
     ClassBodyDeclaration, ClassBodyDeclarations, ClassDeclaration, ClassMemberDeclaration,
     ClassType, ClassTypePart, ClassTypePartList, CompilationUnit, ComponentPattern,
     ComponentPatternList, ConstructorBody, ConstructorInvocation, ElementValue, ElementValueList,
-    ElementValuePair, EnumBody, EnumConstant, EnumDeclaration, Expression, ExpressionOrType,
+    ElementValuePair, EnumBody, EnumConstant, EnumDeclaration, Expression, ExpressionOrTypeOrVoid,
     FieldDeclaration, ForInit, ForUpdate, FormalParameter, FormalParameterList, Identifier,
     InterfaceDeclaration, LeftHandSide, MemberAccess, MethodBody, MethodCall, MethodDeclaration,
     MethodReferenceType, Modifiable, Modified, Modifier, Pattern, Program, RecordBodyDeclaration,
@@ -576,7 +576,7 @@ impl<'a> Parser<'a> {
     fn element_value(&mut self) -> ParseResult<ElementValue> {
         one_of!(
             self.conditional_expression()
-                .and_then(|e| ExpressionOrType::try_into(e).map_err(Into::into)),
+                .and_then(|e| ExpressionOrTypeOrVoid::try_into(e).map_err(Into::into)),
             self.element_value_array_initializer()
                 .map(ElementValueList::into),
             self.annotation().map(Annotation::into),
@@ -1298,7 +1298,7 @@ impl<'a> Parser<'a> {
     ///     field_access
     ///     array_access
     /// ```
-    fn term(&mut self) -> ParseResult<ExpressionOrType> {
+    fn term(&mut self) -> ParseResult<ExpressionOrTypeOrVoid> {
         let expr = self.conditional_expression()?;
         if let Ok(op) = accept_with_value!(self,
             Symbol::Assign => AssignmentOp::Identity,
@@ -1342,7 +1342,7 @@ impl<'a> Parser<'a> {
     /// conditional_expression:
     ///     conditional_or_expression [? expression : conditional_expression]
     /// ```
-    fn conditional_expression(&mut self) -> ParseResult<ExpressionOrType> {
+    fn conditional_expression(&mut self) -> ParseResult<ExpressionOrTypeOrVoid> {
         let condition = self.conditional_or_expression()?;
         if self.accept(Symbol::QuestionMark)? {
             let if_true = self.expression().assert(
@@ -1372,9 +1372,9 @@ impl<'a> Parser<'a> {
         &mut self,
         subexpression: F,
         operation: G,
-    ) -> ParseResult<ExpressionOrType>
+    ) -> ParseResult<ExpressionOrTypeOrVoid>
     where
-        F: Fn(&mut Self) -> ParseResult<ExpressionOrType>,
+        F: Fn(&mut Self) -> ParseResult<ExpressionOrTypeOrVoid>,
         G: Fn(&mut Self) -> Result<BinOp, E>,
         Failure: From<E>,
     {
@@ -1398,7 +1398,7 @@ impl<'a> Parser<'a> {
         Ok(expr)
     }
 
-    fn conditional_or_expression(&mut self) -> ParseResult<ExpressionOrType> {
+    fn conditional_or_expression(&mut self) -> ParseResult<ExpressionOrTypeOrVoid> {
         self.left_associative_binary_operation(Self::conditional_and_expression, |this| {
             accept_with_value!(this,
                 Symbol::LogicalOr => BinOp::LogicalOr
@@ -1406,7 +1406,7 @@ impl<'a> Parser<'a> {
         })
     }
 
-    fn conditional_and_expression(&mut self) -> ParseResult<ExpressionOrType> {
+    fn conditional_and_expression(&mut self) -> ParseResult<ExpressionOrTypeOrVoid> {
         self.left_associative_binary_operation(Self::inclusive_or_expression, |this| {
             accept_with_value!(this,
                 Symbol::LogicalAnd => BinOp::LogicalAnd
@@ -1414,7 +1414,7 @@ impl<'a> Parser<'a> {
         })
     }
 
-    fn inclusive_or_expression(&mut self) -> ParseResult<ExpressionOrType> {
+    fn inclusive_or_expression(&mut self) -> ParseResult<ExpressionOrTypeOrVoid> {
         self.left_associative_binary_operation(Self::exclusive_or_expression, |this| {
             accept_with_value!(this,
                 Symbol::BitwiseOr => BinOp::BitwiseOr
@@ -1422,7 +1422,7 @@ impl<'a> Parser<'a> {
         })
     }
 
-    fn exclusive_or_expression(&mut self) -> ParseResult<ExpressionOrType> {
+    fn exclusive_or_expression(&mut self) -> ParseResult<ExpressionOrTypeOrVoid> {
         self.left_associative_binary_operation(Self::and_expression, |this| {
             accept_with_value!(this,
                 Symbol::BitwiseXor => BinOp::BitwiseXor
@@ -1430,7 +1430,7 @@ impl<'a> Parser<'a> {
         })
     }
 
-    fn and_expression(&mut self) -> ParseResult<ExpressionOrType> {
+    fn and_expression(&mut self) -> ParseResult<ExpressionOrTypeOrVoid> {
         self.left_associative_binary_operation(Self::equality_expression, |this| {
             accept_with_value!(this,
                 Symbol::BitwiseAnd => BinOp::BitwiseAnd
@@ -1438,7 +1438,7 @@ impl<'a> Parser<'a> {
         })
     }
 
-    fn equality_expression(&mut self) -> ParseResult<ExpressionOrType> {
+    fn equality_expression(&mut self) -> ParseResult<ExpressionOrTypeOrVoid> {
         self.left_associative_binary_operation(Self::relational_expression, |this| {
             accept_with_value!(this,
                 Symbol::Equals => BinOp::Equal,
@@ -1447,7 +1447,7 @@ impl<'a> Parser<'a> {
         })
     }
 
-    fn relational_expression(&mut self) -> ParseResult<ExpressionOrType> {
+    fn relational_expression(&mut self) -> ParseResult<ExpressionOrTypeOrVoid> {
         let mut expr = self.shift_expression()?;
 
         // not using generic left_associative_binary_operation here
@@ -1473,7 +1473,7 @@ impl<'a> Parser<'a> {
         Ok(expr)
     }
 
-    fn shift_expression(&mut self) -> ParseResult<ExpressionOrType> {
+    fn shift_expression(&mut self) -> ParseResult<ExpressionOrTypeOrVoid> {
         self.left_associative_binary_operation(Self::additive_expression, |this| {
             accept_with_value!(this,
                 Symbol::LeftShift => BinOp::LeftShift,
@@ -1483,7 +1483,7 @@ impl<'a> Parser<'a> {
         })
     }
 
-    fn additive_expression(&mut self) -> ParseResult<ExpressionOrType> {
+    fn additive_expression(&mut self) -> ParseResult<ExpressionOrTypeOrVoid> {
         self.left_associative_binary_operation(Self::multiplicative_expression, |this| {
             accept_with_value!(this,
                 Symbol::Plus => BinOp::Add,
@@ -1492,7 +1492,7 @@ impl<'a> Parser<'a> {
         })
     }
 
-    fn multiplicative_expression(&mut self) -> ParseResult<ExpressionOrType> {
+    fn multiplicative_expression(&mut self) -> ParseResult<ExpressionOrTypeOrVoid> {
         self.left_associative_binary_operation(Self::unary_expression, |this| {
             accept_with_value!(this,
                 Symbol::Multiply => BinOp::Multiply,
@@ -1511,7 +1511,7 @@ impl<'a> Parser<'a> {
     ///     one of:
     ///         ~  !  +  -  ++  --
     /// ```
-    fn unary_expression(&mut self) -> ParseResult<ExpressionOrType> {
+    fn unary_expression(&mut self) -> ParseResult<ExpressionOrTypeOrVoid> {
         match self.switch() {
             Ok(switch) => return Ok(switch.into()),
             Err(Failure::NoProduction) => {}
@@ -1545,7 +1545,7 @@ impl<'a> Parser<'a> {
     ///     ++
     ///     --
     /// ```
-    fn postfix_expression(&mut self) -> ParseResult<ExpressionOrType> {
+    fn postfix_expression(&mut self) -> ParseResult<ExpressionOrTypeOrVoid> {
         let mut expr = self.primary()?;
         expr = self.parse_selectors(expr)?;
         if self.accept(Symbol::Increment)? {
@@ -1557,7 +1557,7 @@ impl<'a> Parser<'a> {
         Ok(expr)
     }
 
-    fn primary(&mut self) -> ParseResult<ExpressionOrType> {
+    fn primary(&mut self) -> ParseResult<ExpressionOrTypeOrVoid> {
         one_of!(
             one_of!(
                 self.literal(),
@@ -1568,9 +1568,7 @@ impl<'a> Parser<'a> {
             )
             .map(Expression::into),
             self.primitive_type().map(Type::into),
-            self.void()
-                .map(TypeOrVoid::Void)
-                .map(ExpressionOrType::Type)
+            self.void().map(ExpressionOrTypeOrVoid::Void)
         )
     }
 
@@ -1623,7 +1621,10 @@ impl<'a> Parser<'a> {
     ///     :: identifier // named method reference
     ///     :: new // constructor method reference
     /// ```
-    fn parse_selectors(&mut self, expr: ExpressionOrType) -> ParseResult<ExpressionOrType> {
+    fn parse_selectors(
+        &mut self,
+        expr: ExpressionOrTypeOrVoid,
+    ) -> ParseResult<ExpressionOrTypeOrVoid> {
         let mut expr = expr;
         loop {
             if self.accept(Symbol::Dot)? {
@@ -2682,10 +2683,10 @@ impl TryFrom<Expression> for Identifier {
     }
 }
 
-impl TryFrom<ExpressionOrType> for Identifier {
+impl TryFrom<ExpressionOrTypeOrVoid> for Identifier {
     type Error = Failure;
 
-    fn try_from(value: ExpressionOrType) -> Result<Self, Self::Error> {
+    fn try_from(value: ExpressionOrTypeOrVoid) -> Result<Self, Self::Error> {
         Identifier::try_from(Expression::try_from(value)?)
     }
 }
@@ -2723,28 +2724,28 @@ impl TryFrom<TypeOrVoid> for Type {
     }
 }
 
-impl From<Expression> for ExpressionOrType {
+impl From<Expression> for ExpressionOrTypeOrVoid {
     fn from(value: Expression) -> Self {
-        ExpressionOrType::Expression(value)
+        ExpressionOrTypeOrVoid::Expression(value)
     }
 }
 
-impl From<Switch> for ExpressionOrType {
+impl From<Switch> for ExpressionOrTypeOrVoid {
     fn from(value: Switch) -> Self {
         Expression::from(value).into()
     }
 }
 
-impl From<Type> for ExpressionOrType {
+impl From<Type> for ExpressionOrTypeOrVoid {
     fn from(value: Type) -> Self {
-        ExpressionOrType::Type(value.into())
+        ExpressionOrTypeOrVoid::Type(value.into())
     }
 }
 
-impl TryFrom<ExpressionOrType> for Type {
+impl TryFrom<ExpressionOrTypeOrVoid> for Type {
     type Error = Diagnostic;
 
-    fn try_from(value: ExpressionOrType) -> Result<Self, Self::Error> {
+    fn try_from(value: ExpressionOrTypeOrVoid) -> Result<Self, Self::Error> {
         match TypeOrVoid::try_from(value)? {
             TypeOrVoid::Type(ty) => Ok(ty),
             TypeOrVoid::Void(_) => todo!(),
@@ -2752,25 +2753,29 @@ impl TryFrom<ExpressionOrType> for Type {
     }
 }
 
-impl TryFrom<ExpressionOrType> for TypeOrVoid {
+impl TryFrom<ExpressionOrTypeOrVoid> for TypeOrVoid {
     type Error = Diagnostic;
 
-    fn try_from(value: ExpressionOrType) -> Result<Self, Self::Error> {
+    fn try_from(value: ExpressionOrTypeOrVoid) -> Result<Self, Self::Error> {
         match value {
-            ExpressionOrType::Type(ty) => Ok(ty),
-            ExpressionOrType::Expression(e) => Ok(TypeOrVoid::Type(Type::try_from(e)?)),
+            ExpressionOrTypeOrVoid::Type(ty) => Ok(TypeOrVoid::Type(ty)),
+            ExpressionOrTypeOrVoid::Void(span) => Ok(TypeOrVoid::Void(span)),
+            ExpressionOrTypeOrVoid::Expression(e) => Ok(TypeOrVoid::Type(Type::try_from(e)?)),
         }
     }
 }
 
-impl TryFrom<ExpressionOrType> for Expression {
+impl TryFrom<ExpressionOrTypeOrVoid> for Expression {
     type Error = Diagnostic;
 
-    fn try_from(value: ExpressionOrType) -> Result<Self, Self::Error> {
+    fn try_from(value: ExpressionOrTypeOrVoid) -> Result<Self, Self::Error> {
         match value {
-            ExpressionOrType::Expression(e) => Ok(e),
-            ExpressionOrType::Type(_) => {
-                Err(Error::SyntaxExpected(SyntaxKind::Expression).at(*value.span()))
+            ExpressionOrTypeOrVoid::Expression(e) => Ok(e),
+            ExpressionOrTypeOrVoid::Type(ty) => {
+                Err(Error::SyntaxExpected(SyntaxKind::Expression).at(*ty.span()))
+            }
+            ExpressionOrTypeOrVoid::Void(span) => {
+                Err(Error::SyntaxExpected(SyntaxKind::Expression).at(span))
             }
         }
     }
@@ -2840,7 +2845,7 @@ impl From<ArrayAccess> for Expression {
     }
 }
 
-impl From<ArrayAccess> for ExpressionOrType {
+impl From<ArrayAccess> for ExpressionOrTypeOrVoid {
     fn from(value: ArrayAccess) -> Self {
         Expression::from(value).into()
     }
@@ -2867,10 +2872,10 @@ impl TryFrom<Expression> for LeftHandSide {
     }
 }
 
-impl TryFrom<ExpressionOrType> for LeftHandSide {
+impl TryFrom<ExpressionOrTypeOrVoid> for LeftHandSide {
     type Error = Diagnostic;
 
-    fn try_from(value: ExpressionOrType) -> Result<Self, Self::Error> {
+    fn try_from(value: ExpressionOrTypeOrVoid) -> Result<Self, Self::Error> {
         Expression::try_from(value)?.try_into()
     }
 }
@@ -2887,7 +2892,7 @@ impl Into<ElementValue> for Expression {
     }
 }
 
-impl TryInto<ElementValue> for ExpressionOrType {
+impl TryInto<ElementValue> for ExpressionOrTypeOrVoid {
     type Error = Diagnostic;
 
     fn try_into(self) -> Result<ElementValue, Self::Error> {
