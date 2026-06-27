@@ -5,7 +5,7 @@ use crate::semantic::error::{CoalesceIter, SemanticResult, UnimplementedFeature}
 use crate::semantic::symbol_table::ScopeId;
 
 impl<'a> SemanticAnalyzer<'a> {
-    #[allow(unused_variables)]
+    #[expect(unused_variables)]
     pub(super) fn class_declaration(
         &mut self,
         class_decl: &'a ClassDeclaration,

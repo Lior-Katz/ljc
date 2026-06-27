@@ -11,7 +11,7 @@ use crate::semantic::symbol_table::{Entity, ScopeId};
 use crate::semantic::types::Type;
 
 impl<'a> SemanticAnalyzer<'a> {
-    #[allow(unused_variables)]
+    #[expect(unused_variables)]
     pub fn variable_declaration(
         &mut self,
         var_decl: &'a VariableDeclaration,
