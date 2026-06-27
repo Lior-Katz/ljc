@@ -27,12 +27,12 @@ macro_rules! attributes {
         }
 
     $(
-        impl<'a> HasAttributes<'a, $attr> for $node {
+        impl HasAttributes<$attr> for $node {
             fn wrap_attribute(attrs: $attr) -> NodeAttribute {
                 NodeAttribute::$node(attrs)
             }
 
-            fn unwrap_attribute(attributes: &'a NodeAttribute) -> Option<&'a $attr> {
+            fn unwrap_attribute(attributes: &NodeAttribute) -> Option<&$attr> {
                 match attributes {
                     NodeAttribute::$node(a) => Some(a),
                     _ => None,
@@ -40,8 +40,8 @@ macro_rules! attributes {
             }
 
             fn unwrap_attribute_mut(
-                attributes: &'a mut NodeAttribute,
-            ) -> Option<&'a mut $attr> {
+                attributes: &mut NodeAttribute,
+            ) -> Option<&mut $attr> {
                 match attributes {
                     NodeAttribute::$node(a) => Some(a),
                     _ => None,
@@ -73,7 +73,7 @@ impl<'a> Attributes<'a> {
 
     pub fn insert<Node, Attrs>(&mut self, node: &'a Node, attrs: Attrs)
     where
-        Node: Hash + HasAttributes<'a, Attrs>,
+        Node: Hash + HasAttributes<Attrs>,
         Key<'a>: From<&'a Node>,
     {
         self.0.insert(Key::from(node), Node::wrap_attribute(attrs));
@@ -81,7 +81,7 @@ impl<'a> Attributes<'a> {
 
     pub fn get<Node, Attrs>(&'a self, node: &'a Node) -> Option<&'a Attrs>
     where
-        Node: Hash + HasAttributes<'a, Attrs>,
+        Node: Hash + HasAttributes<Attrs>,
         Key<'a>: From<&'a Node>,
     {
         self.0
@@ -90,9 +90,9 @@ impl<'a> Attributes<'a> {
     }
 
     #[expect(dead_code)]
-    pub fn get_mut<Node, Attrs>(&'a mut self, node: &'a Node) -> Option<&'a mut Attrs>
+    pub fn get_mut<Node, Attrs>(&mut self, node: &'a Node) -> Option<&mut Attrs>
     where
-        Node: Hash + HasAttributes<'a, Attrs>,
+        Node: Hash + HasAttributes<Attrs>,
         Key<'a>: From<&'a Node>,
     {
         self.0
@@ -101,8 +101,8 @@ impl<'a> Attributes<'a> {
     }
 }
 
-pub trait HasAttributes<'a, Attrs> {
+pub trait HasAttributes<Attrs> {
     fn wrap_attribute(attrs: Attrs) -> NodeAttribute;
-    fn unwrap_attribute(attributes: &'a NodeAttribute) -> Option<&'a Attrs>;
-    fn unwrap_attribute_mut(attributes: &'a mut NodeAttribute) -> Option<&'a mut Attrs>;
+    fn unwrap_attribute(attributes: &NodeAttribute) -> Option<&Attrs>;
+    fn unwrap_attribute_mut(attributes: &mut NodeAttribute) -> Option<&mut Attrs>;
 }

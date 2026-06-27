@@ -33,7 +33,7 @@ impl<'a> SymbolTable<'a> {
         &mut self.scopes[id.0]
     }
 
-    pub fn lookup(&'a self, name: &str, scope_id: ScopeId) -> Option<&'a Entity<'a>> {
+    pub fn lookup(&self, name: &str, scope_id: ScopeId) -> Option<&Entity<'a>> {
         let scope = self.scope(scope_id);
         scope.lookup(name).or_else(|| {
             scope
@@ -71,7 +71,7 @@ impl<'a> Scope<'a> {
         self.entities.insert(name, entity);
     }
 
-    fn lookup(&'a self, name: &str) -> Option<&'a Entity<'a>> {
+    fn lookup(&self, name: &str) -> Option<&Entity<'a>> {
         self.entities.get(name)
     }
 }
