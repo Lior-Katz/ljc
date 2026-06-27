@@ -1,4 +1,4 @@
-use crate::ast::{CompilationUnit, TypeDeclaration, VariableDeclarator};
+use crate::ast::{CompilationUnit, FieldDeclaration, TypeDeclaration, VariableDeclarator};
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::hash::Hash;
@@ -6,8 +6,10 @@ use std::hash::Hash;
 mod compilation_unit;
 mod type_declaration;
 mod variable_declarator;
+mod field_declaration;
 
 pub use crate::semantic::ast_tags::compilation_unit::CompilationUnitAttributes;
+pub use crate::semantic::ast_tags::field_declaration::FieldDeclarationAttributes;
 pub use crate::semantic::ast_tags::type_declaration::TypeDeclarationAttributes;
 pub use crate::semantic::ast_tags::variable_declarator::VariableDeclaratorAttributes;
 
@@ -62,6 +64,7 @@ attributes!(
     CompilationUnit => CompilationUnitAttributes,
     TypeDeclaration => TypeDeclarationAttributes,
     VariableDeclarator => VariableDeclaratorAttributes,
+    FieldDeclaration => FieldDeclarationAttributes,
 );
 
 pub struct Attributes<'a>(HashMap<Key<'a>, NodeAttribute>);
@@ -89,7 +92,6 @@ impl<'a> Attributes<'a> {
             .and_then(Node::unwrap_attribute)
     }
 
-    #[expect(dead_code)]
     pub fn get_mut<Node, Attrs>(&mut self, node: &'a Node) -> Option<&mut Attrs>
     where
         Node: Hash + HasAttributes<Attrs>,

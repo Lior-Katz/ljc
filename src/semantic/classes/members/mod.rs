@@ -1,4 +1,5 @@
 mod method;
+mod field;
 
 use crate::ast::{ClassMemberDeclaration, Modifiers};
 use crate::error::Diagnose;
