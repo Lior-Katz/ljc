@@ -1,0 +1,12 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Null literals cannot be dereferenced
+tests/ui/errors/dereference/NullLiteralDereference.java:3:21
+        int a = null.x;
+                    ^
+
+Null literals cannot be dereferenced
+tests/ui/errors/dereference/NullLiteralDereference.java:4:21
+        int b = null.x.y;
+                    ^

@@ -15,6 +15,9 @@ pub enum Error {
     #[error("Symbol {0} not found in current scope")]
     UnknownSymbol(String),
 
+    #[error("Type {ty} has no member {name}")]
+    UnknownMember {name: String, ty: String},
+
     #[error(
         "Expected an expression, but {0} resolves to a {1}.\n\
         Names can be used as expressions only if they refer to a local variable, method parameter, exception parameter, or a field."
@@ -25,7 +28,35 @@ pub enum Error {
         "Expected a type, but {0} resolves to a {1}.\n\
         Names can be used as types only if they refer to a class, record, enum, or interface."
     )]
-    NameNotType(String, NameResolutionKind)
+    NameNotType(String, NameResolutionKind),
+    
+    #[error(
+        "{0} does not denote a value or namespace that supports member lookup.\n\
+        Expected a package name, type name, or a value of a reference type, but {0} resolves to a {1}."
+    )]
+    NameNotMemberNamespace(String, NameResolutionKind),
+
+    #[error(
+        "Not an expression.\n\
+        Expected a field, but {0} resolves to a {1}.\n\
+        Member names can be used as  only if they refer to a method or constructor."
+    )]
+    MemberNameNotField(String, NameResolutionKind),
+
+    #[error("Null literals cannot be dereferenced")]
+    NullLiteralDereference,
+
+    #[error("Void expressions cannot be dereferenced")]
+    VoidExpressionDereference,
+
+    #[error(
+        "Void expressions cannot be dereferenced\n\
+        Did you mean \"void.class\"?"
+    )]
+    VoidLiteralDereference,
+
+    #[error("Cannot dereference primitive types")]
+    PrimitiveTypeDereference,
 }
 
 #[derive(thiserror::Error, Debug)]
@@ -149,8 +180,8 @@ pub enum UnimplementedFeature {
     BinaryOp,
     #[error("Ternary conditional expressions with 2nd and 3rd operands being reference types")]
     TernaryConditional2ReferenceTypes,
-    #[error("Member access expressions")]
-    MemberAccess,
+    #[error("Assignment to members")]
+    MemberAssignment,
     #[error("Method calls")]
     MethodCall,
     #[error("Instance creation expressions")]
@@ -237,6 +268,8 @@ pub enum UnimplementedFeature {
     NumericPromotion,
     #[error("Field access by simple name")]
     FieldAccessSimpleName,
+    #[error("Dereferencing of boxed types")]
+    BoxedDereference,
 }
 
 impl SubError for UnimplementedFeature {}

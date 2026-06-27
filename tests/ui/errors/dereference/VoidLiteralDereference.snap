@@ -1,0 +1,14 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Void expressions cannot be dereferenced
+Did you mean "void.class"?
+tests/ui/errors/dereference/VoidLiteralDereference.java:3:21
+        int a = void.x;
+                    ^
+
+Void expressions cannot be dereferenced
+Did you mean "void.class"?
+tests/ui/errors/dereference/VoidLiteralDereference.java:4:21
+        int b = void.x.y;
+                    ^

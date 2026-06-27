@@ -133,6 +133,7 @@ pub enum LeftHandSide {
 pub struct MemberAccess {
     pub target: Box<ExpressionOrTypeOrVoid>,
     pub name: Identifier,
+    pub _dot_span: Span
 }
 
 #[derive(Debug, Hash, Eq, PartialEq, Clone)]

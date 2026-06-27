@@ -1,0 +1,22 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Class fields not yet supported
+tests/ui/errors/dereference/PrimitiveVariableDereference.java:2:5
+    int x;
+    ^
+
+Cannot dereference primitive types
+tests/ui/errors/dereference/PrimitiveVariableDereference.java:4:18
+        int a = x.y;
+                 ^
+
+Cannot dereference primitive types
+tests/ui/errors/dereference/PrimitiveVariableDereference.java:5:18
+        int b = x.y.z;
+                 ^
+
+Cannot dereference primitive types
+tests/ui/errors/dereference/PrimitiveVariableDereference.java:6:23
+        int c = Test.x.y;
+                      ^

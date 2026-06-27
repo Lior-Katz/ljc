@@ -6,3 +6,15 @@ Names can be used as expressions only if they refer to a local variable, method 
 tests/ui/errors/names/TypeUsedAsExpression.java:3:17
         int a = Test;
                 ^
+
+Not an expression.
+Expected a field, but Inner resolves to a type.
+Member names can be used as  only if they refer to a method or constructor.
+tests/ui/errors/names/TypeUsedAsExpression.java:4:22
+        int b = Test.Inner;
+                     ^
+
+Nested classes and interfaces not yet supported
+tests/ui/errors/names/TypeUsedAsExpression.java:7:5
+    class Inner {}
+    ^

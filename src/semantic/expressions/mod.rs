@@ -7,7 +7,7 @@ use crate::semantic::types::Type;
 mod type_check;
 
 impl SemanticAnalyzer<'_> {
-    pub(super) fn expression(&self, expression: &Expression, scope: ScopeId) -> SemanticResult<ExpressionResult> {
+    pub(super) fn expression(&mut self, expression: &Expression, scope: ScopeId) -> SemanticResult<ExpressionResult> {
         self.type_check(expression, scope)
     }
 }

@@ -1,0 +1,12 @@
+---
+source: tests/ui/ui_tests.rs
+---
+Type Test has no member x
+tests/ui/errors/names/NoSuchMember.java:3:22
+        int a = Test.x;
+                     ^
+
+Type Test has no member x
+tests/ui/errors/names/NoSuchMember.java:4:22
+        int b = Test.x.y;
+                     ^

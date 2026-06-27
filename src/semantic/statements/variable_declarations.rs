@@ -41,7 +41,7 @@ impl<'a> SemanticAnalyzer<'a> {
         })
     }
     fn check_initializer(
-        &self,
+        &mut self,
         expected_type: &Type,
         expression: &Expression,
         span: Span,

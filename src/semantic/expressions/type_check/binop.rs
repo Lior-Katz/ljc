@@ -12,7 +12,7 @@ use crate::semantic::types::{
 
 impl SemanticAnalyzer<'_> {
     pub(super) fn binary_op(
-        &self,
+        &mut self,
         left: &Expression,
         right: &Expression,
         op: &BinOp,
@@ -100,7 +100,7 @@ impl SemanticAnalyzer<'_> {
     }
 
     fn check_convertible_to_integral_type(
-        &self,
+        &mut self,
         expression: &Expression,
         allow_value: AllowValue,
         scope: ScopeId,

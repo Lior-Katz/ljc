@@ -1,0 +1,20 @@
+---
+source: tests/ui/ui_tests.rs
+---
+main does not denote a value or namespace that supports member lookup.
+Expected a package name, type name, or a value of a reference type, but main resolves to a method.
+tests/ui/errors/dereference/MethodDereference.java:3:21
+        int a = main.x;
+                    ^
+
+main does not denote a value or namespace that supports member lookup.
+Expected a package name, type name, or a value of a reference type, but main resolves to a method.
+tests/ui/errors/dereference/MethodDereference.java:4:21
+        int b = main.x.y;
+                    ^
+
+main does not denote a value or namespace that supports member lookup.
+Expected a package name, type name, or a value of a reference type, but main resolves to a method.
+tests/ui/errors/dereference/MethodDereference.java:5:26
+        int c = Test.main.x;
+                         ^

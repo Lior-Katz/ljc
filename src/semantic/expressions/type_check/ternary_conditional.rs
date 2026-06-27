@@ -11,7 +11,7 @@ use crate::semantic::types::{
 
 impl SemanticAnalyzer<'_> {
     pub(super) fn ternary_conditional(
-        &self,
+        &mut self,
         condition: &Expression,
         if_true: &Expression,
         if_false: &Expression,

@@ -1627,7 +1627,7 @@ impl<'a> Parser<'a> {
     ) -> ParseResult<ExpressionOrTypeOrVoid> {
         let mut expr = expr;
         loop {
-            if self.accept(Symbol::Dot)? {
+            if let Accept::Matched(dot_span) = self.accept_full(Symbol::Dot)? {
                 if let Ok((id, span)) = accept_with_value!(self, Token::Id) {
                     if self.accept(Symbol::LeftParen)? {
                         let arg_list = self.argument_list()?;
@@ -1642,6 +1642,7 @@ impl<'a> Parser<'a> {
                         expr = Expression::MemberAccess(MemberAccess {
                             target: Box::new(expr),
                             name: Identifier { value: id, span },
+                            _dot_span: dot_span,
                         })
                         .into()
                     }
@@ -2705,7 +2706,7 @@ impl TryFrom<Expression> for Type {
     fn try_from(value: Expression) -> Result<Self, Self::Error> {
         match value {
             Expression::Name(n) => Ok(TypeIdentifier::try_from(n)?.into()),
-            Expression::MemberAccess(MemberAccess { target, name }) => Ok(ClassType {
+            Expression::MemberAccess(MemberAccess { target, name, .. }) => Ok(ClassType {
                 name: ClassTypePart { identifier: name.try_into()? },
                 namespace: ClassTypePartList::try_from(*target)?,
             }
@@ -2829,7 +2830,7 @@ impl TryFrom<Expression> for ClassTypePartList {
     fn try_from(value: Expression) -> Result<Self, Self::Error> {
         match value {
             Expression::Name(identifier) => Ok(vec![ClassTypePart { identifier }]),
-            Expression::MemberAccess(MemberAccess { target, name }) => {
+            Expression::MemberAccess(MemberAccess { target, name, .. }) => {
                 let mut parts = Self::try_from(*target)?;
                 parts.push(ClassTypePart { identifier: name });
                 Ok(parts)

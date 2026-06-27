@@ -117,6 +117,12 @@ impl Boxed {
     }
 }
 
+impl ReferenceType {
+    pub(super) fn id(&self) -> TypeId {
+        self.0
+    }
+}
+
 impl From<Primitive> for Type {
     fn from(value: Primitive) -> Self {
         Type::Primitive(value)

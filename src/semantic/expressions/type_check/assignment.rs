@@ -7,7 +7,7 @@ use crate::semantic::symbol_table::ScopeId;
 
 impl SemanticAnalyzer<'_> {
     pub fn assignment(
-        &self,
+        &mut self,
         lhs: &LeftHandSide,
         rhs: &Box<Expression>,
         op: &AssignmentOp,
@@ -34,7 +34,7 @@ impl SemanticAnalyzer<'_> {
     }
 
     fn simple_assignment(
-        &self,
+        &mut self,
         lhs: &LeftHandSide,
         rhs: &Box<Expression>,
         scope: ScopeId,
@@ -63,7 +63,7 @@ impl SemanticAnalyzer<'_> {
     ) -> SemanticResult<ExpressionResult> {
         match left_hand_side {
             LeftHandSide::ExpressionName(name) => self.name_expression(name, scope),
-            LeftHandSide::MemberAccess(_) => Err(UnimplementedFeature::MemberAccess
+            LeftHandSide::MemberAccess(_) => Err(UnimplementedFeature::MemberAssignment
                 .at(*left_hand_side.span())
                 .into()),
             LeftHandSide::ArrayAccess(_) => Err(UnimplementedFeature::ArrayAccess

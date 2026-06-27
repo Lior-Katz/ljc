@@ -66,7 +66,6 @@ impl<'a> SemanticAnalyzer<'a> {
         TypeId(id)
     }
 
-    #[expect(dead_code)]
     fn get_type(&self, type_id: TypeId) -> &'a TypeDeclaration {
         self.types[type_id.0]
     }

@@ -6,3 +6,10 @@ Names can be used as expressions only if they refer to a local variable, method 
 tests/ui/errors/names/MethodNameUsedAsExpression.java:3:17
         int a = main;
                 ^
+
+Not an expression.
+Expected a field, but main resolves to a method.
+Member names can be used as  only if they refer to a method or constructor.
+tests/ui/errors/names/MethodNameUsedAsExpression.java:4:22
+        int b = Test.main;
+                     ^

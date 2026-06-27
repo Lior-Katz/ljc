@@ -2,6 +2,7 @@ mod binop;
 mod name_expression;
 mod ternary_conditional;
 mod assignment;
+mod member_access;
 
 use crate::ast;
 use crate::error::Diagnose;
@@ -15,7 +16,7 @@ use std::ops::Not;
 
 impl SemanticAnalyzer<'_> {
     pub fn type_check(
-        &self,
+        &mut self,
         expression: &Expression,
         scope: ScopeId,
     ) -> SemanticResult<ExpressionResult> {
@@ -54,7 +55,7 @@ impl SemanticAnalyzer<'_> {
             Expression::ConditionalExpression { condition, if_true, if_false } => {
                 self.ternary_conditional(condition, if_true, if_false, scope)
             }
-            Expression::MemberAccess(_) => Err(UnimplementedFeature::MemberAccess.at(span).into()),
+            Expression::MemberAccess(member_access) => self.member_access(member_access, scope),
             Expression::MethodCall(_) => Err(UnimplementedFeature::MethodCall.at(span).into()),
             Expression::InstanceCreation { .. } => {
                 Err(UnimplementedFeature::InstanceCreation.at(span).into())
@@ -76,7 +77,7 @@ impl SemanticAnalyzer<'_> {
     }
 
     fn check_convertible_to_numeric_type(
-        &self,
+        &mut self,
         expression: &Expression,
         allow_value: AllowValue,
         scope: ScopeId,
@@ -99,7 +100,7 @@ impl SemanticAnalyzer<'_> {
         }
     }
 
-    fn check_not_void(&self, expression: &Expression, scope: ScopeId) -> SemanticResult<Type> {
+    fn check_not_void(&mut self, expression: &Expression, scope: ScopeId) -> SemanticResult<Type> {
         match self.type_check(expression, scope)? {
             ExpressionResult::Value(ty) | ExpressionResult::Variable(ty) => Ok(ty),
             ExpressionResult::Void => {
@@ -109,7 +110,7 @@ impl SemanticAnalyzer<'_> {
     }
 
     fn check_primitive_or_boxed_boolean(
-        &self,
+        &mut self,
         expression: &Expression,
         scope: ScopeId,
     ) -> SemanticResult {
